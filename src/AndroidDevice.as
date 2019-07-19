@@ -45,8 +45,7 @@ package
 		
 		[Bindable]
 		public var tooltip:String = "Start driver";
-		
-		public var product:String;
+
 		public var type:String;
 		
 		[Bindable]
@@ -61,13 +60,12 @@ package
 		
 		private var adbFile:File = File.applicationDirectory.resolvePath("assets/tools/android/adb.exe");
 		
-		public function AndroidDevice(port:String, id:String, type:String, product:String)
+		public function AndroidDevice(port:String, id:String, type:String)
 		{
 			this.port = port;
 			this.connected = true;
 			this.id = id;
 			this.type = type;
-			this.product = product;
 			
 			procInfo.executable = adbFile;			
 			procInfo.workingDirectory = adbFile.parent;

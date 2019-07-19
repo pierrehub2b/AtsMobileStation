@@ -45,7 +45,7 @@ package
 			
 			this.procInfo.executable = adbFile;			
 			this.procInfo.workingDirectory = adbFile.parent;
-			this.procInfo.arguments = new <String>["devices", "-l"];
+			this.procInfo.arguments = new <String>["devices"];
 
 			this.timer.addEventListener(TimerEvent.TIMER, devicesTimerComplete, false, 0, true);
 			this.timer.start();
@@ -101,9 +101,33 @@ package
 			}
 			
 			var data:Array = output.split("\n");
-			for each(var line:String in data){
-				var info:Array = line.split(/(\w+)\s*(\w+) *product:(\w+)\s*/g);
-				if(info != null && info.length > 4){
+			if(data.length > 1){
+				
+				var len:int = data.length;
+				var info:Array;
+				var device:AndroidDevice;
+				
+				for(var i:int=1; i<len; i++){
+					info = data[i].split(/\s+/g);
+					if(info.length == 2){
+						device = findDevice(info[0]);
+						if(device == null){
+							device = new AndroidDevice(port, info[0], info[1]);
+							device.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
+							devices.addItem(device);
+							devices.refresh();
+						}else{
+							device.connected = true;
+						}
+					}
+				}
+			}
+			
+			
+			
+			/*for each(var line:String in data){
+				var info:Array = line.split(/\s+/g);
+				if(info != null && info.length > 6){
 					var deviceId:String = info[1];
 					var device:AndroidDevice = findDevice(deviceId);
 					if(device == null){
@@ -116,7 +140,7 @@ package
 						device.connected = true;
 					}
 				}
-			}
+			}*/
 			
 			for each(dv in devices){
 				if(!dv.connected){
