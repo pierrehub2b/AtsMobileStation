@@ -112,7 +112,7 @@ package
 					if(info.length == 2){
 						device = findDevice(info[0]);
 						if(device == null){
-							device = new AndroidDevice(port, info[0], info[1]);
+							device = new AndroidDevice(adbFile, port, info[0], info[1]);
 							device.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
 							devices.addItem(device);
 							devices.refresh();
@@ -122,8 +122,7 @@ package
 					}
 				}
 			}
-			
-			
+						
 			
 			/*for each(var line:String in data){
 				var info:Array = line.split(/\s+/g);

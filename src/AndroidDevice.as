@@ -58,9 +58,7 @@ package
 		private var process:NativeProcess = new NativeProcess();
 		private var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
 		
-		private var adbFile:File = File.applicationDirectory.resolvePath("assets/tools/android/adb.exe");
-		
-		public function AndroidDevice(port:String, id:String, type:String)
+		public function AndroidDevice(adbFile:File, port:String, id:String, type:String)
 		{
 			this.port = port;
 			this.connected = true;
