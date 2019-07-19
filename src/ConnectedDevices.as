@@ -46,6 +46,7 @@ package
 				this.procInfo.executable = chmod;			
 				this.procInfo.workingDirectory = adbFile.parent;
 				this.procInfo.arguments = new <String>["+x", "adb"];
+				
 				this.process.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
 				this.process.start(this.procInfo);
 					
@@ -57,6 +58,9 @@ package
 		
 		protected function onChmodExit(event:NativeProcessExitEvent):void
 		{
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
+			process = new NativeProcess();
+
 			initProcess();
 		}
 		
