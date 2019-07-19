@@ -35,20 +35,38 @@ package
 		
 		public function ConnectedDevices(port:String)
 		{
-			var adbPath:String = "assets/tools/android/adb";
-			if(Capabilities.os.indexOf("Mac") == -1){
-				adbPath += ".exe"
-			}
-			this.adbFile = File.applicationDirectory.resolvePath(adbPath)
 			this.port = port;
 			this.devices.sort = ipSort;
 			
-			this.procInfo.executable = adbFile;			
-			this.procInfo.workingDirectory = adbFile.parent;
-			this.procInfo.arguments = new <String>["devices"];
-
-			this.timer.addEventListener(TimerEvent.TIMER, devicesTimerComplete, false, 0, true);
-			this.timer.start();
+			var adbPath:String = "assets/tools/android/adb";
+			if(Capabilities.os.indexOf("Mac") > -1){
+				this.adbFile = File.applicationDirectory.resolvePath(adbPath);
+					
+				var chmod:File = new File("/bin/chmod");
+				this.procInfo.executable = chmod;			
+				this.procInfo.workingDirectory = adbFile.parent;
+				this.procInfo.arguments = new <String>["+x", "adb"];
+				this.process.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
+				this.process.start(this.procInfo);
+					
+			}else{
+				this.adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
+				initProcess();
+			}
+		}
+		
+		protected function onChmodExit(event:NativeProcessExitEvent):void
+		{
+			initProcess();
+		}
+		
+		private function initProcess():void{
+			procInfo.executable = adbFile;			
+			procInfo.workingDirectory = adbFile.parent;
+			procInfo.arguments = new <String>["devices"];
+			
+			timer.addEventListener(TimerEvent.TIMER, devicesTimerComplete, false, 0, true);
+			launchProcess();
 		}
 		
 		public function terminate():void{
@@ -63,7 +81,7 @@ package
 			process.start(procInfo);
 		}
 		
-		private function devicesTimerComplete(ev:TimerEvent):void{
+		private function launchProcess():void{
 			output = "";
 			errorStack = "";
 			
@@ -71,6 +89,10 @@ package
 			process.addEventListener(NativeProcessExitEvent.EXIT, onReadDevicesExit, false, 0, true);
 			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadDevicesData, false, 0, true);
 			process.start(procInfo);
+		}
+		
+		private function devicesTimerComplete(ev:TimerEvent):void{
+			launchProcess();
 		}
 		
 		protected function onOutputErrorShell(event:ProgressEvent):void
