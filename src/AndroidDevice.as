@@ -197,15 +197,14 @@ package
 		}
 		
 		protected function onReadPropertyData(event:ProgressEvent):void{
-			output += process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
+			output += process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable).replace(/\r/g, "");
 		}
 		
 		protected function onGetPropExit(event:NativeProcessExitEvent):void{
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadPropertyData);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onGetPropExit);
 			
-			
-			var propArray:Array = output.split("\r\n");
+			var propArray:Array = output.split("\n");
 			for each (var line:String in propArray){
 				if(line.indexOf("[ro.product.brand]") == 0){
 					manufacturer = getPropValue(line)
