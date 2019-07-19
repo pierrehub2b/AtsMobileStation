@@ -7,6 +7,7 @@ package
 	import flash.events.ProgressEvent;
 	import flash.events.TimerEvent;
 	import flash.filesystem.File;
+	import flash.system.Capabilities;
 	import flash.utils.Timer;
 	
 	import mx.collections.ArrayCollection;
@@ -20,43 +21,46 @@ package
 		protected var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 		protected var process:NativeProcess = new NativeProcess();
 		
-		private var adbFile:File = File.applicationDirectory.resolvePath("assets/tools/android/adb.exe");
+		private var adbFile:File;
 		private var errorStack:String = "";
 		private var output:String = "";
 		
-		private var listDevicesTimer:Timer;
-		
+		private var timer:Timer = new Timer(3000);
 		private var port:String = "8080";
 		
 		[Bindable]
 		public var devices:ArrayCollection = new ArrayCollection();
 		
-		private var ipSort:Sort = new Sort();
+		private var ipSort:Sort = new Sort([new SortField("ip")]);
 		
 		public function ConnectedDevices(port:String)
 		{
+			var adbPath:String = "assets/tools/android/adb";
+			if(Capabilities.os.indexOf("Mac") == -1){
+				adbPath += ".exe"
+			}
+			this.adbFile = File.applicationDirectory.resolvePath(adbPath)
 			this.port = port;
+			this.devices.sort = ipSort;
 			
-			
-			ipSort.fields = [new SortField("ip")];
-			devices.sort = ipSort;
-			
-			procInfo.executable = adbFile;			
-			procInfo.workingDirectory = adbFile.parent;
-			procInfo.arguments = new <String>["devices", "-l"];
-			
-			listDevicesTimer = new Timer(2000);
-			listDevicesTimer.addEventListener(TimerEvent.TIMER, devicesTimerComplete, false, 0, true);
-			listDevicesTimer.start();
+			this.procInfo.executable = adbFile;			
+			this.procInfo.workingDirectory = adbFile.parent;
+			this.procInfo.arguments = new <String>["devices", "-l"];
+
+			this.timer.addEventListener(TimerEvent.TIMER, devicesTimerComplete, false, 0, true);
+			this.timer.start();
 		}
 		
 		public function terminate():void{
-			var dv:Device;
+			var dv:AndroidDevice;
 			for each(dv in devices){
 				dv.dispose();
 			}
 			
 			process.exit(true);
+			
+			procInfo.arguments = new <String>["kill-server"];
+			process.start(procInfo);
 		}
 		
 		private function devicesTimerComplete(ev:TimerEvent):void{
@@ -78,7 +82,7 @@ package
 			errorStack += process.standardError.readUTFBytes(process.standardError.bytesAvailable);;
 			trace(errorStack);
 			
-			listDevicesTimer.start();
+			timer.start();
 		}
 		
 		protected function onReadDevicesData(event:ProgressEvent):void{
@@ -91,9 +95,7 @@ package
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onReadDevicesExit);
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadDevicesData);
 			
-			var dv:Device;
-			//var refresh:Boolean = false;
-			
+			var dv:AndroidDevice;
 			for each(dv in devices){
 				dv.connected = false;
 			}
@@ -103,14 +105,13 @@ package
 				var info:Array = line.split(/(\w+)\s*(\w+) *product:(\w+)\s*/g);
 				if(info != null && info.length > 4){
 					var deviceId:String = info[1];
-					var device:Device = findDevice(deviceId);
+					var device:AndroidDevice = findDevice(deviceId);
 					if(device == null){
-						device = new Device(port, deviceId, info[2], info[3]);
+						device = new AndroidDevice(port, deviceId, info[2], info[3]);
 						device.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
 						devices.addItem(device);
 						
 						devices.refresh();
-						//refresh = true;
 					}else{
 						device.connected = true;
 					}
@@ -121,20 +122,15 @@ package
 				if(!dv.connected){
 					dv.dispose();
 					devices.removeItem(dv);
-					//refresh = true;
 					devices.refresh();
 				}
 			}
 			
-			//if(refresh){
-			//	devices.refresh();
-			//}
-			
-			listDevicesTimer.start();
+			timer.start();
 		}
 		
-		private function findDevice(id:String):Device{
-			for each(var dv:Device in devices){
+		private function findDevice(id:String):AndroidDevice{
+			for each(var dv:AndroidDevice in devices){
 				if(dv.id == id){
 					return dv;
 				}
@@ -143,7 +139,7 @@ package
 		}
 		
 		private function deviceStoppedHandler(ev:Event):void{
-			var dv:Device = ev.currentTarget as Device;
+			var dv:AndroidDevice = ev.currentTarget as AndroidDevice;
 			dv.removeEventListener("deviceStopped", deviceStoppedHandler);
 			dv.dispose();
 			devices.removeItem(dv);

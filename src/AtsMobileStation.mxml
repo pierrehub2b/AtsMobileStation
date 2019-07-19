@@ -32,15 +32,15 @@
 
 	<s:Label top="10" left="10" fontWeight="bold" 
 			 text="{connectedDevices.devices.length==0?'No devices found':'Connected devices :'}"
-			 filters="{DeviceItemRenderer.dropShadowFilterMiddle}"/>
+			 filters="{AndroidDeviceRenderer.dropShadowFilterMiddle}"/>
 	
 	<s:List left="10" right="10" top="28" width="100%" bottom="20"
 			alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
 			contentBackgroundAlpha="0.0" dataProvider="{connectedDevices.devices}"
-			itemRenderer="DeviceItemRenderer"/>
+			itemRenderer="AndroidDeviceRenderer"/>
 	
 		<s:Label visible="{connectedDevices.devices.length==0}" top="26" left="10" 
-				 fontStyle="italic" fontSize="11" filters="{DeviceItemRenderer.dropShadowFilterMiddle}"
+				 fontStyle="italic" fontSize="11" filters="{AndroidDeviceRenderer.dropShadowFilterMiddle}"
 				 text="(Connect devices with usb cable to this station)"/>
 		
 </s:WindowedApplication>

@@ -8,14 +8,11 @@ package
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
 	
-	public class Device extends EventDispatcher
+	public class AndroidDevice extends EventDispatcher
 	{
-		private static const mobileTempFolder:String = "/data/local/tmp/atsdroid";
-		private static const driverFullName:String = "com.ats.atsdroid";
-		
-		private static const propValueRegex:RegExp = /.*:.*\[(.*)\]/;
-		
-		private static const apkFilePath:String = File.applicationDirectory.resolvePath("assets/drivers/atsdroid.apk").nativePath;
+		private static const androidDriverFullName:String = "com.ats.atsdroid";
+		private static const androidPropValueRegex:RegExp = /.*:.*\[(.*)\]/;
+		private static const androidDriverFilePath:String = File.applicationDirectory.resolvePath("assets/drivers/atsdroid.apk").nativePath;
 		
 		public static const INSTALL:String = "install";
 		public static const START:String = "start";
@@ -64,7 +61,7 @@ package
 		
 		private var adbFile:File = File.applicationDirectory.resolvePath("assets/tools/android/adb.exe");
 		
-		public function Device(port:String, id:String, type:String, product:String)
+		public function AndroidDevice(port:String, id:String, type:String, product:String)
 		{
 			this.port = port;
 			this.connected = true;
@@ -130,7 +127,7 @@ package
 					tooltip = "Installing driver to the device ..."
 					
 					process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit, false, 0, true);
-					procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", driverFullName];
+					procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", androidDriverFullName];
 					process.start(procInfo);
 
 					return;
@@ -166,7 +163,7 @@ package
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
 			
 			process.addEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
-			procInfo.arguments = new <String>["-s", id, "install", "-r", apkFilePath];
+			procInfo.arguments = new <String>["-s", id, "install", "-r", androidDriverFilePath];
 			
 			process.start(procInfo);
 		}
@@ -239,12 +236,12 @@ package
 			process.addEventListener(NativeProcessExitEvent.EXIT, onExecuteExit, false, 0, true);
 			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData, false, 0, true);
 			
-			procInfo.arguments = new <String>["-s", id, "shell", "am", "instrument", "-w", "-r", "-e", "atsPort", port, "-e", "debug", "false", "-e", "class", driverFullName + ".AtsRunner", driverFullName + "/android.support.test.runner.AndroidJUnitRunner"];
+			procInfo.arguments = new <String>["-s", id, "shell", "am", "instrument", "-w", "-r", "-e", "atsPort", port, "-e", "debug", "false", "-e", "class", androidDriverFullName + ".AtsRunner", androidDriverFullName + "/android.support.test.runner.AndroidJUnitRunner"];
 			process.start(procInfo);
 		}
 		
 		private function getPropValue(value:String):String{
-			return propValueRegex.exec(value)[1];
+			return androidPropValueRegex.exec(value)[1];
 		}
 		
 		protected function onExecuteError(event:ProgressEvent):void
