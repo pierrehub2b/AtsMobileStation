@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+					   xmlns:s="library://ns.adobe.com/flex/spark"
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   width="320" height="340" showStatusBar="false"
+					   right="0" bottom="0"
+					   creationComplete="creationCompleteHandler(event)"
+					   close="closeHandler(event)" backgroundColor="0xefefef">
+	<fx:Script>
+		<![CDATA[
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			private var port:String = "8080";
+			
+			[Bindable]
+			private var connectedDevices:ConnectedDevices;
+			
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				connectedDevices = new ConnectedDevices(port);
+			}
+			
+			protected function closeHandler(event:Event):void
+			{
+				connectedDevices.terminate();
+			}
+			
+		]]>
+	</fx:Script>
+
+	<s:Label top="10" left="10" fontWeight="bold" 
+			 text="{connectedDevices.devices.length==0?'No devices found':'Connected devices :'}"
+			 filters="{DeviceItemRenderer.dropShadowFilterMiddle}"/>
+	
+	<s:List left="10" right="10" top="28" width="100%" bottom="20"
+			alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
+			contentBackgroundAlpha="0.0" dataProvider="{connectedDevices.devices}"
+			itemRenderer="DeviceItemRenderer"/>
+	
+		<s:Label visible="{connectedDevices.devices.length==0}" top="26" left="10" 
+				 fontStyle="italic" fontSize="11" filters="{DeviceItemRenderer.dropShadowFilterMiddle}"
+				 text="(Connect devices with usb cable to this station)"/>
+		
+</s:WindowedApplication>

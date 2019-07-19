@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true" height="40"
+				removedFromStage="removedFromStageHandler(event)"
+				toolTip="{device.tooltip}">
+	
+	<fx:Script>
+		<![CDATA[
+			import flash.filters.BitmapFilterQuality;
+			
+			import mx.core.DragSource;
+			import mx.managers.DragManager;
+			
+			import spark.filters.DropShadowFilter;
+			
+			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.4, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
+			
+			[Bindable]
+			private var device:Device;
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				this.device = value as Device;
+			}
+			
+			protected function restart_clickHandler(event:MouseEvent):void
+			{
+				device.dispose();
+				device.close();
+			}
+			
+			protected function removedFromStageHandler(event:Event):void
+			{
+				mainGroup.filters = []
+			}
+			
+			protected function mainGroup_rollOverHandler(event:MouseEvent):void
+			{
+				if(!DragManager.isDragging && (device.status == "ready" || device.status == "fail")){
+					restartButton.includeInLayout = true;
+					restartButton.visible = true;
+					iconStatus.visible = false;
+					iconStatus.includeInLayout = false;
+				}
+			}
+			
+			protected function mainGroup_rollOutHandler(event:MouseEvent):void
+			{
+				restartButton.includeInLayout = false;
+				restartButton.visible = false;
+				iconStatus.visible = true;
+				iconStatus.includeInLayout = true;
+			}
+			
+			override protected function get hovered():Boolean { return false; }
+			override protected function get down():Boolean { return false; }
+			override public function get selected():Boolean { return false; }
+			override public function get showsCaret():Boolean { return false; }
+			
+			protected function mouseDownHandler(event:MouseEvent):void
+			{
+				if(device.status == "ready"){
+					firstGroup.addEventListener(MouseEvent.MOUSE_MOVE, mouseDownForDragHandler, false, 0, true);
+				}
+			}
+			
+			protected function mouseDownForDragHandler(event:MouseEvent):void{
+				firstGroup.removeEventListener(MouseEvent.MOUSE_MOVE, mouseDownForDragHandler);
+				
+				var dragSource:DragSource = new DragSource();
+				dragSource.addData("", "mobile");
+				
+				Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, device.ip + ":" + device.port, false);
+				
+				DragManager.doDrag(this, dragSource, event, firstGroup, mouseX - 20, mouseY + 10, 1.0);
+			}
+				
+			
+		]]>
+	</fx:Script>
+	
+	<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" verticalCenter="0" filters="{dropShadowFilterMiddle}"
+			  paddingRight="6" paddingLeft="5" rollOver="mainGroup_rollOverHandler(event)" rollOut="mainGroup_rollOutHandler(event)">
+		<s:HGroup id="firstGroup" verticalAlign="middle" mouseDown="mouseDownHandler(event)" buttonMode="true">
+			<s:BitmapImage source="assets/icons/32/smartphone.png" smooth="true" smoothingQuality="high"/>
+			<s:VGroup gap="3" mouseEnabled="false">
+				<s:Label visible="{device.ip==null}" includeInLayout="{device.ip==null}" 
+						 text="Unable to get local ip !" fontStyle="italic" color="0x8a844a"/>
+				<s:HGroup visible="{device.ip!=null}" includeInLayout="{device.ip!=null}" gap="0">
+					<s:Label text="{device.ip}" fontWeight="bold"/>
+					<s:Label text=":{device.port}"/>
+				</s:HGroup>
+				<s:Label text="{device.manufacturer} - {device.modelName}" fontSize="11" fontStyle="italic" color="#758696"/>
+			</s:VGroup>
+		</s:HGroup>
+		
+		<s:Spacer width="100%"/>
+		
+		<s:BitmapImage id="iconStatus" source="assets/icons/24/{device.status}.png" smooth="true" smoothingQuality="high"/>
+		<s:Group id="restartButton" buttonMode="true" click="restart_clickHandler(event)"
+				 toolTip="Restart driver" visible="false" includeInLayout="false">
+			<s:BitmapImage source="assets/icons/24/restart.png" smooth="true" smoothingQuality="high"/>
+		</s:Group>
+	</s:HGroup>
+	
+</s:ItemRenderer>

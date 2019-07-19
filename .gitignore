@@ -1,6 +1,8 @@
 # Build and Release Folders
 bin-debug/
 bin-release/
+release/
+src/assets/tools/
 [Oo]bj/
 [Bb]in/
 

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="mobilestation" basedir="." default="package">
+	
+	<property file="build.properties" description=""/>
+	
+	<target name="init.sdk">
+		<condition property="FLEX_HOME" value="${SDK_HOME_MACOS}">
+			<isset property="isMacos"/>
+		</condition>
+		<property name="FLEX_HOME" value="${SDK_HOME_WIN}"/>
+		<echo message="Using SDK ->  ${FLEX_HOME}"/>
+		<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />
+		
+		<condition property="package.type" value="bundle">
+			<matches string="${ant.project.invoked-targets}" pattern="^package-bundle$"/>
+		</condition>
+		<property name="package.type" value="normal"/>
+	</target>
+
+	<target name="compile.project" description="" depends="init.sdk">
+		
+		<echo message="Application type -> '${package.type}'"/>
+		
+		<delete>
+			<fileset dir="temp" includes="**/*"/>
+		</delete>
+		
+		<mxmlc file="src/${APP_NAME}.mxml"
+            output="temp/${APP_NAME}.swf"
+            locale="en_US"
+            static-rsls="true"
+            accessible="false"
+            configname="air"
+            debug="false"
+            failonerror="true"
+            fork="true"
+            maxmemory="512m"
+        	as3="true"
+        	optimize="true"
+        	strict="true"
+        	use-gpu="false"
+        	warnings="false"
+        	default-frame-rate="30">
+        	<source-path path-element="src"/>
+            <external-library-path file="${FLEX_HOME}/frameworks/libs/air/airglobal.swc" append="true"/>
+            <library-path dir="libs" includes="*.swc" append="true"/>
+        	<source-path>src/locale/{locale}</source-path>
+        	<include-resource-bundles>labels</include-resource-bundles>
+        	<include-resource-bundles>short_labels</include-resource-bundles>
+        	<include-resource-bundles>tooltips</include-resource-bundles>
+			<define name="APPLICATION::type" value="'${package.type}'"/>
+        </mxmlc>
+		
+		<copy todir="temp/assets">
+			<fileset dir="src/assets"/>
+		</copy>
+		
+		<copy file="src/${APP_NAME}-app.xml" tofile="temp/${APP_NAME}-app.xml"/>
+		
+		<replaceregexp 
+		   file="src/${APP_NAME}-app.xml" 
+		   match="&lt;versionNumber&gt;(.*)&lt;/versionNumber&gt;"
+		   replace="&lt;versionNumber&gt;${APP_VERSION}&lt;/versionNumber&gt;">
+		</replaceregexp>
+			
+		<replaceregexp 
+		   file="temp/${APP_NAME}-app.xml" 
+		   match="&lt;versionNumber&gt;(.*)&lt;/versionNumber&gt;"
+		   replace="&lt;versionNumber&gt;${APP_VERSION}&lt;/versionNumber&gt;">
+		</replaceregexp>
+			
+		<replaceregexp 
+		   file="temp/${APP_NAME}-app.xml" 
+		   match="&lt;content&gt;(.*)&lt;/content&gt;"
+		   replace="&lt;content&gt;${APP_NAME}.swf&lt;/content&gt;">
+		</replaceregexp>
+
+	</target>
+		
+	<target name="package" depends="init.sdk, compile.project"> 
+		
+		<delete file="../release/${APP_NAME}.exe"/>
+		
+	    <java jar="${FLEX_HOME}/lib/adt.jar" fork="true" failonerror="true" dir="temp"> 
+	    	<arg value="-package"/> 
+	    	<arg value="-storetype"/> 
+	        <arg value="pkcs12"/> 
+	        <arg value="-keystore"/> 
+	        <arg value="../cert.p12"/>
+	    	<arg value="-storepass"/>
+	    	<arg value="${PASSWORD}"/>
+	        <arg value="-target"/> 
+	        <arg value="native"/>
+	    	<arg value="../release/${APP_NAME}.exe"/>
+	        <arg value="${APP_NAME}-app.xml"/> 
+	    	<arg value="."/> 
+	    </java> 
+	</target>
+	
+	<target name="package-bundle" depends="init.sdk, compile.project"> 
+
+		<delete failonerror="false">
+			<fileset dir="release">
+				<include name="${APP_NAME}.zip"/>
+		   		<include name="${APP_NAME}"/>
+			</fileset>
+		</delete>
+		
+	    <java jar="${FLEX_HOME}/lib/adt.jar" fork="true" failonerror="true" dir="temp"> 
+	    	<arg value="-package"/> 
+	    	<arg value="-storetype"/> 
+	        <arg value="pkcs12"/> 
+	        <arg value="-keystore"/> 
+	        <arg value="../cert.p12"/>
+	    	<arg value="-storepass"/>
+	    	<arg value="${PASSWORD}"/>
+	        <arg value="-target"/> 
+	        <arg value="bundle"/>
+	    	<arg value="../release/${APP_NAME}"/>
+	        <arg value="${APP_NAME}-app.xml"/> 
+	    	<arg value="."/> 
+	    </java> 
+		
+		<zip destfile="release/${APP_NAME}.zip"
+		     basedir="release/${APP_NAME}">
+		</zip>
+		
+	</target>
+	
+	<target name="package-all"> 
+		<antcall target="package"/>
+		<antcall target="package-bundle"/>
+	</target>
+</project>
