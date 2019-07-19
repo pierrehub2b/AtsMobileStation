@@ -2,6 +2,7 @@
 bin-debug/
 bin-release/
 release/
+temp/*
 src/assets/tools/
 [Oo]bj/
 [Bb]in/
