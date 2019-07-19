@@ -41,7 +41,7 @@ package
 			var adbPath:String = "assets/tools/android/adb";
 			if(Capabilities.os.indexOf("Mac") > -1){
 				this.adbFile = File.applicationDirectory.resolvePath(adbPath);
-					
+				
 				var chmod:File = new File("/bin/chmod");
 				this.procInfo.executable = chmod;			
 				this.procInfo.workingDirectory = adbFile.parent;
@@ -49,7 +49,7 @@ package
 				
 				this.process.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
 				this.process.start(this.procInfo);
-					
+				
 			}else{
 				this.adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
 				initProcess();
@@ -60,7 +60,7 @@ package
 		{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
 			process = new NativeProcess();
-
+			
 			initProcess();
 		}
 		
@@ -89,10 +89,12 @@ package
 			output = "";
 			errorStack = "";
 			
-			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
-			process.addEventListener(NativeProcessExitEvent.EXIT, onReadDevicesExit, false, 0, true);
-			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadDevicesData, false, 0, true);
-			process.start(procInfo);
+			try{
+				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
+				process.addEventListener(NativeProcessExitEvent.EXIT, onReadDevicesExit, false, 0, true);
+				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadDevicesData, false, 0, true);
+				process.start(procInfo);
+			}catch(err:Error){}
 		}
 		
 		private function devicesTimerComplete(ev:TimerEvent):void{
@@ -148,23 +150,23 @@ package
 					}
 				}
 			}
-						
+			
 			
 			/*for each(var line:String in data){
-				var info:Array = line.split(/\s+/g);
-				if(info != null && info.length > 6){
-					var deviceId:String = info[1];
-					var device:AndroidDevice = findDevice(deviceId);
-					if(device == null){
-						device = new AndroidDevice(port, deviceId, info[2], info[3]);
-						device.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
-						devices.addItem(device);
-						
-						devices.refresh();
-					}else{
-						device.connected = true;
-					}
-				}
+			var info:Array = line.split(/\s+/g);
+			if(info != null && info.length > 6){
+			var deviceId:String = info[1];
+			var device:AndroidDevice = findDevice(deviceId);
+			if(device == null){
+			device = new AndroidDevice(port, deviceId, info[2], info[3]);
+			device.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
+			devices.addItem(device);
+			
+			devices.refresh();
+			}else{
+			device.connected = true;
+			}
+			}
 			}*/
 			
 			for each(dv in devices){
