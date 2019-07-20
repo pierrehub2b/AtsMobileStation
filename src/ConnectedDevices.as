@@ -52,7 +52,7 @@ package
 				
 			}else{
 				this.adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
-				initProcess();
+				startAdbProcess();
 			}
 		}
 		
@@ -61,10 +61,49 @@ package
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
 			process = new NativeProcess();
 			
-			initProcess();
+			startAdbProcess();
+			startSystemProfilerProcess();
 		}
 		
-		private function initProcess():void{
+		
+		//----------------------------------------------------------------------------------------------------------------
+		// MacOS specific
+		//----------------------------------------------------------------------------------------------------------------
+		
+		private var sysProcInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+		private var sysProc:NativeProcess = new NativeProcess();
+		
+		private var sysProfiler:String = "";
+		
+		private function startSystemProfilerProcess():void{
+			
+			sysProfiler = "";
+			
+			sysProcInfo.executable = new File("/usr/sbin/system_profiler");			
+			sysProcInfo.arguments = new <String>["SPUSBDataType", "-xml"];
+			
+			//sysProc.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
+			sysProc.addEventListener(NativeProcessExitEvent.EXIT, onSysProcInfoExit, false, 0, true);
+			sysProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onSysProcInfoData, false, 0, true);
+			sysProc.start(sysProcInfo);
+		}
+		
+		protected function onSysProcInfoData(event:ProgressEvent):void{
+			sysProfiler += StringUtil.trim(sysProc.standardOutput.readUTFBytes(sysProc.standardOutput.bytesAvailable));
+		}
+		
+		protected function onSysProcInfoExit(event:NativeProcessExitEvent):void
+		{
+			sysProc.removeEventListener(NativeProcessExitEvent.EXIT, onSysProcInfoExit);
+			sysProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onSysProcInfoData);
+			
+			trace(sysProfiler);
+		}
+		
+		//----------------------------------------------------------------------------------------------------------------
+		//----------------------------------------------------------------------------------------------------------------
+		
+		private function startAdbProcess():void{
 			procInfo.executable = adbFile;			
 			procInfo.workingDirectory = adbFile.parent;
 			procInfo.arguments = new <String>["devices"];
