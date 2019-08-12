@@ -1,6 +1,6 @@
 <?php
 
-$parameter = $_SERVER["QUERY_STRING"];
+$uri = $_SERVER['REQUEST_URI'];
 
 $url = 'http://localhost:8080/info';
 $ch = curl_init($url);
@@ -12,5 +12,5 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $response = curl_exec($ch);
 curl_close($ch);
 
-echo $parameter;
+echo $uri;
 ?>
