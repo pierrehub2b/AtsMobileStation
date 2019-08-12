@@ -25,7 +25,7 @@ package
 			process.addEventListener(NativeProcessExitEvent.EXIT, onReadLanExit, false, 0, true);
 			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData, false, 0, true);
 			
-			procInfo.arguments = new <String>["-S", "0.0.0.0:9090", "router.php"];
+			procInfo.arguments = new <String>["-S", "0.0.0.0:9090", phpRouterFilePath];
 			process.start(procInfo);
 		}
 		
