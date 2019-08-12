@@ -1,8 +1,6 @@
 <?php
 
-$uri = $_SERVER['REQUEST_URI'];
-
-$url = 'http://localhost:8080'.$uri;
+$url = 'http://localhost:8080'.$_SERVER['REQUEST_URI'];
 $ch = curl_init($url);
 
 curl_setopt($ch, CURLOPT_POST, 1);

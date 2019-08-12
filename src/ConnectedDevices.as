@@ -33,7 +33,7 @@ package
 		
 		private var ipSort:Sort = new Sort([new SortField("ip")]);
 		
-		private var httpServer:HttpWebServer;
+		private var simu:SimulatorDevice;
 		
 		public function ConnectedDevices(port:String)
 		{
@@ -52,13 +52,12 @@ package
 				this.process.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
 				this.process.start(this.procInfo);
 				
+				this.simu = new SimulatorDevice();
+				
 			}else{
 				this.adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
 				startAdbProcess();
 			}
-			
-			httpServer = new HttpWebServer();
-			
 		}
 		
 		protected function onChmodExit(event:NativeProcessExitEvent):void
@@ -149,6 +148,10 @@ package
 			var dv:Device;
 			for each(dv in devices){
 				dv.dispose();
+			}
+			
+			if(simu != null){
+				simu.dispose()
 			}
 			
 			process.exit(true);
