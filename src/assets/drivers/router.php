@@ -1,15 +1,13 @@
 <?php
-$fp = fsockopen("localhost", 8080, $errno, $errstr, 30);
-if (!$fp) {
-	echo "$errstr ($errno)";
-} else {
-	$out = "POST /info HTTP/1.1\r\n";
-	$out .= "Host: com.ats.driver\r\n";
-	$out .= "Connection: Close\r\n\r\n";
-	fwrite($fp, $out);
-	while (!feof($fp)) {
-		echo fgets($fp, 128);
-	}
-	fclose($fp);
-}
+$url = 'http://localhost/info';
+$ch = curl_init($url);
+
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_POSTFIELDS, "");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+echo $response;
 ?>
