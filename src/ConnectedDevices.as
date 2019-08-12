@@ -33,6 +33,8 @@ package
 		
 		private var ipSort:Sort = new Sort([new SortField("ip")]);
 		
+		private var httpServer:HttpWebServer;
+		
 		public function ConnectedDevices(port:String)
 		{
 			this.port = port;
@@ -54,6 +56,9 @@ package
 				this.adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
 				startAdbProcess();
 			}
+			
+			httpServer = new HttpWebServer();
+			
 		}
 		
 		protected function onChmodExit(event:NativeProcessExitEvent):void
@@ -63,8 +68,7 @@ package
 			
 			startAdbProcess();
 			startSystemProfilerProcess();
-		}
-		
+		}		
 		
 		//----------------------------------------------------------------------------------------------------------------
 		// MacOS specific
@@ -98,319 +102,37 @@ package
 			sysProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onSysProcInfoData);
 			
 			var profiler:XML = new XML(sysProfiler);
-			trace(profiler);
+			var array:XMLList = profiler.array.children().children();
+			var catchArray:Boolean = false;
+			
+			for each(var keyItems:XML in array){
+				if(catchArray){
+					for each(var device:XML in keyItems.dict.children()){
+						if(device.dict != undefined){
+							for each(var deviceInfo:XML in device.dict){
+								var dict:Object = new Object();
+								var pairNumber:int = deviceInfo.children().length();
+								for (var i:int = 0; i<pairNumber; i+=2){
+									dict[deviceInfo.children()[i]] = deviceInfo.children()[i+1];
+								}
+								
+								if(dict._name == "iPhone"){
+									trace(dict.serial_num)
+									
+									
+									
+								}
+							}
+						}
+					}
+					
+					break;
+				}else if(keyItems == "_items"){
+					catchArray = true;
+				}
+			}
 		}
-		
-		/*
-		<plist version="1.0">
-		<array>
-		<dict>
-		<key>_SPCommandLineArguments</key>
-		<array>
-		<string>/usr/sbin/system_profiler</string>
-		<string>-nospawn</string>
-		<string>-xml</string>
-		<string>SPUSBDataType</string>
-		<string>-detailLevel</string>
-		<string>full</string>
-		</array>
-		<key>_SPCompletionInterval</key>
-		<real>0.071593999862670898</real>
-		<key>_SPResponseTime</key>
-		<real>0.162087082862854</real>
-		<key>_dataType</key>
-		<string>SPUSBDataType</string>
-		<key>_detailLevel</key>
-		<integer>-1</integer>
-		<key>_items</key>
-		<array>
-		<dict>
-		<key>_items</key>
-		<array>
-		<dict>
-		<key>Built-in_Device</key>
-		<string>Yes</string>
-		<key>_items</key>
-		<array>
-		<dict>
-		<key>Built-in_Device</key>
-		<string>Yes</string>
-		<key>_name</key>
-		<string>Bluetooth USB Host Controller</string>
-		<key>bcd_device</key>
-		<string>1.50</string>
-		<key>bus_power</key>
-		<string>500</string>
-		<key>bus_power_used</key>
-		<string>0</string>
-		<key>device_speed</key>
-		<string>full_speed</string>
-		<key>extra_current_used</key>
-		<string>0</string>
-		<key>location_id</key>
-		<string>0x14330000 / 7</string>
-		<key>manufacturer</key>
-		<string>Apple Inc.</string>
-		<key>product_id</key>
-		<string>0x828f</string>
-		<key>vendor_id</key>
-		<string>apple_vendor_id</string>
-		</dict>
-		</array>
-		<key>_name</key>
-		<string>BRCM20702 Hub</string>
-		<key>bcd_device</key>
-		<string>1.00</string>
-		<key>bus_power</key>
-		<string>500</string>
-		<key>bus_power_used</key>
-		<string>94</string>
-		<key>device_speed</key>
-		<string>full_speed</string>
-		<key>extra_current_used</key>
-		<string>0</string>
-		<key>location_id</key>
-		<string>0x14300000 / 4</string>
-		<key>manufacturer</key>
-		<string>Apple Inc.</string>
-		<key>product_id</key>
-		<string>0x4500</string>
-		<key>vendor_id</key>
-		<string>0x0a5c  (Broadcom Corp.)</string>
-		</dict>
-		<dict>
-		<key>_name</key>
-		<string>iPhone</string>
-		<key>bcd_device</key>
-		<string>10.06</string>
-		<key>bus_power</key>
-		<string>500</string>
-		<key>bus_power_used</key>
-		<string>500</string>
-		<key>device_speed</key>
-		<string>high_speed</string>
-		<key>extra_current_used</key>
-		<string>1600</string>
-		<key>location_id</key>
-		<string>0x14200000 / 10</string>
-		<key>manufacturer</key>
-		<string>Apple Inc.</string>
-		<key>product_id</key>
-		<string>0x12a8</string>
-		<key>serial_num</key>
-		<string>667698daf1684c10884e691231272130f5cc5d31</string>
-		<key>sleep_current</key>
-		<string>2100</string>
-		<key>vendor_id</key>
-		<string>apple_vendor_id</string>
-		</dict>
-		</array>
-		<key>_name</key>
-		<string>USB30Bus</string>
-		<key>host_controller</key>
-		<string>AppleUSBXHCIWPT</string>
-		<key>pci_device</key>
-		<string>0x9cb1</string>
-		<key>pci_revision</key>
-		<string>0x0003</string>
-		<key>pci_vendor</key>
-		<string>0x8086</string>
-		</dict>
-		</array>
-		<key>_parentDataType</key>
-		<string>SPHardwareDataType</string>
-		<key>_properties</key>
-		<dict>
-		<key>1284DeviceID</key>
-		<dict>
-		<key>_order</key>
-		<string>13</string>
-		</dict>
-		<key>_name</key>
-		<dict>
-		<key>_isColumn</key>
-		<string>YES</string>
-		<key>_isOutlineColumn</key>
-		<string>YES</string>
-		<key>_order</key>
-		<string>0</string>
-		</dict>
-		<key>bcd_device</key>
-		<dict>
-		<key>_order</key>
-		<string>3</string>
-		<key>_suppressLocalization</key>
-		<string>YES</string>
-		</dict>
-		<key>bsd_name</key>
-		<dict>
-		<key>_order</key>
-		<string>42</string>
-		</dict>
-		<key>bus_power</key>
-		<dict>
-		<key>_order</key>
-		<string>8</string>
-		</dict>
-		<key>bus_power_desired</key>
-		<dict>
-		<key>_order</key>
-		<string>9</string>
-		</dict>
-		<key>bus_power_used</key>
-		<dict>
-		<key>_order</key>
-		<string>10</string>
-		</dict>
-		<key>detachable_drive</key>
-		<dict>
-		<key>_order</key>
-		<string>39</string>
-		</dict>
-		<key>device_manufacturer</key>
-		<dict>
-		<key>_order</key>
-		<string>20</string>
-		</dict>
-		<key>device_model</key>
-		<dict>
-		<key>_order</key>
-		<string>22</string>
-		</dict>
-		<key>device_revision</key>
-		<dict>
-		<key>_order</key>
-		<string>24</string>
-		</dict>
-		<key>device_serial</key>
-		<dict>
-		<key>_order</key>
-		<string>26</string>
-		</dict>
-		<key>device_speed</key>
-		<dict>
-		<key>_order</key>
-		<string>5</string>
-		</dict>
-		<key>disc_burning</key>
-		<dict>
-		<key>_order</key>
-		<string>32</string>
-		</dict>
-		<key>extra_current_used</key>
-		<dict>
-		<key>_order</key>
-		<string>11</string>
-		</dict>
-		<key>file_system</key>
-		<dict>
-		<key>_order</key>
-		<string>40</string>
-		</dict>
-		<key>free_space</key>
-		<dict>
-		<key>_deprecated</key>
-		<true/>
-		<key>_order</key>
-		<string>19</string>
-		</dict>
-		<key>free_space_in_bytes</key>
-		<dict>
-		<key>_isByteSize</key>
-		<true/>
-		<key>_order</key>
-		<string>19</string>
-		</dict>
-		<key>location_id</key>
-		<dict>
-		<key>_order</key>
-		<string>7</string>
-		</dict>
-		<key>manufacturer</key>
-		<dict>
-		<key>_order</key>
-		<string>6</string>
-		</dict>
-		<key>mount_point</key>
-		<dict>
-		<key>_order</key>
-		<string>44</string>
-		</dict>
-		<key>optical_drive_type</key>
-		<dict>
-		<key>_order</key>
-		<string>30</string>
-		</dict>
-		<key>optical_media_type</key>
-		<dict>
-		<key>_order</key>
-		<string>31</string>
-		</dict>
-		<key>product_id</key>
-		<dict>
-		<key>_order</key>
-		<string>1</string>
-		</dict>
-		<key>removable_media</key>
-		<dict>
-		<key>_order</key>
-		<string>34</string>
-		</dict>
-		<key>serial_num</key>
-		<dict>
-		<key>_order</key>
-		<string>4</string>
-		<key>_suppressLocalization</key>
-		<string>YES</string>
-		</dict>
-		<key>size</key>
-		<dict>
-		<key>_deprecated</key>
-		<true/>
-		<key>_order</key>
-		<string>18</string>
-		</dict>
-		<key>size_in_bytes</key>
-		<dict>
-		<key>_isByteSize</key>
-		<true/>
-		<key>_order</key>
-		<string>18</string>
-		</dict>
-		<key>sleep_current</key>
-		<dict>
-		<key>_order</key>
-		<string>12</string>
-		</dict>
-		<key>vendor_id</key>
-		<dict>
-		<key>_order</key>
-		<string>2</string>
-		</dict>
-		<key>volumes</key>
-		<dict>
-		<key>_detailLevel</key>
-		<string>0</string>
-		</dict>
-		<key>writable</key>
-		<dict>
-		<key>_order</key>
-		<string>36</string>
-		</dict>
-		</dict>
-		<key>_timeStamp</key>
-		<date>2019-07-20T15:19:09Z</date>
-		<key>_versionInfo</key>
-		<dict>
-		<key>com.apple.SystemProfiler.SPUSBReporter</key>
-		<string>900.4.2</string>
-		</dict>
-		</dict>
-		</array>
-		</plist>
-		
-		*/
-		
+				
 		//----------------------------------------------------------------------------------------------------------------
 		//----------------------------------------------------------------------------------------------------------------
 		
@@ -424,7 +146,7 @@ package
 		}
 		
 		public function terminate():void{
-			var dv:AndroidDevice;
+			var dv:Device;
 			for each(dv in devices){
 				dv.dispose();
 			}
@@ -440,9 +162,9 @@ package
 			errorStack = "";
 			
 			try{
-				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
-				process.addEventListener(NativeProcessExitEvent.EXIT, onReadDevicesExit, false, 0, true);
-				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadDevicesData, false, 0, true);
+				//process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
+				process.addEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit, false, 0, true);
+				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData, false, 0, true);
 				process.start(procInfo);
 			}catch(err:Error){}
 		}
@@ -451,29 +173,17 @@ package
 			launchProcess();
 		}
 		
-		protected function onOutputErrorShell(event:ProgressEvent):void
-		{
-			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onReadDevicesExit);
-			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadDevicesData);
-			
-			errorStack += process.standardError.readUTFBytes(process.standardError.bytesAvailable);;
-			trace(errorStack);
-			
-			timer.start();
-		}
-		
-		protected function onReadDevicesData(event:ProgressEvent):void{
+		protected function onReadAndroidDevicesData(event:ProgressEvent):void{
 			output += StringUtil.trim(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
 		}
 		
-		protected function onReadDevicesExit(event:NativeProcessExitEvent):void
+		protected function onReadAndroidDevicesExit(event:NativeProcessExitEvent):void
 		{
-			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onReadDevicesExit);
-			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadDevicesData);
+			//process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit);
+			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData);
 			
-			var dv:AndroidDevice;
+			var dv:Device;
 			for each(dv in devices){
 				dv.connected = false;
 			}
@@ -483,7 +193,7 @@ package
 				
 				var len:int = data.length;
 				var info:Array;
-				var device:AndroidDevice;
+				var device:Device;
 				
 				for(var i:int=1; i<len; i++){
 					info = data[i].split(/\s+/g);
@@ -501,24 +211,6 @@ package
 				}
 			}
 			
-			
-			/*for each(var line:String in data){
-			var info:Array = line.split(/\s+/g);
-			if(info != null && info.length > 6){
-			var deviceId:String = info[1];
-			var device:AndroidDevice = findDevice(deviceId);
-			if(device == null){
-			device = new AndroidDevice(port, deviceId, info[2], info[3]);
-			device.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
-			devices.addItem(device);
-			
-			devices.refresh();
-			}else{
-			device.connected = true;
-			}
-			}
-			}*/
-			
 			for each(dv in devices){
 				if(!dv.connected){
 					dv.dispose();
@@ -530,8 +222,8 @@ package
 			timer.start();
 		}
 		
-		private function findDevice(id:String):AndroidDevice{
-			for each(var dv:AndroidDevice in devices){
+		private function findDevice(id:String):Device{
+			for each(var dv:Device in devices){
 				if(dv.id == id){
 					return dv;
 				}
@@ -540,7 +232,7 @@ package
 		}
 		
 		private function deviceStoppedHandler(ev:Event):void{
-			var dv:AndroidDevice = ev.currentTarget as AndroidDevice;
+			var dv:Device = ev.currentTarget as Device;
 			dv.removeEventListener("deviceStopped", deviceStoppedHandler);
 			dv.dispose();
 			devices.removeItem(dv);

@@ -8,7 +8,7 @@ package
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
 	
-	public class AndroidDevice extends EventDispatcher
+	public class AndroidDevice extends Device
 	{
 		private static const androidDriverFullName:String = "com.ats.atsdroid";
 		private static const androidPropValueRegex:RegExp = /.*:.*\[(.*)\]/;
@@ -29,9 +29,6 @@ package
 		public var error:String = null;
 		
 		[Bindable]
-		public var id:String;
-		
-		[Bindable]
 		public var manufacturer:String = "";
 		
 		[Bindable]
@@ -50,8 +47,6 @@ package
 		
 		[Bindable]
 		public var port:String = "8080";
-		
-		public var connected:Boolean;
 		
 		private var output:String = "";
 		
@@ -78,7 +73,7 @@ package
 			process.start(procInfo);
 		}
 		
-		public function dispose():Boolean{
+		override public function dispose():Boolean{
 			if(process.running){
 				process.exit(true);
 				return true;
@@ -132,27 +127,6 @@ package
 			
 			status = FAIL
 			tooltip = "Unable to get a local ip address for this device\nplease change it's network configuration and restart the driver";
-			
-			/*var dataLan:Array = output.split(/.* inet\s*(.*)\//g);
-			if(dataLan != null && dataLan.length > 1){
-			ip = dataLan[1];
-			}
-			
-			if(ip == null){
-			status = FAIL
-			tooltip = "Unable to get a local ip address for this device\nplease disconnect the device, change it's network configuration and reconnect the device";
-			}else{
-			
-			status = INSTALL
-			tooltip = "Installing driver to the device ..."
-			
-			process.addEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
-			procInfo.arguments = new <String>["-s", id, "install", "-r", apkFilePath];
-			
-			//process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit, false, 0, true);
-			//procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", driverFullName];
-			process.start(procInfo);
-			}*/
 		}
 		
 		protected function onUninstallExit(event:NativeProcessExitEvent):void{
@@ -163,26 +137,6 @@ package
 			
 			process.start(procInfo);
 		}
-		
-		/*protected function onUninstallExit(event:NativeProcessExitEvent):void{
-		process.removeEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
-		
-		status = INSTALL
-		
-		var apkFilePath:String = File.applicationDirectory.resolvePath("assets/drivers/atsdroid.apk").nativePath;
-		
-		process.addEventListener(NativeProcessExitEvent.EXIT, onPushExit, false, 0, true);
-		procInfo.arguments = new <String>["-s", id, "push", apkFilePath, mobileTempFolder];
-		process.start(procInfo);
-		}
-		
-		protected function onPushExit(event:NativeProcessExitEvent):void{
-		process.removeEventListener(NativeProcessExitEvent.EXIT, onPushExit);
-		
-		process.addEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
-		procInfo.arguments = new <String>["-s", id, "shell", "pm", "install", "-t", "-r", mobileTempFolder];
-		process.start(procInfo);
-		}*/
 		
 		protected function onInstallExit(event:NativeProcessExitEvent):void{
 			
