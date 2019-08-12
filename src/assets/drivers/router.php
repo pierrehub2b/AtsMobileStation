@@ -1,6 +1,6 @@
 <?php
 
-$parameter = $_SERVER['QUERY_STRING'];
+$parameter = $_SERVER["QUERY_STRING"];
 
 $url = 'http://localhost:8080/info';
 $ch = curl_init($url);
