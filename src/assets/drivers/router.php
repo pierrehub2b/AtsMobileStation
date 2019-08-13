@@ -11,12 +11,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	
 	$response = curl_exec($ch);
 	curl_close($ch);
-	
-	/*$verif = "";
-	foreach($_POST as $value){
-    	$verif .= $value;
-	}*/
-	echo "{'data':'".$data."'}";
+
+	echo $response;
 }else{
 	$hostPort = explode(":", $_SERVER['HTTP_HOST']);
 	echo "ATS MobileStation started on port : " + $hostPort[1];
