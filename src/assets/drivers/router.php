@@ -5,7 +5,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	$ch = curl_init($url);
 	
 	curl_setopt($ch, CURLOPT_POST, 1);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, "");
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $_POST);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	
 	$response = curl_exec($ch);
@@ -13,7 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	
 	echo $response;
 }else{
-	echo "AtsMobileStation started ...";
+	$hostPort = explode(":", $_SERVER['HTTP_HOST']);
+	echo "ATS MobileStation started on port : " + $hostPort[1];
 }
 
 ?>
