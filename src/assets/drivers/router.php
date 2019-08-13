@@ -3,7 +3,7 @@
 $hostPort = explode(":", $_SERVER['HTTP_HOST']);
 $port = $hostPort[1];
 	
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+//if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	$data = file_get_contents("php://input");
 	$url = 'http://localhost:8080'.$_SERVER['REQUEST_URI'];
 	$ch = curl_init($url);
@@ -15,9 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	$response = curl_exec($ch);
 	curl_close($ch);
 	
+	header('Content-Type: application/json');
 	echo $response;
-}else{
-	echo "ATS MobileStation started on port ".$port;
-}
+//}else{
+//	echo "ATS MobileStation started on port ".$port;
+//}
 
 ?>
