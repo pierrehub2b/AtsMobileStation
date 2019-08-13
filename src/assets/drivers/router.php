@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	echo $response;
 }else{
 	$hostPort = explode(":", $_SERVER['HTTP_HOST']);
-	echo "ATS MobileStation started on port : " + $hostPort[1];
+	echo "ATS MobileStation started on port : ".$hostPort[1];
 }
 
 ?>
