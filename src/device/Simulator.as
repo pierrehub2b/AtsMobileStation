@@ -8,6 +8,9 @@ package device
 	
 	public class Simulator
 	{
+		
+		private static const iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
+
 		public static const OFF:String = "off";
 		public static const WAIT:String = "wait";
 		public static const RUN:String = "run";
@@ -34,6 +37,7 @@ package device
 		
 		private static const xcrunExec:File = new File("/usr/bin/xcrun");
 		private static const openExec:File = new File("/usr/bin/open");
+		private static const xcodeBuildExec:File = new File("/usr/bin/xcodebuild");
 		
 		public function Simulator(uid:String, name:String, os:String)
 		{
@@ -69,7 +73,7 @@ package device
 			}
 		}
 		
-		protected function onShutdownExit(event:ProgressEvent):void
+		protected function onShutdownExit(event:NativeProcessExitEvent):void
 		{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onShutdownExit);
 			phase = OFF;
@@ -100,9 +104,27 @@ package device
 		
 		protected function onSimulatorStartedExit(event:NativeProcessExitEvent):void{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onSimulatorStartedExit);
-			phase = RUN;
-			tooltip = "Shutdown simulator";
+			process.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
+			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingProgress, false, 0, true);
+			
+			procInfo.executable = xcodeBuildExec;
+			procInfo.workingDirectory = iosDriverProjectFolder;
+			procInfo.arguments = new <String>["-workspace", "atsios.xcworkspace", "-scheme", "atsios", "'id=" + uid + "'", "test", "-quiet"];
+			process.start(procInfo);
 		}
+		
+		protected function onTestingProgress(event:ProgressEvent):void{
+			output += process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
+			if(output.indexOf("Continuing with testing") > -1){
+				phase = RUN;
+				tooltip = "Shutdown simulator";
+			}
+		}
+		
+		protected function onTestingExit(event:NativeProcessExitEvent):void{
+			trace("testing crashed")
+		}
+		
 		
 	}
 }
