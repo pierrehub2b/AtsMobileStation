@@ -105,6 +105,7 @@ package device
 		protected function onSimulatorStartedExit(event:NativeProcessExitEvent):void{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onSimulatorStartedExit);
 			
+
 			phase = RUN;
 			tooltip = "Shutdown simulator";
 			
@@ -115,6 +116,7 @@ package device
 			//procInfo.workingDirectory = iosDriverProjectFolder;
 			//procInfo.arguments = new <String>["-workspace", "atsios.xcworkspace", "-scheme", "\"atsios\"", "\"id=" + uid + "\"", "test", "-quiet"];
 			//process.start(procInfo);
+
 		}
 		
 		protected function onTestingProgress(event:ProgressEvent):void{
