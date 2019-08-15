@@ -89,7 +89,7 @@ package device
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onEraseExit);
 			process.addEventListener(NativeProcessExitEvent.EXIT, onBootExit, false, 0, true);
 			
-			procInfo.arguments = new <String>["simctl", "boot", uid];
+			procInfo.arguments = new <String>["simctl", "bootstatus", uid, "-b"];
 			process.start(procInfo);
 		}
 		
@@ -104,13 +104,17 @@ package device
 		
 		protected function onSimulatorStartedExit(event:NativeProcessExitEvent):void{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onSimulatorStartedExit);
-			process.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
-			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingProgress, false, 0, true);
 			
-			procInfo.executable = xcodeBuildExec;
-			procInfo.workingDirectory = iosDriverProjectFolder;
-			procInfo.arguments = new <String>["-workspace", "atsios.xcworkspace", "-scheme", "\"atsios\"", "\"id=" + uid + "\"", "test", "-quiet"];
-			process.start(procInfo);
+			phase = RUN;
+			tooltip = "Shutdown simulator";
+			
+			//process.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
+			//process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingProgress, false, 0, true);
+			
+			//procInfo.executable = xcodeBuildExec;
+			//procInfo.workingDirectory = iosDriverProjectFolder;
+			//procInfo.arguments = new <String>["-workspace", "atsios.xcworkspace", "-scheme", "\"atsios\"", "\"id=" + uid + "\"", "test", "-quiet"];
+			//process.start(procInfo);
 		}
 		
 		protected function onTestingProgress(event:ProgressEvent):void{
