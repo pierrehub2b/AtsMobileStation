@@ -109,7 +109,7 @@ package device
 			
 			procInfo.executable = xcodeBuildExec;
 			procInfo.workingDirectory = iosDriverProjectFolder;
-			procInfo.arguments = new <String>["-workspace", "atsios.xcworkspace", "-scheme", "\"atsios\"", "\"id=" + uid + "\"", "test", "-quiet"];
+			procInfo.arguments = new <String>["-workspace", "atsios.xcworkspace", "-scheme", "atsios", "\"id=" + uid + "\"", "test", "-quiet"];
 			process.start(procInfo);
 		}
 		
