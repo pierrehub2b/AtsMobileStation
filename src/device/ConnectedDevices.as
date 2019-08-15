@@ -1,4 +1,4 @@
-package
+package device
 {
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
@@ -108,9 +108,9 @@ package
 			
 			for each(var keyItems:XML in array){
 				if(catchArray){
-					for each(var device:XML in keyItems.dict.children()){
-						if(device.dict != undefined){
-							for each(var deviceInfo:XML in device.dict){
+					for each(var dev:XML in keyItems.dict.children()){
+						if(dev.dict != undefined){
+							for each(var deviceInfo:XML in dev.dict){
 								var dict:Object = new Object();
 								var pairNumber:int = deviceInfo.children().length();
 								for (var i:int = 0; i<pairNumber; i+=2){
@@ -199,19 +199,19 @@ package
 				
 				var len:int = data.length;
 				var info:Array;
-				var device:Device;
+				var dev:Device;
 				
 				for(var i:int=1; i<len; i++){
 					info = data[i].split(/\s+/g);
-					if(info.length == 2){
-						device = findDevice(info[0]);
-						if(device == null){
-							device = new AndroidDevice(adbFile, port, info[0], info[1]);
-							device.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
-							devices.addItem(device);
+					if(info.length >= 2){
+						dev = findDevice(info[0]);
+						if(dev == null){
+							dev = new AndroidDevice(adbFile, port, info[0], info[1]);
+							dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
+							devices.addItem(dev);
 							devices.refresh();
 						}else{
-							device.connected = true;
+							dev.connected = true;
 						}
 					}
 				}

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true" height="40">
+	<fx:Script>
+		<![CDATA[
+			import device.Simulator;
+			
+			import flash.filters.BitmapFilterQuality;
+			
+			import spark.filters.DropShadowFilter;
+			
+			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
+
+			
+			[Bindable]
+			private var sim:Simulator;
+			
+			override protected function get hovered():Boolean { return false; }
+			//override protected function get down():Boolean { return false; }
+			override public function get selected():Boolean { return false; }
+			//override public function get showsCaret():Boolean { return false; }
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				this.sim = value as Simulator;
+			}
+			
+			protected function startStopButton_clickHandler(event:MouseEvent):void
+			{
+				sim.startStop()
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:BitmapImage left="8" top="16" width="16" height="16" alpha="0.7"
+				   source="assets/icons/20/android.png" verticalCenter="0"/>
+	
+	<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" verticalCenter="0"
+			  paddingRight="6" paddingLeft="5" filters="{dropShadowFilterMiddle}">
+		<s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true">
+			<s:BitmapImage source="assets/icons/32/smartphone.png" smooth="true" smoothingQuality="high"/>
+			<s:VGroup gap="3" mouseEnabled="false">
+				<s:Label text="{sim.name}" fontStyle="italic" color="0x8a844a"/>
+				<s:Label text="{sim.os}" fontSize="11" fontStyle="italic" color="#758696"/>
+			</s:VGroup>
+		</s:HGroup>
+		
+		<s:Spacer width="100%"/>
+		
+
+		<s:Group buttonMode="true" click="startStopButton_clickHandler(event)"
+				 toolTip="{sim.tooltip}" enabled="{sim.phase!=Simulator.WAIT}">
+			<s:BitmapImage id="iconStatus" source="assets/icons/24/{sim.phase}.png" smooth="true" smoothingQuality="high"/>
+			<s:BitmapImage source="assets/icons/24/off.png" smooth="true" smoothingQuality="high"
+						   visible="false"/>
+		</s:Group>
+	</s:HGroup>
+
+	
+</s:ItemRenderer>

@@ -1,4 +1,4 @@
-package
+package device
 {
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
@@ -41,7 +41,7 @@ package
 		public var androidSdk:String = "";
 		
 		[Bindable]
-		public var tooltip:String = "Start driver";
+		public var tooltip:String = "Starting driver ...";
 
 		public var type:String;
 		

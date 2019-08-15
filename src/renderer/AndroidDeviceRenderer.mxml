@@ -4,10 +4,11 @@
 				xmlns:mx="library://ns.adobe.com/flex/mx" 
 				autoDrawBackground="true" height="40"
 				removedFromStage="removedFromStageHandler(event)"
-				toolTip="{device.tooltip}">
+				toolTip="{dev.tooltip}">
 	
 	<fx:Script>
 		<![CDATA[
+			import device.AndroidDevice;
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.core.DragSource;
@@ -15,21 +16,21 @@
 			
 			import spark.filters.DropShadowFilter;
 			
-			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.4, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
+			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
 			[Bindable]
-			private var device:AndroidDevice;
+			private var dev:AndroidDevice;
 			
 			override public function set data(value:Object):void
 			{
 				super.data = value;
-				this.device = value as AndroidDevice;
+				this.dev = value as AndroidDevice;
 			}
 			
 			protected function restart_clickHandler(event:MouseEvent):void
 			{
-				device.dispose();
-				device.close();
+				dev.dispose();
+				dev.close();
 			}
 			
 			protected function removedFromStageHandler(event:Event):void
@@ -39,7 +40,7 @@
 			
 			protected function mainGroup_rollOverHandler(event:MouseEvent):void
 			{
-				if(!DragManager.isDragging && (device.status == "ready" || device.status == "fail")){
+				if(!DragManager.isDragging && (dev.status == "ready" || dev.status == "fail")){
 					restartButton.includeInLayout = true;
 					restartButton.visible = true;
 					iconStatus.visible = false;
@@ -56,13 +57,13 @@
 			}
 			
 			override protected function get hovered():Boolean { return false; }
-			override protected function get down():Boolean { return false; }
+			//override protected function get down():Boolean { return false; }
 			override public function get selected():Boolean { return false; }
-			override public function get showsCaret():Boolean { return false; }
+			//override public function get showsCaret():Boolean { return false; }
 			
 			protected function mouseDownHandler(event:MouseEvent):void
 			{
-				if(device.status == "ready"){
+				if(dev.status == "ready"){
 					firstGroup.addEventListener(MouseEvent.MOUSE_MOVE, mouseDownForDragHandler, false, 0, true);
 				}
 			}
@@ -73,7 +74,7 @@
 				var dragSource:DragSource = new DragSource();
 				dragSource.addData("", "mobile");
 				
-				Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, device.ip + ":" + device.port, false);
+				Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, dev.ip + ":" + dev.port, false);
 				
 				DragManager.doDrag(this, dragSource, event, firstGroup, mouseX - 20, mouseY + 10, 1.0);
 			}
@@ -87,19 +88,19 @@
 		<s:HGroup id="firstGroup" verticalAlign="middle" mouseDown="mouseDownHandler(event)" buttonMode="true">
 			<s:BitmapImage source="assets/icons/32/smartphone.png" smooth="true" smoothingQuality="high"/>
 			<s:VGroup gap="3" mouseEnabled="false">
-				<s:Label visible="{device.ip==null}" includeInLayout="{device.ip==null}" 
+				<s:Label visible="{dev.ip==null}" includeInLayout="{dev.ip==null}" 
 						 text="Unable to get local ip !" fontStyle="italic" color="0x8a844a"/>
-				<s:HGroup visible="{device.ip!=null}" includeInLayout="{device.ip!=null}" gap="0">
-					<s:Label text="{device.ip}" fontWeight="bold"/>
-					<s:Label text=":{device.port}"/>
+				<s:HGroup visible="{dev.ip!=null}" includeInLayout="{dev.ip!=null}" gap="0">
+					<s:Label text="{dev.ip}" fontWeight="bold"/>
+					<s:Label text=":{dev.port}"/>
 				</s:HGroup>
-				<s:Label text="{device.manufacturer} - {device.modelName}" fontSize="11" fontStyle="italic" color="#758696"/>
+				<s:Label text="{dev.manufacturer} - {dev.modelName}" fontSize="11" fontStyle="italic" color="#758696"/>
 			</s:VGroup>
 		</s:HGroup>
 		
 		<s:Spacer width="100%"/>
 		
-		<s:BitmapImage id="iconStatus" source="assets/icons/24/{device.status}.png" smooth="true" smoothingQuality="high"/>
+		<s:BitmapImage id="iconStatus" source="assets/icons/24/{dev.status}.png" smooth="true" smoothingQuality="high"/>
 		<s:Group id="restartButton" buttonMode="true" click="restart_clickHandler(event)"
 				 toolTip="Restart driver" visible="false" includeInLayout="false">
 			<s:BitmapImage source="assets/icons/24/restart.png" smooth="true" smoothingQuality="high"/>

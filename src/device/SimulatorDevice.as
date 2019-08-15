@@ -1,4 +1,4 @@
-package
+package device
 {
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;

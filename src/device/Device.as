@@ -1,4 +1,4 @@
-package
+package device
 {
 	import flash.events.EventDispatcher;
 
