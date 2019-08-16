@@ -88,7 +88,7 @@
 			</s:stroke>
 		</s:Rect>
 		<s:HGroup width="100%" paddingLeft="7" paddingRight="10" verticalCenter="0" verticalAlign="middle" gap="3">
-			<s:Label fontSize="13" text="Connected devices" fontWeight="bold"/>
+			<s:Label fontSize="13" text="Connected Devices" fontWeight="bold"/>
 		</s:HGroup>
 	</s:Group>
 	
@@ -132,7 +132,7 @@
 				</s:stroke>
 			</s:Rect>
 			<s:HGroup id="subGroup" width="100%" paddingLeft="7" paddingRight="10" verticalCenter="0" verticalAlign="middle" gap="3">
-				<s:Label fontSize="13" text="Simulators" fontWeight="bold"
+				<s:Label fontSize="13" text="Available Simulators" fontWeight="bold"
 						 filters="{AndroidDeviceRenderer.dropShadowFilterMiddle}"/>
 			</s:HGroup>
 		</s:Group>
