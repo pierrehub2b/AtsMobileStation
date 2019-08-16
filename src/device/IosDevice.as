@@ -32,10 +32,6 @@ package device
 			process.start(procInfo);*/
 		}
 		
-		override public function set connected(value:Boolean):void
-		{
-		}
-		
 		
 	}
 }
