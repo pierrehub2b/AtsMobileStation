@@ -2,13 +2,10 @@ package device
 {
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
-	import flash.events.NativeProcessExitEvent;
-	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
 
 	public class IosDevice extends Device
 	{
-		public var error:String = null;
 		private var output:String = "";
 		
 		private var process:NativeProcess = new NativeProcess();
