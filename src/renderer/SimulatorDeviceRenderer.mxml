@@ -56,7 +56,7 @@
 		<s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true">
 			<s:BitmapImage source="assets/icons/32/smartphone.png" smooth="true" smoothingQuality="high"/>
 			<s:VGroup gap="3" mouseEnabled="false">
-				<s:Label text="{sim.name}" fontStyle="italic" color="0x8a844a"/>
+				<s:Label text="{sim.name}" fontStyle="italic" color="0x8a844a" maxWidth="240" maxDisplayedLines="1"/>
 				<s:Label text="{sim.os}" fontSize="11" fontStyle="italic" color="#758696"/>
 			</s:VGroup>
 		</s:HGroup>

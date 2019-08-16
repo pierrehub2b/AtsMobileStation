@@ -44,6 +44,7 @@ package device
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData);
 			
 			error = process.standardError.readUTFBytes(process.standardError.bytesAvailable);
+			trace(error)
 		}
 		
 		protected function onReadLanData(event:ProgressEvent):void{

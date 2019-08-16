@@ -11,7 +11,7 @@ package device
 
 	public class AvailableSimulators
 	{
-		private var regex:RegExp = /iPhone(.*)\([^\)]*)\)\[(.*)\](.*)/
+		private var regex:RegExp = /iPhone(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		protected var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 		protected var process:NativeProcess = new NativeProcess();
 		
@@ -52,11 +52,11 @@ package device
 			for each(var line:String in list){
 				if(line.indexOf("iPhone") == 0){
 					var data:Array = regex.exec(line);
-					//data[2]
-					trace(data)
+					if(data != null){
+						collection.addItem(new Simulator(data[3], "iPhone" + data[1], data[2]));
+					}
 				}
 			}
 		}
-		
 	}
 }

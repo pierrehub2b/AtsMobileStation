@@ -2,7 +2,7 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
-					   width="320" height="360" showStatusBar="false"
+					   width="340" height="360" showStatusBar="false"
 					   right="0" bottom="0"
 					   creationComplete="creationCompleteHandler(event)"
 					   close="closeHandler(event)" backgroundColor="0xefefef">
@@ -10,17 +10,17 @@
 		<![CDATA[
 			import com.greensock.TweenMax;
 			
-			import device.ConnectedDevices;
-			import device.Simulator;
-			
 			import flash.filters.BitmapFilterQuality;
 			
-			import mx.collections.ArrayCollection;
 			import mx.events.FlexEvent;
 			
-			import renderer.AndroidDeviceRenderer;
-			
 			import spark.filters.DropShadowFilter;
+			
+			import device.AvailableSimulators;
+			import device.ConnectedDevices;
+			import device.SimulatorDevice;
+			
+			import renderer.AndroidDeviceRenderer;
 			
 			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 
@@ -32,19 +32,25 @@
 			private var connectedDevices:ConnectedDevices;
 			
 			[Bindable]
-			private var simulators:ArrayCollection = new ArrayCollection();
+			private var simulatorsList:AvailableSimulators;
+			
+			private var simPhp:SimulatorDevice;
 			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
-				//if(Capabilities.os.indexOf("Mac") > -1){
-				simulators.addItem(new Simulator("8E70DF80-AC94-466B-AA13-313EC56BAA94", "iphone Xr", "12.4"));
+				if(Capabilities.os.indexOf("Mac") > -1){
+				
+					simulatorsList = new AvailableSimulators();
+					simPhp = new SimulatorDevice(9090);
+				
+				/*simulators.addItem(new Simulator("8E70DF80-AC94-466B-AA13-313EC56BAA94", "iphone Xr", "12.4"));
 				simulators.addItem(new Simulator("8092FC53-38AB-4308-B2B9-47D0B00F7794", "iphone Xs", "12.4"));
 				simulators.addItem(new Simulator("9CE6251F-0B96-4D29-AEB2-454FA2835C1C", "iphone X", "12.4"));
-				simulators.addItem(new Simulator("26DCA5DF-1324-48EE-B524-B1751FA3BA3E", "iphone SE", "12.4"));
+				simulators.addItem(new Simulator("26DCA5DF-1324-48EE-B524-B1751FA3BA3E", "iphone SE", "12.4"));*/
 				//simulators.addItem(new Simulator("00002", "iphone7", "10.2"));	
 				//	simulators.addItem(new Simulator("00003", "iphone9", "10.4"));
 				//	simulators.addItem(new Simulator("00004", "iphoneX", "10.3"));	
-				//}
+				}
 					
 				connectedDevices = new ConnectedDevices(port);
 			}
@@ -139,7 +145,7 @@
 		
 		<s:List width="100%" top="30" bottom="0"
 				alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
-				contentBackgroundAlpha="0.0" dataProvider="{simulators}"
+				contentBackgroundAlpha="0.0" dataProvider="{simulatorsList.collection}"
 				itemRenderer="renderer.SimulatorDeviceRenderer"/>
 	</s:Group>
 	

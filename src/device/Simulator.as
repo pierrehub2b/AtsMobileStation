@@ -6,6 +6,8 @@ package device
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
 	
+	import mx.utils.StringUtil;
+	
 	public class Simulator
 	{
 		
@@ -42,7 +44,7 @@ package device
 		public function Simulator(uid:String, name:String, os:String)
 		{
 			this.uid = uid;
-			this.name = name;
+			this.name = StringUtil.trim(name);
 			this.os = os;
 		}
 		
