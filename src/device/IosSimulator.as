@@ -67,10 +67,9 @@ package device
 				process.start(procInfo);
 			}else{
 				
-				dispatchEvent(new Event(STATUS_CHANGED));
-				
 				phase = WAIT;
 				tooltip = "Simulator is terminating ...";
+				dispatchEvent(new Event(STATUS_CHANGED));
 				
 				procInfo.executable = xcrunExec;
 				process.addEventListener(NativeProcessExitEvent.EXIT, onShutdownExit, false, 0, true);

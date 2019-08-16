@@ -33,9 +33,6 @@ package device
 		
 		private var ipSort:Sort = new Sort([new SortField("ip")]);
 		
-		private var simu:SimulatorDevice;
-		private var simu2:SimulatorDevice;
-		
 		public function AvailableDevices(port:String)
 		{
 			this.port = port;
@@ -52,9 +49,6 @@ package device
 				
 				this.process.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
 				this.process.start(this.procInfo);
-				
-				this.simu = new SimulatorDevice(9090);
-				this.simu2 = new SimulatorDevice(9191);
 				
 			}else{
 				this.adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
@@ -154,11 +148,6 @@ package device
 			var dv:Device;
 			for each(dv in collection){
 				dv.dispose();
-			}
-			
-			if(simu != null){
-				simu.dispose();
-				simu2.dispose()
 			}
 			
 			process.exit(true);

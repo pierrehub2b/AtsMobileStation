@@ -73,7 +73,7 @@ package device
 		
 		protected function simulatorStatusChanged(ev:Event):void{
 			var sim:IosSimulator = ev.currentTarget as IosSimulator;
-			dispatchEvent(new SimulatorEvent(SIMULATOR_STATUS_CHANGED, sim);
+			dispatchEvent(new SimulatorEvent(SIMULATOR_STATUS_CHANGED, sim));
 		}
 	}
 }
