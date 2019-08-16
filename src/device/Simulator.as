@@ -86,8 +86,11 @@ package device
 		}
 		
 		protected function onEraseExit(event:NativeProcessExitEvent):void{
+			
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onEraseExit);
 			process.addEventListener(NativeProcessExitEvent.EXIT, onBootExit, false, 0, true);
+			
+			trace("Simulator image erased, booting simulator ...")
 			
 			procInfo.arguments = new <String>["simctl", "bootstatus", uid, "-b"];
 			process.start(procInfo);
@@ -97,6 +100,8 @@ package device
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onBootExit);
 			process.addEventListener(NativeProcessExitEvent.EXIT, onSimulatorStartedExit, false, 0, true);
 			
+			trace("Simulator started, open simulator app ...")
+			
 			procInfo.executable = openExec;
 			procInfo.arguments = new <String>["-a", "simulator"];
 			process.start(procInfo);
@@ -105,17 +110,16 @@ package device
 		protected function onSimulatorStartedExit(event:NativeProcessExitEvent):void{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onSimulatorStartedExit);
 			
-
 			phase = RUN;
 			tooltip = "Shutdown simulator";
 			
-			//process.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
-			//process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingProgress, false, 0, true);
+			/*process.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
+			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingProgress, false, 0, true);
 			
-			//procInfo.executable = xcodeBuildExec;
-			//procInfo.workingDirectory = iosDriverProjectFolder;
-			//procInfo.arguments = new <String>["-workspace", "atsios.xcworkspace", "-scheme", "\"atsios\"", "\"id=" + uid + "\"", "test", "-quiet"];
-			//process.start(procInfo);
+			procInfo.executable = xcodeBuildExec;
+			procInfo.workingDirectory = iosDriverProjectFolder;
+			procInfo.arguments = new <String>["-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + uid, "test", "-quiet"];
+			process.start(procInfo);*/
 
 		}
 		

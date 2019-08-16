@@ -37,10 +37,13 @@
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
 				//if(Capabilities.os.indexOf("Mac") > -1){
-				simulators.addItem(new Simulator("00001", "iphone6", "10.1"));
-				simulators.addItem(new Simulator("00002", "iphone7", "10.2"));	
-					simulators.addItem(new Simulator("00003", "iphone9", "10.4"));
-					simulators.addItem(new Simulator("00004", "iphoneX", "10.3"));	
+				simulators.addItem(new Simulator("8E70DF80-AC94-466B-AA13-313EC56BAA94", "iphone Xr", "12.4"));
+				simulators.addItem(new Simulator("8092FC53-38AB-4308-B2B9-47D0B00F7794", "iphone Xs", "12.4"));
+				simulators.addItem(new Simulator("9CE6251F-0B96-4D29-AEB2-454FA2835C1C", "iphone X", "12.4"));
+				simulators.addItem(new Simulator("26DCA5DF-1324-48EE-B524-B1751FA3BA3E", "iphone SE", "12.4"));
+				//simulators.addItem(new Simulator("00002", "iphone7", "10.2"));	
+				//	simulators.addItem(new Simulator("00003", "iphone9", "10.4"));
+				//	simulators.addItem(new Simulator("00004", "iphoneX", "10.3"));	
 				//}
 					
 				connectedDevices = new ConnectedDevices(port);
