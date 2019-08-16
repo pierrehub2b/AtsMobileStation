@@ -21,6 +21,7 @@ package device
 			this.ip = ip;
 			this.modelName = name;
 			this.manufacturer = "Apple";
+			this.connected = true;
 			
 			/*process.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingProgress, false, 0, true);
