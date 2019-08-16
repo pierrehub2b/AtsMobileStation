@@ -6,14 +6,19 @@ package device
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
 	
+	import mx.collections.ArrayCollection;
 	import mx.utils.StringUtil;
 
 	public class AvailableSimulators
 	{
+		private var regex:RegExp = /iPhone(.*)\([\)]*)\)\[(.*)\](.*)/
 		protected var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 		protected var process:NativeProcess = new NativeProcess();
 		
 		private var output:String = "";
+		
+		[Bindable]
+		public var collection:ArrayCollection = new ArrayCollection();
 		
 		public function AvailableSimulators()
 		{
@@ -42,8 +47,15 @@ package device
 			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit);
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onInstrumentsOutput);
-
-			trace(output);
+			
+			var list:Array = output.split("\n");
+			for each(var line:String in list){
+				if(line.indexOf("iPhone") == 0){
+					var data:Array = regex.exec(line);
+					//data[2]
+					trace(data)
+				}
+			}
 		}
 		
 	}
