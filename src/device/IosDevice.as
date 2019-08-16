@@ -31,5 +31,11 @@ package device
 			procInfo.arguments = new <String>["-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test", "-quiet"];
 			process.start(procInfo);*/
 		}
+		
+		override public function set connected(value:Boolean):void
+		{
+		}
+		
+		
 	}
 }

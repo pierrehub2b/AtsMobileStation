@@ -18,7 +18,7 @@
 			
 			import mx.events.FlexEvent;
 			
-			import renderer.AndroidDeviceRenderer;
+			import renderer.RunningDeviceRenderer;
 			
 			import spark.filters.DropShadowFilter;
 			
@@ -88,7 +88,7 @@
 	</s:Group>
 	
 	<s:VGroup top="38" left="10" right="10" bottom="30" gap="3">
-		<s:VGroup filters="{AndroidDeviceRenderer.dropShadowFilterMiddle}" gap="3" paddingTop="10"
+		<s:VGroup filters="{RunningDeviceRenderer.dropShadowFilterMiddle}" gap="3" paddingTop="10"
 				  visible="{devices.collection.length==0}" includeInLayout="{devices.collection.length==0}">
 			<s:Label fontWeight="bold" 
 					 text="No devices found"/>
@@ -100,7 +100,7 @@
 		<s:List width="100%" height="100%"
 				alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
 				contentBackgroundAlpha="0.0" dataProvider="{devices.collection}"
-				itemRenderer="renderer.AndroidDeviceRenderer"/>
+				itemRenderer="renderer.RunningDeviceRenderer"/>
 	</s:VGroup>
 
 	<s:Group id="simulatorsGroup" left="5" right="5" bottom="5" height="26">
@@ -128,7 +128,7 @@
 			</s:Rect>
 			<s:HGroup id="subGroup" width="100%" paddingLeft="7" paddingRight="10" verticalCenter="0" verticalAlign="middle" gap="3">
 				<s:Label fontSize="13" text="Available Simulators" fontWeight="bold"
-						 filters="{AndroidDeviceRenderer.dropShadowFilterMiddle}"/>
+						 filters="{RunningDeviceRenderer.dropShadowFilterMiddle}"/>
 			</s:HGroup>
 		</s:Group>
 		

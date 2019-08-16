@@ -33,8 +33,18 @@ package device
 		[Bindable]
 		public var tooltip:String = "Starting driver ...";
 		
-		public var connected:Boolean;
+		private var _connected:Boolean;
 				
+		public function get connected():Boolean
+		{
+			return _connected;
+		}
+
+		public function set connected(value:Boolean):void
+		{
+			_connected = value;
+		}
+
 		public function dispose():Boolean{
 			return true;
 		}

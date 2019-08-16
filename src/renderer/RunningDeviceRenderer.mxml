@@ -9,6 +9,8 @@
 	<fx:Script>
 		<![CDATA[
 			import device.AndroidDevice;
+			import device.Device;
+			
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.core.DragSource;
@@ -19,12 +21,12 @@
 			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
 			[Bindable]
-			private var dev:AndroidDevice;
+			private var dev:Device;
 			
 			override public function set data(value:Object):void
 			{
 				super.data = value;
-				this.dev = value as AndroidDevice;
+				this.dev = value as Device;
 			}
 			
 			protected function restart_clickHandler(event:MouseEvent):void
