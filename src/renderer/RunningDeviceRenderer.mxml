@@ -8,16 +8,15 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import device.AndroidDevice;
-			import device.Device;
-			import device.IosDevice;
-			
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.core.DragSource;
 			import mx.managers.DragManager;
 			
 			import spark.filters.DropShadowFilter;
+			
+			import device.Device;
+			import device.IosDevice;
 			
 			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
@@ -93,7 +92,7 @@
 	</fx:Script>
 	
 	<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" verticalCenter="0" filters="{dropShadowFilterMiddle}"
-			  paddingRight="6" paddingLeft="5" rollOver="mainGroup_rollOverHandler(event)" rollOut="mainGroup_rollOutHandler(event)">
+			  paddingRight="6" paddingLeft="2" rollOver="mainGroup_rollOverHandler(event)" rollOut="mainGroup_rollOutHandler(event)">
 		<s:HGroup id="firstGroup" verticalAlign="middle" mouseDown="mouseDownHandler(event)" buttonMode="true">
 			<s:BitmapImage source="assets/icons/32/smartphone.png" smooth="true" smoothingQuality="high"/>
 			<s:VGroup gap="3" mouseEnabled="false">
@@ -115,6 +114,6 @@
 			<s:BitmapImage source="assets/icons/24/restart.png" smooth="true" smoothingQuality="high"/>
 		</s:Group>
 	</s:HGroup>
-	<s:BitmapImage id="osBitmap" left="8" top="16" width="16" height="16" alpha="0.7"
+	<s:BitmapImage id="osBitmap" left="8" top="16" width="16" height="16"
 				   source="assets/icons/20/android.png" verticalCenter="0"/>
 </s:ItemRenderer>

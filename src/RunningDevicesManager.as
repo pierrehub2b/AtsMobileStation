@@ -63,7 +63,7 @@ package
 		
 		public function simulatorChanged(sim:IosSimulator):void{
 			if(sim.phase == IosSimulator.RUN){
-				collection.addItem(sim.device);trace("new ios")
+				collection.addItem(sim.device);
 			}else{
 				var dv:Device = findDevice(sim.id)
 				if(dv != null){
