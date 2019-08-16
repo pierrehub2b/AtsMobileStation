@@ -37,11 +37,12 @@ package device
 		[Bindable]
 		public var tooltip:String = "Starting driver ...";
 		
-		private var _connected:Boolean;
+		private var _connected:Boolean = false;
+		public var isSimulator:Boolean = false;
 				
 		public function get connected():Boolean
 		{
-			return _connected;
+			return isSimulator || _connected;
 		}
 
 		public function set connected(value:Boolean):void

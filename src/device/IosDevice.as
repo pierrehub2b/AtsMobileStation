@@ -16,12 +16,12 @@ package device
 		private static const xcodeBuildExec:File = new File("/usr/bin/xcodebuild");
 		private static const phpExec:File = new File("/usr/bin/php");
 
-		public function IosDevice(id:String, name:String, ip:String)
+		public function IosDevice(id:String, name:String, isSimulator:Boolean, ip:String)
 		{
 			this.ip = ip;
 			this.modelName = name;
 			this.manufacturer = "Apple";
-			this.connected = true;
+			this.isSimulator = isSimulator;
 			
 			/*process.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingProgress, false, 0, true);
