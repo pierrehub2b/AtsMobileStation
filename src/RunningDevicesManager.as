@@ -1,5 +1,9 @@
-package device
+package 
 {
+	import device.AndroidDevice;
+	import device.Device;
+	import device.IosDevice;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -13,10 +17,12 @@ package device
 	import mx.collections.ArrayCollection;
 	import mx.utils.StringUtil;
 	
+	import simulator.IosSimulator;
+	
 	import spark.collections.Sort;
 	import spark.collections.SortField;
 	
-	public class AvailableDevices
+	public class RunningDevicesManager
 	{
 		protected var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 		protected var process:NativeProcess = new NativeProcess();
@@ -33,7 +39,7 @@ package device
 		
 		private var ipSort:Sort = new Sort([new SortField("ip")]);
 		
-		public function AvailableDevices(port:String)
+		public function RunningDevicesManager(port:String)
 		{
 			this.port = port;
 			this.collection.sort = ipSort;
@@ -56,8 +62,11 @@ package device
 			}
 		}
 		
-		public function simulatorChanged(simulator:IosSimulator):void{
-			trace(simulator.name + " -> " + simulator.phase)
+		public function simulatorChanged(sim:IosSimulator):void{
+			trace(sim.name + " -> " + sim.phase)
+			
+			var ios:IosDevice = new IosDevice(sim.id, sim);
+			
 		}
 		
 		protected function onChmodExit(event:NativeProcessExitEvent):void

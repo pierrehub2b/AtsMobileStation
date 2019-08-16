@@ -12,35 +12,9 @@ package device
 		private static const androidDriverFullName:String = "com.ats.atsdroid";
 		private static const androidPropValueRegex:RegExp = /.*:.*\[(.*)\]/;
 		private static const androidDriverFilePath:String = File.applicationDirectory.resolvePath("assets/drivers/atsdroid.apk").nativePath;
-		
-		public static const INSTALL:String = "install";
-		public static const START:String = "start";
-		public static const READY:String = "ready";
-		public static const FAIL:String = "fail";
-		
-		[Bindable]
-		public var ip:String;
-		
-		[Bindable]
-		public var status:String = START;
-		
-		[Bindable]
-		public var error:String = null;
-		
-		[Bindable]
-		public var manufacturer:String = "";
-		
-		[Bindable]
-		public var modelId:String = "";
-		
-		[Bindable]
-		public var modelName:String = "";
-		
+						
 		public var androidVersion:String = "";
 		public var androidSdk:String = "";
-		
-		[Bindable]
-		public var tooltip:String = "Starting driver ...";
 
 		public var type:String;
 		

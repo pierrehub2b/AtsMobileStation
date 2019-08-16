@@ -1,4 +1,4 @@
-package device
+package 
 {
 	import event.SimulatorEvent;
 	
@@ -13,8 +13,9 @@ package device
 	
 	import mx.collections.ArrayCollection;
 	import mx.utils.StringUtil;
+	import simulator.IosSimulator;
 	
-	public class AvailableSimulators extends EventDispatcher
+	public class AvailableSimulatorsManager extends EventDispatcher
 	{
 		public static const SIMULATOR_STATUS_CHANGED:String = "simulatorStatusChanged";
 		
@@ -28,7 +29,7 @@ package device
 		[Bindable]
 		public var collection:ArrayCollection = new ArrayCollection();
 		
-		public function AvailableSimulators()
+		public function AvailableSimulatorsManager()
 		{
 			if(Capabilities.os.indexOf("Mac") > -1){
 				procInfo.executable = new File("/usr/bin/instruments");

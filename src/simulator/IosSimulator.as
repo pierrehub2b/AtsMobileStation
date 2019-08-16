@@ -1,5 +1,7 @@
-package device
+package simulator
 {
+	import device.IosDevice;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -7,6 +9,9 @@ package device
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
+	import flash.net.InterfaceAddress;
+	import flash.net.NetworkInfo;
+	import flash.net.NetworkInterface;
 	
 	import mx.utils.StringUtil;
 	
@@ -14,8 +19,6 @@ package device
 	{
 		public static const STATUS_CHANGED:String = "statusChanged";
 		
-		private static const iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
-
 		public static const OFF:String = "off";
 		public static const WAIT:String = "wait";
 		public static const RUN:String = "run";
@@ -42,13 +45,18 @@ package device
 		
 		private static const xcrunExec:File = new File("/usr/bin/xcrun");
 		private static const openExec:File = new File("/usr/bin/open");
-		private static const xcodeBuildExec:File = new File("/usr/bin/xcodebuild");
 		
 		public function IosSimulator(id:String, name:String, version:String)
 		{
 			this.id = id;
 			this.name = StringUtil.trim(name);
 			this.version = version;
+		}
+		
+		public function get device():IosDevice{
+			var netInterfaces:Vector.<NetworkInterface> = NetworkInfo.networkInfo.findInterfaces();
+			var addresses:Vector.<InterfaceAddress> = netInterfaces[1].addresses;
+			var ios:IosDevice = new IosDevice(id, name, addresses[0].address);
 		}
 		
 		public function startStop():void{
@@ -119,15 +127,6 @@ package device
 			phase = RUN;
 			tooltip = "Shutdown simulator";
 			dispatchEvent(new Event(STATUS_CHANGED));
-			
-			/*process.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
-			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingProgress, false, 0, true);
-			
-			procInfo.executable = xcodeBuildExec;
-			procInfo.workingDirectory = iosDriverProjectFolder;
-			procInfo.arguments = new <String>["-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + uid, "test", "-quiet"];
-			process.start(procInfo);*/
-
 		}
 	}
 }

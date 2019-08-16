@@ -1,6 +1,6 @@
 package event
 {
-	import device.IosSimulator;
+	import simulator.IosSimulator;
 	
 	import flash.events.Event;
 	
