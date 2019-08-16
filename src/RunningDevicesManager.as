@@ -18,6 +18,7 @@ package
 	import mx.utils.StringUtil;
 	
 	import simulator.IosSimulator;
+	import simulator.SimulatorDevice;
 	
 	import spark.collections.Sort;
 	import spark.collections.SortField;
@@ -62,11 +63,13 @@ package
 			}
 		}
 		
+		private var ios:IosDevice;
 		public function simulatorChanged(sim:IosSimulator):void{
-			trace(sim.name + " -> " + sim.phase)
-			
-			var ios:IosDevice = new IosDevice(sim.id, sim);
-			
+			if(sim.phase == IosSimulator.RUN){
+				this.ios = sim.device;
+			}else{
+				this.ios.dispose();
+			}
 		}
 		
 		protected function onChmodExit(event:NativeProcessExitEvent):void
