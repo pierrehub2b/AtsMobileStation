@@ -10,6 +10,7 @@
 		<![CDATA[
 			import device.AndroidDevice;
 			import device.Device;
+			import device.IosDevice;
 			
 			import flash.filters.BitmapFilterQuality;
 			
@@ -27,6 +28,12 @@
 			{
 				super.data = value;
 				this.dev = value as Device;
+				
+				if(this.dev is IosDevice){
+					osBitmap.source = "assets/icons/20/ios.png";
+				}else{
+					osBitmap.source = "assets/icons/20/android.png";
+				}
 			}
 			
 			protected function restart_clickHandler(event:MouseEvent):void
@@ -108,6 +115,6 @@
 			<s:BitmapImage source="assets/icons/24/restart.png" smooth="true" smoothingQuality="high"/>
 		</s:Group>
 	</s:HGroup>
-	<s:BitmapImage left="8" top="16" width="16" height="16" alpha="0.7"
+	<s:BitmapImage id="osBitmap" left="8" top="16" width="16" height="16" alpha="0.7"
 				   source="assets/icons/20/android.png" verticalCenter="0"/>
 </s:ItemRenderer>

@@ -18,6 +18,7 @@ package device
 
 		public function IosDevice(id:String, name:String, isSimulator:Boolean, ip:String)
 		{
+			this.id = id;
 			this.ip = ip;
 			this.modelName = name;
 			this.manufacturer = "Apple";
