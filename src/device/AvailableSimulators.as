@@ -11,7 +11,7 @@ package device
 
 	public class AvailableSimulators
 	{
-		private var regex:RegExp = /iPhone(.*)\([\)]*)\)\[(.*)\](.*)/
+		private var regex:RegExp = /iPhone(.*)\([^\)]*)\)\[(.*)\](.*)/
 		protected var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 		protected var process:NativeProcess = new NativeProcess();
 		
