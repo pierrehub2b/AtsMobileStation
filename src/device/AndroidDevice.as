@@ -17,10 +17,7 @@ package device
 		public var androidSdk:String = "";
 
 		public var type:String;
-		
-		[Bindable]
-		public var port:String = "8080";
-		
+				
 		private var output:String = "";
 		
 		private var process:NativeProcess = new NativeProcess();
@@ -52,13 +49,6 @@ package device
 				return true;
 			}
 			return false;
-		}
-		
-		public function close():void{
-			if(!dispose()){
-				connected = false;
-				dispatchEvent(new Event("deviceStopped"));
-			}
 		}
 		
 		protected function onOutputErrorShell(event:ProgressEvent):void

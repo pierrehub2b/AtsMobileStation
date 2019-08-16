@@ -1,5 +1,6 @@
 package device
 {
+	import flash.events.Event;
 	import flash.events.EventDispatcher;
 
 	public class Device extends EventDispatcher
@@ -17,6 +18,9 @@ package device
 				
 		[Bindable]
 		public var ip:String;
+		
+		[Bindable]
+		public var port:String = "8080";
 		
 		[Bindable]
 		public var error:String = null;
@@ -47,6 +51,13 @@ package device
 
 		public function dispose():Boolean{
 			return true;
+		}
+		
+		public function close():void{
+			if(!dispose()){
+				_connected = false;
+				dispatchEvent(new Event("deviceStopped"));
+			}
 		}
 	}
 }
