@@ -2,14 +2,17 @@ package device
 {
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
 	
 	import mx.utils.StringUtil;
 	
-	public class Simulator
+	public class IosSimulator extends EventDispatcher
 	{
+		public static const STATUS_CHANGED:String = "statusChanged";
 		
 		private static const iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
 
@@ -17,13 +20,13 @@ package device
 		public static const WAIT:String = "wait";
 		public static const RUN:String = "run";
 		
-		public var uid:String;
+		public var id:String;
 		
 		[Bindable]
 		public var name:String;
 		
 		[Bindable]
-		public var os:String;
+		public var version:String;
 		
 		[Bindable]
 		public var phase:String = OFF;
@@ -41,11 +44,11 @@ package device
 		private static const openExec:File = new File("/usr/bin/open");
 		private static const xcodeBuildExec:File = new File("/usr/bin/xcodebuild");
 		
-		public function Simulator(uid:String, name:String, os:String)
+		public function IosSimulator(id:String, name:String, version:String)
 		{
-			this.uid = uid;
+			this.id = id;
 			this.name = StringUtil.trim(name);
-			this.os = os;
+			this.version = version;
 		}
 		
 		public function startStop():void{
@@ -59,18 +62,20 @@ package device
 				
 				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
 				process.addEventListener(NativeProcessExitEvent.EXIT, onEraseExit, false, 0, true);
-				//process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData, false, 0, true);
-				
-				procInfo.arguments = new <String>["simctl", "erase", uid];
+
+				procInfo.arguments = new <String>["simctl", "erase", id];
 				process.start(procInfo);
 			}else{
+				
+				dispatchEvent(new Event(STATUS_CHANGED));
+				
 				phase = WAIT;
 				tooltip = "Simulator is terminating ...";
 				
 				procInfo.executable = xcrunExec;
 				process.addEventListener(NativeProcessExitEvent.EXIT, onShutdownExit, false, 0, true);
 				
-				procInfo.arguments = new <String>["simctl", "shutdown", uid];
+				procInfo.arguments = new <String>["simctl", "shutdown", id];
 				process.start(procInfo);
 			}
 		}
@@ -94,7 +99,7 @@ package device
 			
 			trace("Simulator image erased, booting simulator ...")
 			
-			procInfo.arguments = new <String>["simctl", "bootstatus", uid, "-b"];
+			procInfo.arguments = new <String>["simctl", "bootstatus", id, "-b"];
 			process.start(procInfo);
 		}
 		
@@ -114,6 +119,7 @@ package device
 			
 			phase = RUN;
 			tooltip = "Shutdown simulator";
+			dispatchEvent(new Event(STATUS_CHANGED));
 			
 			/*process.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingProgress, false, 0, true);
@@ -124,19 +130,5 @@ package device
 			process.start(procInfo);*/
 
 		}
-		
-		protected function onTestingProgress(event:ProgressEvent):void{
-			output += process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
-			if(output.indexOf("Continuing with testing") > -1){
-				phase = RUN;
-				tooltip = "Shutdown simulator";
-			}
-		}
-		
-		protected function onTestingExit(event:NativeProcessExitEvent):void{
-			trace("testing crashed")
-		}
-		
-		
 	}
 }

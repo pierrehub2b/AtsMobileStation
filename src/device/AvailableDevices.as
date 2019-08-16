@@ -16,7 +16,7 @@ package device
 	import spark.collections.Sort;
 	import spark.collections.SortField;
 	
-	public class ConnectedDevices
+	public class AvailableDevices
 	{
 		protected var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 		protected var process:NativeProcess = new NativeProcess();
@@ -29,17 +29,17 @@ package device
 		private var port:String = "8080";
 		
 		[Bindable]
-		public var devices:ArrayCollection = new ArrayCollection();
+		public var collection:ArrayCollection = new ArrayCollection();
 		
 		private var ipSort:Sort = new Sort([new SortField("ip")]);
 		
 		private var simu:SimulatorDevice;
 		private var simu2:SimulatorDevice;
 		
-		public function ConnectedDevices(port:String)
+		public function AvailableDevices(port:String)
 		{
 			this.port = port;
-			this.devices.sort = ipSort;
+			this.collection.sort = ipSort;
 			
 			var adbPath:String = "assets/tools/android/adb";
 			if(Capabilities.os.indexOf("Mac") > -1){
@@ -60,6 +60,10 @@ package device
 				this.adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
 				startAdbProcess();
 			}
+		}
+		
+		public function simulatorChanged(simulator:IosSimulator):void{
+			trace(simulator.name + " -> " + simulator.phase)
 		}
 		
 		protected function onChmodExit(event:NativeProcessExitEvent):void
@@ -148,7 +152,7 @@ package device
 		
 		public function terminate():void{
 			var dv:Device;
-			for each(dv in devices){
+			for each(dv in collection){
 				dv.dispose();
 			}
 			
@@ -190,7 +194,7 @@ package device
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData);
 			
 			var dv:Device;
-			for each(dv in devices){
+			for each(dv in collection){
 				dv.connected = false;
 			}
 			
@@ -208,8 +212,8 @@ package device
 						if(dev == null){
 							dev = new AndroidDevice(adbFile, port, info[0], info[1]);
 							dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
-							devices.addItem(dev);
-							devices.refresh();
+							collection.addItem(dev);
+							collection.refresh();
 						}else{
 							dev.connected = true;
 						}
@@ -217,11 +221,11 @@ package device
 				}
 			}
 			
-			for each(dv in devices){
+			for each(dv in collection){
 				if(!dv.connected){
 					dv.dispose();
-					devices.removeItem(dv);
-					devices.refresh();
+					collection.removeItem(dv);
+					collection.refresh();
 				}
 			}
 			
@@ -229,7 +233,7 @@ package device
 		}
 		
 		private function findDevice(id:String):Device{
-			for each(var dv:Device in devices){
+			for each(var dv:Device in collection){
 				if(dv.id == id){
 					return dv;
 				}
@@ -241,7 +245,7 @@ package device
 			var dv:Device = ev.currentTarget as Device;
 			dv.removeEventListener("deviceStopped", deviceStoppedHandler);
 			dv.dispose();
-			devices.removeItem(dv);
+			collection.removeItem(dv);
 		}
 	}
 }

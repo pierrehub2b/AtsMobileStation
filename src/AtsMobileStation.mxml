@@ -10,54 +10,46 @@
 		<![CDATA[
 			import com.greensock.TweenMax;
 			
+			import device.AvailableDevices;
+			import device.AvailableSimulators;
+			import device.SimulatorDevice;
+			
+			import event.SimulatorEvent;
+			
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.events.FlexEvent;
 			
-			import spark.filters.DropShadowFilter;
-			
-			import device.AvailableSimulators;
-			import device.ConnectedDevices;
-			import device.SimulatorDevice;
-			
 			import renderer.AndroidDeviceRenderer;
 			
+			import spark.filters.DropShadowFilter;
+			
 			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
-
 			
 			[Bindable]
 			private var port:String = "8080";
 			
 			[Bindable]
-			private var connectedDevices:ConnectedDevices;
+			private var devices:AvailableDevices;
 			
 			[Bindable]
-			private var simulatorsList:AvailableSimulators;
-			
-			private var simPhp:SimulatorDevice;
+			private var simulators:AvailableSimulators;
 			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
-				if(Capabilities.os.indexOf("Mac") > -1){
-				
-					simulatorsList = new AvailableSimulators();
-					simPhp = new SimulatorDevice(9090);
-				
-				/*simulators.addItem(new Simulator("8E70DF80-AC94-466B-AA13-313EC56BAA94", "iphone Xr", "12.4"));
-				simulators.addItem(new Simulator("8092FC53-38AB-4308-B2B9-47D0B00F7794", "iphone Xs", "12.4"));
-				simulators.addItem(new Simulator("9CE6251F-0B96-4D29-AEB2-454FA2835C1C", "iphone X", "12.4"));
-				simulators.addItem(new Simulator("26DCA5DF-1324-48EE-B524-B1751FA3BA3E", "iphone SE", "12.4"));*/
-				//simulators.addItem(new Simulator("00002", "iphone7", "10.2"));	
-				//	simulators.addItem(new Simulator("00003", "iphone9", "10.4"));
-				//	simulators.addItem(new Simulator("00004", "iphoneX", "10.3"));	
-				}
-					
-				connectedDevices = new ConnectedDevices(port);
+				simulators = new AvailableSimulators();
+				simulators.addEventListener(AvailableSimulators.SIMULATOR_STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
+				devices = new AvailableDevices(port);
+			}
+			
+			protected function simulatorStatusChanged(ev:SimulatorEvent):void
+			{
+				devices.simulatorChanged(ev.simulator);
 			}
 			
 			protected function closeHandler(event:Event):void
 			{
-				connectedDevices.terminate();
+				devices.terminate();
 			}
 			
 			protected function clickGroup_clickHandler(event:MouseEvent):void
@@ -67,7 +59,6 @@
 				}else{
 					TweenMax.to(simulatorsGroup, 0.3, {height:26})
 				}
-
 			}
 			
 			protected function clickConnected_clickHandler(event:MouseEvent):void
@@ -100,7 +91,7 @@
 	
 	<s:VGroup top="38" left="10" right="10" bottom="30" gap="3">
 		<s:VGroup filters="{AndroidDeviceRenderer.dropShadowFilterMiddle}" gap="3" paddingTop="10"
-				  visible="{connectedDevices.devices.length==0}" includeInLayout="{connectedDevices.devices.length==0}">
+				  visible="{devices.collection.length==0}" includeInLayout="{devices.collection.length==0}">
 			<s:Label fontWeight="bold" 
 					 text="No devices found"/>
 			<s:Label fontStyle="italic" fontSize="11"
@@ -110,7 +101,7 @@
 		<s:Spacer height="4"/>
 		<s:List width="100%" height="100%"
 				alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
-				contentBackgroundAlpha="0.0" dataProvider="{connectedDevices.devices}"
+				contentBackgroundAlpha="0.0" dataProvider="{devices.collection}"
 				itemRenderer="renderer.AndroidDeviceRenderer"/>
 	</s:VGroup>
 
@@ -145,7 +136,7 @@
 		
 		<s:List width="100%" top="30" bottom="0"
 				alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
-				contentBackgroundAlpha="0.0" dataProvider="{simulatorsList.collection}"
+				contentBackgroundAlpha="0.0" dataProvider="{simulators.collection}"
 				itemRenderer="renderer.SimulatorDeviceRenderer"/>
 	</s:Group>
 	

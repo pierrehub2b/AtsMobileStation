@@ -9,13 +9,13 @@
 			
 			import spark.filters.DropShadowFilter;
 			
-			import device.Simulator;
+			import device.IosSimulator;
 			
 			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 
 			
 			[Bindable]
-			private var sim:Simulator;
+			private var sim:IosSimulator;
 			
 			override protected function get hovered():Boolean { return false; }
 			//override protected function get down():Boolean { return false; }
@@ -25,7 +25,7 @@
 			override public function set data(value:Object):void
 			{
 				super.data = value;
-				this.sim = value as Simulator;
+				this.sim = value as IosSimulator;
 			}
 			
 			protected function startStopButton_clickHandler(event:MouseEvent):void
@@ -35,7 +35,7 @@
 			
 			protected function button_rollOverHandler(event:MouseEvent):void
 			{
-				if(sim.phase == Simulator.RUN){
+				if(sim.phase == IosSimulator.RUN){
 					offButton.visible = true;
 				}
 			}
@@ -57,7 +57,7 @@
 			<s:BitmapImage source="assets/icons/32/smartphone.png" smooth="true" smoothingQuality="high"/>
 			<s:VGroup gap="3" mouseEnabled="false">
 				<s:Label text="{sim.name}" fontStyle="italic" color="0x8a844a" maxWidth="240" maxDisplayedLines="1"/>
-				<s:Label text="{sim.os}" fontSize="11" fontStyle="italic" color="#758696"/>
+				<s:Label text="{sim.version}" fontSize="11" fontStyle="italic" color="#758696"/>
 			</s:VGroup>
 		</s:HGroup>
 		
@@ -65,7 +65,7 @@
 		
 
 		<s:Group buttonMode="true" click="startStopButton_clickHandler(event)"
-				 toolTip="{sim.tooltip}" enabled="{sim.phase!=Simulator.WAIT}"
+				 toolTip="{sim.tooltip}" enabled="{sim.phase!=IosSimulator.WAIT}"
 				 rollOver="button_rollOverHandler(event)" rollOut="button_rollOutHandler(event)">
 			<s:BitmapImage id="iconStatus" source="assets/icons/24/{sim.phase}.png" smooth="true" smoothingQuality="high"/>
 			<s:BitmapImage id="offButton" source="assets/icons/24/shutdown.png" smooth="true" smoothingQuality="high"
