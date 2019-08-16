@@ -63,12 +63,15 @@ package
 			}
 		}
 		
-		private var ios:IosDevice;
 		public function simulatorChanged(sim:IosSimulator):void{
 			if(sim.phase == IosSimulator.RUN){
-				this.ios = sim.device;
+				collection.addItem(sim.device);
 			}else{
-				this.ios.dispose();
+				var dv:Device = findDevice(sim.id)
+				if(dv != null){
+					collection.removeItem(dv);
+					dv.dispose();
+				}
 			}
 		}
 		
@@ -78,19 +81,19 @@ package
 			process = new NativeProcess();
 			
 			startAdbProcess();
-			startSystemProfilerProcess();
+			//startSystemProfilerProcess();
 		}		
 		
 		//----------------------------------------------------------------------------------------------------------------
 		// MacOS specific
 		//----------------------------------------------------------------------------------------------------------------
 		
-		private var sysProcInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-		private var sysProc:NativeProcess = new NativeProcess();
+		//private var sysProcInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+		//private var sysProc:NativeProcess = new NativeProcess();
 		
-		private var sysProfiler:String = "";
+		//private var sysProfiler:String = "";
 		
-		private function startSystemProfilerProcess():void{
+		/*private function startSystemProfilerProcess():void{
 			
 			sysProfiler = "";
 			
@@ -142,7 +145,7 @@ package
 					catchArray = true;
 				}
 			}
-		}
+		}*/
 				
 		//----------------------------------------------------------------------------------------------------------------
 		//----------------------------------------------------------------------------------------------------------------
