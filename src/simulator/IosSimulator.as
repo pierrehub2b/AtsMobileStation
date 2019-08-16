@@ -56,7 +56,7 @@ package simulator
 		public function get device():IosDevice{
 			var netInterfaces:Vector.<NetworkInterface> = NetworkInfo.networkInfo.findInterfaces();
 			var addresses:Vector.<InterfaceAddress> = netInterfaces[1].addresses;
-			return new IosDevice(id, name, true, addresses[0].address);
+			return new IosDevice(id, name + " (" + version +")", true, addresses[0].address);
 		}
 		
 		public function startStop():void{
