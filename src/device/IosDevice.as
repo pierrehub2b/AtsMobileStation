@@ -11,6 +11,7 @@ package device
 		private var output:String = "";
 		
 		private var testingProcess:NativeProcess = new NativeProcess();
+		private var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 
 		private static const iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
 		private static const phpRouterFilePath:String = File.applicationDirectory.resolvePath("assets/drivers/router.php").nativePath;
@@ -31,7 +32,6 @@ package device
 			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingProgress, false, 0, true);
 			
-			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfo.executable = xcodeBuildExec;
 			procInfo.workingDirectory = iosDriverProjectFolder;
 			procInfo.arguments = new <String>["-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test", "-quiet"];
@@ -44,12 +44,13 @@ package device
 			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
 			testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingProgress);
 			
-			trace(testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable));
+			trace("error -> " + testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable));
 		}
 		
 		protected function onTestingProgress(event:ProgressEvent):void{
-			output = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
-			trace(output);
+			var data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
+			output += data;
+			trace("output -> " + data);
 		}
 		
 		protected function onTestingExit(event:NativeProcessExitEvent):void{
@@ -58,7 +59,7 @@ package device
 			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
 			testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingProgress);
 			
-
+			trace("output -> " + output);
 		}
 		
 	}
