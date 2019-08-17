@@ -56,7 +56,6 @@ package device
 		protected function onTestingError(event:ProgressEvent):void
 		{
 			var data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
-			trace("data -> " + data);
 			if(data.indexOf("Continuing with testing") != -1){
 				if(isSimulator){
 					starting();
