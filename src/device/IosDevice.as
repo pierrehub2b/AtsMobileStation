@@ -29,6 +29,7 @@ package device
 			this.isSimulator = isSimulator;
 			
 			installing()
+			trace("Install atsios driver ...");
 			
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
@@ -58,6 +59,7 @@ package device
 		protected function onTestingError(event:ProgressEvent):void
 		{
 			var data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
+			trace("test error -> " + data);
 			if(data.indexOf("Continuing with testing") != -1){
 				if(isSimulator){
 					starting();
