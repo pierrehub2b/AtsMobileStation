@@ -1,7 +1,5 @@
 package simulator
 {
-	import device.IosDevice;
-	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -14,6 +12,8 @@ package simulator
 	import flash.net.NetworkInterface;
 	
 	import mx.utils.StringUtil;
+	
+	import device.IosDevice;
 	
 	public class IosSimulator extends EventDispatcher
 	{
@@ -56,7 +56,16 @@ package simulator
 		public function get device():IosDevice{
 			var netInterfaces:Vector.<NetworkInterface> = NetworkInfo.networkInfo.findInterfaces();
 			var addresses:Vector.<InterfaceAddress> = netInterfaces[1].addresses;
-			return new IosDevice(id, name + " (" + version +")", true, addresses[0].address);
+			
+			var ipAddress:String = null;
+			for each(var intAddress:InterfaceAddress in addresses){
+				ipAddress = intAddress.address;
+				if(intAddress.ipVersion == "IPv4"){
+					break;
+				}
+			}
+			
+			return new IosDevice(id, name + " (" + version +")", true, ipAddress);
 		}
 		
 		public function startStop():void{
