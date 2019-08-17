@@ -71,7 +71,7 @@ package device
 					phpProcessInfo.workingDirectory = File.userDirectory;
 					
 					procInfo.arguments = new <String>["-S", "0.0.0.0:" + port, phpRouterFilePath];
-					phpProcess.start(procInfo);
+					phpProcess.start(phpProcessInfo);
 				}else{
 					status = READY
 				}
