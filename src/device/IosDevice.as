@@ -70,7 +70,7 @@ package device
 					phpProcessInfo.executable = phpExec;			
 					phpProcessInfo.workingDirectory = File.userDirectory;
 					
-					procInfo.arguments = new <String>["-S", "0.0.0.0:" + port, phpRouterFilePath];
+					phpProcessInfo.arguments = new <String>["-S", "0.0.0.0:" + port, phpRouterFilePath];
 					phpProcess.start(phpProcessInfo);
 				}else{
 					status = READY
