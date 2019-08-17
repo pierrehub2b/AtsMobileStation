@@ -28,8 +28,7 @@ package device
 			this.manufacturer = "Apple";
 			this.isSimulator = isSimulator;
 			
-			status = INSTALL
-			trace("Install atsios driver ...");
+			installing()
 			
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
@@ -60,11 +59,12 @@ package device
 			trace("data -> " + data);
 			if(data.indexOf("Continuing with testing") != -1){
 				if(isSimulator){
-					trace("atsios driver started, launch php server ...");
+					starting();
 					
 					phpProcess = new NativeProcess();
 					phpProcess.addEventListener(NativeProcessExitEvent.EXIT, onPhpExit, false, 0, true);
 					phpProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onPhpData, false, 0, true);
+					phpProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onPhpError, false, 0, true);
 					
 					var phpProcessInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 					phpProcessInfo.executable = phpExec;			
@@ -78,9 +78,25 @@ package device
 			}
 		}
 		
+		protected function onPhpError(event:ProgressEvent):void{
+			phpProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onPhpData);
+			phpProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onPhpError);
+			
+			var data:String = phpProcess.standardError.readUTFBytes(phpProcess.standardError.bytesAvailable);
+
+			
+			trace("Php error -> " + data);
+			status = READY
+		}
+		
 		protected function onPhpData(event:ProgressEvent):void{
 			phpProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onPhpData);
-			trace("Php server started ...");
+			phpProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onPhpError);
+			var data:String = phpProcess.standardOutput.readUTFBytes(phpProcess.standardOutput.bytesAvailable);
+			
+			
+			trace("Php output -> " + data);
+
 			status = READY
 		}
 		

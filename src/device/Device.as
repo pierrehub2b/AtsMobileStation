@@ -12,9 +12,6 @@ package device
 		
 		[Bindable]
 		public var id:String;
-		
-		[Bindable]
-		public var status:String = START;
 				
 		[Bindable]
 		public var ip:String;
@@ -33,7 +30,10 @@ package device
 		
 		[Bindable]
 		public var modelName:String = "";
-				
+						
+		[Bindable]
+		public var status:String = START;
+		
 		[Bindable]
 		public var tooltip:String = "Starting driver ...";
 		
@@ -48,6 +48,15 @@ package device
 		public function set connected(value:Boolean):void
 		{
 			_connected = value;
+		}
+				
+		protected function installing():void{
+			status = INSTALL;
+			tooltip = "Installing driver ...";
+		}
+		
+		protected function starting():void{
+			tooltip = "Starting driver ...";
 		}
 
 		public function dispose():Boolean{
