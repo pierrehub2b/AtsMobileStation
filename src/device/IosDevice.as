@@ -40,9 +40,9 @@ package device
 		
 		protected function onTestingError(event:ProgressEvent):void
 		{
-			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
+			/*testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
 			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
-			testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingProgress);
+			testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingProgress);*/
 			
 			trace("error -> " + testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable));
 		}
