@@ -46,6 +46,7 @@ package device
 			if(phpProcess != null && phpProcess.running){
 				phpProcess.exit(true);
 			}
+			return true;
 		}
 				
 		protected function onTestingExit(event:NativeProcessExitEvent):void{
@@ -55,7 +56,7 @@ package device
 		
 		protected function onTestingError(event:ProgressEvent):void
 		{
-			var data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable));
+			var data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
 			trace("data -> " + data);
 			if(data.indexOf("Continuing with testing") != -1){
 				if(isSimulator){
