@@ -56,8 +56,11 @@ package device
 		protected function onTestingError(event:ProgressEvent):void
 		{
 			var data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable));
+			trace("data -> " + data);
 			if(data.indexOf("Continuing with testing") != -1){
 				if(isSimulator){
+					trace("atsios driver started, launch php server ...");
+					
 					phpProcess = new NativeProcess();
 					phpProcess.addEventListener(NativeProcessExitEvent.EXIT, onPhpExit, false, 0, true);
 					phpProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onPhpData, false, 0, true);
