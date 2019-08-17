@@ -51,6 +51,8 @@ package device
 		protected function onTestingExit(event:NativeProcessExitEvent):void{
 			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
 			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
+			
+			trace("testing exit");
 		}
 		
 		protected function onTestingError(event:ProgressEvent):void
@@ -102,6 +104,8 @@ package device
 		protected function onPhpExit(event:NativeProcessExitEvent):void{
 			phpProcess.removeEventListener(NativeProcessExitEvent.EXIT, onPhpExit);
 			phpProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onPhpData);
+			
+			trace("Php exit");
 		}	
 	}
 }
