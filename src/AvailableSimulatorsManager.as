@@ -15,6 +15,7 @@ package
 	import mx.utils.StringUtil;
 	
 	import simulator.IosSimulator;
+	import simulator.Simulator;
 	
 	public class AvailableSimulatorsManager extends EventDispatcher
 	{
@@ -69,7 +70,7 @@ package
 					var data:Array = regex.exec(line);
 					if(data != null){
 						var sim:IosSimulator = new IosSimulator(data[3], "iPhone" + data[1], data[2]);
-						sim.addEventListener(IosSimulator.STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
+						sim.addEventListener(Simulator.STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
 						collection.addItem(sim);
 					}
 				}

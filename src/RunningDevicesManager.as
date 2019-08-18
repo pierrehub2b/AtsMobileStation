@@ -1,5 +1,8 @@
 package 
 {
+	import device.AndroidDevice;
+	import device.Device;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -13,13 +16,11 @@ package
 	import mx.collections.ArrayCollection;
 	import mx.utils.StringUtil;
 	
+	import simulator.IosSimulator;
+	import simulator.Simulator;
+	
 	import spark.collections.Sort;
 	import spark.collections.SortField;
-	
-	import device.AndroidDevice;
-	import device.Device;
-	
-	import simulator.IosSimulator;
 	
 	public class RunningDevicesManager
 	{
@@ -62,7 +63,7 @@ package
 		}
 		
 		public function simulatorChanged(sim:IosSimulator):void{
-			if(sim.phase == IosSimulator.RUN){
+			if(sim.phase == Simulator.RUN){
 				collection.addItem(sim.device);
 			}else{
 				var dv:Device = findDevice(sim.id)

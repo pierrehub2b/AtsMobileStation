@@ -1,9 +1,10 @@
 package simulator
 {
+	import device.IosDevice;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
-	import flash.events.EventDispatcher;
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
@@ -13,30 +14,8 @@ package simulator
 	
 	import mx.utils.StringUtil;
 	
-	import device.IosDevice;
-	
-	public class IosSimulator extends EventDispatcher
+	public class IosSimulator extends Simulator
 	{
-		public static const STATUS_CHANGED:String = "statusChanged";
-		
-		public static const OFF:String = "off";
-		public static const WAIT:String = "wait";
-		public static const RUN:String = "run";
-		
-		public var id:String;
-		
-		[Bindable]
-		public var name:String;
-		
-		[Bindable]
-		public var version:String;
-		
-		[Bindable]
-		public var phase:String = OFF;
-		
-		[Bindable]
-		public var tooltip:String = "Start simulator";
-		
 		public var error:String = null;
 		private var output:String = "";
 		
@@ -68,7 +47,7 @@ package simulator
 			return new IosDevice(id, name + " (" + version +")", true, ipAddress);
 		}
 		
-		public function startStop():void{
+		override public function startStop():void{
 			
 			if(phase == OFF){
 				phase = WAIT;

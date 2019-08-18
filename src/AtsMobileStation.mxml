@@ -129,8 +129,8 @@
 						 filters="{RunningDeviceRenderer.dropShadowFilterMiddle}"/>
 			</s:HGroup>
 		</s:Group>
-		<s:Label fontStyle="italic" fontSize="11"
-				 text="{simulators.info}"/>
+		<s:Label fontStyle="italic" fontSize="11" top="36"
+				 text="{simulators.info}" paddingLeft="5"/>
 		<s:List width="100%" top="32" bottom="0"
 				alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
 				contentBackgroundAlpha="0.0" dataProvider="{simulators.collection}"

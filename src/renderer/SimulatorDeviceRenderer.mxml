@@ -7,15 +7,15 @@
 		<![CDATA[
 			import flash.filters.BitmapFilterQuality;
 			
+			import simulator.IosSimulator;
+			import simulator.Simulator;
+			
 			import spark.filters.DropShadowFilter;
 			
-			import simulator.IosSimulator;
-			
 			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
-
 			
 			[Bindable]
-			private var sim:IosSimulator;
+			private var sim:Simulator;
 			
 			override protected function get hovered():Boolean { return false; }
 			//override protected function get down():Boolean { return false; }
@@ -25,7 +25,10 @@
 			override public function set data(value:Object):void
 			{
 				super.data = value;
-				this.sim = value as IosSimulator;
+				this.sim = value as Simulator;
+				if(this.sim is IosSimulator){
+					osBitmap.source = "/assets/icons/20/ios.png";
+				}
 			}
 			
 			protected function startStopButton_clickHandler(event:MouseEvent):void
@@ -35,7 +38,7 @@
 			
 			protected function button_rollOverHandler(event:MouseEvent):void
 			{
-				if(sim.phase == IosSimulator.RUN){
+				if(sim.phase == Simulator.RUN){
 					offButton.visible = true;
 				}
 			}
@@ -63,9 +66,8 @@
 		
 		<s:Spacer width="100%"/>
 		
-
 		<s:Group buttonMode="true" click="startStopButton_clickHandler(event)"
-				 toolTip="{sim.tooltip}" enabled="{sim.phase!=IosSimulator.WAIT}"
+				 toolTip="{sim.tooltip}" enabled="{sim.phase!=Simulator.WAIT}"
 				 rollOver="button_rollOverHandler(event)" rollOut="button_rollOutHandler(event)">
 			<s:BitmapImage id="iconStatus" source="assets/icons/24/{sim.phase}.png" smooth="true" smoothingQuality="high"/>
 			<s:BitmapImage id="offButton" source="assets/icons/24/shutdown.png" smooth="true" smoothingQuality="high"
@@ -73,5 +75,6 @@
 		</s:Group>
 	</s:HGroup>
 
-	
+	<s:BitmapImage id="osBitmap" left="8" top="16" width="16" height="16"
+				   source="assets/icons/20/android.png" verticalCenter="0"/>
 </s:ItemRenderer>
