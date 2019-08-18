@@ -17,7 +17,7 @@ package device
 		public var ip:String;
 		
 		[Bindable]
-		public var port:String = "8080";
+		public var port:String = "";
 		
 		[Bindable]
 		public var error:String = null;

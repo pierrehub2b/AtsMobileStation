@@ -10,6 +10,8 @@ package device
 	{
 		private var output:String = "";
 		
+		private static const startInfo:RegExp = /atsios started on port (\d+)/
+		
 		private var testingProcess:NativeProcess = new NativeProcess();
 		private var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 		
@@ -27,12 +29,12 @@ package device
 			installing()
 			
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
-			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
+			//testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
 			
 			procInfo.executable = xcodeBuildExec;
 			procInfo.workingDirectory = iosDriverProjectFolder;
-			procInfo.arguments = new <String>["-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test", "-quiet"];
+			procInfo.arguments = new <String>["-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test"];
 			testingProcess.start(procInfo);
 		}
 		
@@ -43,7 +45,7 @@ package device
 		}
 				
 		protected function onTestingExit(event:NativeProcessExitEvent):void{
-			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
+			//testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
 			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
 
 			trace("testing exit");//relaunch testing ...
@@ -54,7 +56,13 @@ package device
 		protected function onTestingOutput(event:ProgressEvent):void
 		{
 			var data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
-			trace("test output -> " + data);
+			//trace("test output -> " + data);
+			
+			var find:Array = startInfo.exec(data);
+			if(find != null){
+				port = find[1];
+				started();
+			}
 		}
 		
 		protected function onTestingError(event:ProgressEvent):void
@@ -62,7 +70,7 @@ package device
 			var data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
 			trace("test error -> " + data);
 			if(data.indexOf("Continuing with testing") != -1){
-				started();
+				
 			}
 		}
 	}
