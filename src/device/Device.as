@@ -53,10 +53,13 @@ package device
 		protected function installing():void{
 			status = INSTALL;
 			tooltip = "Installing driver ...";
+			trace("Install driver ...");
 		}
 		
-		protected function starting():void{
-			tooltip = "Starting driver ...";
+		protected function started():void{
+			status = READY
+			tooltip = "Driver started and ready";
+			trace("Driver started");
 		}
 
 		public function dispose():Boolean{
