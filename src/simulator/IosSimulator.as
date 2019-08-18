@@ -78,9 +78,9 @@ package simulator
 				procInfo.workingDirectory = File.userDirectory;
 				
 				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
-				process.addEventListener(NativeProcessExitEvent.EXIT, onEraseExit, false, 0, true);
+				process.addEventListener(NativeProcessExitEvent.EXIT, onBootExit, false, 0, true);
 
-				procInfo.arguments = new <String>["simctl", "erase", id];
+				procInfo.arguments = new <String>["simctl", "bootstatus", id, "-b"];
 				process.start(procInfo);
 			}else{
 				
@@ -106,17 +106,6 @@ package simulator
 		protected function onOutputErrorShell(event:ProgressEvent):void
 		{
 			trace(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
-		}
-		
-		protected function onEraseExit(event:NativeProcessExitEvent):void{
-			
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onEraseExit);
-			process.addEventListener(NativeProcessExitEvent.EXIT, onBootExit, false, 0, true);
-			
-			trace("Simulator image erased, booting simulator ...")
-			
-			procInfo.arguments = new <String>["simctl", "bootstatus", id, "-b"];
-			process.start(procInfo);
 		}
 		
 		protected function onBootExit(event:NativeProcessExitEvent):void{
