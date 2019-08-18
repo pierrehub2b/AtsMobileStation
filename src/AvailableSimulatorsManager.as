@@ -13,6 +13,7 @@ package
 	
 	import mx.collections.ArrayCollection;
 	import mx.utils.StringUtil;
+	
 	import simulator.IosSimulator;
 	
 	public class AvailableSimulatorsManager extends EventDispatcher
@@ -26,6 +27,9 @@ package
 		
 		private var output:String = "";
 		
+		[Bindable]
+		public var info:String = "Loading available simulators ...";
+			
 		[Bindable]
 		public var collection:ArrayCollection = new ArrayCollection();
 		
@@ -69,6 +73,12 @@ package
 						collection.addItem(sim);
 					}
 				}
+			}
+			
+			if(collection.length == 0){
+				info = "No simulators found !\n(Xcode may not be installed on this station !)"
+			}else{
+				info = "";
 			}
 		}
 		
