@@ -10,8 +10,6 @@
 		<![CDATA[
 			import com.greensock.TweenMax;
 			
-			import simulator.SimulatorDevice;
-			
 			import event.SimulatorEvent;
 			
 			import flash.filters.BitmapFilterQuality;
