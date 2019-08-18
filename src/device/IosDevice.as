@@ -33,6 +33,7 @@ package device
 			
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
+			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
 			
 			procInfo.executable = xcodeBuildExec;
 			procInfo.workingDirectory = iosDriverProjectFolder;
@@ -56,12 +57,21 @@ package device
 			trace("testing exit");
 		}
 		
+		protected function onTestingOutput(event:ProgressEvent):void
+		{
+			var data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
+			trace("test output -> " + data);
+
+		}
+
+		
 		protected function onTestingError(event:ProgressEvent):void
 		{
 			var data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
 			trace("test error -> " + data);
 			if(data.indexOf("Continuing with testing") != -1){
-				if(isSimulator){
+				status = READY
+				/*if(isSimulator){
 					starting();
 					
 					phpProcess = new NativeProcess();
@@ -77,7 +87,7 @@ package device
 					phpProcess.start(phpProcessInfo);
 				}else{
 					status = READY
-				}
+				}*/
 			}
 		}
 		
