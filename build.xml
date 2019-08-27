@@ -91,7 +91,7 @@
 	    	<arg value="${PASSWORD}"/>
 	        <arg value="-target"/> 
 	        <arg value="native"/>
-	    	<arg value="../release/${APP_NAME}.exe"/>
+	    	<arg value="../release/${APP_NAME}"/>
 	        <arg value="${APP_NAME}-app.xml"/> 
 	    	<arg value="."/> 
 	    </java> 

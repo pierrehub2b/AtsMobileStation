@@ -1,0 +1,25 @@
+PODS:
+  - BlueSocket (1.0.48)
+  - Embassy (4.1.0)
+  - EnvoyAmbassador (4.0.5):
+    - Embassy (~> 4.0)
+
+DEPENDENCIES:
+  - BlueSocket
+  - Embassy
+  - EnvoyAmbassador
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - BlueSocket
+    - Embassy
+    - EnvoyAmbassador
+
+SPEC CHECKSUMS:
+  BlueSocket: ff75aa92edb147aebf43ce7b20bf7a3693f8dcca
+  Embassy: 296c51c4b16b8377b413f48f413a99aa736adc22
+  EnvoyAmbassador: 21cef10e70d003801c68ba5281948684a4e25486
+
+PODFILE CHECKSUM: 102c1f2fa740ea65c3d899c94be698f2ab91c032
+
+COCOAPODS: 1.7.5

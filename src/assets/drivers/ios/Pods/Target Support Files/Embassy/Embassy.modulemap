@@ -1,0 +1,6 @@
+module Embassy {
+  umbrella header "Embassy-umbrella.h"
+
+  export *
+  module * { export * }
+}

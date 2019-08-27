@@ -1,0 +1,6 @@
+module Pods_atsiosUITests {
+  umbrella header "Pods-atsiosUITests-umbrella.h"
+
+  export *
+  module * { export * }
+}

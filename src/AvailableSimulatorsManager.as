@@ -29,7 +29,7 @@ package
 		private var output:String = "";
 		
 		[Bindable]
-		public var info:String = "Loading available simulators ...";
+		public var info:String = "Loading simulators, please wait ...";
 			
 		[Bindable]
 		public var collection:ArrayCollection = new ArrayCollection();

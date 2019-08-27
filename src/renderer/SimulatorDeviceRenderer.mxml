@@ -75,6 +75,6 @@
 		</s:Group>
 	</s:HGroup>
 
-	<s:BitmapImage id="osBitmap" left="8" top="16" width="16" height="16"
-				   source="assets/icons/20/android.png" verticalCenter="0"/>
+	<s:BitmapImage id="osBitmap" left="10" width="18" height="18" smooth="true" smoothingQuality="high"
+				   source="assets/icons/20/android.png" verticalCenter="-1"/>
 </s:ItemRenderer>

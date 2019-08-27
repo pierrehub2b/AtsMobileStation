@@ -10,7 +10,7 @@ package device
 	{
 		private var output:String = "";
 		
-		private static const startInfo:RegExp = /atsios started on port (\d+)/
+		private static const startInfo:RegExp = /ATSDRIVER_DRIVER_HOST=(.*):(\d+)/
 		
 		private var testingProcess:NativeProcess = new NativeProcess();
 		private var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
@@ -21,7 +21,7 @@ package device
 		public function IosDevice(id:String, name:String, isSimulator:Boolean, ip:String)
 		{
 			this.id = id;
-			this.ip = ip;
+			this.ip = "0.0.0.0";
 			this.modelName = name;
 			this.manufacturer = "Apple";
 			this.isSimulator = isSimulator;
@@ -60,7 +60,8 @@ package device
 			
 			var find:Array = startInfo.exec(data);
 			if(find != null){
-				port = find[1];
+				ip = find[1];
+				port = find[2];
 				started();
 			}
 		}

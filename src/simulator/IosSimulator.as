@@ -33,17 +33,17 @@ package simulator
 		}
 		
 		public function get device():IosDevice{
+			var ipAddress:String = "---";
 			var netInterfaces:Vector.<NetworkInterface> = NetworkInfo.networkInfo.findInterfaces();
+			if(netInterfaces.length > 1){
 			var addresses:Vector.<InterfaceAddress> = netInterfaces[1].addresses;
-			
-			var ipAddress:String = null;
 			for each(var intAddress:InterfaceAddress in addresses){
 				ipAddress = intAddress.address;
 				if(intAddress.ipVersion == "IPv4"){
 					break;
 				}
 			}
-			
+			}
 			return new IosDevice(id, name + " (" + version +")", true, ipAddress);
 		}
 		
