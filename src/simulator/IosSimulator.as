@@ -25,12 +25,13 @@ package simulator
 		private static const xcrunExec:File = new File("/usr/bin/xcrun");
 		private static const openExec:File = new File("/usr/bin/open");
 		
-		public function IosSimulator(id:String, name:String, version:String, isBooted: Boolean)
+		public function IosSimulator(id:String, name:String, version:String, isBooted: Boolean, isSimulator: Boolean)
 		{
 			this.id = id;
 			this.name = StringUtil.trim(name);
 			this.version = version;
 			this.phase = isBooted ? RUN : OFF;
+			this.isSimulator = isSimulator;
 			if(isBooted) {
 				tooltip = "Shutdown simulator";
 			}
@@ -48,7 +49,7 @@ package simulator
 				}
 			}
 			}
-			return new IosDevice(id, name + " (" + version +")", true, ipAddress);
+			return new IosDevice(id, name + " (" + version +")", isSimulator, ipAddress);
 		}
 		
 		override public function startStop():void{

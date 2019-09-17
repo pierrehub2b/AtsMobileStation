@@ -58,7 +58,7 @@ package
 				
 			}else{
 				this.adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
-				startAdbProcess();
+				startAdbProcess(); 
 			}
 		}
 		

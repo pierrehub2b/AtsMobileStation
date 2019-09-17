@@ -24,6 +24,9 @@ package simulator
 		[Bindable]
 		public var tooltip:String = "Start simulator";
 		
+		[Bindable]
+		public var isSimulator:Boolean = true;
+		
 		public function startStop():void{
 			
 		}
