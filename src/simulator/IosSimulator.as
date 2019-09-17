@@ -1,7 +1,5 @@
 package simulator
 {
-	import device.IosDevice;
-	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -14,6 +12,8 @@ package simulator
 	
 	import mx.utils.StringUtil;
 	
+	import device.IosDevice;
+	
 	public class IosSimulator extends Simulator
 	{
 		public var error:String = null;
@@ -25,11 +25,15 @@ package simulator
 		private static const xcrunExec:File = new File("/usr/bin/xcrun");
 		private static const openExec:File = new File("/usr/bin/open");
 		
-		public function IosSimulator(id:String, name:String, version:String)
+		public function IosSimulator(id:String, name:String, version:String, isBooted: Boolean)
 		{
 			this.id = id;
 			this.name = StringUtil.trim(name);
 			this.version = version;
+			this.phase = isBooted ? RUN : OFF;
+			if(isBooted) {
+				tooltip = "Shutdown simulator";
+			}
 		}
 		
 		public function get device():IosDevice{
@@ -61,8 +65,7 @@ package simulator
 
 				procInfo.arguments = new <String>["simctl", "bootstatus", id, "-b"];
 				process.start(procInfo);
-			}else{
-				
+			} else{
 				phase = WAIT;
 				tooltip = "Simulator is terminating ...";
 				dispatchEvent(new Event(STATUS_CHANGED));
