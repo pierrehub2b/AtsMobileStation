@@ -97,15 +97,14 @@ package
 			arrayInstrument.removeAt(0)
 			for each(var line:String in arrayInstrument){
 				var isPhysicalDevice: Boolean = line.indexOf("(Simulator)") == -1;
-				if(line.indexOf("iPhone") == 0/* || isPhysicalDevice*/) {
+				if(line.indexOf("iPhone") == 0 /*|| isPhysicalDevice*/) {
 					var data:Array = regex.exec(line);
 					if(data != null){
 						var currentElement:SimCtlDevice = getByUdid(simctl, data[3]);
 						if((currentElement != null && currentElement.getIsAvailable()) || isPhysicalDevice) {
 							var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : isPhysicalDevice;
-							var sim:IosSimulator = new IosSimulator(currentElement.getUdid(), currentElement.getName(), data[2], isRunning, !isPhysicalDevice);
+							var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], isRunning, !isPhysicalDevice);
 							sim.addEventListener(Simulator.STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
-							
 							if(!isPhysicalDevice) {
 								collection.addItem(sim);
 							}
