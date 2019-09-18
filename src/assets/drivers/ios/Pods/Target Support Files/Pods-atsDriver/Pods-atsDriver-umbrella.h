@@ -11,6 +11,6 @@
 #endif
 
 
-FOUNDATION_EXPORT double Pods_atsiosUITestsVersionNumber;
-FOUNDATION_EXPORT const unsigned char Pods_atsiosUITestsVersionString[];
+FOUNDATION_EXPORT double Pods_atsDriverVersionNumber;
+FOUNDATION_EXPORT const unsigned char Pods_atsDriverVersionString[];
 

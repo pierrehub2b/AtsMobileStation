@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "closure #1 in atsDriver.setupWebApp():atsDriver.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "UIApplication.shared.description">
+            </PersistentString>
+            <PersistentString
+               value = "XCUIApplication.init(bundleIdentifier: &quot;com.apple.SiriViewService&quot;).state.rawValue">
+            </PersistentString>
+            <PersistentString
+               value = "siri.state">
+            </PersistentString>
+            <PersistentString
+               value = "app.state">
+            </PersistentString>
+            <PersistentString
+               value = "XCUIDevice.shared.siriService.activate(voiceRecognitionText: &quot;Open \(parameters[1])&quot;)">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "UIApplication.topMostViewController():topMostViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.keyWindow?">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "atsDriver.convertIntoJSONString(arrayObject:):atsDriver.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "json.count">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "specialized closure #2 in closure #1 in atsDriver.setupWebApp():atsDriver.swift">
+      </ContextState>
+      <ContextState
+         contextName = "atsDriver.getChildrens(currentLevel:currentIndex:endedIndex:leveledTable:parentFrame:):atsDriver.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "parentFrame.height">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>

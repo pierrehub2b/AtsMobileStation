@@ -1,0 +1,199 @@
+//
+//  GetEnumValuesFunctions.swift
+//  atsDriver
+//
+//  Created by Laura Chiudini on 27/08/2019.
+//  Copyright © 2019 CAIPTURE. All rights reserved.
+//
+
+import Foundation
+
+func getStateStringValue(rawValue: UInt) -> String {
+    switch rawValue {
+    case 0:
+        return "unknown"
+    case 1:
+        return "notRunning"
+    case 2:
+        return "runningBackgroundSuspended"
+    case 3:
+        return "runningBackground"
+    case 4:
+        return "runningForeground"
+    default:
+        return "unknown"
+    }
+}
+
+func getComponentTypeStringValue(rawValue: UInt) -> String {
+    switch rawValue {
+    case 0:
+        return "any"
+    case 1:
+        return "other"
+    case 2:
+        return "application"
+    case 3:
+        return "group"
+    case 4:
+        return "window"
+    case 5:
+        return "sheet"
+    case 6:
+        return "drawer"
+    case 7:
+        return "alert"
+    case 8:
+        return "dialog"
+    case 9:
+        return "button"
+    case 10:
+        return "radioButton"
+    case 11:
+        return "radioGrouo"
+    case 12:
+        return "checkBox"
+    case 13:
+        return "disclosureTriangle"
+    case 14:
+        return "popUpButton"
+    case 15:
+        return "comboBox"
+    case 16:
+        return "menuButton"
+    case 17:
+        return "toolbarButton"
+    case 18:
+        return "popOver"
+    case 19:
+        return "keyboard"
+    case 20:
+        return "key"
+    case 21:
+        return "navigationBar"
+    case 22:
+        return "tabBar"
+    case 23:
+        return "tabGroup"
+    case 24:
+        return "toolBar"
+    case 25:
+        return "statusBar"
+    case 26:
+        return "table"
+    case 27:
+        return "tableRow"
+    case 28:
+        return "tableColumn"
+    case 29:
+        return "outline"
+    case 30:
+        return "outlineRow"
+    case 31:
+        return "browser"
+    case 32:
+        return "collectionView"
+    case 33:
+        return "slider"
+    case 34:
+        return "pageIndicator"
+    case 35:
+        return "progressIndicator"
+    case 36:
+        return "activityIndicator"
+    case 37:
+        return "segmentedControl"
+    case 38:
+        return "picker"
+    case 39:
+        return "pickerWheel"
+    case 40:
+        return "switch"
+    case 41:
+        return "toggle"
+    case 42:
+        return "link"
+    case 43:
+        return "image"
+    case 44:
+        return "icon"
+    case 45:
+        return "searchField"
+    case 46:
+        return "scrollView"
+    case 47:
+        return "scrollBar"
+    case 48:
+        return "staticText"
+    case 49:
+        return "textField"
+    case 50:
+        return "secureTextField"
+    case 51:
+        return "datePicker"
+    case 52:
+        return "textView"
+    case 53:
+        return "menu"
+    case 54:
+        return "menuItem"
+    case 55:
+        return "menuBar"
+    case 56:
+        return "menuBarItem"
+    case 57:
+        return "map"
+    case 58:
+        return "webView"
+    case 59:
+        return "incrementArrow"
+    case 60:
+        return "decrementArrow"
+    case 61:
+        return "timeline"
+    case 62:
+        return "ratingIndicator"
+    case 63:
+        return "valueIndicator"
+    case 64:
+        return "splitGroup"
+    case 65:
+        return "splitter"
+    case 66:
+        return "relevanceIndicator"
+    case 67:
+        return "colorWell"
+    case 68:
+        return "helpTag"
+    case 69:
+        return "matte"
+    case 70:
+        return "dockItem"
+    case 71:
+        return "ruler"
+    case 72:
+        return "rulerMarker"
+    case 73:
+        return "grid"
+    case 74:
+        return "levelIndicator"
+    case 75:
+        return "cell"
+    case 76:
+        return "layoutArea"
+    case 77:
+        return "layoutItem"
+    case 78:
+        return "handle"
+    case 79:
+        return "stepper"
+    case 80:
+        return "tab"
+    case 81:
+        return "touchBar"
+    case 82:
+        return "statusItem"
+    default:
+        return "any"
+    }
+}

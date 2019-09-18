@@ -16,7 +16,7 @@ package device
 		private var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 		
 		private static const iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
-		private static const xcodeBuildExec:File = new File("/usr/bin/xcodebuild");
+		private static const xcodeBuildExec:File = new File("/usr/bin/env");
 		
 		public function IosDevice(id:String, name:String, isSimulator:Boolean, ip:String)
 		{
@@ -29,12 +29,12 @@ package device
 			installing()
 			
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
-			//testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
+			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
 			
 			procInfo.executable = xcodeBuildExec;
 			procInfo.workingDirectory = iosDriverProjectFolder;
-			procInfo.arguments = new <String>["-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test"];
+			procInfo.arguments = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test-without-building"];
 			testingProcess.start(procInfo);
 		}
 		
@@ -45,7 +45,7 @@ package device
 		}
 				
 		protected function onTestingExit(event:NativeProcessExitEvent):void{
-			//testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
+			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
 			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
 
 			trace("testing exit");//relaunch testing ...

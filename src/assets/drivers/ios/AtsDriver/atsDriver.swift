@@ -1,306 +1,190 @@
+//Licensed to the Apache Software Foundation (ASF) under one
+//or more contributor license agreements.  See the NOTICE file
+//distributed with this work for additional information
+//    regarding copyright ownership.  The ASF licenses this file
+//to you under the Apache License, Version 2.0 (the
+//"License"); you may not use this file except in compliance
+//with the License.  You may obtain a copy of the License at
 //
-//  atsDriver.swift
-//  atsDriver
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Copyright © 2019 atsDriver. All rights reserved.
-//
+//Unless required by applicable law or agreed to in writing,
+//software distributed under the License is distributed on an
+//"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//KIND, either express or implied.  See the License for the
+//specific language governing permissions and limitations
+//under the License.
 
 import Foundation
 import UIKit
 import XCTest
 import Embassy
 import EnvoyAmbassador
+import Socket
 
-struct UIElement: Codable {
-    let id: String
-    let tag: String
-    let clickable: Bool
-    let x: Double
-    let y: Double
-    let width: Double
-    let height: Double
-    var children: [UIElement]?
-    var attributes: [String:String]
-    let channelY: Double?
-    let channelHeight: Double?
-}
-
-enum actionsEnum: String {
-    case DRIVER = "driver"
-    case APP = "app"
-    case START = "start"
-    case STOP = "stop"
-    case SWITCH = "switch"
-    case CAPTURE = "capture"
-    case ELEMENT = "element"
-    case TAP = "tap"
-    case INPUT = "input"
-    case SWIPE = "swipe"
-    case BUTTON = "button"
-    case INFO = "info"
-    case QUIT = "quit"
-    case EMPTY = "&empty;"
-}
-
-enum deviceButtons: String {
-    case HOME = "home"
-    case SOUNDUP = "soundup"
-    case SOUNDDOWN = "sounddown"
-    case SILENTSWITCH = "silentswitch"
-    case LOCK = "lock"
-    case ENTER = "enter"
-    case RETURN = "return"
-    case ORIENTATION = "orientation"
-}
-
-struct Frame {
-    let label: String
-    let identifier: String
-    let placeHolderValue: String
-    let x: Double
-    let y: Double
-    let width: Double
-    let height: Double
-}
+public var app: XCUIApplication!
 
 class atsDriver: XCTestCase {
     
+    let udpThread = DispatchQueue(label: "udpQueue", qos: .userInitiated)
+    var domThread = DispatchQueue(label: "domQueue", qos: .userInitiated)
     var port = 8080
-    var app: XCUIApplication!
-    var portUdp: Int = 47633
-    var udpServer: UDPServer!
     var currentAppIdentifier: String = ""
-    var allElements: UIElement? = nil
     var resultElement: [String: Any] = [:]
     var captureStruct: String = ""
     var flatStruct: [String: Frame] = [:]
     var thread: Thread! = nil
-    
+    var rootNode: UIElement? = nil
+    var udpPort: Int = 47633
+    var continueRunningValue = true
+    var connectedSockets = [Int32: Socket]()
+    var imgView: Data? = nil
+    var lastCapture: TimeInterval = NSDate().timeIntervalSince1970
+    var leveledTableCount = 0
+    var tcpSocket = socket(AF_INET, SOCK_STREAM, 0)
+    var cachedDescription: String = ""
+    let offsetYShift = 33.0
     let osVersion = UIDevice.current.systemVersion
-    let model = UIDevice.current.name
+    let model = UIDevice.modelName.replacingOccurrences(of: "Simulator ", with: "")
+    let simulator = UIDevice.modelName.range(of: "Simulator", options: .caseInsensitive) != nil
     let uid = UIDevice.current.identifierForVendor!.uuidString
-    let deviceWidth = UIScreen.main.bounds.width
-    let deviceHeight = UIScreen.main.bounds.height
-
+    let bluetoothName = UIDevice.current.name
+    var deviceWidth = 1.0
+    var deviceHeight = 1.0
+    let maxHeight = 800.0
+    var ratioScreen = 1.0
+    var isAlert = false
+    
     var continueExecution = true
     
     var applicationControls =
         [
-         "any","other","application","group","window","sheet","drawer","alert","dialog","button","radioButton","radioGroup","checkbox","disclosureTriangle","popUpButton","comboBox","menuButton","toolbarButton","popOver",
-         "keyboard","key","navigationBar","tabBar","tabGroup","toolBar","statusBar","table","tableRow","tableColumn","outline","outlineRow","browser","collectionView","slider","pageIndicator","progressIndicator",
-         "activityIndicator","segmentedControl","picker","pickerWheel","switch","toogle","link","image","icon","searchField","scrollView","scrollBar","staticText","textField","secureTextField","datePicker","textView",
-         "menu","menuItem","menuBar","menuBarItem","map","webView","incrementArrow","decrementArrow","timeline","ratingIndicator","valueIndicator","splitGroup","splitter","relevanceIndicator","colorWell","helpTag","matte",
-         "dockItem","ruler","rulerMarker","grid","levelIndicator","cell","layoutArea","layoutItem","handle","stepper","tab","touchBar","statusItem"
-        ]
+            "any","other","application","group","window","sheet","drawer","alert","dialog","button","radioButton","radioGroup","checkbox","disclosureTriangle","popUpButton","comboBox","menuButton","toolbarButton","popOver",
+            "keyboard","key","navigationBar","tabBar","tabGroup","toolBar","statusBar","table","tableRow","tableColumn","outline","outlineRow","browser","collectionView","slider","pageIndicator","progressIndicator",
+            "activityIndicator","segmentedControl","picker","pickerWheel","switch","toogle","link","image","icon","searchField","scrollView","scrollBar","staticText","textField","secureTextField","datePicker","textView",
+            "menu","menuItem","menuBar","menuBarItem","map","webView","incrementArrow","decrementArrow","timeline","ratingIndicator","valueIndicator","splitGroup","splitter","relevanceIndicator","colorWell","helpTag","matte",
+            "dockItem","ruler","rulerMarker","grid","levelIndicator","cell","layoutArea","layoutItem","handle","stepper","tab","touchBar","statusItem"
+    ]
     
-    //var udpThread: Thread!
-
     override func setUp() {
         super.setUp()
-        
+        continueAfterFailure = true
+        udpThread.async {
+            self.udpStart()
+        }
         
         XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
         
-        self.thread = Thread(target: self, selector: Selector(("udpStart")), object: nil)
-        setupWebApp()
-        setupApp()
+        for i in 8080..<65000 {
+            let (isFree, _) = checkTcpPortForListen(port: UInt16(i))
+            if (isFree == true && i != self.udpPort) {
+                self.port = i
+                break;
+            }
+        }
         
-
+        self.setupWebApp()
+        self.setupApp()
     }
     
     func udpStart(){
-        self.udpServer = UDPServer(port: self.portUdp)
-        print("Swift Echo Server Sample")
-        print("Connect with a command line window by entering 'telnet ::1 \(portUdp)'")
+        for i in 60000..<65000 {
+            let (isFree, _) = checkTcpPortForListen(port: UInt16(i))
+            if isFree == true {
+                self.udpPort = i
+                break;
+            }
+        }
         
-        self.udpServer.run()
+        do {
+            var data = Data()
+            let socket = try Socket.create(family: .inet, type: .datagram, proto: .udp)
+            
+            repeat {
+                let currentConnection = try socket.listen(forMessage: &data, on: self.udpPort)
+                self.addNewConnection(socket: socket, currentConnection: currentConnection)
+            } while true
+        } catch let error {
+            guard let socketError = error as? Socket.Error else {
+                print("Unexpected error...")
+                return
+            }
+            print("Error on socket instance creation: \(socketError.description)")
+        }
     }
     
-    func getEnumStringValue(rawValue: UInt) -> String {
-        switch rawValue {
-        case 0:
-            return "any"
-        case 1:
-            return "other"
-        case 2:
-            return "application"
-        case 3:
-            return "group"
-        case 4:
-            return "window"
-        case 5:
-            return "sheet"
-        case 6:
-            return "drawer"
-        case 7:
-            return "alert"
-        case 8:
-            return "dialog"
-        case 9:
-            return "button"
-        case 10:
-            return "radioButton"
-        case 11:
-            return "radioGrouo"
-        case 12:
-            return "checkBox"
-        case 13:
-            return "disclosureTriangle"
-        case 14:
-            return "popUpButton"
-        case 15:
-            return "comboBox"
-        case 16:
-            return "menuButton"
-        case 17:
-            return "toolbarButton"
-        case 18:
-            return "popOver"
-        case 19:
-            return "keyboard"
-        case 20:
-            return "key"
-        case 21:
-            return "navigationBar"
-        case 22:
-            return "tabBar"
-        case 23:
-            return "tabGroup"
-        case 24:
-            return "toolBar"
-        case 25:
-            return "statusBar"
-        case 26:
-            return "table"
-        case 27:
-            return "tableRow"
-        case 28:
-            return "tableColumn"
-        case 29:
-            return "outline"
-        case 30:
-            return "outlineRow"
-        case 31:
-            return "browser"
-        case 32:
-            return "collectionView"
-        case 33:
-            return "slider"
-        case 34:
-            return "pageIndicator"
-        case 35:
-            return "progressIndicator"
-        case 36:
-            return "activityIndicator"
-        case 37:
-            return "segmentedControl"
-        case 38:
-            return "picker"
-        case 39:
-            return "pickerWheel"
-        case 40:
-            return "switch"
-        case 41:
-            return "toggle"
-        case 42:
-            return "link"
-        case 43:
-            return "image"
-        case 44:
-            return "icon"
-        case 45:
-            return "searchField"
-        case 46:
-            return "scrollView"
-        case 47:
-            return "scrollBar"
-        case 48:
-            return "staticText"
-        case 49:
-            return "textField"
-        case 50:
-            return "secureTextField"
-        case 51:
-            return "datePicker"
-        case 52:
-            return "textView"
-        case 53:
-            return "menu"
-        case 54:
-            return "menuItem"
-        case 55:
-            return "menuBar"
-        case 56:
-            return "menuBarItem"
-        case 57:
-            return "map"
-        case 58:
-            return "webView"
-        case 59:
-            return "incrementArrow"
-        case 60:
-            return "decrementArrow"
-        case 61:
-            return "timeline"
-        case 62:
-            return "ratingIndicator"
-        case 63:
-            return "valueIndicator"
-        case 64:
-            return "splitGroup"
-        case 65:
-            return "splitter"
-        case 66:
-            return "relevanceIndicator"
-        case 67:
-            return "colorWell"
-        case 68:
-            return "helpTag"
-        case 69:
-            return "matte"
-        case 70:
-            return "dockItem"
-        case 71:
-            return "ruler"
-        case 72:
-            return "rulerMarker"
-        case 73:
-            return "grid"
-        case 74:
-            return "levelIndicator"
-        case 75:
-            return "cell"
-        case 76:
-            return "layoutArea"
-        case 77:
-            return "layoutItem"
-        case 78:
-            return "handle"
-        case 79:
-            return "stepper"
-        case 80:
-            return "tab"
-        case 81:
-            return "touchBar"
-        case 82:
-            return "statusItem"
-        default:
-            return "any"
+    func addNewConnection(socket: Socket, currentConnection: (bytesRead: Int, address: Socket.Address?)) {
+        let bufferSize = 4000
+        var offset = 0
+        
+        do {
+            let workItem = DispatchWorkItem {
+                self.refreshView()
+            }
+            
+            DispatchQueue.init(label: "getImg").async(execute: workItem)
+            workItem.wait()
+            
+            let img = self.imgView
+            if(img != nil) {
+                repeat {
+                    let thisChunkSize = ((img!.count - offset) > bufferSize) ? bufferSize : (img!.count - offset);
+                    var chunk = img!.subdata(in: offset..<offset + thisChunkSize)
+                    offset += thisChunkSize
+                    let uint32Offset = UInt32(offset - thisChunkSize)
+                    let uint32RemainingData = UInt32(img!.count - offset)
+                    
+                    let offSetTable = self.toByteArrary(value: uint32Offset)
+                    let remainingDataTable = self.toByteArrary(value: uint32RemainingData)
+                    
+                    chunk.insert(contentsOf: offSetTable + remainingDataTable, at: 0)
+                    
+                    try socket.write(from: chunk, to: currentConnection.address!)
+                    
+                } while (offset < img!.count);
+            }
         }
+        catch let error {
+            guard let socketError = error as? Socket.Error else {
+                print("Unexpected error by connection at \(socket.remoteHostname):\(socket.remotePort)...")
+                return
+            }
+            if self.continueExecution {
+                print("Error reported by connection at \(socket.remoteHostname):\(socket.remotePort):\n \(socketError.description)")
+            }
+        }
+        
+    }
+    
+    func refreshView() {
+        let img = self.imageResize(with: XCUIScreen.main.screenshot().image)
+        self.imgView = UIImageJPEGRepresentation(img, 0)
+    }
+    
+    func imageResize(with image: UIImage) -> UIImage {
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: self.deviceWidth, height: self.deviceHeight), true, 0.85)
+        image.draw(in: CGRect(x: 0, y: 0, width: self.deviceWidth, height: self.deviceHeight))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return newImage ?? UIImage()
+    }
+    
+    func toByteArrary<T>(value: T)  -> [UInt8] where T: UnsignedInteger, T: FixedWidthInteger{
+        var bigEndian = value.bigEndian
+        let count = MemoryLayout<T>.size
+        let bytePtr = withUnsafePointer(to: &bigEndian) {
+            $0.withMemoryRebound(to: UInt8.self, capacity: count) {
+                UnsafeBufferPointer(start: $0, count: count)
+            }
+        }
+        
+        return Array(bytePtr)
     }
     
     // setup the Embassy web server for testing
     private func setupWebApp() {
         
         let loop = try! SelectorEventLoop(selector: try! KqueueSelector())
-        
-        for i in 8080..<65000 {
-            let (isFree, _) = checkTcpPortForListen(port: UInt16(i))
-            if isFree == true {
-                self.port = i
-                break;
-            }
-        }
         
         let server = DefaultHTTPServer(eventLoop: loop, interface: "0.0.0.0", port: self.port) {
             (
@@ -332,254 +216,317 @@ class atsDriver: XCTestCase {
                 self.resultElement["message"] = "unknow command"
             } else {
                 switch action {
-                    case actionsEnum.DRIVER.rawValue:
-                        if(parameters.count > 0) {
-                            if(actionsEnum.START.rawValue == parameters[0]) {
-                                XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
-                                XCUIDevice.shared.press(.home)
-                                
-                                self.driverInfoBase()
-                                self.resultElement["status"] = 0
-                                self.resultElement["screenCapturePort"] = 47633
-                                self.thread.start()
-                                
-                            } else {
-                                if(actionsEnum.STOP.rawValue == parameters[0]) {
-                                    if(self.app != nil){
-                                        self.app.terminate()
-                                        self.resultElement["status"] = 0
-                                        self.resultElement["message"] = "stop ats driver"
-                                    }
-                                    XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
-                                } else {
-                                    if(actionsEnum.QUIT.rawValue == parameters[0]) {
-                                        self.tearDown()
-                                        self.thread.cancel()
-                                        self.resultElement["status"] = 0
-                                        self.resultElement["message"] = "close ats driver"
-                                    } else if(actionsEnum.INFO.rawValue == parameters[0]) {
-                                        self.resultElement["status"] = 0
-                                        self.resultElement["message"] = "get info"
-                                    } else {
-                                        self.resultElement["message"] = "missiing driver action type " + parameters[0]
-                                        self.resultElement["status"] = -42
-                                    }
-                                }
-                            }
+                case ActionsEnum.DRIVER.rawValue:
+                    if(parameters.count > 0) {
+                        if(ActionsEnum.START.rawValue == parameters[0]) {
+                            self.continueExecution = true
+                            self.driverInfoBase(applyRatio: true)
+                            self.resultElement["status"] = 0
+                            self.resultElement["screenCapturePort"] = self.udpPort
                         } else {
-                            self.resultElement["message"] = "missing driver action"
-                            self.resultElement["status"] = -41
-                        }
-                        break
-                    case actionsEnum.BUTTON.rawValue:
-                        if(parameters.count > 0) {
-                            if(deviceButtons.HOME.rawValue == parameters[0]) {
-                                XCUIDevice.shared.press(.home)
-                                self.resultElement["status"] = 0
-                                self.resultElement["message"] = "press home button"
+                            if(ActionsEnum.STOP.rawValue == parameters[0]) {
+                                if(app != nil){
+                                    app.terminate()
+                                    self.continueExecution = false
+                                    XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
+                                    self.resultElement["status"] = 0
+                                    self.resultElement["message"] = "stop ats driver"
+                                }
                             } else {
-                                if(deviceButtons.ORIENTATION.rawValue == parameters[0]) {
-                                    if(XCUIDevice.shared.orientation == .landscapeLeft) {
-                                        XCUIDevice.shared.orientation = .portrait
-                                        self.resultElement["status"] = 0
-                                        self.resultElement["message"] = "orientation to portrait mode"
-                                    } else {
-                                        XCUIDevice.shared.orientation = .landscapeLeft
-                                        self.resultElement["status"] = 0
-                                        self.resultElement["message"] = "orientation to landscape mode"
-                                    }
+                                if(ActionsEnum.QUIT.rawValue == parameters[0]) {
+                                    app.terminate()
+                                    self.continueExecution = false
+                                    XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
+                                    self.resultElement["status"] = 0
+                                    self.resultElement["message"] = "close ats driver"
+                                } else if(ActionsEnum.INFO.rawValue == parameters[0]) {
+                                    self.resultElement["status"] = 0
+                                    self.resultElement["info"] = self.getAppInfo()
                                 } else {
-                                    self.resultElement["message"] = "unknow button " + parameters[0]
+                                    self.resultElement["message"] = "missiing driver action type " + parameters[0]
                                     self.resultElement["status"] = -42
                                 }
                             }
-                            
-                        } else {
-                            self.resultElement["message"] = "missing button action"
-                            self.resultElement["status"] = -41
                         }
-                        break
-                    case actionsEnum.CAPTURE.rawValue:
-                        self.allElements = nil
-                        self.flatStruct = [:]
-                        if(self.app == nil) {
-                            self.resultElement["message"] = "no app has been launched"
-                            self.resultElement["status"] = -99
-                            break
+                    } else {
+                        self.resultElement["message"] = "missing driver action"
+                        self.resultElement["status"] = -41
+                    }
+                    break
+                case ActionsEnum.BUTTON.rawValue:
+                    if(parameters.count > 0) {
+                        if(DeviceButtons.HOME.rawValue == parameters[0]) {
+                            XCUIDevice.shared.press(.home)
+                            self.resultElement["status"] = 0
+                            self.resultElement["message"] = "press home button"
+                        } else {
+                            if(DeviceButtons.ORIENTATION.rawValue == parameters[0]) {
+                                if(XCUIDevice.shared.orientation == .landscapeLeft) {
+                                    XCUIDevice.shared.orientation = .portrait
+                                    self.resultElement["status"] = 0
+                                    self.resultElement["message"] = "orientation to portrait mode"
+                                } else {
+                                    XCUIDevice.shared.orientation = .landscapeLeft
+                                    self.resultElement["status"] = 0
+                                    self.resultElement["message"] = "orientation to landscape mode"
+                                }
+                            } else {
+                                self.resultElement["message"] = "unknow button " + parameters[0]
+                                self.resultElement["status"] = -42
+                            }
                         }
                         
-                        let description = self.app.debugDescription
-                        var descriptionTable = description.split(separator: "\n")
+                    } else {
+                        self.resultElement["message"] = "missing button action"
+                        self.resultElement["status"] = -41
+                    }
+                    break
+                    
+                case ActionsEnum.CAPTURE2.rawValue:
+                    if(app == nil) {
+                        self.resultElement["message"] = "no app has been launched"
+                        self.resultElement["status"] = -99
+                        break
+                    }
+                    
+                    self.resultElement["message"] = "root_description"
+                    self.resultElement["status"] = 0
+                    self.resultElement["root"] = app.debugDescription
+                    
+                case ActionsEnum.CAPTURE.rawValue:
+                    if(app == nil) { 
+                        self.resultElement["message"] = "no app has been launched"
+                        self.resultElement["status"] = -99
+                        break
+                    }
+                    
+                    var description = app.debugDescription
+                    
+                    if(self.cachedDescription != description
+                        && self.cachedDescription.split(separator: "\n").count != description.split(separator: "\n").count){
+                        self.cachedDescription = description;
+                        
+                        description = description.replacingOccurrences(of: "'\n", with: "'⌘")
+                            .replacingOccurrences(of: "}}\n", with: "}}⌘")
+                            .replacingOccurrences(of: "Disabled\n", with: "Disabled⌘")
+                            .replacingOccurrences(of: "Selected\n", with: "Selected⌘")
+                            .replacingOccurrences(of: "\n    ", with: "⌘    ")
+                            .replacingOccurrences(of: "\n", with: " ")
+                        let descriptionTable = description.split(separator: "⌘")
                         var leveledTable: [(Int,String)] = [(Int,String)]()
-                        for index in 3...descriptionTable.count-8 {
+                        
+                        if(descriptionTable.count < 3) {
+                            break
+                        }
+                        self.isAlert = false
+                        for index in 0...descriptionTable.count-3 {
                             //no traitment of line that are not reference composants
-                            var currentLine = String(descriptionTable[index])
+                            let currentLine = String(descriptionTable[index])
                             var blankSpacesAtStart = 0
-                            for char in currentLine.characters.indices {
-                                if(currentLine[char] == " ") {
+                            for char in currentLine {
+                                if(char == " ") {
                                     blankSpacesAtStart += 1
                                 } else {
                                     break
                                 }
                             }
                             let level = (blankSpacesAtStart / 2) - 1
-                            leveledTable.append((level, currentLine))
-                        }
-                        
-                        var rootLine = leveledTable[0].1.split(separator: ",")
-                        let levelUID = UUID().uuidString
-                        
-                        let rootNode = UIElement(
-                            id: levelUID,
-                            tag: "root",
-                            clickable: false,
-                            x: Double(self.cleanString(input: String(rootLine[2]))) as! Double,
-                            y: Double(self.cleanString(input: String(rootLine[3]))) as! Double,
-                            width: Double(self.cleanString(input: String(rootLine[4]))) as! Double,
-                            height: Double(self.cleanString(input: String(rootLine[5]))) as! Double,
-                            children: self.getChildrens(currentLevel: 1, currentIndex: 0, endedIndex: leveledTable.count-1, leveledTable: leveledTable),
-                            attributes: [:],
-                            channelY: 0,
-                            channelHeight: Double(self.cleanString(input: String(rootLine[5])))
-                        )
-
-                        self.captureStruct = self.convertIntoJSONString(arrayObject: rootNode)
-                        break
-                    case actionsEnum.ELEMENT.rawValue:
-                        if(parameters.count > 1) {
-                            let flatElement = self.flatStruct[parameters[0]]
-                            var element: XCUIElement? = nil
-                            if(flatElement?.label != "") {
-                                element = self.retrieveElement(parameter: "label", field: flatElement!.label)
-                            } else if(flatElement?.identifier != "") {
-                                element = self.retrieveElement(parameter: "identifier", field: flatElement!.identifier)
-                            } else {
-                                element = self.retrieveElement(parameter: "placeholderValue", field: flatElement!.placeHolderValue)
-                            }
-                            if(element != nil && !element!.isHittable) {
-                                element = nil
-                                self.resultElement["status"] = -22
-                                self.resultElement["message"] = "element not in the screen"
-                            }
-                            if(element != nil) {
-                                if(actionsEnum.INPUT.rawValue == parameters[1]) {
-                                    let text = parameters[2]
-                                    if(element!.elementType.rawValue == 49 || element!.elementType.rawValue == 50 || element!.elementType.rawValue == 45) {
-                                        element?.tap()
-                                        if(text == actionsEnum.EMPTY.rawValue) {
-                                            let deleteString = String(repeating: XCUIKeyboardKey.delete.rawValue, count: (element?.value as? String)?.count ?? 0)
-                                            element?.typeText(deleteString)
-                                            self.resultElement["status"] = 0
-                                            self.resultElement["message"] = "element clear text"
-                                        } else {
-                                            element?.typeText(text)
-                                            self.resultElement["status"] = 0
-                                            self.resultElement["message"] = "element tap text: " + text
-                                        }
-                                    } else {
-                                        element?.tap()
-                                        self.resultElement["status"] = 0
-                                        self.resultElement["message"] = "not a text input, just tap"
-                                    }
-                                } else {
-                                    var offSetX = 0
-                                    var offSetY = 0
-                                    if(parameters.count > 3) {
-                                        offSetX = Int(parameters[2])!
-                                        offSetY = Int(parameters[3])!
-                                    }
-                                    
-                                    let calculateX = Double(element?.frame.minX ?? 0) + Double(offSetX)
-                                    let calculateY = Double(element?.frame.minY ?? 0) + Double(offSetY)
-                                    
-                                    if(actionsEnum.TAP.rawValue == parameters[1]) {
-                                        self.tapCoordinate(at: calculateX, and: calculateY)
-                                        self.resultElement["status"] = 0
-                                        self.resultElement["message"] = "tap on element"
-                                    } else {
-                                        if(actionsEnum.SWIPE.rawValue == parameters[1]) {
-                                            let directionX = Double(parameters[4]) ?? 0.0
-                                            let directionY = Double(parameters[5]) ?? 0.0
-                                            if(directionX > 0.0) {
-                                                element?.swipeRight()
-                                            }
-                                            if(directionX < 0.0) {
-                                                element?.swipeLeft()
-                                            }
-                                            if(directionY > 0.0) {
-                                                element?.swipeUp()
-                                            }
-                                            if(directionY < 0.0) {
-                                                element?.swipeDown()
-                                            }
-                                            self.resultElement["status"] = 0
-                                            self.resultElement["message"] = "swipe element"
-                                        }
-                                    }
+                            if(level > 0) {
+                                let startString = currentLine.trimmingCharacters(in: NSCharacterSet.whitespaces)
+                                if(startString.starts(with: "Alert")) {
+                                    self.isAlert = true
                                 }
-                            } else {
-                                self.resultElement["status"] = -21
-                                self.resultElement["message"] = "missing element"
+                                leveledTable.append((level, currentLine))
                             }
-                        }  else {
-                            self.resultElement["message"] = "missing element action"
-                            self.resultElement["status"] = -41
                         }
-                        break
-                    case actionsEnum.APP.rawValue:
-                        if(parameters.count > 1) {
-                            if(actionsEnum.START.rawValue == parameters[0]) {
-                                self.app = XCUIApplication(bundleIdentifier: parameters[1])
-                                self.app.launch();
-                                self.resultElement["message"] = "start app " + parameters[1]
+
+                        if(self.rootNode != nil) {
+                            self.captureStruct = self.convertIntoJSONString(arrayObject: self.rootNode!)
+                        } else {
+                            self.captureStruct = "{}"
+                        }
+                        
+                        var firstIndex = 0
+                        var currentLevel = 1
+                        var newLeveledTable = leveledTable
+                        if(self.isAlert) {
+                           newLeveledTable = [(Int,String)]()
+                           for t in 0...leveledTable.count-1 {
+                               if(leveledTable[t].1.localizedCaseInsensitiveContains("alert")) {
+                                   firstIndex = t
+                                   currentLevel = leveledTable[t].0
+                                   break
+                               }
+                           }
+
+                           for t in 0...leveledTable.count-1 {
+                               if((leveledTable[t].0 < currentLevel && t < firstIndex) || t >= firstIndex ) {
+                                   newLeveledTable.append(leveledTable[t])
+                               }
+                           }
+                       }
+                        
+                        let parentFrame = Frame(x: 0, y: 0, width: self.deviceWidth, height: self.deviceHeight)
+                        
+                        let workItem = DispatchWorkItem {
+                            let rootNode = UIElement(
+                                id: UUID().uuidString,
+                                tag: "root",
+                                clickable: false,
+                                x: 0,
+                                y: 0,
+                                width: self.deviceWidth,
+                                height: self.deviceHeight,
+                                children: self.getChildrens(currentLevel: 1, currentIndex: 0, endedIndex: newLeveledTable.count-1, leveledTable: newLeveledTable, parentFrame: parentFrame),
+                                attributes: [:],
+                                channelY: 0,
+                                channelHeight: self.deviceHeight
+                            )
+                            
+                            self.flatStruct = self.getFlatStruct(rootNode: rootNode)
+                            if(self.isAlert) {
+                                var flatArchi: [UIElement] = [UIElement]()
+                                var root = rootNode
+                                root.children = []
+                                for node in rootNode.children! {
+                                    root.children! += self.flatArchitecture(rootNode: node)
+                                }
+                                flatArchi.append(root)
+                                self.captureStruct = self.convertIntoJSONString(arrayObject: root)
+                            } else {
+                                self.captureStruct = self.convertIntoJSONString(arrayObject: rootNode)
+                            }
+                            self.rootNode = rootNode
+                            self.lastCapture = NSDate().timeIntervalSince1970
+                        }
+                        self.domThread.async(execute: workItem)
+                        workItem.wait()
+                    }
+                    
+                    break
+                case ActionsEnum.ELEMENT.rawValue:
+                    if(parameters.count > 1) {
+                        let flatElement = self.flatStruct[parameters[0]]
+                        if(flatElement == nil) {
+                            self.resultElement["status"] = -21
+                            self.resultElement["message"] = "missing element"
+                            break
+                        }
+                        
+                        let elementX = flatElement!.x/self.ratioScreen
+                        let elementY = flatElement!.y/self.ratioScreen
+                        let elementWidth = flatElement!.width/self.ratioScreen
+                        let elementHeight = flatElement!.height/self.ratioScreen
+                        
+                        if(ActionsEnum.INPUT.rawValue == parameters[1]) {
+                            let text = parameters[2]
+                            if(text == ActionsEnum.EMPTY.rawValue) {
+                                self.tapCoordinate(at: elementX + (elementWidth * 0.90), and: elementY + (elementHeight / 2))
+                            } else {
+                                self.tapCoordinate(at: elementX, and: elementHeight)
                                 self.resultElement["status"] = 0
-                                self.resultElement["label"] = self.app.label
+                                if(app.keyboards.count > 0) {
+                                    app.typeText(text)
+                                    self.resultElement["message"] = "element tap text: " + text
+                                } else {
+                                    self.resultElement["message"] = "no keyboard on screen for tap text"
+                                }
+                            }
+                        } else {
+                            var offSetX = 0.0
+                            var offSetY = 0.0
+                            if(parameters.count > 3) {
+                                offSetX = Double(parameters[2])!
+                                offSetY = Double(parameters[3])! + self.offsetYShift
+                                if(offSetY > elementHeight){
+                                    offSetY = Double(parameters[3])!
+                                }
+                            }
+                            
+                            let calculateX = elementX + offSetX
+                            let calculateY = elementY + offSetY
+                            
+                            if(ActionsEnum.TAP.rawValue == parameters[1]) {
+                                self.tapCoordinate(at: calculateX, and: calculateY)
+                                self.resultElement["status"] = 0
+                                self.resultElement["message"] = "tap on element"
+                            } else {
+                                if(ActionsEnum.SWIPE.rawValue == parameters[1]) {
+                                    let directionX = (Double(parameters[4]) ?? 0.0)/self.ratioScreen
+                                    let directionY = (Double(parameters[5]) ?? 0.0)/self.ratioScreen
+                                    self.swipeCoordinate(x: calculateX, y: calculateY, swipeX: directionX, swipeY: directionY)
+                                    self.resultElement["status"] = 0
+                                    self.resultElement["message"] = "swipe element"
+                                }
+                            }
+                        }
+                    } else {
+                        self.resultElement["message"] = "missing paramters action"
+                        self.resultElement["status"] = -41
+                    }
+                    break
+                case ActionsEnum.APP.rawValue:
+                    if(parameters.count > 1) {
+                        if(ActionsEnum.START.rawValue == parameters[0]) {
+                            app = XCUIApplication.init(bundleIdentifier: parameters[1])
+                            app.launch()
+                            
+                            if(app.state.rawValue == 4) {
+                                
+                                self.resultElement["status"] = 0
+                                self.resultElement["label"] = app.label
                                 self.resultElement["icon"] = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH4wgNCzQS2tg9zgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAAMSURBVAjXY2DY/QYAAmYBqC0q4zEAAAAASUVORK5CYII="
                                 self.resultElement["version"] = "0.0.0"
                             } else {
-                                if(actionsEnum.SWITCH.rawValue == parameters[0]) {
-                                    self.app = XCUIApplication(bundleIdentifier: parameters[1])
-                                    self.app.activate()
-                                    self.resultElement["message"] = "switch app " + parameters[1]
+                                self.resultElement["message"] = "App package not found in current device: " + parameters[1]
+                                self.resultElement["status"] = -51
+                                app = nil
+                            }
+                        } else {
+                            if(ActionsEnum.SWITCH.rawValue == parameters[0]) {
+                                app = XCUIApplication(bundleIdentifier: parameters[1])
+                                app.activate()
+                                self.resultElement["message"] = "switch app " + parameters[1]
+                                self.resultElement["status"] = 0
+                            } else {
+                                if(ActionsEnum.STOP.rawValue == parameters[0]) {
+                                    app = XCUIApplication(bundleIdentifier: parameters[1])
+                                    app.terminate()
+                                    self.resultElement["message"] = "stop app " + parameters[1]
                                     self.resultElement["status"] = 0
                                 } else {
-                                    if(actionsEnum.STOP.rawValue == parameters[0]) {
-                                        self.app = XCUIApplication(bundleIdentifier: parameters[1])
-                                        self.app.terminate()
-                                        self.resultElement["message"] = "stop app " + parameters[1]
-                                        self.resultElement["status"] = 0
-                                    } else {
-                                        self.resultElement["message"] = "missiing app action type " + parameters[0]
-                                        self.resultElement["status"] = -42
-                                    }
+                                    self.resultElement["message"] = "missiing app action type " + parameters[0]
+                                    self.resultElement["status"] = -42
                                 }
-                                
                             }
                             
-                        } else {
-                            self.resultElement["message"] = "missing app action"
-                            self.resultElement["status"] = -41
                         }
-                        break
-                    case actionsEnum.INFO.rawValue:
-                        self.driverInfoBase()
-                        self.resultElement["message"] = "device capabilities"
-                        self.resultElement["status"] = 0
-                        self.resultElement["id"] = self.uid
-                        self.resultElement["model"] = self.model
-                        self.resultElement["manufacturer"] = "Apple"
-                        self.resultElement["brand"] = "Apple"
-                        self.resultElement["version"] = self.osVersion
-                        self.resultElement["bluetoothName"] = ""
-                        break
-                    default:
-                        self.resultElement["status"] = -12
-                        self.resultElement["message"] = "unknow command " + action
-                        break
+                        
+                    } else {
+                        self.resultElement["message"] = "missing app action"
+                        self.resultElement["status"] = -41
                     }
+                    break
+                case ActionsEnum.INFO.rawValue:
+                    self.driverInfoBase(applyRatio: false)
+                    self.resultElement["message"] = "device capabilities"
+                    self.resultElement["status"] = 0
+                    self.resultElement["id"] = self.uid
+                    self.resultElement["model"] = self.model
+                    self.resultElement["manufacturer"] = "Apple"
+                    self.resultElement["brand"] = "Apple"
+                    self.resultElement["version"] = self.osVersion
+                    self.resultElement["bluetoothName"] = self.bluetoothName
+                    self.resultElement["simulator"] = self.simulator
+                    break
+                default:
+                    self.resultElement["status"] = -12
+                    self.resultElement["message"] = "unknow command " + action
+                    break
+                }
             }
             
-            if(action == actionsEnum.CAPTURE.rawValue) {
+            if(action == ActionsEnum.CAPTURE.rawValue) {
                 sendBody(Data(self.captureStruct.utf8))
             } else {
                 if let theJSONData = try?  JSONSerialization.data(
@@ -616,6 +563,7 @@ class atsDriver: XCTestCase {
             }
         }
     }
+
     
     func split(input: String, regex: String) -> [String] {
         
@@ -632,121 +580,196 @@ class atsDriver: XCTestCase {
         return modifiedString.components(separatedBy: stop)
     }
     
-    func getChildrens(currentLevel: Int, currentIndex: Int, endedIndex: Int, leveledTable: [(Int,String)]) -> [UIElement] {
+    func getFlatStruct(rootNode: UIElement) -> [String: Frame] {
+        let frame = Frame(x: rootNode.x, y: rootNode.y, width: rootNode.width, height: rootNode.height)
+        var currentFlatStruct: [String:Frame] = [:]
+        currentFlatStruct[rootNode.id] = frame
+        for child in rootNode.children! {
+            let c = self.getFlatStruct(rootNode: child)
+            currentFlatStruct = currentFlatStruct.merging(c)
+            { (current, _) in current }
+        }
+        return currentFlatStruct
+    }
+    
+    func flatArchitecture(rootNode: UIElement) -> [UIElement] {
+        var currentArchi: [UIElement] = [UIElement]()
+        var currentNode = rootNode
+        currentNode.children = []
+        if(currentNode.tag != "Other" && currentNode.tag != "Alert") {
+            currentArchi.append(currentNode)
+        }
+        
+        for child in rootNode.children! {
+            currentArchi += self.flatArchitecture(rootNode: child)
+        }
+        return currentArchi
+    }
+    
+    func getChildrens(currentLevel: Int, currentIndex: Int, endedIndex: Int, leveledTable: [(Int,String)], parentFrame: Frame) -> [UIElement] {
         var tableToReturn: [UIElement] = [UIElement]()
-        for line in currentIndex...leveledTable.count-1 {
-            let levelUID = UUID().uuidString
-            let currentLine = leveledTable[line]
-            var splittedLine: [String] = [String]()
-            
-            var currentString = ""
-            var stopSplitting = false
-            var index = 0
-            var isValue = false
-            for char in currentLine.1 {
-                if(isValue) {
-                    currentString += String(char)
-                    if((index + 1) == currentLine.1.count) {
+        if(currentIndex < leveledTable.count-1) {
+            for line in currentIndex...leveledTable.count-1 {
+                let levelUID = UUID().uuidString
+                let currentLine = leveledTable[line]
+                var splittedLine: [String] = [String]()
+                
+                var currentString = ""
+                var stopSplitting = false
+                var index = 0
+                var isValue = false
+                for char in currentLine.1 {
+                    if(isValue) {
+                        currentString += String(char)
+                        if((index + 1) == currentLine.1.count) {
+                            splittedLine.append(currentString)
+                        }
+                    } else if(currentString.contains("value")) {
+                        isValue = !isValue
+                        currentString += String(char)
+                    } else if(char == "," && !stopSplitting){
                         splittedLine.append(currentString)
-                    }
-                } else if(currentString.contains("value")) {
-                    isValue = !isValue
-                    currentString += String(char)
-                } else if(char == "," && !stopSplitting){
-                    splittedLine.append(currentString)
-                    currentString = ""
-                } else {
-                    if(char == "'") {
-                        stopSplitting = !stopSplitting
-                    }
-                    currentString += String(char)
-                    if((index + 1) == currentLine.1.count) {
-                        splittedLine.append(currentString)
-                    }
-                }
-                index += 1
-            }
-            
-            if(currentLine.0 == currentLevel && endedIndex >= line) {
-                var endIn = line + 1
-                for el in endIn...leveledTable.count-1 {
-                    if(leveledTable[el].0 >= currentLevel+1) {
-                        endIn += 1
+                        currentString = ""
                     } else {
-                        break
-                    }
-                }
-                
-                var attr: [String: String] = [String: String]()
-                
-                var label = ""
-                var placeHolder = ""
-                var identifier = ""
-                var value = ""
-                let pattern = "'(.*?)'"
-                for str in splittedLine {
-                    if(str.contains("identifier")) {
-                        identifier = (self.matchingStrings(input: String(str), regex: pattern).first?[1])!
-                    }
-                    if(str.contains("label")) {
-                        label = (self.matchingStrings(input: String(str), regex: pattern).first?[1])!
-                    }
-                    if(str.contains("placeholderValue")) {
-                        placeHolder = (self.matchingStrings(input: String(str), regex: pattern).first?[1])!
-                    }
-                    if(str.contains("value")) {
-                        var valueTable = str.split(separator: ":")
-                        if(valueTable.count == 2) {
-                            let val = valueTable[1]
-                            value = val.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if(char == "'") {
+                            stopSplitting = !stopSplitting
+                        }
+                        currentString += String(char)
+                        if((index + 1) == currentLine.1.count) {
+                            splittedLine.append(currentString)
                         }
                     }
+                    index += 1
                 }
                 
-                var enabled = true
-                if(currentLine.1.contains("Disabled")) {
-                    enabled = false
+                if(currentLine.0 == currentLevel && endedIndex >= line) {
+                    var endIn = line + 1
+                    if(endIn < leveledTable.count-1) {
+                        for el in endIn...leveledTable.count-1 {
+                            if(leveledTable[el].0 >= currentLevel+1) {
+                                endIn += 1
+                            } else {
+                                break
+                            }
+                        }
+                    }
+                    
+                    var coordinateIndexes = 2
+                    if(splittedLine.count > 2 && splittedLine[2].contains("pid:")) {
+                        coordinateIndexes += 1
+                    }
+                    
+                    
+                    var attr: [String: String] = [String: String]()
+                    
+                    var label = ""
+                    var placeHolder = ""
+                    var identifier = ""
+                    var value = ""
+                    let pattern = "'(.*?)'"
+                    for str in splittedLine {
+                        if(str.contains("identifier")) {
+                            let currentIdentifier = (self.matchingStrings(input: String(str), regex: pattern).first?[1])!
+                            identifier = currentIdentifier.components(separatedBy: CharacterSet.symbols).joined()
+                        }
+                        if(str.contains("label")) {
+                            let currentLabel = str.replacingOccurrences(of: "label:", with: "").replacingOccurrences(of: "'", with: "").trimmingCharacters(in: NSCharacterSet.whitespaces)
+                            label = currentLabel.components(separatedBy: CharacterSet.symbols).joined()
+                        }
+                        if(str.contains("placeholderValue")) {
+                            let currentPlaceHolder = (self.matchingStrings(input: String(str), regex: pattern).first?[1])!
+                            placeHolder = currentPlaceHolder.components(separatedBy: CharacterSet.symbols).joined()
+                        }
+                        if(str.contains("value")) {
+                            let valueTable = str.split(separator: ":")
+                            if(valueTable.count == 2) {
+                                let val = valueTable[1]
+                                let currentValue = val.trimmingCharacters(in: .whitespacesAndNewlines)
+                                value = currentValue.components(separatedBy: CharacterSet.symbols).joined()
+                            }
+                        }
+                    }
+                    
+                    var enabled = true
+                    if(currentLine.1.contains("Disabled")) {
+                        enabled = false
+                    }
+                    
+                    var selected = false
+                    if(currentLine.1.contains("Selected")) {
+                        selected = true
+                    }
+                    
+                    
+                    attr["text"] = label
+                    attr["description"] = placeHolder
+                    attr["checkable"] = String(self.cleanString(input: String(splittedLine[0])) == "checkbox")
+                    attr["enabled"] = String(enabled)
+                    attr["identifier"] = identifier
+                    attr["selected"] = String(selected)
+                    attr["editable"] = String(enabled)
+                    attr["numeric"] = "false"
+                    attr["value"] = value
+                    
+                    var x = Double(self.cleanString(input: String(splittedLine[coordinateIndexes])))! * self.ratioScreen
+                    var y = Double(self.cleanString(input: String(splittedLine[coordinateIndexes+1])))! * self.ratioScreen
+                    var width = Double(self.cleanString(input: String(splittedLine[coordinateIndexes+2])))! * self.ratioScreen
+                    var height = Double(self.cleanString(input: String(splittedLine[coordinateIndexes+3])))! * self.ratioScreen
+                    
+                    if((y + height) > (parentFrame.height + parentFrame.y)) {
+                        let reduceHeight = (parentFrame.height + parentFrame.y) - height - y
+                        height = height + reduceHeight
+                    }
+                    if((x + width) > (parentFrame.width + parentFrame.x)) {
+                        let reduceWidth = (parentFrame.width + parentFrame.x) - width - x
+                        width = width + reduceWidth
+                    }
+                    
+                    if(y < parentFrame.y) {
+                        y = parentFrame.y
+                    }
+                    if(x < parentFrame.x) {
+                        x = parentFrame.x
+                    }
+                    
+                    let currentParentFrame = Frame(x: x, y: y, width: width, height: height)
+                    
+                    tableToReturn.append(UIElement(
+                        id: levelUID,
+                        tag: self.cleanString(input: String(splittedLine[0])),
+                        clickable: true,
+                        x: x,
+                        y: y,
+                        width: width,
+                        height: height,
+                        children: self.getChildrens(currentLevel: currentLevel+1, currentIndex: line+1, endedIndex: endIn, leveledTable: leveledTable, parentFrame: currentParentFrame),
+                        attributes: attr,
+                        channelY: nil,
+                        channelHeight: nil
+                    ))
                 }
-                
-                var selected = false
-                if(currentLine.1.contains("Selected")) {
-                    selected = true
-                }
-                
-                
-                attr["text"] = label
-                attr["description"] = placeHolder
-                attr["checkable"] = String(self.cleanString(input: String(splittedLine[0])) == "checkbox")
-                attr["enabled"] = String(enabled)
-                attr["identifier"] = identifier
-                attr["selected"] = String(selected)
-                attr["editable"] = String(enabled)
-                attr["numeric"] = "false"
-                attr["value"] = value
-                
-                let x = Double(self.cleanString(input: String(splittedLine[2]))) as! Double
-                let y = Double(self.cleanString(input: String(splittedLine[3]))) as! Double
-                let width = Double(self.cleanString(input: String(splittedLine[4]))) as! Double
-                let height = Double(self.cleanString(input: String(splittedLine[5]))) as! Double
-            
-                tableToReturn.append(UIElement(
-                    id: levelUID,
-                    tag: self.cleanString(input: String(splittedLine[0])),
-                    clickable: true,
-                    x: x,
-                    y: y,
-                    width: width,
-                    height: height,
-                    children: self.getChildrens(currentLevel: currentLevel+1, currentIndex: line+1, endedIndex: endIn, leveledTable: leveledTable),
-                    attributes: attr,
-                    channelY: nil,
-                    channelHeight: nil
-                ))
-                
-                flatStruct[levelUID] = Frame(label: label, identifier: identifier, placeHolderValue: placeHolder, x: x, y: y, width: width, height: height)
             }
         }
+        
         return tableToReturn
+    }
+    
+    func getAppInfo() -> String {
+        if(app != nil) {
+            let pattern = "'(.*?)'"
+            let packageName = self.matchingStrings(input: String(app.description), regex: pattern).first?[1]
+            var informations: [String:String] = [:]
+            informations["packageName"] = packageName
+            informations["activity"] = getStateStringValue(rawValue: app.state.rawValue)
+            informations["system"] = model + " " + osVersion
+            informations["label"] = app.label
+            informations["icon"] = ""
+            informations["version"] = ""
+            informations["os"] = "ios"
+            return self.convertIntoJSONString(arrayObject: informations)
+        } else {
+            return ""
+        }
     }
     
     func cleanString(input: String) -> String {
@@ -756,10 +779,30 @@ class atsDriver: XCTestCase {
     }
     
     func tapCoordinate(at xCoordinate: Double, and yCoordinate: Double) {
-        let normalized = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
-        let coordinate = normalized.withOffset(CGVector(dx: xCoordinate, dy: yCoordinate))
+        if(self.isAlert) {
+            let alertBox = app.windows.alerts.firstMatch
+            let x = Double(alertBox.frame.minX)
+            let y = Double(alertBox.frame.minY)
+            let normalized = alertBox.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+            let coordinate = normalized.withOffset(CGVector(dx: xCoordinate - x, dy: yCoordinate - y))
+            coordinate.tap()
+        } else {
+            let normalized = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+            let coordinate = normalized.withOffset(CGVector(dx: xCoordinate, dy: yCoordinate))
+            coordinate.tap()
+        }
+    }
+    
+    func swipeCoordinate(x xCoordinate: Double, y yCoordinate: Double, swipeX xSwipe: Double, swipeY ySwipe: Double) {
+        let pressDuration : TimeInterval = 0.05
         
-        coordinate.tap()
+        let startNormalized = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+        let startCoordinate = startNormalized.withOffset(CGVector(dx: xCoordinate, dy: yCoordinate))
+        
+        let endNormalized = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+        let endCoordinate = endNormalized.withOffset(CGVector(dx: (xCoordinate+xSwipe), dy: (yCoordinate + ySwipe)))
+        
+        startCoordinate.press(forDuration: pressDuration, thenDragTo: endCoordinate)
     }
     
     func retrieveElement(parameter: String, field: String) -> XCUIElement? {
@@ -767,10 +810,10 @@ class atsDriver: XCTestCase {
         fieldValue = fieldValue.replacingOccurrences(of: "%22", with: "'")
         fieldValue = fieldValue.replacingOccurrences(of: "%20", with: " ")
         let predicate = NSPredicate(format: "\(parameter) == '\(fieldValue)'")
-        if(self.app == nil) {
+        if(app == nil) {
             return nil
         }
-        let elem = self.app.descendants(matching: .any).element(matching: predicate)
+        let elem = app.descendants(matching: .any).element(matching: predicate)
         if(elem.exists) {
             return elem.firstMatch
         } else {
@@ -779,6 +822,18 @@ class atsDriver: XCTestCase {
     }
     
     func convertIntoJSONString(arrayObject: UIElement) -> String {
+        do {
+            let jsonEncoder = JSONEncoder()
+            let jsonData = try jsonEncoder.encode(arrayObject)
+            let json = String(data: jsonData, encoding: String.Encoding.utf8) ?? "no values"
+            return json
+        } catch let error as NSError {
+            print("Array convertIntoJSON - \(error.description)")
+        }
+        return ""
+    }
+    
+    func convertIntoJSONString(arrayObject: [String:String]) -> String {
         do {
             let jsonEncoder = JSONEncoder()
             let jsonData = try jsonEncoder.encode(arrayObject)
@@ -811,7 +866,7 @@ class atsDriver: XCTestCase {
     func getQueryStringParameter(query_string: String, param: String) -> String {
         let params = query_string.components(separatedBy: "&")
         for item in params {
-            var currentParam = item.components(separatedBy: "=")
+            let currentParam = item.components(separatedBy: "=")
             if(currentParam.count != 2) { return "" }
             if(currentParam[0] == param) {
                 return currentParam[1]
@@ -827,26 +882,28 @@ class atsDriver: XCTestCase {
         app.launchEnvironment["ENVOY_BASEURL"] = "http://localhost:\(self.port)"
     }
     
-    override func tearDown() {
-        super.tearDown()
-    }
-    
-    func driverInfoBase() {
+    func driverInfoBase(applyRatio: Bool) {
+        let screenNativeBounds = XCUIScreen.main.screenshot().image
+        self.ratioScreen = self.maxHeight / Double(screenNativeBounds.size.height)
+        
+        self.deviceWidth = Double(screenNativeBounds.size.width) * self.ratioScreen
+        self.deviceHeight = Double(screenNativeBounds.size.height) * self.ratioScreen
+        
         self.resultElement["os"] = "ios"
         self.resultElement["driverVersion"] = "1.0.0"
-        self.resultElement["systemName"] = model + " " + osVersion
-        self.resultElement["deviceWidth"] = deviceWidth
-        self.resultElement["deviceHeight"] = deviceHeight
-        self.resultElement["channelWidth"] = deviceWidth
-        self.resultElement["channelHeight"] = deviceHeight
+        self.resultElement["systemName"] = model + " - " + osVersion
+        self.resultElement["deviceWidth"] = applyRatio ? self.deviceWidth : screenNativeBounds.size.width
+        self.resultElement["deviceHeight"] = applyRatio ? self.deviceHeight : screenNativeBounds.size.height
+        self.resultElement["channelWidth"] = applyRatio ? self.deviceWidth : screenNativeBounds.size.width
+        self.resultElement["channelHeight"] = applyRatio ? self.deviceHeight : screenNativeBounds.size.height
         self.resultElement["channelX"] = 0
         self.resultElement["channelY"] = 0
     }
     
-    func testExecuteCommand() {
-        while continueExecution {
-            
-        }
+    func closeSocket() {
+        Darwin.shutdown(self.tcpSocket, SHUT_RDWR)
+        close(self.tcpSocket)
+        print("close socket")
     }
     
     func checkTcpPortForListen(port: in_port_t) -> (Bool, descr: String) {
@@ -877,6 +934,7 @@ class atsDriver: XCTestCase {
             return (false, "\(port), ListenFailed, \(details)")
         }
         release(socket: socketFileDescriptor)
+        self.tcpSocket = socketFileDescriptor
         return (true, "\(port) is free for use")
     }
     
@@ -928,5 +986,16 @@ class atsDriver: XCTestCase {
         freeifaddrs(ifaddr)
         
         return address
+    }
+    
+    override func tearDown() {
+        self.closeSocket()
+        super.tearDown()
+    }
+    
+    func testExecuteCommand() {
+        while continueExecution {
+            
+        }
     }
 }

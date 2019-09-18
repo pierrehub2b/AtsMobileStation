@@ -7,8 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		043FEF82230C1DFD007051EF /* libBlueSocket.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 043FEF81230C1DFD007051EF /* libBlueSocket.a */; };
-		043FEF84230C2960007051EF /* UdpServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043FEF83230C2960007051EF /* UdpServer.swift */; };
+		0400C0A8231D145B004CD4C9 /* UIDeviceName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0400C0A7231D145B004CD4C9 /* UIDeviceName.swift */; };
+		0417A86D231535850094FC89 /* UIElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0417A86C231535850094FC89 /* UIElement.swift */; };
+		0417A86F231535A10094FC89 /* ActionsEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0417A86E231535A10094FC89 /* ActionsEnum.swift */; };
+		0417A871231536100094FC89 /* DeviceButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0417A870231536100094FC89 /* DeviceButtons.swift */; };
+		0417A8732315362F0094FC89 /* Frame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0417A8722315362F0094FC89 /* Frame.swift */; };
+		0417A8752315366D0094FC89 /* EnumFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0417A8742315366D0094FC89 /* EnumFunctions.swift */; };
 		047BFA6822F178D700BB2E25 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047BFA6722F178D700BB2E25 /* AppDelegate.swift */; };
 		047BFA6A22F178D700BB2E25 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047BFA6922F178D700BB2E25 /* ViewController.swift */; };
 		047BFA6D22F178D700BB2E25 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 047BFA6B22F178D700BB2E25 /* Main.storyboard */; };
@@ -16,9 +20,10 @@
 		047BFA7222F178D800BB2E25 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 047BFA7122F178D800BB2E25 /* Assets.xcassets */; };
 		047BFA7522F178D800BB2E25 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 047BFA7322F178D800BB2E25 /* LaunchScreen.storyboard */; };
 		047BFA8022F178D800BB2E25 /* atsDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047BFA7F22F178D800BB2E25 /* atsDriver.swift */; };
+		048E4D4B230E9D850004B08E /* libBlueSocket.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 048E4D4A230E9D850004B08E /* libBlueSocket.a */; };
 		04FB981022F17BC500D2B564 /* libEmbassy.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04FB980F22F17BC500D2B564 /* libEmbassy.a */; };
 		04FB981222F17BC500D2B564 /* libEnvoyAmbassador.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04FB981122F17BC500D2B564 /* libEnvoyAmbassador.a */; };
-		B838CAF2ACFF0346AFC747BC /* libPods-atsiosUITests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C0D8CE06F7ACBB16A5BDF271 /* libPods-atsiosUITests.a */; };
+		4642DFB0BA296DCD9288BF84 /* libPods-atsDriver.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 672037982A627CDF33E32082 /* libPods-atsDriver.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,8 +37,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0400C0A7231D145B004CD4C9 /* UIDeviceName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDeviceName.swift; sourceTree = "<group>"; };
+		0417A86C231535850094FC89 /* UIElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIElement.swift; sourceTree = "<group>"; };
+		0417A86E231535A10094FC89 /* ActionsEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionsEnum.swift; sourceTree = "<group>"; };
+		0417A870231536100094FC89 /* DeviceButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceButtons.swift; sourceTree = "<group>"; };
+		0417A8722315362F0094FC89 /* Frame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Frame.swift; sourceTree = "<group>"; };
+		0417A8742315366D0094FC89 /* EnumFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnumFunctions.swift; sourceTree = "<group>"; };
 		043FEF81230C1DFD007051EF /* libBlueSocket.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libBlueSocket.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		043FEF83230C2960007051EF /* UdpServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UdpServer.swift; sourceTree = "<group>"; };
 		046FFFB122F9BDF8008C6466 /* libUITestHelpers.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libUITestHelpers.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		047BFA6422F178D700BB2E25 /* atsios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = atsios.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		047BFA6722F178D700BB2E25 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -46,12 +56,20 @@
 		047BFA7B22F178D800BB2E25 /* atsDriver.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = atsDriver.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		047BFA7F22F178D800BB2E25 /* atsDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = atsDriver.swift; sourceTree = "<group>"; };
 		047BFA8122F178D800BB2E25 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		048E4D3C230E7E3C0004B08E /* libSocket.IO-Client-Swift.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libSocket.IO-Client-Swift.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		048E4D3E230E7E3C0004B08E /* libStarscream.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libStarscream.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		048E4D40230E8D7A0004B08E /* libSocket.swift.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libSocket.swift.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		048E4D42230E90230004B08E /* libSocket.IO-Client-Swift.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libSocket.IO-Client-Swift.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		048E4D44230E90230004B08E /* libStarscream.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libStarscream.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		048E4D4A230E9D850004B08E /* libBlueSocket.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libBlueSocket.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		049922E322F2F30500A53078 /* libSwiftyJSON.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libSwiftyJSON.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		04DEC05E22FB21FF00941684 /* libSwiftSocket.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libSwiftSocket.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		04FB980F22F17BC500D2B564 /* libEmbassy.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libEmbassy.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		04FB981122F17BC500D2B564 /* libEnvoyAmbassador.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libEnvoyAmbassador.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		29A033C72F092427CC8F9466 /* Pods-atsDriver.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-atsDriver.release.xcconfig"; path = "Target Support Files/Pods-atsDriver/Pods-atsDriver.release.xcconfig"; sourceTree = "<group>"; };
 		5678C43C43C84FCACF81C48D /* Pods-atsiosUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-atsiosUITests.release.xcconfig"; path = "Target Support Files/Pods-atsiosUITests/Pods-atsiosUITests.release.xcconfig"; sourceTree = "<group>"; };
-		C0D8CE06F7ACBB16A5BDF271 /* libPods-atsiosUITests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-atsiosUITests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		672037982A627CDF33E32082 /* libPods-atsDriver.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-atsDriver.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		89F6EEB0CA1DB5071991C47F /* Pods-atsDriver.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-atsDriver.debug.xcconfig"; path = "Target Support Files/Pods-atsDriver/Pods-atsDriver.debug.xcconfig"; sourceTree = "<group>"; };
 		CF14D7879408BF914F82B665 /* Pods-atsiosUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-atsiosUITests.debug.xcconfig"; path = "Target Support Files/Pods-atsiosUITests/Pods-atsiosUITests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -67,10 +85,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				043FEF82230C1DFD007051EF /* libBlueSocket.a in Frameworks */,
+				048E4D4B230E9D850004B08E /* libBlueSocket.a in Frameworks */,
 				04FB981022F17BC500D2B564 /* libEmbassy.a in Frameworks */,
 				04FB981222F17BC500D2B564 /* libEnvoyAmbassador.a in Frameworks */,
-				B838CAF2ACFF0346AFC747BC /* libPods-atsiosUITests.a in Frameworks */,
+				4642DFB0BA296DCD9288BF84 /* libPods-atsDriver.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -116,7 +134,12 @@
 			children = (
 				047BFA7F22F178D800BB2E25 /* atsDriver.swift */,
 				047BFA8122F178D800BB2E25 /* Info.plist */,
-				043FEF83230C2960007051EF /* UdpServer.swift */,
+				0417A86C231535850094FC89 /* UIElement.swift */,
+				0417A86E231535A10094FC89 /* ActionsEnum.swift */,
+				0417A870231536100094FC89 /* DeviceButtons.swift */,
+				0417A8722315362F0094FC89 /* Frame.swift */,
+				0417A8742315366D0094FC89 /* EnumFunctions.swift */,
+				0400C0A7231D145B004CD4C9 /* UIDeviceName.swift */,
 			);
 			path = atsDriver;
 			sourceTree = "<group>";
@@ -126,6 +149,8 @@
 			children = (
 				CF14D7879408BF914F82B665 /* Pods-atsiosUITests.debug.xcconfig */,
 				5678C43C43C84FCACF81C48D /* Pods-atsiosUITests.release.xcconfig */,
+				89F6EEB0CA1DB5071991C47F /* Pods-atsDriver.debug.xcconfig */,
+				29A033C72F092427CC8F9466 /* Pods-atsDriver.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -133,13 +158,19 @@
 		CE6333FFDB6E768160A7BE15 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				048E4D4A230E9D850004B08E /* libBlueSocket.a */,
+				048E4D42230E90230004B08E /* libSocket.IO-Client-Swift.a */,
+				048E4D44230E90230004B08E /* libStarscream.a */,
+				048E4D40230E8D7A0004B08E /* libSocket.swift.a */,
+				048E4D3C230E7E3C0004B08E /* libSocket.IO-Client-Swift.a */,
+				048E4D3E230E7E3C0004B08E /* libStarscream.a */,
 				043FEF81230C1DFD007051EF /* libBlueSocket.a */,
 				04DEC05E22FB21FF00941684 /* libSwiftSocket.a */,
 				046FFFB122F9BDF8008C6466 /* libUITestHelpers.a */,
 				049922E322F2F30500A53078 /* libSwiftyJSON.a */,
 				04FB980F22F17BC500D2B564 /* libEmbassy.a */,
 				04FB981122F17BC500D2B564 /* libEnvoyAmbassador.a */,
-				C0D8CE06F7ACBB16A5BDF271 /* libPods-atsiosUITests.a */,
+				672037982A627CDF33E32082 /* libPods-atsDriver.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -257,7 +288,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-atsiosUITests-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-atsDriver-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -281,8 +312,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				043FEF84230C2960007051EF /* UdpServer.swift in Sources */,
+				0417A86F231535A10094FC89 /* ActionsEnum.swift in Sources */,
+				0417A871231536100094FC89 /* DeviceButtons.swift in Sources */,
+				0417A86D231535850094FC89 /* UIElement.swift in Sources */,
+				0417A8752315366D0094FC89 /* EnumFunctions.swift in Sources */,
+				0400C0A8231D145B004CD4C9 /* UIDeviceName.swift in Sources */,
 				047BFA8022F178D800BB2E25 /* atsDriver.swift in Sources */,
+				0417A8732315362F0094FC89 /* Frame.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -480,7 +516,7 @@
 		};
 		047BFA8822F178D800BB2E25 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CF14D7879408BF914F82B665 /* Pods-atsiosUITests.debug.xcconfig */;
+			baseConfigurationReference = 89F6EEB0CA1DB5071991C47F /* Pods-atsDriver.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -509,7 +545,7 @@
 		};
 		047BFA8922F178D800BB2E25 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5678C43C43C84FCACF81C48D /* Pods-atsiosUITests.release.xcconfig */;
+			baseConfigurationReference = 29A033C72F092427CC8F9466 /* Pods-atsDriver.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CODE_SIGN_IDENTITY = "iPhone Developer";

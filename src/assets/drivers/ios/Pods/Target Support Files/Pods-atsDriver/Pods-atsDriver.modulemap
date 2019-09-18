@@ -1,0 +1,6 @@
+module Pods_atsDriver {
+  umbrella header "Pods-atsDriver-umbrella.h"
+
+  export *
+  module * { export * }
+}

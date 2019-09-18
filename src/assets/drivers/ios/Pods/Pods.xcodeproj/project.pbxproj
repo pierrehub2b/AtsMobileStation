@@ -27,6 +27,7 @@
 		5E75349B1AC4145BE2B6819F3DE03A8D /* SocketUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76D964AF733E2E151D5575A824A9FE2E /* SocketUtils.swift */; };
 		5E7B51917D21095C762B608FF0DCB528 /* EventLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 797AEFA4EB7954B8CCC802F717C16735 /* EventLoop.swift */; };
 		609F27FF53779F4E5FDCF44A0CF697E8 /* Embassy-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = FCD18F09C268E376CE62790CDA64F593 /* Embassy-dummy.m */; };
+		61079C60D4F953B523204CA21A10F28B /* Pods-atsDriver-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6DF0AA5E28DB55F7BBB92A486516CF91 /* Pods-atsDriver-dummy.m */; };
 		6308145AD36508FDEA222216ABD6FAB6 /* LogFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198DBE7C04D382158F2AED93D315EAF6 /* LogFormatter.swift */; };
 		63C62A3D0D11D48CA5E7F16B99EFBB5A /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677B324683E951CB9A7D96490B8C0331 /* Errors.swift */; };
 		6497BFB8CE4E76760A4E66F4679B82BC /* SystemLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D295EEF3F3CEC5CEDF3C3FC4E68C7D6 /* SystemLibrary.swift */; };
@@ -40,18 +41,17 @@
 		A8E9B9E34FFD3044A4293DBC1C07A5E7 /* IOUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA71D6998B7C2124BABA1AC8DF62EB1B /* IOUtils.swift */; };
 		A9FF437D639CFF9FFE8522049EEEACBB /* Atomic.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAD6CC6662041FB8C723AA1A81DFC011 /* Atomic.swift */; };
 		AD4EF0862AEFBAB8D2BF79104E6FE306 /* EnvoyAmbassador-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = A9F87E9EA1C82D6E4897EBF116D8BF88 /* EnvoyAmbassador-umbrella.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		B1131C97438AC6A9E5CD34DF5F432174 /* Pods-atsiosUITests-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = AA6AE380A864C5928C0303D8D0BD8B1C /* Pods-atsiosUITests-umbrella.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		B58EDDDFEAD7D139A2EB08ED77B23CE5 /* BlueSocket-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6562211A655F24A37AB17310ADC28D3F /* BlueSocket-dummy.m */; };
 		B70D0958A1EE0ED51CB38D92F9B59C26 /* HTTPServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C4283CF20DA58E8A4B99C2513F566F /* HTTPServer.swift */; };
 		BFBDB09818BA4C1107A99DCBBA88AA97 /* DefaultLogFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3349F1369D853F1B0B302E540C124E8B /* DefaultLogFormatter.swift */; };
 		C6D0781A3481ACA47A9A35C56BEAA78A /* JSONResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE807C36CD5068970E52D6CBC62B76F4 /* JSONResponse.swift */; };
 		C6D3C037D3570883C7B78905CC2B9B2E /* JSONReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 326CC8AAE0852B40593E59EF75CAC6CB /* JSONReader.swift */; };
 		C6EE14D0226CD729741F6CADB8E052A0 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F294D48C93B3983B76BD44B86CA0093A /* Logger.swift */; };
+		C7819280AFDA5B5E83578CE936235268 /* Pods-atsDriver-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 026CC5DD3610DC871392033C7A6A2B6F /* Pods-atsDriver-umbrella.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		C983620B3B6BFE40D78AB87E185CEEC7 /* HTTPHeaderParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88E0D3B15B4CE5910278E060A607562B /* HTTPHeaderParser.swift */; };
 		CD3D1D08C04FEDB052BBEBBE47D7CD2E /* DataReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA42A978D229010EE46A9E88CDFF6E2F /* DataReader.swift */; };
 		D5E1119845F1C64383A722918EA930C2 /* HTTPConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 703469578AD9CA4F5F844C20BB8E6EC1 /* HTTPConnection.swift */; };
 		D92249DA48126F1763E2F7F0DB5654CE /* MultiDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF7BA2F4E8F4CA17C93D4003C4D9098 /* MultiDictionary.swift */; };
-		DE1D4C628DA6459A9999161D304D047A /* Pods-atsiosUITests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = A19405593948BAF7A2CC66AA043EFFA9 /* Pods-atsiosUITests-dummy.m */; };
 		E243829CB1D1A11353D8621337226D37 /* DataResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BAA97A50BF40CE3FBBFDF95986A891B /* DataResponse.swift */; };
 		E73AA8A86ED7CE33F8D8D87597C6966C /* SelectorEventLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C15873805488A4169DCA76F1C788D92 /* SelectorEventLoop.swift */; };
 		F6F57F54B33E741CDD24228824085093 /* SocketProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9EF93DF8C3DEEFA1FF882F5EA99B11B /* SocketProtocols.swift */; };
@@ -59,6 +59,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		02A5364D33B19B1F1AE7CDBD4E78FFDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5B3240FACF0A23DF3BD74F1B77F2D123;
+			remoteInfo = EnvoyAmbassador;
+		};
 		379071E45E63F26FC73AC3C8D953EB23 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
@@ -66,21 +73,14 @@
 			remoteGlobalIDString = 8FE649A3E328F8296F04B715E875E776;
 			remoteInfo = Embassy;
 		};
-		38AE586B728544A47D10820789F83E24 /* PBXContainerItemProxy */ = {
+		9B6F574095781E6613571E2F899C8A50 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 9717BE7FCECEF299173A5D71C18B19F5;
 			remoteInfo = BlueSocket;
 		};
-		800B6B9CD4FC04312242EFF7CB796843 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 5B3240FACF0A23DF3BD74F1B77F2D123;
-			remoteInfo = EnvoyAmbassador;
-		};
-		B3280FCFA3AF9A794DBAC13B522B7F39 /* PBXContainerItemProxy */ = {
+		E8C11D32DB7D0A55E6816FE69875B3BC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
@@ -90,9 +90,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		026CC5DD3610DC871392033C7A6A2B6F /* Pods-atsDriver-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-atsDriver-umbrella.h"; sourceTree = "<group>"; };
 		09C3FE476D25729D32A578C14AE8D91F /* EnvoyAmbassador-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "EnvoyAmbassador-prefix.pch"; sourceTree = "<group>"; };
 		0C15873805488A4169DCA76F1C788D92 /* SelectorEventLoop.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SelectorEventLoop.swift; path = Sources/SelectorEventLoop.swift; sourceTree = "<group>"; };
-		0CA65C2FA61B525A53099ED29F6F9FF6 /* libPods-atsiosUITests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-atsiosUITests.a"; path = "libPods-atsiosUITests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		193CA82337D381AD5A74EAE2A276EFA3 /* libEnvoyAmbassador.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libEnvoyAmbassador.a; path = libEnvoyAmbassador.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		198DBE7C04D382158F2AED93D315EAF6 /* LogFormatter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LogFormatter.swift; path = Sources/LogFormatter.swift; sourceTree = "<group>"; };
 		1FF7BA2F4E8F4CA17C93D4003C4D9098 /* MultiDictionary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MultiDictionary.swift; path = Sources/MultiDictionary.swift; sourceTree = "<group>"; };
@@ -103,15 +103,17 @@
 		27668D7855B7F05C261734656F3E6AC3 /* Embassy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Embassy.xcconfig; sourceTree = "<group>"; };
 		27771345F03C75AE04786B9978745356 /* EnvoyAmbassador-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "EnvoyAmbassador-dummy.m"; sourceTree = "<group>"; };
 		2D1636505CD1A84C1647475014D1F249 /* HTTPRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HTTPRequest.swift; path = Sources/HTTPRequest.swift; sourceTree = "<group>"; };
-		2E8E0CDF485DB35C6F2A4B1519C4BADD /* Pods-atsiosUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-atsiosUITests.release.xcconfig"; sourceTree = "<group>"; };
 		2EAA4A7F572E0FFFDA0F24140040D388 /* libBlueSocket.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libBlueSocket.a; path = libBlueSocket.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		326CC8AAE0852B40593E59EF75CAC6CB /* JSONReader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = JSONReader.swift; path = Ambassador/Readers/JSONReader.swift; sourceTree = "<group>"; };
 		3349F1369D853F1B0B302E540C124E8B /* DefaultLogFormatter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DefaultLogFormatter.swift; path = Sources/DefaultLogFormatter.swift; sourceTree = "<group>"; };
+		369023AADB901BD9D9EE8AB5E384907B /* Pods-atsDriver-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-atsDriver-acknowledgements.markdown"; sourceTree = "<group>"; };
 		39E2E7B08BB9EBC360549345E4594F1E /* BlueSocket-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "BlueSocket-umbrella.h"; sourceTree = "<group>"; };
 		40C4283CF20DA58E8A4B99C2513F566F /* HTTPServer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HTTPServer.swift; path = Sources/HTTPServer.swift; sourceTree = "<group>"; };
 		40CC494FEE4C0E0B47A3D12876A9A68B /* PrintLogHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PrintLogHandler.swift; path = Sources/PrintLogHandler.swift; sourceTree = "<group>"; };
+		4678CBC83026C08BE0FBCB530EBD4EEC /* Pods-atsDriver.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-atsDriver.debug.xcconfig"; sourceTree = "<group>"; };
 		4D84F54ABA6DF5BBBBB711115F186E8E /* SelectSelector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SelectSelector.swift; path = Sources/SelectSelector.swift; sourceTree = "<group>"; };
 		54501343E2CEB979ADDEEB37DB4AB5F9 /* SWSGIUtils.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SWSGIUtils.swift; path = Sources/SWSGIUtils.swift; sourceTree = "<group>"; };
+		58955EAFB38570A99ACB2AC6C24C1B0F /* Pods-atsDriver.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-atsDriver.modulemap"; sourceTree = "<group>"; };
 		5F2C094A0F10BF9AE9FF9E740FDB3B4B /* TransformLogHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TransformLogHandler.swift; path = Sources/TransformLogHandler.swift; sourceTree = "<group>"; };
 		62F1963F6E40B004C00708DF18A18D86 /* BlueSocket-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "BlueSocket-prefix.pch"; sourceTree = "<group>"; };
 		632E00B537A01A9AEB3A7F8B69921AB0 /* Router.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Router.swift; path = Ambassador/Router.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 		677B324683E951CB9A7D96490B8C0331 /* Errors.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Errors.swift; path = Sources/Errors.swift; sourceTree = "<group>"; };
 		6A156695A8FA2A219B783BA6FDD039D7 /* Socket.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Socket.swift; path = Sources/Socket/Socket.swift; sourceTree = "<group>"; };
 		6D295EEF3F3CEC5CEDF3C3FC4E68C7D6 /* SystemLibrary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SystemLibrary.swift; path = Sources/SystemLibrary.swift; sourceTree = "<group>"; };
+		6DF0AA5E28DB55F7BBB92A486516CF91 /* Pods-atsDriver-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-atsDriver-dummy.m"; sourceTree = "<group>"; };
 		703469578AD9CA4F5F844C20BB8E6EC1 /* HTTPConnection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HTTPConnection.swift; path = Sources/HTTPConnection.swift; sourceTree = "<group>"; };
 		72993E24F24BCDCF4B1B9F93CCE91F2C /* Embassy.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = Embassy.modulemap; sourceTree = "<group>"; };
 		7352774CB37C7C52F0198B5C590CC123 /* SWGIWebApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SWGIWebApp.swift; path = Ambassador/SWGIWebApp.swift; sourceTree = "<group>"; };
@@ -129,18 +132,14 @@
 		7C77E67FB1970A400B8FF7329A8D5231 /* Selector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Selector.swift; path = Sources/Selector.swift; sourceTree = "<group>"; };
 		7CE5960C4378A1296948AD55678AC6B1 /* DefaultLogger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DefaultLogger.swift; path = Sources/DefaultLogger.swift; sourceTree = "<group>"; };
 		88E0D3B15B4CE5910278E060A607562B /* HTTPHeaderParser.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HTTPHeaderParser.swift; path = Sources/HTTPHeaderParser.swift; sourceTree = "<group>"; };
-		9168E374629FE9B22CED8FDCAF16E422 /* Pods-atsiosUITests.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-atsiosUITests.modulemap"; sourceTree = "<group>"; };
 		95A2D45F84FF9778A34032145E2D53D8 /* WebApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WebApp.swift; path = Ambassador/WebApp.swift; sourceTree = "<group>"; };
 		9BAA97A50BF40CE3FBBFDF95986A891B /* DataResponse.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DataResponse.swift; path = Ambassador/Responses/DataResponse.swift; sourceTree = "<group>"; };
 		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		A0AA15B54B79AC02E421D28AB9C5D9BE /* HeapSort.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HeapSort.swift; path = Sources/HeapSort.swift; sourceTree = "<group>"; };
-		A19405593948BAF7A2CC66AA043EFFA9 /* Pods-atsiosUITests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-atsiosUITests-dummy.m"; sourceTree = "<group>"; };
 		A9F87E9EA1C82D6E4897EBF116D8BF88 /* EnvoyAmbassador-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "EnvoyAmbassador-umbrella.h"; sourceTree = "<group>"; };
-		AA6AE380A864C5928C0303D8D0BD8B1C /* Pods-atsiosUITests-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-atsiosUITests-umbrella.h"; sourceTree = "<group>"; };
 		AA71D6998B7C2124BABA1AC8DF62EB1B /* IOUtils.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = IOUtils.swift; path = Sources/IOUtils.swift; sourceTree = "<group>"; };
+		AE71076519B9590444763918501A50C8 /* Pods-atsDriver-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-atsDriver-acknowledgements.plist"; sourceTree = "<group>"; };
 		AE807C36CD5068970E52D6CBC62B76F4 /* JSONResponse.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = JSONResponse.swift; path = Ambassador/Responses/JSONResponse.swift; sourceTree = "<group>"; };
-		AF5513DDEB08E31FC470D97EFBF3BD28 /* Pods-atsiosUITests-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-atsiosUITests-acknowledgements.markdown"; sourceTree = "<group>"; };
-		B422C8077CAA7116745718C73781C52A /* Pods-atsiosUITests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-atsiosUITests-acknowledgements.plist"; sourceTree = "<group>"; };
 		BA42A978D229010EE46A9E88CDFF6E2F /* DataReader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DataReader.swift; path = Ambassador/Readers/DataReader.swift; sourceTree = "<group>"; };
 		BAD6CC6662041FB8C723AA1A81DFC011 /* Atomic.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Atomic.swift; path = Sources/Atomic.swift; sourceTree = "<group>"; };
 		BE018A2BA67C9A91218429E9A8F9541B /* Transport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Transport.swift; path = Sources/Transport.swift; sourceTree = "<group>"; };
@@ -149,12 +148,13 @@
 		CAD92E8B4B21BE3721B017AD736D5861 /* PropagateLogHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PropagateLogHandler.swift; path = Sources/PropagateLogHandler.swift; sourceTree = "<group>"; };
 		CF67E9380E9317714369573E34CE3F56 /* EnvoyAmbassador.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = EnvoyAmbassador.xcconfig; sourceTree = "<group>"; };
 		D691F4C276E6A6F2FADF57D6EFF5F741 /* Embassy-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Embassy-umbrella.h"; sourceTree = "<group>"; };
-		DA1EF5E71FCC47D2D236A373D769DB49 /* Pods-atsiosUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-atsiosUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		DA19A544F75C0924082FEF732E338782 /* Pods-atsDriver.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-atsDriver.release.xcconfig"; sourceTree = "<group>"; };
 		DE2E1B6CBB1D66228016BCE01D28B59F /* BlueSocket.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = BlueSocket.xcconfig; sourceTree = "<group>"; };
 		E151BA5BEBE1D322875781DB6666F88A /* URLParametersReader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = URLParametersReader.swift; path = Ambassador/Readers/URLParametersReader.swift; sourceTree = "<group>"; };
 		E435D7C7C6BC59FE6FCF6F2395145AAD /* Embassy-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Embassy-prefix.pch"; sourceTree = "<group>"; };
 		F294D48C93B3983B76BD44B86CA0093A /* Logger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Logger.swift; path = Sources/Logger.swift; sourceTree = "<group>"; };
 		F4602BC9FD320E448ECBD0711E1FCC17 /* libEmbassy.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libEmbassy.a; path = libEmbassy.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		F46F918C9AE615F5540E135C312A3D11 /* libPods-atsDriver.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-atsDriver.a"; path = "libPods-atsDriver.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAE7AD138DB6E89368B511E6184E0638 /* LogHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LogHandler.swift; path = Sources/LogHandler.swift; sourceTree = "<group>"; };
 		FCD18F09C268E376CE62790CDA64F593 /* Embassy-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Embassy-dummy.m"; sourceTree = "<group>"; };
 		FDAA8C1F7594FE19C3347AC0EF35235A /* KqueueSelector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = KqueueSelector.swift; path = Sources/KqueueSelector.swift; sourceTree = "<group>"; };
@@ -168,14 +168,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A79B5AE42F4F5AB38C2CBE53ECBEE600 /* Frameworks */ = {
+		4029EDD52CD46A8300647EF4F05C308F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B9685D8B6B7525FEB02749DDF666032A /* Frameworks */ = {
+		A79B5AE42F4F5AB38C2CBE53ECBEE600 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -243,6 +243,21 @@
 			path = "../Target Support Files/EnvoyAmbassador";
 			sourceTree = "<group>";
 		};
+		0D6E1C8BA455C6A1318C9CDC741A0E71 /* Pods-atsDriver */ = {
+			isa = PBXGroup;
+			children = (
+				58955EAFB38570A99ACB2AC6C24C1B0F /* Pods-atsDriver.modulemap */,
+				369023AADB901BD9D9EE8AB5E384907B /* Pods-atsDriver-acknowledgements.markdown */,
+				AE71076519B9590444763918501A50C8 /* Pods-atsDriver-acknowledgements.plist */,
+				6DF0AA5E28DB55F7BBB92A486516CF91 /* Pods-atsDriver-dummy.m */,
+				026CC5DD3610DC871392033C7A6A2B6F /* Pods-atsDriver-umbrella.h */,
+				4678CBC83026C08BE0FBCB530EBD4EEC /* Pods-atsDriver.debug.xcconfig */,
+				DA19A544F75C0924082FEF732E338782 /* Pods-atsDriver.release.xcconfig */,
+			);
+			name = "Pods-atsDriver";
+			path = "Target Support Files/Pods-atsDriver";
+			sourceTree = "<group>";
+		};
 		297D971C3F4DC36D2D220821CE4DE509 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
@@ -264,6 +279,14 @@
 				6703472623722395F41267291856BC03 /* EnvoyAmbassador */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		3CDC16D9AF4A3D789090CBED3807BF20 /* Targets Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				0D6E1C8BA455C6A1318C9CDC741A0E71 /* Pods-atsDriver */,
+			);
+			name = "Targets Support Files";
 			sourceTree = "<group>";
 		};
 		6703472623722395F41267291856BC03 /* EnvoyAmbassador */ = {
@@ -296,23 +319,26 @@
 			path = BlueSocket;
 			sourceTree = "<group>";
 		};
-		CA603042D77AA5C378082E90406576BC /* Targets Support Files */ = {
-			isa = PBXGroup;
-			children = (
-				F8AE3EDBA83A85162220719020D53FAA /* Pods-atsiosUITests */,
-			);
-			name = "Targets Support Files";
-			sourceTree = "<group>";
-		};
 		CF1408CF629C7361332E53B88F7BD30C = {
 			isa = PBXGroup;
 			children = (
 				9D940727FF8FB9C785EB98E56350EF41 /* Podfile */,
 				D89477F20FB1DE18A04690586D7808C4 /* Frameworks */,
 				36B45E25F83B26DFEEE1372492886279 /* Pods */,
-				DB4E0E30E6318FC40CF5370C1CE181A6 /* Products */,
-				CA603042D77AA5C378082E90406576BC /* Targets Support Files */,
+				D30A33E4DED379007F3E1A3F84ABA697 /* Products */,
+				3CDC16D9AF4A3D789090CBED3807BF20 /* Targets Support Files */,
 			);
+			sourceTree = "<group>";
+		};
+		D30A33E4DED379007F3E1A3F84ABA697 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2EAA4A7F572E0FFFDA0F24140040D388 /* libBlueSocket.a */,
+				F4602BC9FD320E448ECBD0711E1FCC17 /* libEmbassy.a */,
+				193CA82337D381AD5A74EAE2A276EFA3 /* libEnvoyAmbassador.a */,
+				F46F918C9AE615F5540E135C312A3D11 /* libPods-atsDriver.a */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		D89477F20FB1DE18A04690586D7808C4 /* Frameworks */ = {
@@ -320,17 +346,6 @@
 			children = (
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		DB4E0E30E6318FC40CF5370C1CE181A6 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				2EAA4A7F572E0FFFDA0F24140040D388 /* libBlueSocket.a */,
-				F4602BC9FD320E448ECBD0711E1FCC17 /* libEmbassy.a */,
-				193CA82337D381AD5A74EAE2A276EFA3 /* libEnvoyAmbassador.a */,
-				0CA65C2FA61B525A53099ED29F6F9FF6 /* libPods-atsiosUITests.a */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		F2C4DB17908B9C364C1853D8EADCE5D2 /* Support Files */ = {
@@ -346,21 +361,6 @@
 			path = "../Target Support Files/Embassy";
 			sourceTree = "<group>";
 		};
-		F8AE3EDBA83A85162220719020D53FAA /* Pods-atsiosUITests */ = {
-			isa = PBXGroup;
-			children = (
-				9168E374629FE9B22CED8FDCAF16E422 /* Pods-atsiosUITests.modulemap */,
-				AF5513DDEB08E31FC470D97EFBF3BD28 /* Pods-atsiosUITests-acknowledgements.markdown */,
-				B422C8077CAA7116745718C73781C52A /* Pods-atsiosUITests-acknowledgements.plist */,
-				A19405593948BAF7A2CC66AA043EFFA9 /* Pods-atsiosUITests-dummy.m */,
-				AA6AE380A864C5928C0303D8D0BD8B1C /* Pods-atsiosUITests-umbrella.h */,
-				DA1EF5E71FCC47D2D236A373D769DB49 /* Pods-atsiosUITests.debug.xcconfig */,
-				2E8E0CDF485DB35C6F2A4B1519C4BADD /* Pods-atsiosUITests.release.xcconfig */,
-			);
-			name = "Pods-atsiosUITests";
-			path = "Target Support Files/Pods-atsiosUITests";
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -372,11 +372,11 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4D10DC52269B7599E24AAC59EA375AC9 /* Headers */ = {
+		BC8172F21228DC264E8B76B8ADDDA3DC /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B1131C97438AC6A9E5CD34DF5F432174 /* Pods-atsiosUITests-umbrella.h in Headers */,
+				C7819280AFDA5B5E83578CE936235268 /* Pods-atsDriver-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -418,26 +418,6 @@
 			productReference = 193CA82337D381AD5A74EAE2A276EFA3 /* libEnvoyAmbassador.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		78F3B5DCAD001702A432F3501AF0BA14 /* Pods-atsiosUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = EECAA1AF7BA534E7D37552AB54CFD604 /* Build configuration list for PBXNativeTarget "Pods-atsiosUITests" */;
-			buildPhases = (
-				4D10DC52269B7599E24AAC59EA375AC9 /* Headers */,
-				7E87D801C8E16D4394668FF65F0D7172 /* Sources */,
-				B9685D8B6B7525FEB02749DDF666032A /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				C367E564CC0DB5F26070F982DC5008C6 /* PBXTargetDependency */,
-				A6E4C087678BF8468CE1AE63EE1A50F1 /* PBXTargetDependency */,
-				A9B8BEE1739C7535CBFB9BBE754F0007 /* PBXTargetDependency */,
-			);
-			name = "Pods-atsiosUITests";
-			productName = "Pods-atsiosUITests";
-			productReference = 0CA65C2FA61B525A53099ED29F6F9FF6 /* libPods-atsiosUITests.a */;
-			productType = "com.apple.product-type.library.static";
-		};
 		8FE649A3E328F8296F04B715E875E776 /* Embassy */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 21BE5BA65361B9757002CC8DB665037D /* Build configuration list for PBXNativeTarget "Embassy" */;
@@ -474,6 +454,26 @@
 			productReference = 2EAA4A7F572E0FFFDA0F24140040D388 /* libBlueSocket.a */;
 			productType = "com.apple.product-type.library.static";
 		};
+		A69A8F25E7E30778A5F7050FD22F31E3 /* Pods-atsDriver */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6B55B9E10E614879783B0E926B30D858 /* Build configuration list for PBXNativeTarget "Pods-atsDriver" */;
+			buildPhases = (
+				BC8172F21228DC264E8B76B8ADDDA3DC /* Headers */,
+				D5957A9861B12A8CD11200B8D05BE497 /* Sources */,
+				4029EDD52CD46A8300647EF4F05C308F /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4C87A5BE3CCF16386BE8214384E131EF /* PBXTargetDependency */,
+				9CC56B35E17239A567EC6D48972C28EE /* PBXTargetDependency */,
+				AA9650EAB8A839125F9A188863AD45DB /* PBXTargetDependency */,
+			);
+			name = "Pods-atsDriver";
+			productName = "Pods-atsDriver";
+			productReference = F46F918C9AE615F5540E135C312A3D11 /* libPods-atsDriver.a */;
+			productType = "com.apple.product-type.library.static";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -491,14 +491,14 @@
 				en,
 			);
 			mainGroup = CF1408CF629C7361332E53B88F7BD30C;
-			productRefGroup = DB4E0E30E6318FC40CF5370C1CE181A6 /* Products */;
+			productRefGroup = D30A33E4DED379007F3E1A3F84ABA697 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				9717BE7FCECEF299173A5D71C18B19F5 /* BlueSocket */,
 				8FE649A3E328F8296F04B715E875E776 /* Embassy */,
 				5B3240FACF0A23DF3BD74F1B77F2D123 /* EnvoyAmbassador */,
-				78F3B5DCAD001702A432F3501AF0BA14 /* Pods-atsiosUITests */,
+				A69A8F25E7E30778A5F7050FD22F31E3 /* Pods-atsDriver */,
 			);
 		};
 /* End PBXProject section */
@@ -616,14 +616,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		7E87D801C8E16D4394668FF65F0D7172 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				DE1D4C628DA6459A9999161D304D047A /* Pods-atsiosUITests-dummy.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		944AE755ECE941188D1F834BB1FE9F60 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -652,32 +644,40 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D5957A9861B12A8CD11200B8D05BE497 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				61079C60D4F953B523204CA21A10F28B /* Pods-atsDriver-dummy.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		4C87A5BE3CCF16386BE8214384E131EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = BlueSocket;
+			target = 9717BE7FCECEF299173A5D71C18B19F5 /* BlueSocket */;
+			targetProxy = 9B6F574095781E6613571E2F899C8A50 /* PBXContainerItemProxy */;
+		};
 		65EB7933BAC810557FC27650D8BA8767 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = Embassy;
 			target = 8FE649A3E328F8296F04B715E875E776 /* Embassy */;
 			targetProxy = 379071E45E63F26FC73AC3C8D953EB23 /* PBXContainerItemProxy */;
 		};
-		A6E4C087678BF8468CE1AE63EE1A50F1 /* PBXTargetDependency */ = {
+		9CC56B35E17239A567EC6D48972C28EE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = Embassy;
 			target = 8FE649A3E328F8296F04B715E875E776 /* Embassy */;
-			targetProxy = B3280FCFA3AF9A794DBAC13B522B7F39 /* PBXContainerItemProxy */;
+			targetProxy = E8C11D32DB7D0A55E6816FE69875B3BC /* PBXContainerItemProxy */;
 		};
-		A9B8BEE1739C7535CBFB9BBE754F0007 /* PBXTargetDependency */ = {
+		AA9650EAB8A839125F9A188863AD45DB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = EnvoyAmbassador;
 			target = 5B3240FACF0A23DF3BD74F1B77F2D123 /* EnvoyAmbassador */;
-			targetProxy = 800B6B9CD4FC04312242EFF7CB796843 /* PBXContainerItemProxy */;
-		};
-		C367E564CC0DB5F26070F982DC5008C6 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = BlueSocket;
-			target = 9717BE7FCECEF299173A5D71C18B19F5 /* BlueSocket */;
-			targetProxy = 38AE586B728544A47D10820789F83E24 /* PBXContainerItemProxy */;
+			targetProxy = 02A5364D33B19B1F1AE7CDBD4E78FFDD /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -708,9 +708,9 @@
 			};
 			name = Release;
 		};
-		1B7664DD47E643D722DD472E86801F59 /* Debug */ = {
+		223D391813F50B1E133195EC8CC32F0E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DA1EF5E71FCC47D2D236A373D769DB49 /* Pods-atsiosUITests.debug.xcconfig */;
+			baseConfigurationReference = DA19A544F75C0924082FEF732E338782 /* Pods-atsDriver.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -720,7 +720,7 @@
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
 				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/Pods-atsiosUITests/Pods-atsiosUITests.modulemap";
+				MODULEMAP_FILE = "Target Support Files/Pods-atsDriver/Pods-atsDriver.modulemap";
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
 				PODS_ROOT = "$(SRCROOT)";
@@ -728,8 +728,9 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 			};
-			name = Debug;
+			name = Release;
 		};
 		2B881325C68C96C8FFEC61D9DF216E91 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -756,6 +757,29 @@
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
+		};
+		2ECC8A5F19E8F63C04616F2AD700C5FA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4678CBC83026C08BE0FBCB530EBD4EEC /* Pods-atsDriver.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-atsDriver/Pods-atsDriver.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
 		};
 		41454038A4DD531CC7B29D319420EFAE /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -957,30 +981,6 @@
 			};
 			name = Release;
 		};
-		D0885C67E00F985A3204B824BDB1E3FC /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2E8E0CDF485DB35C6F2A4B1519C4BADD /* Pods-atsiosUITests.release.xcconfig */;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
-				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/Pods-atsiosUITests/Pods-atsiosUITests.modulemap";
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
 		F43C57CC54BC399372CCFBD8E2AE68FC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CF67E9380E9317714369573E34CE3F56 /* EnvoyAmbassador.xcconfig */;
@@ -1027,20 +1027,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		6B55B9E10E614879783B0E926B30D858 /* Build configuration list for PBXNativeTarget "Pods-atsDriver" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2ECC8A5F19E8F63C04616F2AD700C5FA /* Debug */,
+				223D391813F50B1E133195EC8CC32F0E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		C55EE617F7C7AE9CBE33110E6A6ECA24 /* Build configuration list for PBXNativeTarget "BlueSocket" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				88A458990A161A9C7E64B18CC70F76A5 /* Debug */,
 				1145A0A5298E86D82C3169052F932DD7 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		EECAA1AF7BA534E7D37552AB54CFD604 /* Build configuration list for PBXNativeTarget "Pods-atsiosUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				1B7664DD47E643D722DD472E86801F59 /* Debug */,
-				D0885C67E00F985A3204B824BDB1E3FC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
