@@ -242,6 +242,8 @@ package
 									dev = findDevice(data[3]);
 									
 									if(dev != null && dev.isCrashed) {
+										dev.dispose();
+										dev.close();
 										collection.removeItem(dev);
 										dev = null;
 									}
