@@ -68,7 +68,7 @@ package simulator
 
 				procInfo.arguments = new <String>["simctl", "bootstatus", id, "-b"];
 				process.start(procInfo);
-			} else{
+			} else {
 				phase = WAIT;
 				tooltip = "Simulator is terminating ...";
 				dispatchEvent(new Event(STATUS_CHANGED));

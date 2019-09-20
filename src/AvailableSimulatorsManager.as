@@ -22,6 +22,7 @@ package
 	public class AvailableSimulatorsManager extends EventDispatcher
 	{
 		public static const SIMULATOR_STATUS_CHANGED:String = "simulatorStatusChanged";
+		public static const COLLECTION_CHANGED:String = "collectionChanged";
 		
 		private var regex:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 			
@@ -43,6 +44,13 @@ package
 		public function AvailableSimulatorsManager()
 		{
 			if(Capabilities.os.indexOf("Mac") > -1){
+				this.refreshList();
+			}
+		}
+		
+		public function refreshList():void {
+			if(!process.running) {
+				collection = new ArrayCollection();
 				procInfo.executable = new File("/usr/bin/env");
 				procInfo.workingDirectory = File.userDirectory;
 				
@@ -64,7 +72,7 @@ package
 			output += StringUtil.trim(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
 		}
 		
-		protected function getByUdid(array:Array, search:String):SimCtlDevice {
+		public function getByUdid(array:Array, search:String):SimCtlDevice {
 			var i:int = 0;
 			for each(var simCtl:SimCtlDevice in array)
 			{
@@ -97,7 +105,7 @@ package
 			arrayInstrument.removeAt(0)
 			for each(var line:String in arrayInstrument){
 				var isPhysicalDevice: Boolean = line.indexOf("(Simulator)") == -1;
-				if(line.indexOf("iPhone") == 0 /*|| isPhysicalDevice*/) {
+				if(line.indexOf("iPhone") == 0/* || isPhysicalDevice*/) {
 					var data:Array = regex.exec(line);
 					if(data != null){
 						var currentElement:SimCtlDevice = getByUdid(simctl, data[3]);
@@ -105,13 +113,7 @@ package
 							var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : isPhysicalDevice;
 							var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], isRunning, !isPhysicalDevice);
 							sim.addEventListener(Simulator.STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
-							if(!isPhysicalDevice) {
-								collection.addItem(sim);
-							}
-							
-							if(sim.phase == Simulator.RUN) {
-								dispatchEvent(new SimulatorEvent(SIMULATOR_STATUS_CHANGED, sim));
-							}
+							collection.addItem(sim);
 						}
 					}
 				}
@@ -124,10 +126,25 @@ package
 			}
 		}
 		
+		public function updateSimulatorInList(sim: IosSimulator):void {
+			var index:int = 0;
+			for each(var elem: IosSimulator in collection) {
+				if(elem.id == sim.id) {
+					collection.setItemAt(sim,index);
+				}
+				index++;
+			}
+			this.collection.refresh();
+		}
+		
 		protected function onInstrumentsExit(event:NativeProcessExitEvent):void
 		{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit);
 			arrayInstrument = output.split("\n");
+			getDevicesStates();
+		}
+		
+		public function getDevicesStates(): void {
 			output = ""
 			//now retrieving the list of simulators with status	
 			process.addEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist, false, 0, true);

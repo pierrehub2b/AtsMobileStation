@@ -1,8 +1,8 @@
 package event
 {
-	import simulator.IosSimulator;
-	
 	import flash.events.Event;
+	
+	import simulator.IosSimulator;
 	
 	public class SimulatorEvent extends Event
 	{

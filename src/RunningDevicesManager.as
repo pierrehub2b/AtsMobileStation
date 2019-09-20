@@ -1,8 +1,5 @@
 package 
 {
-	import device.AndroidDevice;
-	import device.Device;
-	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -16,23 +13,34 @@ package
 	import mx.collections.ArrayCollection;
 	import mx.utils.StringUtil;
 	
-	import simulator.IosSimulator;
-	import simulator.Simulator;
-	
 	import spark.collections.Sort;
 	import spark.collections.SortField;
+	
+	import CustomClasses.SimCtlDevice;
+	
+	import device.AndroidDevice;
+	import device.Device;
+	
+	import event.SimulatorEvent;
+	
+	import simulator.IosSimulator;
+	import simulator.Simulator;
 	
 	public class RunningDevicesManager
 	{
 		protected var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 		protected var process:NativeProcess = new NativeProcess();
-		
+	
+		private var regex:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
+			
 		private var adbFile:File;
 		private var errorStack:String = "";
 		private var output:String = "";
 		
 		private var timer:Timer = new Timer(3000);
 		private var port:String = "8080";
+		
+		private var arrayInstrument: Array = new Array();
 		
 		[Bindable]
 		public var collection:ArrayCollection = new ArrayCollection();
@@ -46,20 +54,23 @@ package
 			
 			var adbPath:String = "assets/tools/android/adb";
 			if(Capabilities.os.indexOf("Mac") > -1){
-				this.adbFile = File.applicationDirectory.resolvePath(adbPath);
-				
-				var chmod:File = new File("/bin/chmod");
-				this.procInfo.executable = chmod;			
-				this.procInfo.workingDirectory = adbFile.parent;
-				this.procInfo.arguments = new <String>["+x", "adb"];
-				
-				this.process.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
-				this.process.start(this.procInfo);
-				
+				startIosProcess();				
 			}else{
 				this.adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
 				startAdbProcess(); 
 			}
+		}
+		
+		public function getByUdid(array:Array, search:String):SimCtlDevice {
+			var i:int = 0;
+			for each(var simCtl:SimCtlDevice in array)
+			{
+				if(simCtl.getUdid() == search) {
+					return simCtl;
+				}
+				i++;
+			}
+			return null;
 		}
 		
 		public function simulatorChanged(sim:IosSimulator):void{
@@ -75,88 +86,24 @@ package
 			collection.refresh()
 		}
 		
-		protected function onChmodExit(event:NativeProcessExitEvent):void
-		{
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
-			process = new NativeProcess();
-			
-			startAdbProcess();
-			//startSystemProfilerProcess();
-		}		
-		
-		//----------------------------------------------------------------------------------------------------------------
-		// MacOS specific
-		//----------------------------------------------------------------------------------------------------------------
-		
-		//private var sysProcInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-		//private var sysProc:NativeProcess = new NativeProcess();
-		
-		//private var sysProfiler:String = "";
-		
-		/*private function startSystemProfilerProcess():void{
-			
-			sysProfiler = "";
-			
-			sysProcInfo.executable = new File("/usr/sbin/system_profiler");			
-			sysProcInfo.arguments = new <String>["SPUSBDataType", "-xml"];
-			
-			//sysProc.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
-			sysProc.addEventListener(NativeProcessExitEvent.EXIT, onSysProcInfoExit, false, 0, true);
-			sysProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onSysProcInfoData, false, 0, true);
-			sysProc.start(sysProcInfo);
-		}
-		
-		protected function onSysProcInfoData(event:ProgressEvent):void{
-			sysProfiler += StringUtil.trim(sysProc.standardOutput.readUTFBytes(sysProc.standardOutput.bytesAvailable));
-		}
-		
-		protected function onSysProcInfoExit(event:NativeProcessExitEvent):void
-		{
-			sysProc.removeEventListener(NativeProcessExitEvent.EXIT, onSysProcInfoExit);
-			sysProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onSysProcInfoData);
-			
-			var profiler:XML = new XML(sysProfiler);
-			var array:XMLList = profiler.array.children().children();
-			var catchArray:Boolean = false;
-			
-			for each(var keyItems:XML in array){
-				if(catchArray){
-					for each(var dev:XML in keyItems.dict.children()){
-						if(dev.dict != undefined){
-							for each(var deviceInfo:XML in dev.dict){
-								var dict:Object = new Object();
-								var pairNumber:int = deviceInfo.children().length();
-								for (var i:int = 0; i<pairNumber; i+=2){
-									dict[deviceInfo.children()[i]] = deviceInfo.children()[i+1];
-								}
-								
-								if(dict._name == "iPhone"){
-									trace(dict.serial_num)
-									
-									
-									
-								}
-							}
-						}
-					}
-					
-					break;
-				}else if(keyItems == "_items"){
-					catchArray = true;
-				}
-			}
-		}*/
-				
-		//----------------------------------------------------------------------------------------------------------------
-		//----------------------------------------------------------------------------------------------------------------
-		
 		private function startAdbProcess():void{
 			procInfo.executable = adbFile;			
 			procInfo.workingDirectory = adbFile.parent;
 			procInfo.arguments = new <String>["devices"];
 			
 			timer.addEventListener(TimerEvent.TIMER, devicesTimerComplete, false, 0, true);
+			
 			launchProcess();
+		}
+		
+		protected function startIosProcess():void {
+			procInfo.executable = new File("/usr/bin/env");
+			procInfo.workingDirectory = File.userDirectory;
+			this.procInfo.arguments = new <String>["xcrun", "instruments", "-s", "devices"];
+			
+			timer.addEventListener(TimerEvent.TIMER, devicesTimerComplete, false, 0, true);
+			
+			launchIosProcess();
 		}
 		
 		public function terminate():void{
@@ -183,8 +130,26 @@ package
 			}catch(err:Error){}
 		}
 		
+		private function launchIosProcess():void{
+			output = "";
+			errorStack = "";
+			this.procInfo.arguments = new <String>["xcrun", "instruments", "-s", "devices"];
+			
+			try{
+				//process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
+				process.addEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit, false, 0, true);
+				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData, false, 0, true);
+				process.start(procInfo);
+			}catch(err:Error){}
+		}
+		
 		private function devicesTimerComplete(ev:TimerEvent):void{
-			launchProcess();
+			if(Capabilities.os.indexOf("Mac") > -1){
+				launchIosProcess();
+				
+			} else {
+				launchProcess();
+			}
 		}
 		
 		protected function onReadAndroidDevicesData(event:ProgressEvent):void{
@@ -234,6 +199,96 @@ package
 			}
 			
 			timer.start();
+		}
+		
+		protected function onSimCtlExist(event:NativeProcessExitEvent):void {
+			//process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist);
+			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData);
+			
+			var dv:Device;
+			for each(dv in collection){
+				dv.connected = false;
+			}
+			var obj:Object;
+			var dev:Device;
+			var devices:Object;
+			var simctl:Array = new Array();
+			
+			try {	
+				obj = JSON.parse(output);
+				devices = obj["devices"];
+				for each(var runtime:Object in devices) {
+					for each(var device:Object in runtime) {
+						var availabilityError:String = ""
+						if(!device["isAvailable"]) {
+							availabilityError = device["availabilityError"];
+						}
+						simctl.push(new SimCtlDevice(availabilityError,device["isAvailable"] ,device["name"] ,device["state"] ,device["udid"]));
+					}
+				}
+				
+				arrayInstrument.removeAt(0)
+				for each(var line:String in arrayInstrument){
+					//var isPhysicalDevice: Boolean = line.indexOf("(Simulator)") == -1;
+					var isPhysicalDevice: Boolean = false;
+					if(line.indexOf("iPhone") == 0 || isPhysicalDevice) {
+						var data:Array = regex.exec(line);
+						if(data != null){
+							var currentElement:SimCtlDevice = getByUdid(simctl, data[3]);
+							if((currentElement != null && currentElement.getIsAvailable()) || isPhysicalDevice) {
+								var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : isPhysicalDevice;
+								if(isRunning) {
+									dev = findDevice(data[3]);
+									if(dev == null){
+										var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], isRunning, !isPhysicalDevice);
+										AtsMobileStation.simulators.updateSimulatorInList(sim);
+										dev = sim.device;
+										dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
+										collection.addItem(dev);
+										collection.refresh();
+									}else{
+										dev.connected = true;
+									}
+								}
+							}
+						}
+					}
+				}
+				
+				for each(dv in collection){
+					if(!dv.connected){
+						dv.dispose();
+						collection.removeItem(dv);
+						collection.refresh();
+					}
+				}
+				
+				
+				timer.start();
+				
+			} catch(err:Error){
+				trace(err);
+				timer.start();
+			} 
+			
+		}
+		
+		protected function simulatorStatusChanged(ev:Event):void{
+			var sim:IosSimulator = ev.currentTarget as IosSimulator;
+			sim.dispatchEvent(new SimulatorEvent(AvailableSimulatorsManager.SIMULATOR_STATUS_CHANGED, sim));
+		}
+		
+		protected function onInstrumentsExit(event:NativeProcessExitEvent):void
+		{
+			//process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit);
+			arrayInstrument = output.split("\n");
+			output = ""
+			//now retrieving the list of simulators with status	
+			process.addEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist, false, 0, true);
+			procInfo.arguments = new <String>["xcrun", "simctl", "list", "devices", "--j"];
+			process.start(procInfo);
 		}
 		
 		private function findDevice(id:String):Device{

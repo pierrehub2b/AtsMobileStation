@@ -27,7 +27,6 @@ package device
 			this.isSimulator = isSimulator;
 			
 			installing()
-			
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
@@ -56,7 +55,7 @@ package device
 		protected function onTestingOutput(event:ProgressEvent):void
 		{
 			var data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
-			//trace("test output -> " + data);
+			trace("test output -> " + data);
 			
 			var find:Array = startInfo.exec(data);
 			if(find != null){

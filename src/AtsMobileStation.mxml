@@ -29,7 +29,7 @@
 			private var devices:RunningDevicesManager;
 			
 			[Bindable]
-			private var simulators:AvailableSimulatorsManager;
+			public static var simulators:AvailableSimulatorsManager;
 			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
