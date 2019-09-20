@@ -104,8 +104,9 @@ package
 			}
 			arrayInstrument.removeAt(0)
 			for each(var line:String in arrayInstrument){
-				var isPhysicalDevice: Boolean = line.indexOf("(Simulator)") == -1;
-				if(line.indexOf("iPhone") == 0/* || isPhysicalDevice*/) {
+				//var isPhysicalDevice: Boolean = line.indexOf("(Simulator)") == -1;
+				var isPhysicalDevice: Boolean = false;
+				if(line.indexOf("iPhone") == 0 || isPhysicalDevice) {
 					var data:Array = regex.exec(line);
 					if(data != null){
 						var currentElement:SimCtlDevice = getByUdid(simctl, data[3]);

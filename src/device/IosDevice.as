@@ -5,6 +5,7 @@ package device
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
+	import flash.utils.setInterval;
 	
 	public class IosDevice extends Device
 	{
@@ -25,6 +26,7 @@ package device
 			this.modelName = name;
 			this.manufacturer = "Apple";
 			this.isSimulator = isSimulator;
+			this.isCrashed = false;
 			
 			installing()
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
@@ -47,8 +49,7 @@ package device
 			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
 			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
 
-			trace("testing exit");//relaunch testing ...
-			
+			trace("testing exit");
 			
 		}
 		
@@ -69,9 +70,13 @@ package device
 		{
 			var data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
 			trace("test error -> " + data);
-			if(data.indexOf("Continuing with testing") != -1){
-				
+			if(data.indexOf("Continuing with testing") < 0 && data.indexOf("** TEST EXECUTE FAILED **") > 0){
+				this.changeCrashedStatus();
 			}
+		}
+		
+		protected function changeCrashedStatus():void {
+			this.isCrashed = true
 		}
 	}
 }

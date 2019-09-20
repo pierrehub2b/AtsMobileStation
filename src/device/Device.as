@@ -37,6 +37,7 @@ package device
 		[Bindable]
 		public var tooltip:String = "Starting driver ...";
 		
+		public var isCrashed:Boolean = false;
 		private var _connected:Boolean = false;
 		public var isSimulator:Boolean = false;
 				

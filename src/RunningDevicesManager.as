@@ -240,6 +240,12 @@ package
 								var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : isPhysicalDevice;
 								if(isRunning) {
 									dev = findDevice(data[3]);
+									
+									if(dev != null && dev.isCrashed) {
+										collection.removeItem(dev);
+										dev = null;
+									}
+
 									if(dev == null){
 										var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], isRunning, !isPhysicalDevice);
 										AtsMobileStation.simulators.updateSimulatorInList(sim);
