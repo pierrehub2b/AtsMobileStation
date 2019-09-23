@@ -70,7 +70,7 @@ package device
 		{
 			var data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
 			trace("test error -> " + data);
-			if(data.indexOf("Continuing with testing") < 0 && data.indexOf("** TEST EXECUTE FAILED **") > 0){
+			if(data.indexOf("Continuing with testing") < 0 && data.indexOf("** TEST EXECUTE FAILED **") > 0 || data.indexOf("** TEST FAILED **") > 0){
 				this.changeCrashedStatus();
 			}
 		}
