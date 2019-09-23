@@ -138,7 +138,7 @@ package
 			try{
 				//process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
 				process.addEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit, false, 0, true);
-				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData, false, 0, true);
+				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData, false, 0, true);
 				process.start(procInfo);
 			}catch(err:Error){}
 		}
@@ -153,6 +153,10 @@ package
 		}
 		
 		protected function onReadAndroidDevicesData(event:ProgressEvent):void{
+			output += StringUtil.trim(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
+		}
+		
+		protected function onReadIosDevicesData(event:ProgressEvent):void{
 			output += StringUtil.trim(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
 		}
 		
@@ -204,7 +208,7 @@ package
 		protected function onSimCtlExist(event:NativeProcessExitEvent):void {
 			//process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist);
-			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData);
+			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
 			
 			var dv:Device;
 			for each(dv in collection){
@@ -271,16 +275,11 @@ package
 						collection.removeItem(dv);
 						collection.refresh();
 					}
-				}
-				
-				
-				timer.start();
-				
+				}	
 			} catch(err:Error){
 				trace(err);
-				timer.start();
-			} 
-			
+			} 	
+			timer.start();	
 		}
 		
 		protected function simulatorStatusChanged(ev:Event):void{
@@ -292,10 +291,12 @@ package
 		{
 			//process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit);
+			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
 			arrayInstrument = output.split("\n");
 			output = ""
 			//now retrieving the list of simulators with status	
 			process.addEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist, false, 0, true);
+			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData, false, 0, true);
 			procInfo.arguments = new <String>["xcrun", "simctl", "list", "devices", "--j"];
 			process.start(procInfo);
 		}

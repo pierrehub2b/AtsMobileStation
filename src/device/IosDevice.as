@@ -35,7 +35,7 @@ package device
 			
 			procInfo.executable = xcodeBuildExec;
 			procInfo.workingDirectory = iosDriverProjectFolder;
-			procInfo.arguments = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test-without-building"];
+			procInfo.arguments = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test"];
 			testingProcess.start(procInfo);
 		}
 		
