@@ -245,6 +245,7 @@ package
 										dev.dispose();
 										dev.close();
 										collection.removeItem(dev);
+										collection.refresh();
 										dev = null;
 									}
 
