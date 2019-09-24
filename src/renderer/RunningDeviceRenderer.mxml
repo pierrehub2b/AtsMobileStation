@@ -22,7 +22,13 @@
 			import renderer.SettingsDeviceRenderer;
 			
 			private function showWindow(event:MouseEvent, dev:Device):void{
-				PopUpManager.createPopUp(this, SettingsDeviceRenderer);
+				// create and configure the TitleWindow
+				var tw:SettingsDeviceRenderer = new SettingsDeviceRenderer();
+				tw.title = "Device settings";
+				tw.showCloseButton = true;
+				tw.dev = dev;
+				// open the TitleWindow as a modal popup window
+				PopUpManager.addPopUp(tw, this, true);
 			}
 			
 			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);

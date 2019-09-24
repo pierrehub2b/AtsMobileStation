@@ -61,6 +61,10 @@ package
 			}
 		}
 		
+		public function getCollection():ArrayCollection {
+			return this.collection;
+		}
+		
 		public function getByUdid(array:Array, search:String):SimCtlDevice {
 			var i:int = 0;
 			for each(var simCtl:SimCtlDevice in array)

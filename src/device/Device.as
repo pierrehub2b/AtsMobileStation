@@ -20,6 +20,12 @@ package device
 		public var port:String = "";
 		
 		[Bindable]
+		public var settingsPort:String = "";
+		
+		[Bindable]
+		public var automaticPort:Boolean = true;
+		
+		[Bindable]
 		public var error:String = null;
 		
 		[Bindable]

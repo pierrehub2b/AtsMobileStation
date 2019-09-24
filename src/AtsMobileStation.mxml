@@ -26,7 +26,7 @@
 			private var port:String = "8080";
 			
 			[Bindable]
-			private var devices:RunningDevicesManager;
+			public static var devices:RunningDevicesManager;
 			
 			[Bindable]
 			public static var simulators:AvailableSimulatorsManager;

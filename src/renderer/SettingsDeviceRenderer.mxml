@@ -3,12 +3,34 @@
 				initialize = "settings_initializeHandler(event)" title="Device settings">
 	<mx:Script>
 		<![CDATA[
+			import mx.collections.ArrayCollection;
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
 			
+			import device.Device;
+			
+			public var dev:Device;
+			
 			protected function settings_initializeHandler(event:FlexEvent):void {
 				portAutomatic.selected = portSelection.text == "";
+				if(dev != null) {
+					var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
+					var fileStream:FileStream = new FileStream();
+					fileStream.open(file, FileMode.READ);
+					var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
+					var arrayString: Array = content.split("\n");
+					for each(var line:String in arrayString) {
+						if(line != "") {
+							var arrayLineId: Array = line.split("==");
+							if(arrayLineId[0] == dev.id) {
+								var arrayLineAttributes: Array = arrayLineId[1].split(";");
+								portAutomatic.selected = (arrayLineAttributes[0] == "true");
+								portSelection.text = arrayLineAttributes[1];
+							}
+						}
+					}
+				}
 			}
 
 			private function closeHandler(event:CloseEvent):void{
@@ -25,9 +47,23 @@
 				portAutomatic.selected = portSelection.text == "";
 			}
 			
-			protected function button1_clickHandler(event:MouseEvent):void
+			protected function save_clickHandler(event:MouseEvent):void
 			{
 				// TODO Save settings
+				if(dev != null){
+					dev.settingsPort = portSelection.text;
+					dev.automaticPort = portAutomatic.selected;
+					//save profile
+					var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
+					var fileStream:FileStream = new FileStream();
+					fileStream.open(file, FileMode.WRITE);
+					var devices:ArrayCollection = AtsMobileStation.devices.getCollection();
+					for each(var dv:Device in devices) {
+						fileStream.writeUTFBytes(dv.id + "==" + dv.automaticPort + ";" + dv.settingsPort + ";\n");
+					}
+					
+					fileStream.close();
+				}
 				PopUpManager.removePopUp(this);
 			}
 			
@@ -51,7 +87,7 @@
 			</s:HGroup>
 			
 			<s:HGroup width="100%" paddingLeft="7" paddingRight="10" paddingTop="10" verticalCenter="0" verticalAlign="middle" gap="3" horizontalAlign="right">
-				<mx:Button fontSize="10" label="Save" click="button1_clickHandler(event)"/>
+				<mx:Button fontSize="10" label="Save" click="save_clickHandler(event)"/>
 			</s:HGroup>
 		</s:VGroup>
 		
