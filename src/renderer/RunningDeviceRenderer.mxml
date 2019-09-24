@@ -35,23 +35,18 @@
 				}
 			}
 			
-			protected function restart_clickHandler(event:MouseEvent):void
+			protected function settings_clickHandler(event:MouseEvent):void
 			{
 				dev.isCrashed = true;
 				dev.dispose();
 				dev.close();
 			}
 			
-			protected function removedFromStageHandler(event:Event):void
-			{
-				mainGroup.filters = []
-			}
-			
 			protected function mainGroup_rollOverHandler(event:MouseEvent):void
 			{
 				if(!DragManager.isDragging && (dev.status == "ready" || dev.status == "fail")){
-					restartButton.includeInLayout = true;
-					restartButton.visible = true;
+					settingsButton.includeInLayout = true;
+					settingsButton.visible = true;
 					iconStatus.visible = false;
 					iconStatus.includeInLayout = false;
 				}
@@ -59,10 +54,15 @@
 			
 			protected function mainGroup_rollOutHandler(event:MouseEvent):void
 			{
-				restartButton.includeInLayout = false;
-				restartButton.visible = false;
+				settingsButton.includeInLayout = false;
+				settingsButton.visible = false;
 				iconStatus.visible = true;
 				iconStatus.includeInLayout = true;
+			}
+			
+			protected function removedFromStageHandler(event:Event):void
+			{
+				mainGroup.filters = []
 			}
 			
 			override protected function get hovered():Boolean { return false; }
@@ -110,9 +110,9 @@
 		<s:Spacer width="100%"/>
 		
 		<s:BitmapImage id="iconStatus" source="assets/icons/24/{dev.status}.png" smooth="true" smoothingQuality="high"/>
-		<s:Group id="restartButton" buttonMode="true" click="restart_clickHandler(event)"
-				 toolTip="Restart driver" visible="false" includeInLayout="false">
-			<s:BitmapImage source="assets/icons/24/restart.png" smooth="true" smoothingQuality="high"/>
+		<s:Group id="settingsButton" buttonMode="true" click="settings_clickHandler(event)"
+				 toolTip="Settings of device" visible="false" includeInLayout="false">
+			<s:BitmapImage source="assets/icons/24/run.png" smooth="true" smoothingQuality="high"/>
 		</s:Group>
 	</s:HGroup>
 	<s:BitmapImage id="osBitmap" left="7" width="18" height="18" smooth="true" smoothingQuality="high"
