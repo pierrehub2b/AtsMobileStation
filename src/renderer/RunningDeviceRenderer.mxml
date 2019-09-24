@@ -12,11 +12,18 @@
 			
 			import mx.core.DragSource;
 			import mx.managers.DragManager;
+			import mx.managers.PopUpManager;
 			
 			import spark.filters.DropShadowFilter;
 			
 			import device.Device;
 			import device.IosDevice;
+			
+			import renderer.SettingsDeviceRenderer;
+			
+			private function showWindow(event:MouseEvent, dev:Device):void{
+				PopUpManager.createPopUp(this, SettingsDeviceRenderer);
+			}
 			
 			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
@@ -35,7 +42,7 @@
 				}
 			}
 			
-			protected function settings_clickHandler(event:MouseEvent):void
+			protected function restart_clickHandler(event:MouseEvent):void
 			{
 				dev.isCrashed = true;
 				dev.dispose();
@@ -47,6 +54,8 @@
 				if(!DragManager.isDragging && (dev.status == "ready" || dev.status == "fail")){
 					settingsButton.includeInLayout = true;
 					settingsButton.visible = true;
+					restartButton.includeInLayout = true;
+					restartButton.visible = true;
 					iconStatus.visible = false;
 					iconStatus.includeInLayout = false;
 				}
@@ -56,6 +65,8 @@
 			{
 				settingsButton.includeInLayout = false;
 				settingsButton.visible = false;
+				restartButton.includeInLayout = false;
+				restartButton.visible = false;
 				iconStatus.visible = true;
 				iconStatus.includeInLayout = true;
 			}
@@ -110,9 +121,13 @@
 		<s:Spacer width="100%"/>
 		
 		<s:BitmapImage id="iconStatus" source="assets/icons/24/{dev.status}.png" smooth="true" smoothingQuality="high"/>
-		<s:Group id="settingsButton" buttonMode="true" click="settings_clickHandler(event)"
+		<s:Group id="settingsButton" buttonMode="true" click="showWindow(event, dev)"
 				 toolTip="Settings of device" visible="false" includeInLayout="false">
 			<s:BitmapImage source="assets/icons/24/run.png" smooth="true" smoothingQuality="high"/>
+		</s:Group>
+		<s:Group id="restartButton" buttonMode="true" click="restart_clickHandler(event)"
+				 toolTip="Restart device" visible="false" includeInLayout="false">
+			<s:BitmapImage source="assets/icons/24/restart.png" smooth="true" smoothingQuality="high"/>
 		</s:Group>
 	</s:HGroup>
 	<s:BitmapImage id="osBitmap" left="7" width="18" height="18" smooth="true" smoothingQuality="high"

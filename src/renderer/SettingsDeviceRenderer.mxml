@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" showCloseButton="true" close="closeHandler(event)" xmlns:s="library://ns.adobe.com/flex/spark"
+				initialize = "settings_initializeHandler(event)" title="Device settings">
+	<mx:Script>
+		<![CDATA[
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			protected function settings_initializeHandler(event:FlexEvent):void {
+				portAutomatic.selected = portSelection.text == "";
+			}
+
+			private function closeHandler(event:CloseEvent):void{
+				PopUpManager.removePopUp(this);
+			}		
+			
+			protected function portAutomatic_changeHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+			}
+			
+			protected function portSelection_changeHandler(event:Event):void
+			{
+				portAutomatic.selected = portSelection.text == "";
+			}
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				// TODO Save settings
+				PopUpManager.removePopUp(this);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<s:Group id="deviceSettings" height="60" width="100%" left="5" right="5" top="5">
+		<s:VGroup width="100%" paddingLeft="7" paddingRight="10" verticalCenter="0" verticalAlign="middle" gap="3">
+			
+			<s:HGroup width="100%" paddingLeft="7" paddingRight="10" verticalCenter="0" verticalAlign="middle" gap="3">
+				<s:HGroup horizontalAlign="left">
+					<mx:Label fontSize="10" text="Fixed port"/>
+					<mx:TextInput id="portSelection" width="70" height="100%" restrict="0-9" maxChars="5" change="portSelection_changeHandler(event)" />
+				</s:HGroup>
+				
+				<s:Spacer width="100%"/>
+				
+				<s:HGroup horizontalAlign="right">
+					<mx:CheckBox id="portAutomatic" label="Auto" change="portAutomatic_changeHandler(event)"/>
+				</s:HGroup>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" paddingLeft="7" paddingRight="10" paddingTop="10" verticalCenter="0" verticalAlign="middle" gap="3" horizontalAlign="right">
+				<mx:Button fontSize="10" label="Save" click="button1_clickHandler(event)"/>
+			</s:HGroup>
+		</s:VGroup>
+		
+		
+	</s:Group>
+</mx:TitleWindow>
