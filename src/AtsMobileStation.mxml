@@ -38,6 +38,9 @@
 				
 				var iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
 				var resultDir:File = File.documentsDirectory.resolvePath("tmpDriverCode"); 
+				
+				resultDir.deleteDirectory(true);
+				
 				resultDir.createDirectory();
 				iosDriverProjectFolder.copyTo(resultDir, true);
 			}
