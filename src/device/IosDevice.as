@@ -33,7 +33,7 @@ package device
 			this.isSimulator = isSimulator;
 			this.isCrashed = false;
 			
-			var file:File = File.userDirectory.resolvePath(".actiontestscript/devicesPortsSettings.txt");
+			var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
 			if(file.exists) {
 				var fileStream:FileStream = new FileStream();
 				fileStream.open(file, FileMode.READ);
@@ -105,7 +105,7 @@ package device
 			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
 			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
 			trace("testing exit");
-			
+			AtsMobileStation.devices.restartDev(this);
 		}
 		
 		protected function onTestingOutput(event:ProgressEvent):void

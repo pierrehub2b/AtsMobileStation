@@ -50,9 +50,7 @@
 			
 			protected function restart_clickHandler(event:MouseEvent):void
 			{
-				dev.isCrashed = true;
-				dev.dispose();
-				dev.close();
+				AtsMobileStation.devices.restartDev(dev);
 			}
 			
 			protected function mainGroup_rollOverHandler(event:MouseEvent):void

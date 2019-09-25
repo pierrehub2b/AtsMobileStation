@@ -34,18 +34,12 @@
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
 				simulators = new AvailableSimulatorsManager();
-				simulators.addEventListener(AvailableSimulatorsManager.SIMULATOR_STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
 				devices = new RunningDevicesManager(port);
 				
 				var iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
 				var resultDir:File = File.documentsDirectory.resolvePath("tmpDriverCode"); 
 				resultDir.createDirectory();
 				iosDriverProjectFolder.copyTo(resultDir, true);
-			}
-			
-			protected function simulatorStatusChanged(ev:SimulatorEvent):void
-			{
-				devices.simulatorChanged(ev.simulator);
 			}
 			
 			protected function closeHandler(event:Event):void

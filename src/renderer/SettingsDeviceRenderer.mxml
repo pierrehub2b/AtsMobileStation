@@ -15,7 +15,7 @@
 			protected function settings_initializeHandler(event:FlexEvent):void {
 				
 				if(dev != null) {
-					var file:File = File.userDirectory.resolvePath(".actiontestscript/devicesPortsSettings.txt");
+					var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
 					if(file.exists) {
 						var fileStream:FileStream = new FileStream();
 						fileStream.open(file, FileMode.READ);
@@ -58,7 +58,7 @@
 					dev.settingsPort = portSelection.text;
 					dev.automaticPort = portAutomatic.selected;
 					//save profile
-					var file:File = File.userDirectory.resolvePath(".actiontestscript/devicesPortsSettings.txt");
+					var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
 					var fileStream:FileStream = new FileStream();
 					fileStream.open(file, FileMode.WRITE);
 					
@@ -72,9 +72,7 @@
 					fileStream.close();
 				}
 				if(hasToRestart) {
-					dev.isCrashed = true;
-					dev.dispose();
-					dev.close();
+					AtsMobileStation.devices.restartDev(dev);
 				}
 				PopUpManager.removePopUp(this);
 			}

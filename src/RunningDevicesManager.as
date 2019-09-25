@@ -61,8 +61,18 @@ package
 			}
 		}
 		
-		public function getCollection():ArrayCollection {
-			return this.collection;
+		public function restartDev(dev:Device):void {
+			this.collection;
+			var tmpCollection:ArrayCollection = new ArrayCollection();
+			for each(var dv:Device in this.collection) {
+				if(dv.id != dev.id) {
+					tmpCollection.addItem(dv);
+				}
+			}
+			dev.dispose();
+			dev.close();
+			this.collection = tmpCollection;
+			this.collection.refresh();
 		}
 		
 		public function getByUdid(array:Array, search:String):SimCtlDevice {
@@ -75,19 +85,6 @@ package
 				i++;
 			}
 			return null;
-		}
-		
-		public function simulatorChanged(sim:IosSimulator):void{
-			if(sim.phase == Simulator.RUN){
-				collection.addItem(sim.device);
-			}else{
-				var dv:Device = findDevice(sim.id)
-				if(dv != null){
-					collection.removeItem(dv);
-					dv.dispose();
-				}
-			}
-			collection.refresh()
 		}
 		
 		private function startAdbProcess():void{
@@ -250,11 +247,7 @@ package
 									dev = findDevice(data[3]);
 									
 									if(dev != null && dev.isCrashed) {
-										dev.dispose();
-										dev.close();
-										collection.removeItem(dev);
-										collection.refresh();
-										dev = null;
+										AtsMobileStation.devices.restartDev(dev);
 									}
 
 									if(dev == null){
@@ -275,9 +268,7 @@ package
 				
 				for each(dv in collection){
 					if(!dv.connected){
-						dv.dispose();
-						collection.removeItem(dv);
-						collection.refresh();
+						AtsMobileStation.devices.restartDev(dev);
 					}
 				}	
 			} catch(err:Error){
