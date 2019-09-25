@@ -254,7 +254,6 @@ package
 										dev.close();
 										collection.removeItem(dev);
 										collection.refresh();
-										AtsMobileStation.simulators.updateSimulatorInList(sim);
 										dev = null;
 									}
 

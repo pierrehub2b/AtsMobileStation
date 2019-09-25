@@ -5,7 +5,12 @@ package device
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
+	import flash.filesystem.FileMode;
+	import flash.filesystem.FileStream;
 	import flash.utils.setInterval;
+	import flash.xml.XMLDocument;
+	
+	import mx.collections.ArrayCollection;
 	
 	public class IosDevice extends Device
 	{
@@ -28,14 +33,65 @@ package device
 			this.isSimulator = isSimulator;
 			this.isCrashed = false;
 			
+			var file:File = File.userDirectory.resolvePath(".actiontestscript/devicesPortsSettings.txt");
+			if(file.exists) {
+				var fileStream:FileStream = new FileStream();
+				fileStream.open(file, FileMode.READ);
+				var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
+				var arrayString: Array = content.split("\n");
+				for each(var line:String in arrayString) {
+					if(line != "") {
+						var arrayLineId: Array = line.split("==");
+						if(arrayLineId[0] == id) {
+							var arrayLineAttributes: Array = arrayLineId[1].split(";");
+							automaticPort = (arrayLineAttributes[0] == "true");
+							settingsPort = arrayLineAttributes[1];
+						}
+					}
+				}
+				fileStream.close();
+			}
+		
 			installing()
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
 			
+			var resultDir:File = File.documentsDirectory.resolvePath("tmpDriverCode"); 
+			
+			file = resultDir.resolvePath("atsDriver/Settings.plist");
+			if(file.exists) {
+				fileStream = new FileStream();
+				fileStream.open(file, FileMode.READ);
+				content = fileStream.readUTFBytes(fileStream.bytesAvailable);
+				arrayString = content.split("\n");
+				var index:int = 0;
+				for each(var lineSettings:String in arrayString) {
+					if(lineSettings.indexOf("CFCustomPort") > 0) {
+						if(!automaticPort) {
+							arrayString[index+1] = "\t<string>"+ settingsPort +"</string>";
+						} else {
+							arrayString[index+1] = "\t<string></string>";
+						}
+						break;
+					}
+					index++;
+				}
+				fileStream.close();
+				
+				var writeFileStream:FileStream = new FileStream();
+				writeFileStream.open(file, FileMode.UPDATE);
+				for each(var str:String in arrayString) {
+					writeFileStream.writeUTFBytes(str + "\n");
+				}
+				writeFileStream.close();
+			}
+			
 			procInfo.executable = xcodeBuildExec;
-			procInfo.workingDirectory = iosDriverProjectFolder;
-			procInfo.arguments = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test-without-building"];
+			procInfo.workingDirectory = resultDir;
+			
+			procInfo.arguments = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test"];	
+			
 			testingProcess.start(procInfo);
 		}
 		
@@ -48,7 +104,6 @@ package device
 		protected function onTestingExit(event:NativeProcessExitEvent):void{
 			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
 			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
-
 			trace("testing exit");
 			
 		}

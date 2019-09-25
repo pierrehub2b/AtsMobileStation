@@ -3,7 +3,6 @@
 				initialize = "settings_initializeHandler(event)" title="Device settings">
 	<mx:Script>
 		<![CDATA[
-			import mx.collections.ArrayCollection;
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
@@ -11,26 +10,31 @@
 			import device.Device;
 			
 			public var dev:Device;
+			public var arrayString:Array;
 			
 			protected function settings_initializeHandler(event:FlexEvent):void {
-				portAutomatic.selected = portSelection.text == "";
+				
 				if(dev != null) {
-					var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
-					var fileStream:FileStream = new FileStream();
-					fileStream.open(file, FileMode.READ);
-					var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
-					var arrayString: Array = content.split("\n");
-					for each(var line:String in arrayString) {
-						if(line != "") {
-							var arrayLineId: Array = line.split("==");
-							if(arrayLineId[0] == dev.id) {
-								var arrayLineAttributes: Array = arrayLineId[1].split(";");
-								portAutomatic.selected = (arrayLineAttributes[0] == "true");
-								portSelection.text = arrayLineAttributes[1];
+					var file:File = File.userDirectory.resolvePath(".actiontestscript/devicesPortsSettings.txt");
+					if(file.exists) {
+						var fileStream:FileStream = new FileStream();
+						fileStream.open(file, FileMode.READ);
+						var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
+						arrayString = content.split("\n");
+						for each(var line:String in arrayString) {
+							if(line != "") {
+								var arrayLineId: Array = line.split("==");
+								if(arrayLineId[0] == dev.id) {
+									var arrayLineAttributes: Array = arrayLineId[1].split(";");
+									portAutomatic.selected = (arrayLineAttributes[0] == "true");
+									portSelection.text = arrayLineAttributes[1];
+								}
 							}
 						}
 					}
 				}
+				portAutomatic.selected = portSelection.text == "";
+				portSelection.enabled = !portAutomatic.selected;
 			}
 
 			private function closeHandler(event:CloseEvent):void{
@@ -39,7 +43,7 @@
 			
 			protected function portAutomatic_changeHandler(event:Event):void
 			{
-				// TODO Auto-generated method stub
+				portSelection.enabled = !portAutomatic.selected;
 			}
 			
 			protected function portSelection_changeHandler(event:Event):void
@@ -49,20 +53,28 @@
 			
 			protected function save_clickHandler(event:MouseEvent):void
 			{
-				// TODO Save settings
-				if(dev != null){
+				var hasToRestart:Boolean = dev.settingsPort != portSelection.text  || dev.automaticPort != portAutomatic.selected;
+				if(dev != null){ 
 					dev.settingsPort = portSelection.text;
 					dev.automaticPort = portAutomatic.selected;
 					//save profile
-					var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
+					var file:File = File.userDirectory.resolvePath(".actiontestscript/devicesPortsSettings.txt");
 					var fileStream:FileStream = new FileStream();
 					fileStream.open(file, FileMode.WRITE);
-					var devices:ArrayCollection = AtsMobileStation.devices.getCollection();
-					for each(var dv:Device in devices) {
-						fileStream.writeUTFBytes(dv.id + "==" + dv.automaticPort + ";" + dv.settingsPort + ";\n");
-					}
 					
+					for each(var str:String in arrayString) {
+						var arrayLineId: Array = str.split("==");
+						if(arrayLineId[0] != dev.id) {
+							fileStream.writeUTFBytes(str + "\n");
+						}
+					}
+					fileStream.writeUTFBytes(dev.id + "==" + dev.automaticPort + ";" + dev.settingsPort + ";");
 					fileStream.close();
+				}
+				if(hasToRestart) {
+					dev.isCrashed = true;
+					dev.dispose();
+					dev.close();
 				}
 				PopUpManager.removePopUp(this);
 			}
