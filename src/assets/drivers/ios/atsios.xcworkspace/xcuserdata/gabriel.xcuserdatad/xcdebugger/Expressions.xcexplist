@@ -3,6 +3,44 @@
    version = "1.0">
    <ContextStates>
       <ContextState
+         contextName = "atsDriver.convertIntoJSONString(arrayObject:):atsDriver.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "json.count">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "atsDriver.getChildrens(currentLevel:currentIndex:endedIndex:leveledTable:parentFrame:):atsDriver.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "parentFrame.height">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "atsDriver.setUp():atsDriver.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "myDict[@&quot;CFCustomPort&quot;].self.unsafelyUnwrapped">
+            </PersistentString>
+            <PersistentString
+               value = "${CUSTOM_PORT}">
+            </PersistentString>
+            <PersistentString
+               value = "Bundle.main">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "UIApplication.topMostViewController():topMostViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.keyWindow?">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "closure #1 in atsDriver.setupWebApp():atsDriver.swift">
          <PersistentStrings>
             <PersistentString
@@ -23,29 +61,13 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "UIApplication.topMostViewController():topMostViewController.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "self.keyWindow?">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "atsDriver.convertIntoJSONString(arrayObject:):atsDriver.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "json.count">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
          contextName = "specialized closure #2 in closure #1 in atsDriver.setupWebApp():atsDriver.swift">
       </ContextState>
       <ContextState
-         contextName = "atsDriver.getChildrens(currentLevel:currentIndex:endedIndex:leveledTable:parentFrame:):atsDriver.swift">
+         contextName = "static UIApplication.customPort.getter:atsDriver.swift">
          <PersistentStrings>
             <PersistentString
-               value = "parentFrame.height">
+               value = "Bundle.main.path(forResource: &quot;CFCustomPort&quot;, ofType: &quot;plist&quot;)">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

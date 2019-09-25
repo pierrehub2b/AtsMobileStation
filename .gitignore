@@ -2,8 +2,8 @@
 bin-debug/
 bin-release/
 release/
-temp/
 src/assets/tools/
+temp/
 [Oo]bj/
 [Bb]in/
 

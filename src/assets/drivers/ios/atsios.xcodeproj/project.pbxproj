@@ -24,6 +24,7 @@
 		04FB981022F17BC500D2B564 /* libEmbassy.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04FB980F22F17BC500D2B564 /* libEmbassy.a */; };
 		04FB981222F17BC500D2B564 /* libEnvoyAmbassador.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04FB981122F17BC500D2B564 /* libEnvoyAmbassador.a */; };
 		4642DFB0BA296DCD9288BF84 /* libPods-atsDriver.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 672037982A627CDF33E32082 /* libPods-atsDriver.a */; };
+		C0D378BF233B5E5C009A6AB1 /* Settings.plist in Resources */ = {isa = PBXBuildFile; fileRef = 047BFA8122F178D800BB2E25 /* Settings.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,7 +56,7 @@
 		047BFA7622F178D800BB2E25 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		047BFA7B22F178D800BB2E25 /* atsDriver.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = atsDriver.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		047BFA7F22F178D800BB2E25 /* atsDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = atsDriver.swift; sourceTree = "<group>"; };
-		047BFA8122F178D800BB2E25 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		047BFA8122F178D800BB2E25 /* Settings.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Settings.plist; sourceTree = "<group>"; };
 		048E4D3C230E7E3C0004B08E /* libSocket.IO-Client-Swift.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libSocket.IO-Client-Swift.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		048E4D3E230E7E3C0004B08E /* libStarscream.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libStarscream.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		048E4D40230E8D7A0004B08E /* libSocket.swift.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libSocket.swift.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -133,7 +134,7 @@
 			isa = PBXGroup;
 			children = (
 				047BFA7F22F178D800BB2E25 /* atsDriver.swift */,
-				047BFA8122F178D800BB2E25 /* Info.plist */,
+				047BFA8122F178D800BB2E25 /* Settings.plist */,
 				0417A86C231535850094FC89 /* UIElement.swift */,
 				0417A86E231535A10094FC89 /* ActionsEnum.swift */,
 				0417A870231536100094FC89 /* DeviceButtons.swift */,
@@ -267,6 +268,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0D378BF233B5E5C009A6AB1 /* Settings.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -386,7 +388,6 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				CUSTOM_PORT = 9191;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -450,7 +451,6 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				CUSTOM_PORT = 9191;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -521,10 +521,8 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CUSTOM_PORT = 8080;
 				DEVELOPMENT_TEAM = X58W5PF95D;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"CUSTOM_PORT=$(CUSTOM_PORT)",
 					"$(inherited)",
 					"COCOAPODS=1",
 				);
@@ -550,10 +548,8 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CUSTOM_PORT = 8080;
 				DEVELOPMENT_TEAM = X58W5PF95D;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"CUSTOM_PORT=$(CUSTOM_PORT)",
 					"$(inherited)",
 					"COCOAPODS=1",
 				);
