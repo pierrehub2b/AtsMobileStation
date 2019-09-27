@@ -60,7 +60,7 @@ package device
 		protected function installing():void{
 			status = INSTALL;
 			tooltip = "Installing driver ...";
-			trace("Install driver ...");
+			trace("Install driver");
 		}
 		
 		protected function started():void{

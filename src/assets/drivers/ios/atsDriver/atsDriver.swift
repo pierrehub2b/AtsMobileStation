@@ -82,13 +82,10 @@ class atsDriver: XCTestCase {
         
         XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
         
-        print("Custom port ='" + customPort + "'");
         if(customPort != "") {
             let (isFree, _) = checkTcpPortForListen(port: UInt16(customPort)!)
             if(isFree == true) {
                 self.port = Int(customPort)!
-            } else {
-                return;
             }
         } else {
             for i in 8080..<65000 {
@@ -202,7 +199,9 @@ class atsDriver: XCTestCase {
     private func setupWebApp() {
         
         let loop = try! SelectorEventLoop(selector: try! KqueueSelector())
-        print(self.port);
+        if(port == 0) {
+            return;
+        }
         let server = DefaultHTTPServer(eventLoop: loop, interface: "0.0.0.0", port: self.port) {
             (
             environ: [String: Any],
