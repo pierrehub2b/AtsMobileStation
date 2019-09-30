@@ -10,15 +10,13 @@
 		<![CDATA[
 			import com.greensock.TweenMax;
 			
-			import event.SimulatorEvent;
-			
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.events.FlexEvent;
 			
-			import renderer.RunningDeviceRenderer;
-			
 			import spark.filters.DropShadowFilter;
+			
+			import renderer.RunningDeviceRenderer;
 			
 			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
@@ -39,7 +37,9 @@
 				var iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
 				var resultDir:File = File.documentsDirectory.resolvePath("tmpDriverCode"); 
 				
-				resultDir.deleteDirectory(true);
+				if(resultDir.exists){
+					resultDir.deleteDirectory(true);
+				}
 				
 				resultDir.createDirectory();
 				iosDriverProjectFolder.copyTo(resultDir, true);
