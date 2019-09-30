@@ -20,6 +20,7 @@ package
 	
 	import device.AndroidDevice;
 	import device.Device;
+	import device.IosDevice;
 	
 	import event.SimulatorEvent;
 	
@@ -240,9 +241,11 @@ package
 			for each(dv in collection){
 				dv.connected = false;
 			}
+			
 			var obj:Object;
 			var dev:Device;
 			var devices:Object;
+			
 			var simctl:Array = new Array();
 			
 			try {	
@@ -260,14 +263,18 @@ package
 				}
 				
 				arrayInstrument.removeAt(0)
+					
 				var containsPhysicalDevice:Boolean = false;
 				var deviceSimData: Array;
+				
 				for each(var line:String in arrayInstrument){
 					var isPhysicalDevice: Boolean = line.indexOf("(Simulator)") == -1;
 					if(isPhysicalDevice) {
 						containsPhysicalDevice = true;
 						deviceSimData = regex.exec(line);
+						continue;
 					}
+					
 					if(line.indexOf("iPhone") == 0) {
 						var data:Array = regex.exec(line);
 						if(data != null){
@@ -275,11 +282,12 @@ package
 							if((currentElement != null && currentElement.getIsAvailable())) {
 								var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : false;
 								if(isRunning) {
-									dev = findDevice(data[3]);
+									dev = findDevice(data[3]) as IosDevice;
 									
-									if(dev != null && dev.isCrashed && dev.isSimulator) {
+									if(dev != null && dev.isCrashed) {
 										dev.dispose();
-										dev.close();
+										collection.removeItem(dev);
+										collection.refresh();
 										dev = null;
 									}
 									
@@ -291,7 +299,7 @@ package
 										dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
 										collection.addItem(dev);
 										collection.refresh();
-									}else if(dev != null) {
+									}else {
 										dev.connected = true;
 									}
 								}
@@ -302,10 +310,20 @@ package
 				
 				if(!containsPhysicalDevice) {
 					iosPhysicalDevicePluged = "";
+					// clean collection
+					var tmpCollection:ArrayCollection = collection;
+					for each(var d:Device in tmpCollection) {
+						if(!d.isSimulator) {
+							collection.removeItem(d);
+							collection.refresh();
+						}
+					}
 				} else {
 					if(deviceSimData != null) {
-						dev = findDevice(deviceSimData[3]);
+						dev = findDevice(deviceSimData[3]) as IosDevice;
 						if(dev != null && dev.isCrashed) {
+							dev.dispose();
+							dev.close();
 							dev = null;
 							iosPhysicalDevicePluged = "";
 						}
@@ -359,6 +377,7 @@ package
 			//process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
 			iosProcess.removeEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit);
 			iosProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
+			arrayInstrument = new Array();
 			arrayInstrument = output.split("\n");
 			output = ""
 			//now retrieving the list of simulators with status	
@@ -371,7 +390,11 @@ package
 		private function findDevice(id:String):Device{
 			for each(var dv:Device in collection) {
 				if(dv.id == id){
-					return dv;
+					if(dv.manufacturer != "Apple") {
+						return dv as AndroidDevice;
+					} else {
+						return dv as IosDevice;
+					}
 				}
 			}
 			return null;

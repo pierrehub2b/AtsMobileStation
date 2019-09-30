@@ -12,7 +12,7 @@ package device
 		
 		[Bindable]
 		public var id:String;
-				
+		
 		[Bindable]
 		public var ip:String;
 		
