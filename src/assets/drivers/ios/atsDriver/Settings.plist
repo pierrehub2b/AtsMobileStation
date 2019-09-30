@@ -17,12 +17,10 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFCustomPort</key>
-	<string>$(CUSTOM_PORT)</string>
+	<string></string>
 	<key>LSApplicationCategoryType</key>
 	<string></string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
-	<key>CustomPort</key>
-	<string>$(CUSTOM_PORT)</string>
 </dict>
 </plist>

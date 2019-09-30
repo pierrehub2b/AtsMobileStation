@@ -12,11 +12,24 @@
 			
 			import mx.core.DragSource;
 			import mx.managers.DragManager;
+			import mx.managers.PopUpManager;
 			
 			import spark.filters.DropShadowFilter;
 			
 			import device.Device;
 			import device.IosDevice;
+			
+			import renderer.SettingsDeviceRenderer;
+			
+			private function showWindow(event:MouseEvent, dev:Device):void{
+				// create and configure the TitleWindow
+				var tw:SettingsDeviceRenderer = new SettingsDeviceRenderer();
+				tw.title = "Device settings";
+				tw.showCloseButton = true;
+				tw.dev = dev;
+				// open the TitleWindow as a modal popup window
+				PopUpManager.addPopUp(tw, this, true);
+			}
 			
 			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
@@ -37,19 +50,14 @@
 			
 			protected function restart_clickHandler(event:MouseEvent):void
 			{
-				dev.isCrashed = true;
-				dev.dispose();
-				dev.close();
-			}
-			
-			protected function removedFromStageHandler(event:Event):void
-			{
-				mainGroup.filters = []
+				AtsMobileStation.devices.restartDev(dev);
 			}
 			
 			protected function mainGroup_rollOverHandler(event:MouseEvent):void
 			{
 				if(!DragManager.isDragging && (dev.status == "ready" || dev.status == "fail")){
+					settingsButton.includeInLayout = true;
+					settingsButton.visible = true;
 					restartButton.includeInLayout = true;
 					restartButton.visible = true;
 					iconStatus.visible = false;
@@ -59,10 +67,17 @@
 			
 			protected function mainGroup_rollOutHandler(event:MouseEvent):void
 			{
+				settingsButton.includeInLayout = false;
+				settingsButton.visible = false;
 				restartButton.includeInLayout = false;
 				restartButton.visible = false;
 				iconStatus.visible = true;
 				iconStatus.includeInLayout = true;
+			}
+			
+			protected function removedFromStageHandler(event:Event):void
+			{
+				mainGroup.filters = []
 			}
 			
 			override protected function get hovered():Boolean { return false; }
@@ -110,8 +125,12 @@
 		<s:Spacer width="100%"/>
 		
 		<s:BitmapImage id="iconStatus" source="assets/icons/24/{dev.status}.png" smooth="true" smoothingQuality="high"/>
+		<s:Group id="settingsButton" buttonMode="true" click="showWindow(event, dev)"
+				 toolTip="Settings of device" visible="false" includeInLayout="false">
+			<s:BitmapImage source="assets/icons/24/run.png" smooth="true" smoothingQuality="high"/>
+		</s:Group>
 		<s:Group id="restartButton" buttonMode="true" click="restart_clickHandler(event)"
-				 toolTip="Restart driver" visible="false" includeInLayout="false">
+				 toolTip="Restart device" visible="false" includeInLayout="false">
 			<s:BitmapImage source="assets/icons/24/restart.png" smooth="true" smoothingQuality="high"/>
 		</s:Group>
 	</s:HGroup>

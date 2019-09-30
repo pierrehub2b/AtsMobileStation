@@ -27,7 +27,6 @@
 		
 		<mxmlc file="src/${APP_NAME}.mxml"
             output="temp/${APP_NAME}.swf"
-            locale="en_US"
             static-rsls="true"
             accessible="false"
             configname="air"
@@ -44,7 +43,6 @@
         	<source-path path-element="src"/>
             <external-library-path file="${FLEX_HOME}/frameworks/libs/air/airglobal.swc" append="true"/>
             <library-path dir="libs" includes="*.swc" append="true"/>
-        	<source-path>src/locale/{locale}</source-path>
         	<include-resource-bundles>labels</include-resource-bundles>
         	<include-resource-bundles>short_labels</include-resource-bundles>
         	<include-resource-bundles>tooltips</include-resource-bundles>

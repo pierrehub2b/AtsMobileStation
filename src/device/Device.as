@@ -12,12 +12,18 @@ package device
 		
 		[Bindable]
 		public var id:String;
-				
+		
 		[Bindable]
 		public var ip:String;
 		
 		[Bindable]
 		public var port:String = "";
+		
+		[Bindable]
+		public var settingsPort:String = "";
+		
+		[Bindable]
+		public var automaticPort:Boolean = true;
 		
 		[Bindable]
 		public var error:String = null;
@@ -54,7 +60,7 @@ package device
 		protected function installing():void{
 			status = INSTALL;
 			tooltip = "Installing driver ...";
-			trace("Install driver ...");
+			trace("Install driver");
 		}
 		
 		protected function started():void{

@@ -26,7 +26,7 @@
 			private var port:String = "8080";
 			
 			[Bindable]
-			private var devices:RunningDevicesManager;
+			public static var devices:RunningDevicesManager;
 			
 			[Bindable]
 			public static var simulators:AvailableSimulatorsManager;
@@ -34,13 +34,15 @@
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
 				simulators = new AvailableSimulatorsManager();
-				simulators.addEventListener(AvailableSimulatorsManager.SIMULATOR_STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
 				devices = new RunningDevicesManager(port);
-			}
-			
-			protected function simulatorStatusChanged(ev:SimulatorEvent):void
-			{
-				devices.simulatorChanged(ev.simulator);
+				
+				var iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
+				var resultDir:File = File.documentsDirectory.resolvePath("tmpDriverCode"); 
+				
+				resultDir.deleteDirectory(true);
+				
+				resultDir.createDirectory();
+				iosDriverProjectFolder.copyTo(resultDir, true);
 			}
 			
 			protected function closeHandler(event:Event):void

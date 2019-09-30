@@ -76,6 +76,16 @@ package simulator
 				procInfo.executable = xcrunExec;
 				process.addEventListener(NativeProcessExitEvent.EXIT, onShutdownExit, false, 0, true);
 				
+				var index:int = 0;
+				for each(var d:IosDevice in AtsMobileStation.devices.collection) {
+					if(id == d.id) {
+						AtsMobileStation.devices.collection.removeItemAt(index);
+						AtsMobileStation.devices.collection.refresh();
+						break;
+					}
+					index++;
+				}
+				
 				procInfo.arguments = new <String>["simctl", "shutdown", id];
 				process.start(procInfo);
 			}

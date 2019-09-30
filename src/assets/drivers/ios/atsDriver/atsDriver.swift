@@ -28,7 +28,7 @@ class atsDriver: XCTestCase {
     
     let udpThread = DispatchQueue(label: "udpQueue", qos: .userInitiated)
     var domThread = DispatchQueue(label: "domQueue", qos: .userInitiated)
-    var port = 8080
+    var port = 0
     var currentAppIdentifier: String = ""
     var resultElement: [String: Any] = [:]
     var captureStruct: String = ""
@@ -51,7 +51,7 @@ class atsDriver: XCTestCase {
     let bluetoothName = UIDevice.current.name
     var deviceWidth = 1.0
     var deviceHeight = 1.0
-    let maxHeight = 800.0
+    let maxHeight = 840.0
     var ratioScreen = 1.0
     var isAlert = false
     
@@ -73,14 +73,28 @@ class atsDriver: XCTestCase {
             self.udpStart()
         }
         
+        var customPort = "";
+        let testBundle = Bundle(for: atsDriver.self)
+        if let url = testBundle.url(forResource: "Settings", withExtension: "plist"),
+          let myDict = NSDictionary(contentsOf: url) as? [String:Any] {
+            customPort = myDict["CFCustomPort"].unsafelyUnwrapped as! String;
+        }
+        
         XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
         
-        for i in 8080..<65000 {
-            let (isFree, _) = checkTcpPortForListen(port: UInt16(i))
-            if (isFree == true && i != self.udpPort) {
-                self.port = i
-                break;
+        if(customPort != "") {
+            let (isFree, _) = checkTcpPortForListen(port: UInt16(customPort)!)
+            if(isFree == true) {
+                self.port = Int(customPort)!
             }
+        } else {
+            for i in 8080..<65000 {
+               let (isFree, _) = checkTcpPortForListen(port: UInt16(i))
+               if (isFree == true && i != self.udpPort) {
+                   self.port = i
+                   break;
+               }
+           }
         }
         
         self.setupWebApp()
@@ -185,7 +199,9 @@ class atsDriver: XCTestCase {
     private func setupWebApp() {
         
         let loop = try! SelectorEventLoop(selector: try! KqueueSelector())
-        
+        if(port == 0) {
+            return;
+        }
         let server = DefaultHTTPServer(eventLoop: loop, interface: "0.0.0.0", port: self.port) {
             (
             environ: [String: Any],
@@ -294,7 +310,7 @@ class atsDriver: XCTestCase {
                     self.resultElement["root"] = app.debugDescription
                     
                 case ActionsEnum.CAPTURE.rawValue:
-                    if(app == nil) { 
+                    if(app == nil) {
                         self.resultElement["message"] = "no app has been launched"
                         self.resultElement["status"] = -99
                         break
@@ -883,19 +899,24 @@ class atsDriver: XCTestCase {
     }
     
     func driverInfoBase(applyRatio: Bool) {
-        let screenNativeBounds = XCUIScreen.main.screenshot().image
-        self.ratioScreen = self.maxHeight / Double(screenNativeBounds.size.height)
+        let screenBounds = UIScreen.main.nativeBounds
+        let screenScale = UIScreen.main.nativeScale
+        let screenSize = CGSize(width: screenBounds.size.width * screenScale, height: screenBounds.size.height * screenScale)
         
-        self.deviceWidth = Double(screenNativeBounds.size.width) * self.ratioScreen
-        self.deviceHeight = Double(screenNativeBounds.size.height) * self.ratioScreen
+        if(applyRatio) {
+            let screenNativeBounds = XCUIScreen.main.screenshot().image
+            self.ratioScreen = self.maxHeight / Double(screenNativeBounds.size.height)
+            self.deviceWidth = Double(screenNativeBounds.size.width) * self.ratioScreen
+            self.deviceHeight = Double(screenNativeBounds.size.height) * self.ratioScreen
+        }
         
         self.resultElement["os"] = "ios"
         self.resultElement["driverVersion"] = "1.0.0"
         self.resultElement["systemName"] = model + " - " + osVersion
-        self.resultElement["deviceWidth"] = applyRatio ? self.deviceWidth : screenNativeBounds.size.width
-        self.resultElement["deviceHeight"] = applyRatio ? self.deviceHeight : screenNativeBounds.size.height
-        self.resultElement["channelWidth"] = applyRatio ? self.deviceWidth : screenNativeBounds.size.width
-        self.resultElement["channelHeight"] = applyRatio ? self.deviceHeight : screenNativeBounds.size.height
+        self.resultElement["deviceWidth"] = applyRatio ? self.deviceWidth : screenSize.width
+        self.resultElement["deviceHeight"] = applyRatio ? self.deviceHeight : screenSize.height
+        self.resultElement["channelWidth"] = applyRatio ? self.deviceWidth : screenSize.width
+        self.resultElement["channelHeight"] = applyRatio ? self.deviceHeight : screenSize.height
         self.resultElement["channelX"] = 0
         self.resultElement["channelY"] = 0
     }
