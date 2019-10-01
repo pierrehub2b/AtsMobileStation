@@ -26,11 +26,8 @@ package
 		
 		private var regex:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 			
-		protected var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-		protected var process:NativeProcess = new NativeProcess();
-		
-		protected var procInfoState:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-		protected var processState:NativeProcess = new NativeProcess();
+		protected var procInfo:NativeProcessStartupInfo;
+		protected var process:NativeProcess;
 		
 		private var output:String = "";
 		private var arrayInstrument: Array = new Array();
@@ -44,6 +41,8 @@ package
 		public function AvailableSimulatorsManager()
 		{
 			if(Capabilities.os.indexOf("Mac") > -1){
+				procInfo = new NativeProcessStartupInfo();
+				process = new NativeProcess();
 				this.refreshList();
 			}
 		}

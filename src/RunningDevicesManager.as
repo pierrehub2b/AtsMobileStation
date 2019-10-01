@@ -29,15 +29,15 @@ package
 	public class RunningDevicesManager
 	{
 		//ios Proc info
-		protected var iosProcInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-		protected var iosProcess:NativeProcess = new NativeProcess();
+		protected var iosProcInfo:NativeProcessStartupInfo;
+		protected var iosProcess:NativeProcess;
 		
 		//android Proc info
 		protected var adbProcInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 		protected var adbProcess:NativeProcess = new NativeProcess();
-	
+		
 		private var regex:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
-			
+		
 		private var adbFile:File;
 		private var errorStack:String = "";
 		private var output:String = "";
@@ -46,11 +46,6 @@ package
 		private var port:String = "8080";
 		
 		private var arrayInstrument: Array = new Array();
-		
-		public var iosPhysicalDevicePluged:String = ""; 
-		private var attempts: int = 0;
-		private var maxAttempts: int = 3;
-		
 		
 		[Bindable]
 		public var collection:ArrayCollection = new ArrayCollection();
@@ -64,6 +59,9 @@ package
 			
 			var adbPath:String = "assets/tools/android/adb";
 			if(Capabilities.os.indexOf("Mac") > -1){
+				iosProcInfo = new NativeProcessStartupInfo();
+				iosProcess = new NativeProcess();
+				
 				iosProcInfo.executable = new File("/usr/bin/env");
 				iosProcInfo.workingDirectory = File.userDirectory;
 				
@@ -95,7 +93,6 @@ package
 		}	
 		
 		public function restartDev(dev:Device):void {
-			this.collection;
 			var tmpCollection:ArrayCollection = new ArrayCollection();
 			for each(var dv:Device in this.collection) {
 				if(dv.id != dev.id) {
@@ -263,40 +260,37 @@ package
 				}
 				
 				arrayInstrument.removeAt(0)
-					
 				var containsPhysicalDevice:Boolean = false;
-				var deviceSimData: Array;
-				
 				for each(var line:String in arrayInstrument){
 					var isPhysicalDevice: Boolean = line.indexOf("(Simulator)") == -1;
+					var data:Array = regex.exec(line);
 					if(isPhysicalDevice) {
 						containsPhysicalDevice = true;
-						deviceSimData = regex.exec(line);
-						continue;
 					}
 					
-					if(line.indexOf("iPhone") == 0) {
-						var data:Array = regex.exec(line);
+					if(line.indexOf("iPhone") == 0 || isPhysicalDevice) {
 						if(data != null){
 							var currentElement:SimCtlDevice = getByUdid(simctl, data[3]);
-							if((currentElement != null && currentElement.getIsAvailable())) {
-								var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : false;
+							if((currentElement != null && currentElement.getIsAvailable()) || isPhysicalDevice) {
+								var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : isPhysicalDevice;
 								if(isRunning) {
 									dev = findDevice(data[3]) as IosDevice;
-									
+									var isRedifined:Boolean = false;
 									if(dev != null && dev.isCrashed) {
+										isRedifined = true;
 										dev.dispose();
+										dev.close();
 										collection.removeItem(dev);
 										collection.refresh();
-										dev = null;
 									}
 									
-
-									if(dev == null) {
-										var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], isRunning, true);
-										AtsMobileStation.simulators.updateSimulatorInList(sim);
-										dev = sim.device;
-										dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
+									if(dev == null || isRedifined) {
+										var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], isRunning, !isPhysicalDevice);
+										dev = sim.device;								
+										if(!isPhysicalDevice) {
+											AtsMobileStation.simulators.updateSimulatorInList(sim);
+											dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
+										}
 										collection.addItem(dev);
 										collection.refresh();
 									}else {
@@ -309,53 +303,17 @@ package
 				}
 				
 				if(!containsPhysicalDevice) {
-					iosPhysicalDevicePluged = "";
-					// clean collection
 					var tmpCollection:ArrayCollection = collection;
 					for each(var d:Device in tmpCollection) {
 						if(!d.isSimulator) {
+							d.dispose();
+							d.close();
 							collection.removeItem(d);
 							collection.refresh();
 						}
 					}
-				} else {
-					if(deviceSimData != null) {
-						dev = findDevice(deviceSimData[3]) as IosDevice;
-						if(dev != null && dev.isCrashed) {
-							dev.dispose();
-							dev.close();
-							dev = null;
-							iosPhysicalDevicePluged = "";
-						}
+				} 
 						
-						if(iosPhysicalDevicePluged == "") {
-							trace("device plugged");
-							iosPhysicalDevicePluged = deviceSimData[3];
-							var tmpCollection: ArrayCollection = new ArrayCollection();
-							for each(var currentDev:Device in collection) {
-								if(dv.id != iosPhysicalDevicePluged) {
-									tmpCollection.addItem(dv);
-								}
-							}
-							collection = tmpCollection;
-							var simPhysical:IosSimulator = new IosSimulator(deviceSimData[3], deviceSimData[1], deviceSimData[2], true, false);
-							dev = simPhysical.device;
-							collection.addItem(dev);
-							collection.refresh();
-						} else {
-							if(dev != null && dev.ip != "0.0.0.0" && dev.port != "") {
-								attempts = 0;
-							} else {
-								attempts++;
-							}
-							if(attempts > maxAttempts) {
-								iosPhysicalDevicePluged = "";
-								attempts = 0;
-							}
-						}
-					}
-				}
-				
 				for each(dv in collection){
 					if(!dv.connected && dv.isSimulator){
 						AtsMobileStation.devices.restartDev(dev);

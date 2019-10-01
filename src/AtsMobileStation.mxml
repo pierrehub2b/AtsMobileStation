@@ -33,21 +33,32 @@
 			{
 				simulators = new AvailableSimulatorsManager();
 				devices = new RunningDevicesManager(port);
-				
-				var iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
-				var resultDir:File = File.documentsDirectory.resolvePath("tmpDriverCode"); 
-				
-				if(resultDir.exists){
-					resultDir.deleteDirectory(true);
-				}
-				
-				resultDir.createDirectory();
-				iosDriverProjectFolder.copyTo(resultDir, true);
 			}
 			
 			protected function closeHandler(event:Event):void
 			{
+				cleanDirectory(File.documentsDirectory.resolvePath("tmpDir"));
 				devices.terminate();
+			}
+			
+			protected function cleanDirectory(directory:File):void
+			{
+				if (directory.isDirectory) 
+				{
+					var dirArray: Array = new Array();
+					var files:Array = directory.getDirectoryListing();
+					for (var i:int = 0; i < files.length; i++)
+					{
+						if (files[i].isDirectory && files[i].nativePath.indexOf("driver_") > -1)
+						{
+							dirArray.push(files[i]);
+						}
+					}
+					
+					for each(var d:File in dirArray) {
+						d.deleteDirectory(true);
+					}
+				}
 			}
 			
 			protected function clickGroup_clickHandler(event:MouseEvent):void

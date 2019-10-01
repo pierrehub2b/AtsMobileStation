@@ -42,7 +42,7 @@ package device
 				for each(var line:String in arrayString) {
 					if(line != "") {
 						var arrayLineId: Array = line.split("==");
-						if(arrayLineId[0] == id) {
+						if(arrayLineId[0].toString().toLowerCase() == id.toString().toLowerCase()) {
 							var arrayLineAttributes: Array = arrayLineId[1].split(";");
 							automaticPort = (arrayLineAttributes[0] == "true");
 							settingsPort = arrayLineAttributes[1];
@@ -62,7 +62,8 @@ package device
 			
 			testingProcessPhysical.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingPhysicalOutput, false, 0, true);
 			
-			var resultDir:File = File.documentsDirectory.resolvePath("tmpDriverCode"); 
+			var resultDir:File = File.documentsDirectory.resolvePath("tmpDir/driver_"+ id);
+			iosDriverProjectFolder.copyTo(resultDir, true);
 			
 			file = resultDir.resolvePath("atsDriver/Settings.plist");
 			if(file.exists) {
@@ -98,8 +99,10 @@ package device
 			procInfoPhysical.executable = xcodeBuildExec;
 			procInfoPhysical.workingDirectory = resultDir;
 			
-			procInfo.arguments = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test"];	
-			procInfoPhysical.arguments = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test"];
+			
+			var args: Vector.<String> = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test"];	
+			procInfo.arguments = args;
+			procInfoPhysical.arguments = args;
 			if(isSimulator) {
 				testingProcess.start(procInfo);
 			} else {

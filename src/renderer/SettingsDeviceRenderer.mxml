@@ -24,7 +24,7 @@
 						for each(var line:String in arrayString) {
 							if(line != "") {
 								var arrayLineId: Array = line.split("==");
-								if(arrayLineId[0] == dev.id) {
+								if(arrayLineId[0].toString().toLowerCase() == dev.id.toString().toLowerCase()) {
 									var arrayLineAttributes: Array = arrayLineId[1].split(";");
 									portAutomatic.selected = (arrayLineAttributes[0] == "true");
 									portSelection.text = arrayLineAttributes[1];
@@ -64,11 +64,11 @@
 					
 					for each(var str:String in arrayString) {
 						var arrayLineId: Array = str.split("==");
-						if(arrayLineId[0] != dev.id) {
+						if(arrayLineId[0].toString().toLowerCase() != dev.id.toString().toLowerCase()) {
 							fileStream.writeUTFBytes(str + "\n");
 						}
 					}
-					fileStream.writeUTFBytes(dev.id + "==" + dev.automaticPort + ";" + dev.settingsPort + ";");
+					fileStream.writeUTFBytes(dev.id.toString().toLowerCase() + "==" + dev.automaticPort + ";" + dev.settingsPort + ";");
 					fileStream.close();
 				}
 				if(hasToRestart) {
