@@ -56,8 +56,10 @@
 			protected function mainGroup_rollOverHandler(event:MouseEvent):void
 			{
 				if(!DragManager.isDragging && (dev.status == "ready" || dev.status == "fail")){
-					settingsButton.includeInLayout = true;
-					settingsButton.visible = true;
+					if(this.dev is IosDevice) {
+						settingsButton.includeInLayout = true;
+						settingsButton.visible = true;
+					}
 					restartButton.includeInLayout = true;
 					restartButton.visible = true;
 					iconStatus.visible = false;
@@ -67,8 +69,10 @@
 			
 			protected function mainGroup_rollOutHandler(event:MouseEvent):void
 			{
-				settingsButton.includeInLayout = false;
-				settingsButton.visible = false;
+				if(this.dev is IosDevice) {
+					settingsButton.includeInLayout = false;
+					settingsButton.visible = false;
+				}
 				restartButton.includeInLayout = false;
 				restartButton.visible = false;
 				iconStatus.visible = true;
