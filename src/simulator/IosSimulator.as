@@ -30,10 +30,10 @@ package simulator
 			this.id = id;
 			this.name = StringUtil.trim(name);
 			this.version = version;
-			this.phase = isBooted ? RUN : OFF;
 			this.isSimulator = isSimulator;
 			if(isBooted) {
-				tooltip = "Shutdown simulator";
+				phase = RUN;
+				tooltip = "shutdown simulator";
 			}
 		}
 		
@@ -66,7 +66,7 @@ package simulator
 				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
 				process.addEventListener(NativeProcessExitEvent.EXIT, onBootExit, false, 0, true);
 
-				procInfo.arguments = new <String>["simctl", "bootstatus", id, "-b"];
+				procInfo.arguments = new <String>["simctl", "bootstatus", id];
 				process.start(procInfo);
 			} else {
 				phase = WAIT;
@@ -105,18 +105,6 @@ package simulator
 		
 		protected function onBootExit(event:NativeProcessExitEvent):void{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onBootExit);
-			process.addEventListener(NativeProcessExitEvent.EXIT, onSimulatorStartedExit, false, 0, true);
-			
-			trace("Simulator started, open simulator app ...")
-			
-			procInfo.executable = openExec;
-			procInfo.arguments = new <String>["-a", "simulator"];
-			process.start(procInfo);
-		}
-		
-		protected function onSimulatorStartedExit(event:NativeProcessExitEvent):void{
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onSimulatorStartedExit);
-			
 			phase = RUN;
 			tooltip = "Shutdown simulator";
 			dispatchEvent(new Event(STATUS_CHANGED));

@@ -48,19 +48,25 @@ package
 				procInfo.executable = new File("/usr/bin/env");
 				procInfo.workingDirectory = File.userDirectory;
 				
+				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
+				process.addEventListener(NativeProcessExitEvent.EXIT, onStartSimulatorExit, false, 0, true);
+				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onInstrumentsOutput, false, 0, true);
+				
 				procInfo.arguments = new <String>["open", "-a", "Simulator"];
 				process.start(procInfo);
-				
-				this.refreshList();
 			}
+		}
+		
+		protected function onStartSimulatorExit(event:NativeProcessExitEvent):void
+		{
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onStartSimulatorExit);
+			this.refreshList();
 		}
 		
 		public function refreshList():void {
 			if(!process.running) {
 				collection = new ArrayCollection();
-				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
 				process.addEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit, false, 0, true);
-				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onInstrumentsOutput, false, 0, true);
 				
 				procInfo.arguments = new <String>["xcrun", "instruments", "-s", "devices"];
 				process.start(procInfo);

@@ -8,7 +8,7 @@ package simulator
 		
 		public static const OFF:String = "off";
 		public static const WAIT:String = "wait";
-		public static const RUN:String = "run";
+		public static const RUN:String = "shutdown";
 		
 		public var id:String;
 		
