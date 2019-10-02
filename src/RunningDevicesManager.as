@@ -1,5 +1,13 @@
 package 
 {
+	import CustomClasses.SimCtlDevice;
+	
+	import device.AndroidDevice;
+	import device.Device;
+	import device.IosDevice;
+	
+	import event.SimulatorEvent;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -13,21 +21,14 @@ package
 	import mx.collections.ArrayCollection;
 	import mx.utils.StringUtil;
 	
+	import simulator.IosSimulator;
+	
 	import spark.collections.Sort;
 	import spark.collections.SortField;
 	
-	import CustomClasses.SimCtlDevice;
-	
-	import device.AndroidDevice;
-	import device.Device;
-	import device.IosDevice;
-	
-	import event.SimulatorEvent;
-	
-	import simulator.IosSimulator;
-	
 	public class RunningDevicesManager
 	{
+		
 		//ios Proc info
 		protected var iosProcInfo:NativeProcessStartupInfo;
 		protected var iosProcess:NativeProcess;
