@@ -33,9 +33,9 @@ package device
 			this.isCrashed = false;
 			this.connected = !isSimulator;
 			
+			var fileStream:FileStream = new FileStream();
 			var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
 			if(file.exists) {
-				var fileStream:FileStream = new FileStream();
 				fileStream.open(file, FileMode.READ);
 				var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
 				var arrayString: Array = content.split("\n");
@@ -52,10 +52,16 @@ package device
 				fileStream.close();
 			}
 	
+			var teamId:String = "";
+			file = File.userDirectory.resolvePath("actiontestscript/developmentDevTeam.txt");
+			if(file.exists) {
+				fileStream = new FileStream();
+				fileStream.open(file, FileMode.READ);
+				teamId = fileStream.readUTFBytes(fileStream.bytesAvailable);
+				fileStream.close();
+			}
 		
 			installing()
-			
-			
 			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
@@ -64,14 +70,14 @@ package device
 			
 			var resultDir:File = File.documentsDirectory.resolvePath("tmpDir/driver_"+ id);
 			iosDriverProjectFolder.copyTo(resultDir, true);
-			
+			var index:int = 0;
 			file = resultDir.resolvePath("atsDriver/Settings.plist");
 			if(file.exists) {
 				fileStream = new FileStream();
 				fileStream.open(file, FileMode.READ);
 				content = fileStream.readUTFBytes(fileStream.bytesAvailable);
 				arrayString = content.split("\n");
-				var index:int = 0;
+				
 				for each(var lineSettings:String in arrayString) {
 					if(lineSettings.indexOf("CFCustomPort") > 0) {
 						if(!automaticPort) {
@@ -92,6 +98,50 @@ package device
 				}
 				writeFileStream.close();
 			}
+			
+			/*var isDebug:Boolean = false;
+			var isRelease:Boolean = false;
+			file = resultDir.resolvePath("atsios.xcodeproj/project.pbxproj");
+			if(file.exists) {
+				fileStream = new FileStream();
+				fileStream.open(file, FileMode.READ);
+				content = fileStream.readUTFBytes(fileStream.bytesAvailable);
+				arrayString = content.split("\n");
+				var indexDevTeam:int = 0;
+				for each(var lineDevTeam:String in arrayString) {
+					if(lineDevTeam.indexOf("/* Debug *//* = {") > -1) {
+						isDebug = true;
+						isRelease = false;
+					}*/
+					
+					/*if(lineDevTeam.indexOf("/* Release */ /*= {") > -1) {
+						isDebug = false;
+						isRelease = true;
+					}*/
+					
+					//if(lineDevTeam.indexOf("CODE_SIGN_STYLE") > 0) {
+						//if(teamId != "") {
+							//arrayString[indexDevTeam] = "\t\t\t\tCODE_SIGN_STYLE = Automatic;";
+							//} else {
+							//	arrayString[indexDevTeam] = "\t\t\t\tCODE_SIGN_STYLE = Manual;";
+						//}
+					//}
+					/*if(lineDevTeam.indexOf("DEVELOPMENT_TEAM") > 0 && isDebug) {
+						if(teamId != "") {
+							arrayString[indexDevTeam] = "\t\t\t\tDEVELOPMENT_TEAM = "+ teamId +";";
+						}
+					}
+					indexDevTeam++;
+				}
+				fileStream.close();
+				
+				writeFileStream = new FileStream();
+				writeFileStream.open(file, FileMode.UPDATE);
+				for each(var strDevTeam:String in arrayString) {
+					writeFileStream.writeUTFBytes(strDevTeam + "\n");
+				}
+				writeFileStream.close();
+			}*/
 			
 			procInfo.executable = xcodeBuildExec;
 			procInfo.workingDirectory = resultDir;

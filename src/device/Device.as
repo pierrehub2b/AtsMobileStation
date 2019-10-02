@@ -46,6 +46,8 @@ package device
 		public var isCrashed:Boolean = false;
 		private var _connected:Boolean = false;
 		public var isSimulator:Boolean = false;
+		
+		public var devTeamId:String = "";
 				
 		public function get connected():Boolean
 		{

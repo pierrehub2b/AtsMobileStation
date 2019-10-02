@@ -36,7 +36,8 @@ package
 		protected var adbProcInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 		protected var adbProcess:NativeProcess = new NativeProcess();
 		
-		private var regex:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
+		private const regex:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
+		private const jsonPattern:RegExp = /\{[^]*\}/;
 		
 		private var adbFile:File;
 		private var errorStack:String = "";
@@ -236,98 +237,98 @@ package
 			iosProcess.removeEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist);
 			iosProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
 			
-			var dv:Device;
-			for each(dv in collection){
-				dv.connected = false;
-			}
-			
-			var obj:Object;
-			var dev:Device;
-			var devices:Object;
-			
-			var simctl:Array = new Array();
-			
-			try {	
-				if(output.substr(0,1) != "{") {
-					var pattern:RegExp = new RegExp(".+?(?={)");
-					output = output.replace(pattern,"");
-				}
+			if(output.length > 0){
 				
-				obj = JSON.parse(output);
-				devices = obj["devices"];
-				for each(var runtime:Object in devices) {
-					for each(var device:Object in runtime) {
-						var availabilityError:String = ""
-						if(!device["isAvailable"]) {
-							availabilityError = device["availabilityError"];
+				var data:Array = jsonPattern.exec(output);
+				
+				if(data != null && data.length > 0){
+					
+					var dv:Device;
+					for each(dv in collection){
+						dv.connected = false;
+					}
+					
+					var obj:Object;
+					var dev:Device;
+					var devices:Object;
+					
+					var simctl:Array = new Array();
+					
+					obj = JSON.parse(data[0]);
+					devices = obj["devices"];
+					for each(var runtime:Object in devices) {
+						for each(var device:Object in runtime) {
+							var availabilityError:String = ""
+							if(!device["isAvailable"]) {
+								availabilityError = device["availabilityError"];
+							}
+							simctl.push(new SimCtlDevice(availabilityError,device["isAvailable"] ,device["name"] ,device["state"] ,device["udid"]));
 						}
-						simctl.push(new SimCtlDevice(availabilityError,device["isAvailable"] ,device["name"] ,device["state"] ,device["udid"]));
 					}
-				}
-				
-				arrayInstrument.removeAt(0)
-				var containsPhysicalDevice:Boolean = false;
-				for each(var line:String in arrayInstrument){
-					var isPhysicalDevice: Boolean = line.indexOf("(Simulator)") == -1;
-					var data:Array = regex.exec(line);
-					if(isPhysicalDevice) {
-						containsPhysicalDevice = true;
-					}
-					isPhysicalDevice = false;
-					if(line.indexOf("iPhone") == 0 || isPhysicalDevice) {
-						if(data != null){
-							var currentElement:SimCtlDevice = getByUdid(simctl, data[3]);
-							if((currentElement != null && currentElement.getIsAvailable()) || isPhysicalDevice) {
-								var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : isPhysicalDevice;
-								if(isRunning) {
-									dev = findDevice(data[3]) as IosDevice;
-									var isRedifined:Boolean = false;
-									if(dev != null && dev.isCrashed) {
-										isRedifined = true;
-										dev.dispose();
-										dev.close();
-										collection.removeItem(dev);
-										collection.refresh();
-									}
-									
-									if(dev == null || isRedifined) {
-										var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], isRunning, !isPhysicalDevice);
-										dev = sim.device;								
-										if(!isPhysicalDevice) {
-											AtsMobileStation.simulators.updateSimulatorInList(sim);
-											dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
+					
+					arrayInstrument.removeAt(0)
+					var containsPhysicalDevice:Boolean = false;
+					for each(var line:String in arrayInstrument){
+						var isPhysicalDevice: Boolean = line.indexOf("(Simulator)") == -1;
+						data = regex.exec(line);
+						if(isPhysicalDevice) {
+							containsPhysicalDevice = true;
+						}
+						isPhysicalDevice = false;
+						if(line.indexOf("iPhone") == 0 || isPhysicalDevice) {
+							if(data != null){
+								var currentElement:SimCtlDevice = getByUdid(simctl, data[3]);
+								if((currentElement != null && currentElement.getIsAvailable()) || isPhysicalDevice) {
+									var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : isPhysicalDevice;
+									if(isRunning) {
+										dev = findDevice(data[3]) as IosDevice;
+										var isRedifined:Boolean = false;
+										if(dev != null && dev.isCrashed) {
+											isRedifined = true;
+											dev.dispose();
+											dev.close();
+											collection.removeItem(dev);
+											collection.refresh();
 										}
-										collection.addItem(dev);
-										collection.refresh();
-									}else {
-										dev.connected = true;
+										
+										if(dev == null || isRedifined) {
+											var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], isRunning, !isPhysicalDevice);
+											dev = sim.device;								
+											if(!isPhysicalDevice) {
+												AtsMobileStation.simulators.updateSimulatorInList(sim);
+												dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
+											}
+											collection.addItem(dev);
+											collection.refresh();
+										}else {
+											dev.connected = true;
+										}
 									}
 								}
 							}
 						}
 					}
-				}
-				
-				if(!containsPhysicalDevice) {
-					var tmpCollection:ArrayCollection = collection;
-					for each(var d:Device in tmpCollection) {
-						if(!d.isSimulator) {
-							d.dispose();
-							d.close();
-							collection.removeItem(d);
-							collection.refresh();
+					
+					if(!containsPhysicalDevice) {
+						var tmpCollection:ArrayCollection = collection;
+						for each(var d:Device in tmpCollection) {
+							if(!d.isSimulator) {
+								d.dispose();
+								d.close();
+								collection.removeItem(d);
+								collection.refresh();
+							}
 						}
-					}
-				} 
-						
-				for each(dv in collection){
-					if(!dv.connected && dv.isSimulator){
-						AtsMobileStation.devices.restartDev(dev);
-					}
-				}	
-			} catch(err:Error){
-				trace(err);
-			} 	
+					} 
+					
+					for each(dv in collection){
+						if(!dv.connected && dv.isSimulator){
+							AtsMobileStation.devices.restartDev(dev);
+						}
+					}	
+				}
+			}
+			
 			timer.start();	
 		}
 		

@@ -24,7 +24,8 @@ package
 		public static const SIMULATOR_STATUS_CHANGED:String = "simulatorStatusChanged";
 		public static const COLLECTION_CHANGED:String = "collectionChanged";
 		
-		private var regex:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
+		private const regex:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
+		private const jsonPattern:RegExp = /\{[^]*\}/;
 			
 		protected var procInfo:NativeProcessStartupInfo;
 		protected var process:NativeProcess;
@@ -43,6 +44,13 @@ package
 			if(Capabilities.os.indexOf("Mac") > -1){
 				procInfo = new NativeProcessStartupInfo();
 				process = new NativeProcess();
+				
+				procInfo.executable = new File("/usr/bin/env");
+				procInfo.workingDirectory = File.userDirectory;
+				
+				procInfo.arguments = new <String>["open", "-a", "Simulator"];
+				process.start(procInfo);
+				
 				this.refreshList();
 			}
 		}
@@ -50,9 +58,6 @@ package
 		public function refreshList():void {
 			if(!process.running) {
 				collection = new ArrayCollection();
-				procInfo.executable = new File("/usr/bin/env");
-				procInfo.workingDirectory = File.userDirectory;
-				
 				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
 				process.addEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit, false, 0, true);
 				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onInstrumentsOutput, false, 0, true);
@@ -88,44 +93,48 @@ package
 			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist);
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onInstrumentsOutput);
-			if(output.substr(0,1) != "{") {
-				var pattern:RegExp = new RegExp(".+?(?={)");
-				output = output.replace(pattern,"");
-			}
-			var obj:Object=JSON.parse(output);
-			var devices:Object = obj["devices"];
-			var simctl:Array = new Array();
-			for each(var runtime:Object in devices) {
-				for each(var device:Object in runtime) {
-					var availabilityError:String = ""
-					if(!device["isAvailable"]) {
-						availabilityError = device["availabilityError"];
+			var obj:Object;
+			if(output.length > 0) {
+				var data:Array = jsonPattern.exec(output);
+				if(data != null && data.length > 0){
+					obj = JSON.parse(data[0]);
+					var devices:Object = obj["devices"];
+					var simctl:Array = new Array();
+					
+					for each(var runtime:Object in devices) {
+						for each(var device:Object in runtime) {
+							var availabilityError:String = ""
+							if(!device["isAvailable"]) {
+								availabilityError = device["availabilityError"];
+							}
+							simctl.push(new SimCtlDevice(availabilityError,device["isAvailable"] ,device["name"] ,device["state"] ,device["udid"]));
+						}
 					}
-					simctl.push(new SimCtlDevice(availabilityError,device["isAvailable"] ,device["name"] ,device["state"] ,device["udid"]));
-				}
-			}
-			arrayInstrument.removeAt(0)
-			for each(var line:String in arrayInstrument){
-				//var isPhysicalDevice: Boolean = line.indexOf("(Simulator)") == -1;
-				var isPhysicalDevice: Boolean = false;
-				if(line.indexOf("iPhone") == 0 || isPhysicalDevice) {
-					var data:Array = regex.exec(line);
-					if(data != null){
-						var currentElement:SimCtlDevice = getByUdid(simctl, data[3]);
-						if((currentElement != null && currentElement.getIsAvailable()) || isPhysicalDevice) {
-							var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : isPhysicalDevice;
-							var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], isRunning, !isPhysicalDevice);
-							sim.addEventListener(Simulator.STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
-							collection.addItem(sim);
+					
+					arrayInstrument.removeAt(0)
+					for each(var line:String in arrayInstrument){
+						//var isPhysicalDevice: Boolean = line.indexOf("(Simulator)") == -1;
+						var isPhysicalDevice: Boolean = false;
+						if(line.indexOf("iPhone") == 0 || isPhysicalDevice) {
+							data = regex.exec(line);
+							if(data != null){
+								var currentElement:SimCtlDevice = getByUdid(simctl, data[3]);
+								if((currentElement != null && currentElement.getIsAvailable()) || isPhysicalDevice) {
+									var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : isPhysicalDevice;
+									var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], isRunning, !isPhysicalDevice);
+									sim.addEventListener(Simulator.STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
+									collection.addItem(sim);
+								}
+							}
 						}
 					}
 				}
-			}
-			
-			if(collection.length == 0){
-				info = "No simulators found !\n(Xcode may not be installed on this station !)"
-			}else{
-				info = "";
+				
+				if(collection.length == 0){
+					info = "No simulators found !\n(Xcode may not be installed on this station !)"
+				}else{
+					info = "";
+				}
 			}
 		}
 		
