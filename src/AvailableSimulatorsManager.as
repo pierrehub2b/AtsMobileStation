@@ -88,8 +88,10 @@ package
 			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist);
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onInstrumentsOutput);
-			var pattern:RegExp = new RegExp(".+?(?={)");
-			output = output.replace(pattern,"");
+			if(output.substr(0,1) != "{") {
+				var pattern:RegExp = new RegExp(".+?(?={)");
+				output = output.replace(pattern,"");
+			}
 			var obj:Object=JSON.parse(output);
 			var devices:Object = obj["devices"];
 			var simctl:Array = new Array();

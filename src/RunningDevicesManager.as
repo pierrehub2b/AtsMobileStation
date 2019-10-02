@@ -248,8 +248,11 @@ package
 			var simctl:Array = new Array();
 			
 			try {	
-				var pattern:RegExp = new RegExp(".+?(?={)");
-				output = output.replace(pattern,"");
+				if(output.substr(0,1) != "{") {
+					var pattern:RegExp = new RegExp(".+?(?={)");
+					output = output.replace(pattern,"");
+				}
+				
 				obj = JSON.parse(output);
 				devices = obj["devices"];
 				for each(var runtime:Object in devices) {
