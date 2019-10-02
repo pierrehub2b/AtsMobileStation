@@ -28,6 +28,8 @@ package
 	
 	public class RunningDevicesManager
 	{
+		private static const jsonRegexp:RegExp = /\{(.*)\}/g;
+			
 		//ios Proc info
 		protected var iosProcInfo:NativeProcessStartupInfo;
 		protected var iosProcess:NativeProcess;
@@ -238,7 +240,7 @@ package
 			
 			if(output.length > 0){
 				
-				var data:Array = output.match(/\{([^}]+)\}/);
+				var data:* = jsonRegexp.exec(output);
 				
 				if(data != null && data.length > 0){
 					
