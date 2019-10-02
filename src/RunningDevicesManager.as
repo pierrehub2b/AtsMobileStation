@@ -38,7 +38,7 @@ package
 		protected var adbProcess:NativeProcess = new NativeProcess();
 		
 		private const regex:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
-		private const jsonPattern:RegExp = /\{[^]\}/;
+		private const jsonPattern:RegExp = /\{[^]*\}/;
 		
 		private var adbFile:File;
 		private var errorStack:String = "";
