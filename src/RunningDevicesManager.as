@@ -270,7 +270,7 @@ package
 					if(isPhysicalDevice) {
 						containsPhysicalDevice = true;
 					}
-					
+					isPhysicalDevice = false;
 					if(line.indexOf("iPhone") == 0 || isPhysicalDevice) {
 						if(data != null){
 							var currentElement:SimCtlDevice = getByUdid(simctl, data[3]);
