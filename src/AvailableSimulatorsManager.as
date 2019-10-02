@@ -88,7 +88,8 @@ package
 			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist);
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onInstrumentsOutput);
-			
+			var pattern:RegExp = new RegExp(".+?(?={)");
+			output = output.replace(pattern,"");
 			var obj:Object=JSON.parse(output);
 			var devices:Object = obj["devices"];
 			var simctl:Array = new Array();
@@ -148,7 +149,7 @@ package
 			output = ""
 			//now retrieving the list of simulators with status	
 			process.addEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist, false, 0, true);
-			procInfo.arguments = new <String>["xcrun", "simctl", "list", "devices", "--j"];
+			procInfo.arguments = new <String>["xcrun", "simctl", "list", "devices", "-j"];
 			process.start(procInfo);
 		}
 		

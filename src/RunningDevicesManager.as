@@ -52,6 +52,8 @@ package
 		
 		private var ipSort:Sort = new Sort([new SortField("ip")]);
 		
+		public static var devTeamId:String = "";
+		
 		public function RunningDevicesManager(port:String)
 		{
 			this.port = port;
@@ -246,7 +248,8 @@ package
 			var simctl:Array = new Array();
 			
 			try {	
-				output = output.replace("List of devices attached","");
+				var pattern:RegExp = new RegExp(".+?(?={)");
+				output = output.replace(pattern,"");
 				obj = JSON.parse(output);
 				devices = obj["devices"];
 				for each(var runtime:Object in devices) {
@@ -341,7 +344,7 @@ package
 			//now retrieving the list of simulators with status	
 			iosProcess.addEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist, false, 0, true);
 			iosProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData, false, 0, true);
-			iosProcInfo.arguments = new <String>["xcrun", "simctl", "list", "devices", "--j"];
+			iosProcInfo.arguments = new <String>["xcrun", "simctl", "list", "devices", "-j"];
 			iosProcess.start(iosProcInfo);
 		}
 		
