@@ -238,7 +238,7 @@ package
 			
 			if(output.length > 0){
 				
-				var data:Array = output.match(/\{(.*)\}/);
+				var data:Array = output.match(/\{([^}]+)\}/);
 				
 				if(data != null && data.length > 0){
 					
