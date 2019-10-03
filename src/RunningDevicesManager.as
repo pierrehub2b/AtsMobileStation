@@ -1,13 +1,5 @@
 package 
 {
-	import CustomClasses.SimCtlDevice;
-	
-	import device.AndroidDevice;
-	import device.Device;
-	import device.IosDevice;
-	
-	import event.SimulatorEvent;
-	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -21,10 +13,18 @@ package
 	import mx.collections.ArrayCollection;
 	import mx.utils.StringUtil;
 	
-	import simulator.IosSimulator;
-	
 	import spark.collections.Sort;
 	import spark.collections.SortField;
+	
+	import CustomClasses.SimCtlDevice;
+	
+	import device.AndroidDevice;
+	import device.Device;
+	import device.IosDevice;
+	
+	import event.SimulatorEvent;
+	
+	import simulator.IosSimulator;
 	
 	public class RunningDevicesManager
 	{
@@ -42,7 +42,8 @@ package
 		
 		private var adbFile:File;
 		private var errorStack:String = "";
-		private var output:String = "";
+		private var androidOutput:String = "";
+		private var iosOutput:String = "";
 		
 		private var androidTimer:Timer = new Timer(5000);
 		private var iosTimer:Timer = new Timer(5000);
@@ -154,7 +155,7 @@ package
 		}
 		
 		private function launchAdbProcess():void{
-			output = "";
+			androidOutput = "";
 			errorStack = "";
 			
 			try{
@@ -166,7 +167,7 @@ package
 		}
 		
 		private function launchIosProcess():void{
-			output = "";
+			iosOutput = "";
 			errorStack = "";
 			this.iosProcInfo.arguments = new <String>["xcrun", "instruments", "-s", "devices"];
 			
@@ -187,11 +188,11 @@ package
 		}
 		
 		protected function onReadAndroidDevicesData(event:ProgressEvent):void{
-			output += StringUtil.trim(adbProcess.standardOutput.readUTFBytes(adbProcess.standardOutput.bytesAvailable));
+			androidOutput += StringUtil.trim(adbProcess.standardOutput.readUTFBytes(adbProcess.standardOutput.bytesAvailable));
 		}
 		
 		protected function onReadIosDevicesData(event:ProgressEvent):void{
-			output += StringUtil.trim(iosProcess.standardOutput.readUTFBytes(iosProcess.standardOutput.bytesAvailable));
+			iosOutput += StringUtil.trim(iosProcess.standardOutput.readUTFBytes(iosProcess.standardOutput.bytesAvailable));
 		}
 		
 		protected function onReadAndroidDevicesExit(event:NativeProcessExitEvent):void
@@ -205,7 +206,7 @@ package
 				dv.connected = false;
 			}
 			
-			var data:Array = output.split("\n");
+			var data:Array = androidOutput.split("\n");
 			if(data.length > 1){
 				
 				var len:int = data.length;
@@ -249,7 +250,7 @@ package
 			//process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
 			iosProcess.removeEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit);
 			iosProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
-			arrayInstrument = output.split("\n");
+			arrayInstrument = iosOutput.split("\n");
 			
 			var dev:Device;
 			var dv:Device;
@@ -294,7 +295,7 @@ package
 			if(!containsPhysicalDevice) {
 				var tmpCollection:ArrayCollection = collection;
 				for each(var d:Device in tmpCollection) {
-					if(!d.isSimulator) {
+					if(d is IosDevice && !d.isSimulator) {
 						d.dispose();
 						d.close();
 						collection.removeItem(d);
