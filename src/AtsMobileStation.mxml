@@ -16,8 +16,6 @@
 			
 			import spark.filters.DropShadowFilter;
 			
-			import device.AndroidDevice;
-			
 			import renderer.RunningDeviceRenderer;
 			
 			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
@@ -82,6 +80,12 @@
 				}
 			}
 			
+			protected function buttonRefresh_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				simulators.refreshList();
+			}
+			
 		]]>
 	</fx:Script>
 	
@@ -100,6 +104,8 @@
 		</s:Rect>
 		<s:HGroup width="100%" paddingLeft="7" paddingRight="10" verticalCenter="0" verticalAlign="middle" gap="3">
 			<s:Label fontSize="13" text="Connected Devices" fontWeight="bold"/>
+			<s:Spacer width="100%"/>
+			<s:Button id="buttonRefresh" click="buttonRefresh_clickHandler(event)" enabled="true" icon="assets/icons/24/restart.png" width="20" height="20"/>
 		</s:HGroup>
 	</s:Group>
 	

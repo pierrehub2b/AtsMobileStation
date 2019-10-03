@@ -14,6 +14,9 @@ package
 	
 	import CustomClasses.SimCtlDevice;
 	
+	import device.Device;
+	import device.IosDevice;
+	
 	import event.SimulatorEvent;
 	
 	import simulator.IosSimulator;
@@ -73,7 +76,9 @@ package
 		
 		public function refreshList():void {
 			if(!process.running) {
-				collection = new ArrayCollection();
+				AtsMobileStation.simulators.collection = new ArrayCollection();
+				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
+				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onInstrumentsOutput, false, 0, true);
 				process.addEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit, false, 0, true);
 				
 				procInfo.arguments = new <String>["xcrun", "instruments", "-s", "devices"];
@@ -137,19 +142,49 @@ package
 									var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : isPhysicalDevice;
 									var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], isRunning, !isPhysicalDevice);
 									sim.addEventListener(Simulator.STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
-									collection.addItem(sim);
+									AtsMobileStation.simulators.collection.addItem(sim);
+									if(isRunning) {
+										
+										var dev:Device = AtsMobileStation.devices.findDevice(data[3]) as IosDevice;
+										var isRedifined:Boolean = false;
+										if(dev != null && dev.isCrashed) {
+											isRedifined = true;
+											dev.dispose();
+											dev.close();
+											AtsMobileStation.devices.collection.removeItem(dev);
+											AtsMobileStation.devices.collection.refresh();
+										}
+										if(dev == null || isRedifined) {
+											dev = sim.device;								
+											if(!isPhysicalDevice) {
+												AtsMobileStation.simulators.updateSimulatorInList(sim);
+												dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
+											}
+											AtsMobileStation.devices.collection.addItem(dev);
+											AtsMobileStation.devices.collection.refresh();
+										}else {
+											dev.connected = true;
+										}
+									}
 								}
 							}
 						}
 					}
 				}
 				
-				if(collection.length == 0){
+				if(AtsMobileStation.simulators.collection.length == 0){
 					info = "No simulators found !\n(Xcode may not be installed on this station !)"
 				}else{
 					info = "";
 				}
 			}
+		}
+		
+		private function deviceStoppedHandler(ev:Event):void{
+			var dv:Device = ev.currentTarget as Device;
+			dv.removeEventListener("deviceStopped", deviceStoppedHandler);
+			dv.dispose();
+			AtsMobileStation.devices.collection.removeItem(dv);
 		}
 		
 		public function updateSimulatorInList(sim: IosSimulator):void {

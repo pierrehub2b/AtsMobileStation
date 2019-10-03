@@ -277,8 +277,8 @@ package
 							if(isPhysicalDevice) {
 								containsPhysicalDevice = true;
 							}
-							isPhysicalDevice = false;
-							if(line.toLocaleLowerCase().indexOf("iphone") > -1 || isPhysicalDevice) {
+							//isPhysicalDevice = false;
+							if(/*line.toLocaleLowerCase().indexOf("iphone") > -1 || */isPhysicalDevice) {
 								if(data != null){
 									var currentElement:SimCtlDevice = getByUdid(simctl, data[3]);
 									if((currentElement != null && currentElement.getIsAvailable()) || isPhysicalDevice) {
@@ -355,7 +355,7 @@ package
 			iosProcess.start(iosProcInfo);
 		}
 		
-		private function findDevice(id:String):Device{
+		public function findDevice(id:String):Device{
 			for each(var dv:Device in collection) {
 				if(dv.id == id){
 					if(dv.manufacturer != "Apple") {
