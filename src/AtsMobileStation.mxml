@@ -18,6 +18,8 @@
 			
 			import renderer.RunningDeviceRenderer;
 			
+			import simulator.Simulator;
+			
 			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
 			[Bindable]
@@ -105,7 +107,10 @@
 		<s:HGroup width="100%" paddingLeft="7" paddingRight="10" verticalCenter="0" verticalAlign="middle" gap="3">
 			<s:Label fontSize="13" text="Connected Devices" fontWeight="bold"/>
 			<s:Spacer width="100%"/>
-			<s:Button id="buttonRefresh" click="buttonRefresh_clickHandler(event)" enabled="true" icon="assets/icons/24/restart.png" width="20" height="20"/>
+			<s:Group buttonMode="true" click="buttonRefresh_clickHandler(event)"
+					 toolTip="refresh">
+				<s:BitmapImage id="buttonRefresh" source="assets/icons/24/restart.png" smooth="true" smoothingQuality="high" width="20" height="20"/>
+			</s:Group>
 		</s:HGroup>
 	</s:Group>
 	

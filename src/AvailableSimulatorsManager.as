@@ -71,6 +71,8 @@ package
 		protected function onStartSimulatorExit(event:NativeProcessExitEvent):void
 		{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onStartSimulatorExit);
+			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
+			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onInstrumentsOutput);
 			this.refreshList();
 		}
 		
@@ -132,19 +134,16 @@ package
 					
 					arrayInstrument.removeAt(0)
 					for each(var line:String in arrayInstrument){
-						//var isPhysicalDevice: Boolean = line.indexOf("(Simulator)") == -1;
-						var isPhysicalDevice: Boolean = false;
-						if(line.toLocaleLowerCase().indexOf("iphone") > -1 || isPhysicalDevice) {
+						if(line.toLocaleLowerCase().indexOf("iphone") > -1) {
 							data = regex.exec(line);
 							if(data != null){
 								var currentElement:SimCtlDevice = getByUdid(simctl, data[3]);
-								if((currentElement != null && currentElement.getIsAvailable()) || isPhysicalDevice) {
-									var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : isPhysicalDevice;
-									var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], isRunning, !isPhysicalDevice);
+								if((currentElement != null && currentElement.getIsAvailable())) {
+									var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : false;
+									var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], isRunning, true);
 									sim.addEventListener(Simulator.STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
 									AtsMobileStation.simulators.collection.addItem(sim);
 									if(isRunning) {
-										
 										var dev:Device = AtsMobileStation.devices.findDevice(data[3]) as IosDevice;
 										var isRedifined:Boolean = false;
 										if(dev != null && dev.isCrashed) {
@@ -156,10 +155,8 @@ package
 										}
 										if(dev == null || isRedifined) {
 											dev = sim.device;								
-											if(!isPhysicalDevice) {
-												AtsMobileStation.simulators.updateSimulatorInList(sim);
-												dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
-											}
+											AtsMobileStation.simulators.updateSimulatorInList(sim);
+											dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
 											AtsMobileStation.devices.collection.addItem(dev);
 											AtsMobileStation.devices.collection.refresh();
 										}else {
