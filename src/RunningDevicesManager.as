@@ -31,11 +31,11 @@ package
 		
 		//ios Proc info
 		protected var iosProcInfo:NativeProcessStartupInfo;
-		protected var iosProcess:NativeProcess;
+		public var iosProcess:NativeProcess;
 		
 		//android Proc info
 		protected var adbProcInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-		protected var adbProcess:NativeProcess = new NativeProcess();
+		public var adbProcess:NativeProcess = new NativeProcess();
 		
 		private const regex:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
@@ -276,7 +276,7 @@ package
 							containsPhysicalDevice = true;
 						}
 						isPhysicalDevice = false;
-						if(line.indexOf("iPhone") == 0 || isPhysicalDevice) {
+						if(line.toLocaleLowerCase().indexOf("iphone") > -1 || isPhysicalDevice) {
 							if(data != null){
 								var currentElement:SimCtlDevice = getByUdid(simctl, data[3]);
 								if((currentElement != null && currentElement.getIsAvailable()) || isPhysicalDevice) {

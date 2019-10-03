@@ -27,8 +27,8 @@ package
 		private const regex:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
 			
-		protected var procInfo:NativeProcessStartupInfo;
-		protected var process:NativeProcess;
+		private var procInfo:NativeProcessStartupInfo;
+		public var process:NativeProcess;
 		
 		private var output:String = "";
 		private var arrayInstrument: Array = new Array();
@@ -49,12 +49,20 @@ package
 				procInfo.workingDirectory = File.userDirectory;
 				
 				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
-				process.addEventListener(NativeProcessExitEvent.EXIT, onStartSimulatorExit, false, 0, true);
+				process.addEventListener(NativeProcessExitEvent.EXIT, onSetupSimulatorExit, false, 0, true);
 				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onInstrumentsOutput, false, 0, true);
 				
-				procInfo.arguments = new <String>["open", "-a", "Simulator"];
+				procInfo.arguments = new <String>["defaults", "write" ,"com.apple.iphonesimulator", "ShowChrome", "-int", "0"];
 				process.start(procInfo);
 			}
+		}
+		
+		protected function onSetupSimulatorExit(event:NativeProcessExitEvent):void
+		{
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onSetupSimulatorExit);
+			procInfo.arguments = new <String>["open", "-a", "Simulator"];
+			process.addEventListener(NativeProcessExitEvent.EXIT, onStartSimulatorExit, false, 0, true);
+			process.start(procInfo);
 		}
 		
 		protected function onStartSimulatorExit(event:NativeProcessExitEvent):void
@@ -121,7 +129,7 @@ package
 					for each(var line:String in arrayInstrument){
 						//var isPhysicalDevice: Boolean = line.indexOf("(Simulator)") == -1;
 						var isPhysicalDevice: Boolean = false;
-						if(line.indexOf("iPhone") == 0 || isPhysicalDevice) {
+						if(line.toLocaleLowerCase().indexOf("iphone") > -1 || isPhysicalDevice) {
 							data = regex.exec(line);
 							if(data != null){
 								var currentElement:SimCtlDevice = getByUdid(simctl, data[3]);

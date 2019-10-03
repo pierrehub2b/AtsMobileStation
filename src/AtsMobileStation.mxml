@@ -16,6 +16,8 @@
 			
 			import spark.filters.DropShadowFilter;
 			
+			import device.AndroidDevice;
+			
 			import renderer.RunningDeviceRenderer;
 			
 			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
@@ -38,6 +40,9 @@
 			protected function closeHandler(event:Event):void
 			{
 				cleanDirectory(File.documentsDirectory.resolvePath("tmpDir"));
+				simulators.process.exit(true);
+				devices.adbProcess.exit(true);
+				devices.iosProcess.exit(true);
 				devices.terminate();
 			}
 			

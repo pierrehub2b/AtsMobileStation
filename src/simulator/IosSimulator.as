@@ -12,6 +12,7 @@ package simulator
 	
 	import mx.utils.StringUtil;
 	
+	import device.Device;
 	import device.IosDevice;
 	
 	public class IosSimulator extends Simulator
@@ -63,10 +64,11 @@ package simulator
 				procInfo.executable = xcrunExec;
 				procInfo.workingDirectory = File.userDirectory;
 				
+				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputShell, false, 0, true);
 				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
 				process.addEventListener(NativeProcessExitEvent.EXIT, onBootExit, false, 0, true);
 
-				procInfo.arguments = new <String>["simctl", "bootstatus", id];
+				procInfo.arguments = new <String>["simctl", "bootstatus", id,"-b"];
 				process.start(procInfo);
 			} else {
 				phase = WAIT;
@@ -77,7 +79,7 @@ package simulator
 				process.addEventListener(NativeProcessExitEvent.EXIT, onShutdownExit, false, 0, true);
 				
 				var index:int = 0;
-				for each(var d:IosDevice in AtsMobileStation.devices.collection) {
+				for each(var d:Device in AtsMobileStation.devices.collection) {
 					if(id == d.id) {
 						AtsMobileStation.devices.collection.removeItemAt(index);
 						AtsMobileStation.devices.collection.refresh();
@@ -96,6 +98,11 @@ package simulator
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onShutdownExit);
 			phase = OFF;
 			tooltip = "Start simulator";
+		}
+		
+		protected function onOutputShell(event:ProgressEvent):void
+		{
+			trace(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
 		}
 		
 		protected function onOutputErrorShell(event:ProgressEvent):void
