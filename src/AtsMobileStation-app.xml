@@ -179,6 +179,8 @@
 
 	<icon>
 		<image32x32>assets/icons/32/ats_logo.png</image32x32>
+		<image66x66>assets/icons/66/ats_logo.png</image66x66>
+		<image96x96>assets/icons/96/ats_logo.png</image96x96>
 	</icon>
 	
 	<!-- Whether the application handles the update when a user double-clicks an update version
