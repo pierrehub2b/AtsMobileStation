@@ -37,14 +37,15 @@ package
 		protected var adbProcInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 		public var adbProcess:NativeProcess = new NativeProcess();
 		
-		private const regex:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
+		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
 		
 		private var adbFile:File;
 		private var errorStack:String = "";
 		private var output:String = "";
 		
-		private var timer:Timer = new Timer(3000);
+		private var androidTimer:Timer = new Timer(5000);
+		private var iosTimer:Timer = new Timer(5000);
 		private var port:String = "8080";
 		
 		private var arrayInstrument: Array = new Array();
@@ -61,8 +62,16 @@ package
 			this.port = port;
 			this.collection.sort = ipSort;
 			
+			this.androidTimer.addEventListener(TimerEvent.TIMER, androidTimerComplete, false, 0, true);
+			this.iosTimer.addEventListener(TimerEvent.TIMER, iosTimerComplete, false, 0, true);
+			
 			var adbPath:String = "assets/tools/android/adb";
 			if(Capabilities.os.indexOf("Mac") > -1){
+				
+				//-----------------------------------------------------------------------------
+				// IOS
+				//-----------------------------------------------------------------------------
+				
 				iosProcInfo = new NativeProcessStartupInfo();
 				iosProcess = new NativeProcess();
 				
@@ -70,11 +79,14 @@ package
 				iosProcInfo.workingDirectory = File.userDirectory;
 				
 				this.iosProcInfo.arguments = new <String>["xcrun", "instruments", "-s", "devices"];
-				timer.addEventListener(TimerEvent.TIMER, devicesTimerComplete, false, 0, true);
 				launchIosProcess();
+					
+				//-----------------------------------------------------------------------------
+				// ANDROID
+				//-----------------------------------------------------------------------------
 				
-				this.adbFile = File.applicationDirectory.resolvePath(adbPath);
 				var chmod:File = new File("/bin/chmod");
+				this.adbFile = File.applicationDirectory.resolvePath(adbPath);
 				this.adbProcInfo.executable = chmod;			
 				this.adbProcInfo.workingDirectory = adbFile.parent;
 				this.adbProcInfo.arguments = new <String>["+x", "adb"];
@@ -83,17 +95,23 @@ package
 				
 			}else{
 				this.adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
-				startAdbProcess(); 
+				initAdbProcess();
 			}
+		}
+		
+		private function initAdbProcess():void{
+			adbProcess = new NativeProcess();
+			adbProcInfo.executable = adbFile;			
+			adbProcInfo.workingDirectory = adbFile.parent;
+			adbProcInfo.arguments = new <String>["devices"];
+			
+			launchAdbProcess();
 		}
 		
 		protected function onChmodExit(event:NativeProcessExitEvent):void
 		{
 			adbProcess.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
-			adbProcess = new NativeProcess();
-			
-			startAdbProcess();
-			//startSystemProfilerProcess();
+			initAdbProcess();
 		}	
 		
 		public function restartDev(dev:Device):void {
@@ -121,23 +139,12 @@ package
 			return null;
 		}
 		
-		private function startAdbProcess():void{
-			adbProcInfo.executable = adbFile;			
-			adbProcInfo.workingDirectory = adbFile.parent;
-			adbProcInfo.arguments = new <String>["devices"];
-			
-			timer.addEventListener(TimerEvent.TIMER, devicesTimerComplete, false, 0, true);
-			
-			launchProcess();
-		}
-		
 		public function terminate():void{
 			var dv:Device;
 			for each(dv in collection){
 				if(dv.isSimulator) {
 					dv.dispose();
 				}
-				
 			}
 			
 			iosProcess.exit(true);
@@ -146,7 +153,7 @@ package
 			iosProcess.start(iosProcInfo);
 		}
 		
-		private function launchProcess():void{
+		private function launchAdbProcess():void{
 			output = "";
 			errorStack = "";
 			
@@ -171,13 +178,12 @@ package
 			}catch(err:Error){}
 		}
 		
-		private function devicesTimerComplete(ev:TimerEvent):void{
-			if(Capabilities.os.indexOf("Mac") > -1){
-				launchIosProcess();
-				startAdbProcess();
-			} else {
-				launchProcess();
-			}
+		private function iosTimerComplete(ev:TimerEvent):void{
+			launchIosProcess();
+		}
+		
+		private function androidTimerComplete(ev:TimerEvent):void{
+			launchAdbProcess();
 		}
 		
 		protected function onReadAndroidDevicesData(event:ProgressEvent):void{
@@ -230,7 +236,7 @@ package
 				}
 			}
 			
-			timer.start();
+			androidTimer.start();
 		}
 		
 		protected function simulatorStatusChanged(ev:Event):void{
@@ -252,12 +258,16 @@ package
 			}
 			arrayInstrument.removeAt(0)
 			var containsPhysicalDevice:Boolean = false;
+			
 			for each(var line:String in arrayInstrument){
+				
 				var isPhysicalDevice: Boolean = line.indexOf("(Simulator)") == -1;
-				var data:Array = regex.exec(line);
+				var data:Array = iosDevicePattern.exec(line);
+				
 				if(isPhysicalDevice) {
 					containsPhysicalDevice = true;
 				}
+				
 				if(isPhysicalDevice) {
 					if(data != null){
 						dev = findDevice(data[3]) as IosDevice;
@@ -298,7 +308,8 @@ package
 					AtsMobileStation.devices.restartDev(dev);
 				}
 			}
-			timer.start();	
+			
+			iosTimer.start();	
 		}
 		
 		public function findDevice(id:String):Device{
