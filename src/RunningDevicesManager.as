@@ -293,7 +293,7 @@ package
 			}
 			
 			if(!containsPhysicalDevice) {
-				var tmpCollection:ArrayCollection = collection;
+				var tmpCollection:ArrayCollection = new ArrayCollection(collection.source);
 				for each(var d:Device in tmpCollection) {
 					if(d is IosDevice && !d.isSimulator) {
 						d.dispose();
