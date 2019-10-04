@@ -17,7 +17,7 @@
 				
 				if(dev != null) {
 					if(dev.isSimulator) {
-						hGroupDevTeam.visible = false;
+						//hGroupDevTeam.visible = false;
 					}
 					var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
 					if(file.exists) {
@@ -43,7 +43,7 @@
 						var fileStreamDevTeam:FileStream = new FileStream();
 						fileStreamDevTeam.open(fileDevTeam, FileMode.READ);
 						var contentDevTeam:String = fileStreamDevTeam.readUTFBytes(fileStreamDevTeam.bytesAvailable);
-						developmentTeamId.text = contentDevTeam;
+						//developmentTeamId.text = contentDevTeam;
 						fileStreamDevTeam.close();
 					}
 				}
@@ -90,7 +90,7 @@
 					var fileDevTeam:File = File.userDirectory.resolvePath("actiontestscript/developmentDevTeam.txt");
 					var fileStreamDevTeam:FileStream = new FileStream();
 					fileStreamDevTeam.open(fileDevTeam, FileMode.WRITE);
-					fileStreamDevTeam.writeUTFBytes(developmentTeamId.text);
+					//fileStreamDevTeam.writeUTFBytes(developmentTeamId.text);
 					fileStreamDevTeam.close();
 				}
 				
@@ -115,13 +115,6 @@
 				
 				<s:HGroup horizontalAlign="right">
 					<mx:CheckBox id="portAutomatic" label="Auto" change="portAutomatic_changeHandler(event)"/>
-				</s:HGroup>
-			</s:HGroup>
-			
-			<s:HGroup width="100%" paddingLeft="7" paddingRight="10" verticalCenter="0" verticalAlign="middle" gap="3" id="hGroupDevTeam">
-				<s:HGroup horizontalAlign="left">
-					<mx:Label fontSize="10" text="Development team ID"/>
-					<mx:TextInput id="developmentTeamId" width="100%" height="100%" maxChars="10"/>
 				</s:HGroup>
 			</s:HGroup>
 			
