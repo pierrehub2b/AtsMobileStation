@@ -318,12 +318,15 @@ package
 								collection.refresh();
 							}
 							
-							var startedSimIndex:int = AtsMobileStation.startedIosSimulator.indexOf(data[3],0);
-							if((startedSimIndex != -1 || isPhysicalDevice) && (dev == null || isRedifined)) {
+							if(AtsMobileStation.startedIosSimulator.indexOf(data[3],0) == -1) {
+								AtsMobileStation.startedIosSimulator.push(data[3]);
+							}
+							
+							if(dev == null || isRedifined) {
 								var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], true, !isPhysicalDevice);
 								dev = sim.device;	
 								if(!isPhysicalDevice) {
-									AtsMobileStation.simulators.updateSimulatorInList(sim);
+									AtsMobileStation.simulators.updateSimulatorInList(data[3], true);
 									dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
 								}
 								collection.addItem(dev);
@@ -331,6 +334,18 @@ package
 							}else {
 								if(dev != null) {
 									dev.connected = true;
+								}
+							}
+						} else {
+							if(AtsMobileStation.startedIosSimulator.indexOf(data[3],0) > -1) {
+								AtsMobileStation.startedIosSimulator.removeAt(AtsMobileStation.startedIosSimulator.indexOf(data[3],0));
+								AtsMobileStation.simulators.updateSimulatorInList(data[3], false);
+								dev = findDevice(data[3]);
+								if(dev != null) {
+									(dev as IosDevice).dispose();
+									dev.close();
+									collection.removeItem(dev);
+									collection.refresh();
 								}
 							}
 						}

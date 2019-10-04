@@ -160,11 +160,13 @@ package
 			}
 		}
 		
-		public function updateSimulatorInList(sim: IosSimulator):void {
+		public function updateSimulatorInList(id:String, started:Boolean):void {
 			var index:int = 0;
 			for each(var elem: IosSimulator in collection) {
-				if(elem.id == sim.id) {
-					collection.setItemAt(sim,index);
+				if(elem.id == id) {
+					elem.phase = started ? Simulator.RUN : Simulator.OFF; 					
+					collection.setItemAt(elem,index);
+					break;
 				}
 				index++;
 			}

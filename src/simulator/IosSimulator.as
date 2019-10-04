@@ -71,35 +71,38 @@ package simulator
 				if(AtsMobileStation.startedIosSimulator.indexOf(id,0) == -1) {
 					AtsMobileStation.startedIosSimulator.push(id);
 				}
-				
 
-				procInfo.arguments = new <String>["simctl", "bootstatus", id,"-b"];
+				procInfo.arguments = new <String>["simctl", "boot", id];
 				process.start(procInfo);
 			} else {
-				phase = WAIT;
-				tooltip = "Simulator is terminating ...";
-				dispatchEvent(new Event(STATUS_CHANGED));
-				
-				procInfo.executable = xcrunExec;
-				process.addEventListener(NativeProcessExitEvent.EXIT, onShutdownExit, false, 0, true);
-				
-				var index:int = 0;
-				for each(var d:Device in AtsMobileStation.devices.collection) {
-					if(id == d.id) {
-						AtsMobileStation.devices.collection.removeItemAt(index);
-						AtsMobileStation.devices.collection.refresh();
-						break;
+				if(!process.running) {
+					phase = WAIT;
+					tooltip = "Simulator is terminating ...";
+					dispatchEvent(new Event(STATUS_CHANGED));
+					
+					procInfo.executable = xcrunExec;
+					process.addEventListener(NativeProcessExitEvent.EXIT, onShutdownExit, false, 0, true);
+					
+					var index:int = 0;
+					for each(var d:Device in AtsMobileStation.devices.collection) {
+						if(id == d.id) {
+							(d as IosDevice).dispose();
+							d.close();
+							AtsMobileStation.devices.collection.removeItemAt(index);
+							AtsMobileStation.devices.collection.refresh();
+							break;
+						}
+						index++;
 					}
-					index++;
+					
+					if(AtsMobileStation.startedIosSimulator.indexOf(id,0) > -1) {
+						AtsMobileStation.startedIosSimulator.removeAt(AtsMobileStation.startedIosSimulator.indexOf(id,0));
+					}
+					
+					procInfo.arguments = new <String>["simctl", "shutdown", id];
+					process.start(procInfo);
 				}
 				
-				var startedSimIndex:int = AtsMobileStation.startedIosSimulator.indexOf(id,0);
-				if(startedSimIndex > -1) {
-					AtsMobileStation.startedIosSimulator.removeAt(startedSimIndex);
-				}
-				
-				procInfo.arguments = new <String>["simctl", "shutdown", id];
-				process.start(procInfo);
 			}
 		}
 		
