@@ -67,6 +67,11 @@ package simulator
 				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputShell, false, 0, true);
 				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
 				process.addEventListener(NativeProcessExitEvent.EXIT, onBootExit, false, 0, true);
+				
+				if(AtsMobileStation.startedIosSimulator.indexOf(id,0) == -1) {
+					AtsMobileStation.startedIosSimulator.push(id);
+				}
+				
 
 				procInfo.arguments = new <String>["simctl", "bootstatus", id,"-b"];
 				process.start(procInfo);
@@ -86,6 +91,11 @@ package simulator
 						break;
 					}
 					index++;
+				}
+				
+				var startedSimIndex:int = AtsMobileStation.startedIosSimulator.indexOf(id,0);
+				if(startedSimIndex > -1) {
+					AtsMobileStation.startedIosSimulator.removeAt(startedSimIndex);
 				}
 				
 				procInfo.arguments = new <String>["simctl", "shutdown", id];
