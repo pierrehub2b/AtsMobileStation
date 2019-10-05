@@ -42,9 +42,9 @@
 				this.dev = value as Device;
 				
 				if(this.dev is IosDevice){
-					osBitmap.source = "assets/icons/20/ios.png";
+					mobile.source = "assets/icons/32/ios.png";
 				}else{
-					osBitmap.source = "assets/icons/20/android.png";
+					mobile.source = "assets/icons/32/android.png";
 				}
 			}
 			
@@ -114,8 +114,8 @@
 	<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" verticalCenter="0" filters="{dropShadowFilterMiddle}"
 			  paddingRight="6" paddingLeft="2" rollOver="mainGroup_rollOverHandler(event)" rollOut="mainGroup_rollOutHandler(event)">
 		<s:HGroup id="firstGroup" verticalAlign="middle" mouseDown="mouseDownHandler(event)" buttonMode="true">
-			<s:BitmapImage source="assets/icons/32/smartphone.png" smooth="true" smoothingQuality="high"/>
-			<s:VGroup gap="3" mouseEnabled="false">
+			<s:BitmapImage  id="mobile" source="assets/icons/32/android.png" smooth="true" smoothingQuality="high"/>
+			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="middle">
 				<s:Label visible="{dev.ip==null}" includeInLayout="{dev.ip==null}" 
 						 text="Unable to get local ip !" fontStyle="italic" color="0x8a844a"/>
 				<s:HGroup visible="{dev.ip!=null}" includeInLayout="{dev.ip!=null}" gap="0">
@@ -138,6 +138,5 @@
 			<s:BitmapImage source="assets/icons/24/restart.png" smooth="true" smoothingQuality="high"/>
 		</s:Group>
 	</s:HGroup>
-	<s:BitmapImage id="osBitmap" left="7" width="18" height="18" smooth="true" smoothingQuality="high"
-				   source="assets/icons/20/android.png" verticalCenter="-1"/>
+
 </s:ItemRenderer>
