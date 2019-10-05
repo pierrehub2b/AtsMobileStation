@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" showCloseButton="true" close="closeHandler(event)" xmlns:s="library://ns.adobe.com/flex/spark"
-				initialize = "settings_initializeHandler(event)" title="Device settings">
-	<mx:Script>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="320" title="Device settings" 
+			   close="closeHandler(event)"
+			   initialize="settings_initializeHandler(event)">
+	<fx:Script>
 		<![CDATA[
+			import device.Device;
+			
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
-			
-			import device.Device;
 			
 			public var dev:Device;
 			public var arrayString:Array;
@@ -69,6 +73,10 @@
 			{
 				var hasToRestart:Boolean = dev.settingsPort != portSelection.text  || dev.automaticPort != portAutomatic.selected;
 				if(dev != null){ 
+					
+					status.text = dev.id;
+					deviceName.text = dev.modelName;
+					
 					dev.settingsPort = portSelection.text;
 					dev.automaticPort = portAutomatic.selected;
 					//save profile
@@ -99,30 +107,90 @@
 				}
 				PopUpManager.removePopUp(this);
 			}			
+			
+			private var userDir:File;
+			protected function install_clickHandler(event:MouseEvent):void
+			{
+				userDir = File.documentsDirectory;
+				var typeFilter:FileFilter = new FileFilter("App file","*.apk; *.app");
+				
+				userDir.addEventListener(Event.SELECT, fileSelected, false, 0, true);
+				userDir.browse([typeFilter]);
+			}
+			
+			private function fileSelected(ev:Event):void{
+				userDir.removeEventListener(Event.SELECT, fileSelected);
+				
+				process = new NativeProcess();
+				procInfo = new NativeProcessStartupInfo()
+				
+				procInfo.executable = new File("/usr/bin/xcrun");
+				procInfo.workingDirectory = File.userDirectory;
+				
+				process.addEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
+				
+				procInfo.arguments = new <String>["simctl", "install", dev.id, userDir.nativePath];
+				process.start(procInfo);
+				
+				status.text = "Install app, please wait ..."
+			}
+			
+			protected function onInstallExit(event:NativeProcessExitEvent):void{
+				process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
+				process = null;
+				procInfo = null;
+				
+				status.text = dev.id
+			}
+			
+			private var process:NativeProcess;
+			private var procInfo:NativeProcessStartupInfo;
+			
+			protected function copyId_clickHandler(event:MouseEvent):void
+			{
+				Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, dev.id);
+			}
+			
 		]]>
-	</mx:Script>
+	</fx:Script>
 	
-	<s:Group id="deviceSettings" height="60" width="100%" left="5" right="5" top="5">
-		<s:VGroup width="100%" paddingLeft="7" paddingRight="10" verticalCenter="0" verticalAlign="middle" gap="3">
-			
-			<s:HGroup width="100%" paddingLeft="7" paddingRight="10" verticalCenter="0" verticalAlign="middle" gap="3">
-				<s:HGroup horizontalAlign="left">
-					<mx:Label fontSize="10" text="Fixed port"/>
-					<mx:TextInput id="portSelection" width="70" height="100%" restrict="0-9" maxChars="5" change="portSelection_changeHandler(event)" />
-				</s:HGroup>
-				
-				<s:Spacer width="100%"/>
-				
-				<s:HGroup horizontalAlign="right">
-					<mx:CheckBox id="portAutomatic" label="Auto" change="portAutomatic_changeHandler(event)"/>
-				</s:HGroup>
+	<s:VGroup left="3" right="3" top="8" bottom="34" gap="8" horizontalAlign="center"
+			  verticalAlign="middle">
+		<s:HGroup width="100%" verticalAlign="middle">
+			<s:Label fontSize="11" fontWeight="bold" text="Name :"/>
+			<s:Label id="deviceName" width="100%" fontSize="11"/>
+		</s:HGroup>
+		<s:HGroup>
+			<s:Button label="Copy device id" icon="assets/icons/16/copy.png" click="copyId_clickHandler(event)"/>
+			<s:Button label="Install app" click="install_clickHandler(event)" fontSize="11"
+					  icon="assets/icons/16/download.png"/>
+		</s:HGroup>
+		<mx:HRule width="100%"/>
+		<s:HGroup width="100%" gap="3" verticalAlign="middle" verticalCenter="0">
+			<s:HGroup width="100%" horizontalAlign="left" verticalAlign="baseline">
+				<s:Label fontSize="11" fontWeight="bold" text="Driver port :"/>
+				<s:CheckBox id="portAutomatic" label="Auto"
+							change="portAutomatic_changeHandler(event)" fontSize="11"
+							fontStyle="normal" textDecoration="none"/>
+				<s:TextInput id="portSelection" width="100%" height="100%" restrict="0-9" maxChars="5" change="portSelection_changeHandler(event)" />
 			</s:HGroup>
 			
-			<s:HGroup width="100%" paddingLeft="7" paddingRight="10" paddingTop="10" verticalCenter="0" verticalAlign="middle" gap="3" horizontalAlign="right">
-				<mx:Button fontSize="10" label="Save" click="save_clickHandler(event)"/>
-			</s:HGroup>
-		</s:VGroup>
-		
-		
+		</s:HGroup>
+
+	</s:VGroup>
+	
+	<s:Group left="0" right="0" bottom="0" height="28">
+		<s:Rect	left="0" right="0" bottom="0" alpha="0.5">
+			<s:fill>
+				<s:LinearGradient rotation="-10">
+					<s:GradientEntry color="0xbcc1c4"/>
+					<s:GradientEntry color="0xced0d2"/>
+				</s:LinearGradient>
+			</s:fill>
+		</s:Rect>
+		<s:Label id="status" left="3" color="#888888" fontSize="10" fontStyle="italic"
+				 verticalCenter="2"/>
+		<s:Button right="3" label="Done" click="save_clickHandler(event)" fontSize="11"
+				  icon="assets/icons/16/tick.png" verticalCenter="0"/>
 	</s:Group>
-</mx:TitleWindow>
+</s:TitleWindow>

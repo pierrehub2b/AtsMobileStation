@@ -8,27 +8,25 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import device.Device;
+			import device.IosDevice;
+			
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.core.DragSource;
 			import mx.managers.DragManager;
 			import mx.managers.PopUpManager;
 			
+			
 			import spark.filters.DropShadowFilter;
-			
-			import device.Device;
-			import device.IosDevice;
-			
-			import renderer.SettingsDeviceRenderer;
 			
 			private function showWindow(event:MouseEvent, dev:Device):void{
 				// create and configure the TitleWindow
-				var tw:SettingsDeviceRenderer = new SettingsDeviceRenderer();
-				tw.title = "Device settings";
-				tw.showCloseButton = true;
+				var tw:DeviceSettingsWindow = new DeviceSettingsWindow();
 				tw.dev = dev;
 				// open the TitleWindow as a modal popup window
 				PopUpManager.addPopUp(tw, this, true);
+				PopUpManager.centerPopUp(tw);
 			}
 			
 			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
