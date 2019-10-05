@@ -20,6 +20,10 @@
 			protected function settings_initializeHandler(event:FlexEvent):void {
 				
 				if(dev != null) {
+										
+					status.text = dev.id;
+					deviceName.text = dev.modelName;
+					
 					if(dev.isSimulator) {
 						//hGroupDevTeam.visible = false;
 					}
@@ -73,9 +77,6 @@
 			{
 				var hasToRestart:Boolean = dev.settingsPort != portSelection.text  || dev.automaticPort != portAutomatic.selected;
 				if(dev != null){ 
-					
-					status.text = dev.id;
-					deviceName.text = dev.modelName;
 					
 					dev.settingsPort = portSelection.text;
 					dev.automaticPort = portAutomatic.selected;
@@ -136,7 +137,7 @@
 			}
 			
 			protected function onInstallExit(event:NativeProcessExitEvent):void{
-				process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
+				process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallExit);
 				process = null;
 				procInfo = null;
 				
