@@ -7,11 +7,12 @@
 			   initialize="settings_initializeHandler(event)">
 	<fx:Script>
 		<![CDATA[
-			import device.Device;
-			
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
+			import mx.utils.StringUtil;
+			
+			import device.Device;
 			
 			public var dev:Device;
 			public var arrayString:Array;
@@ -112,7 +113,7 @@
 			private var userDir:File;
 			protected function install_clickHandler(event:MouseEvent):void
 			{
-				userDir = File.documentsDirectory;
+				userDir = File.userDirectory;
 				var typeFilter:FileFilter = new FileFilter("App file","*.apk; *.app");
 				
 				userDir.addEventListener(Event.SELECT, fileSelected, false, 0, true);
@@ -129,6 +130,8 @@
 				procInfo.workingDirectory = File.userDirectory;
 				
 				process.addEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
+				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputError, false, 0, true);
+				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutput, false, 0, true);
 				
 				procInfo.arguments = new <String>["simctl", "install", dev.id, userDir.nativePath];
 				process.start(procInfo);
@@ -136,10 +139,20 @@
 				enabled = false;
 			}
 			
+			protected function onOutputError(event:ProgressEvent):void
+			{
+				trace(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
+			}
+			
+			protected function onOutput(event:ProgressEvent):void{
+				trace(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
+			}
+			
 			protected function onInstallExit(event:NativeProcessExitEvent):void{
 				process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallExit);
 				process = null;
 				procInfo = null;
+				userDir = null;
 
 				enabled = true;
 			}
