@@ -2,7 +2,7 @@
 <s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
-			   width="320" title="Device settings" 
+			   width="300" title="Device settings" 
 			   close="closeHandler(event)"
 			   initialize="settings_initializeHandler(event)">
 	<fx:Script>
@@ -155,19 +155,19 @@
 		]]>
 	</fx:Script>
 	
-	<s:VGroup left="3" right="3" top="8" bottom="36" gap="8" horizontalAlign="left"
+	<s:VGroup left="6" right="6" top="10" bottom="36" gap="8" horizontalAlign="center"
 			  verticalAlign="middle">
 		<s:HGroup width="100%" verticalAlign="middle">
 			<s:Label fontSize="11" fontWeight="bold" text="Name :"/>
 			<s:Label id="deviceName" width="100%" fontSize="11"/>
 		</s:HGroup>
-		<s:Label id="deviceId" left="3" color="#888888" fontSize="11" fontStyle="italic"
-				 verticalCenter="2" text="sdf54sd65f46sd5"/>
+		<s:Label id="deviceId" left="3" width="100%" color="#888888" fontSize="10" fontStyle="italic"
+				 text="sdf54sd65f46sd5" verticalCenter="2"/>
 
-		<mx:HRule width="100%"/>
+		<mx:HRule width="98%"/>
 		<s:HGroup width="100%" gap="3" verticalAlign="middle" verticalCenter="0">
 			<s:HGroup width="100%" horizontalAlign="left" verticalAlign="baseline">
-				<s:Label fontSize="11" fontWeight="bold" text="Driver port :"/>
+				<s:Label fontSize="11" fontWeight="bold" paddingRight="5" text="Driver port :"/>
 				<s:CheckBox id="portAutomatic" label="Auto"
 							change="portAutomatic_changeHandler(event)" fontSize="11"
 							fontStyle="normal" textDecoration="none"/>
@@ -178,8 +178,8 @@
 
 	</s:VGroup>
 	
-	<s:Group left="0" right="0" bottom="0" height="28">
-		<s:Rect	left="0" right="0" bottom="0" alpha="0.5">
+	<s:Group left="0" right="0" bottom="0" height="30">
+		<s:Rect left="0" right="0" top="0" bottom="0" alpha="0.5">
 			<s:fill>
 				<s:LinearGradient rotation="-10">
 					<s:GradientEntry color="0xbcc1c4"/>
@@ -188,11 +188,10 @@
 			</s:fill>
 		</s:Rect>
 		
-		<s:HGroup left="5" right="5" horizontalAlign="center" verticalCenter="0">
+		<s:HGroup left="5" right="5" gap="2" horizontalAlign="center" verticalCenter="0">
 			<s:Button label="Copy device id" icon="assets/icons/16/copy.png" click="copyId_clickHandler(event)"/>
 			<s:Button label="Install app" click="install_clickHandler(event)" fontSize="11"
 					  icon="assets/icons/16/download.png"/>
-			<s:Spacer width="100%"/>
 			<s:Button label="Finish" click="save_clickHandler(event)" fontSize="11"
 					  icon="assets/icons/16/tick.png"/>
 		</s:HGroup>
