@@ -21,7 +21,7 @@
 				
 				if(dev != null) {
 										
-					status.text = dev.id;
+					deviceId.text = dev.id;
 					deviceName.text = dev.modelName;
 					
 					if(dev.isSimulator) {
@@ -133,15 +133,15 @@
 				procInfo.arguments = new <String>["simctl", "install", dev.id, userDir.nativePath];
 				process.start(procInfo);
 				
-				status.text = "Install app, please wait ..."
+				enabled = false;
 			}
 			
 			protected function onInstallExit(event:NativeProcessExitEvent):void{
 				process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallExit);
 				process = null;
 				procInfo = null;
-				
-				status.text = dev.id
+
+				enabled = true;
 			}
 			
 			private var process:NativeProcess;
@@ -155,17 +155,15 @@
 		]]>
 	</fx:Script>
 	
-	<s:VGroup left="3" right="3" top="8" bottom="34" gap="8" horizontalAlign="center"
+	<s:VGroup left="3" right="3" top="8" bottom="36" gap="8" horizontalAlign="left"
 			  verticalAlign="middle">
 		<s:HGroup width="100%" verticalAlign="middle">
 			<s:Label fontSize="11" fontWeight="bold" text="Name :"/>
 			<s:Label id="deviceName" width="100%" fontSize="11"/>
 		</s:HGroup>
-		<s:HGroup>
-			<s:Button label="Copy device id" icon="assets/icons/16/copy.png" click="copyId_clickHandler(event)"/>
-			<s:Button label="Install app" click="install_clickHandler(event)" fontSize="11"
-					  icon="assets/icons/16/download.png"/>
-		</s:HGroup>
+		<s:Label id="deviceId" left="3" color="#888888" fontSize="11" fontStyle="italic"
+				 verticalCenter="2" text="sdf54sd65f46sd5"/>
+
 		<mx:HRule width="100%"/>
 		<s:HGroup width="100%" gap="3" verticalAlign="middle" verticalCenter="0">
 			<s:HGroup width="100%" horizontalAlign="left" verticalAlign="baseline">
@@ -189,9 +187,14 @@
 				</s:LinearGradient>
 			</s:fill>
 		</s:Rect>
-		<s:Label id="status" left="3" color="#888888" fontSize="10" fontStyle="italic"
-				 verticalCenter="2"/>
-		<s:Button right="3" label="Done" click="save_clickHandler(event)" fontSize="11"
-				  icon="assets/icons/16/tick.png" verticalCenter="0"/>
+		
+		<s:HGroup left="5" right="5" horizontalAlign="center" verticalCenter="0">
+			<s:Button label="Copy device id" icon="assets/icons/16/copy.png" click="copyId_clickHandler(event)"/>
+			<s:Button label="Install app" click="install_clickHandler(event)" fontSize="11"
+					  icon="assets/icons/16/download.png"/>
+			<s:Spacer width="100%"/>
+			<s:Button label="Finish" click="save_clickHandler(event)" fontSize="11"
+					  icon="assets/icons/16/tick.png"/>
+		</s:HGroup>
 	</s:Group>
 </s:TitleWindow>
