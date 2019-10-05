@@ -18,8 +18,6 @@
 			
 			import renderer.RunningDeviceRenderer;
 			
-			import simulator.Simulator;
-			
 			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
 			[Bindable]
@@ -30,6 +28,8 @@
 			
 			[Bindable]
 			public static var simulators:AvailableSimulatorsManager;
+			
+			public static var startedIosSimulator:Vector.<String> = new Vector.<String>();
 			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
@@ -82,12 +82,6 @@
 				}
 			}
 			
-			protected function buttonRefresh_clickHandler(event:MouseEvent):void
-			{
-				// TODO Auto-generated method stub
-				simulators.refreshList();
-			}
-			
 		]]>
 	</fx:Script>
 	
@@ -106,11 +100,6 @@
 		</s:Rect>
 		<s:HGroup width="100%" paddingLeft="7" paddingRight="10" verticalCenter="0" verticalAlign="middle" gap="3">
 			<s:Label fontSize="13" text="Connected Devices" fontWeight="bold"/>
-			<s:Spacer width="100%"/>
-			<s:Group buttonMode="true" click="buttonRefresh_clickHandler(event)"
-					 toolTip="refresh">
-				<s:BitmapImage id="buttonRefresh" source="assets/icons/24/restart.png" smooth="true" smoothingQuality="high" width="20" height="20"/>
-			</s:Group>
 		</s:HGroup>
 	</s:Group>
 	

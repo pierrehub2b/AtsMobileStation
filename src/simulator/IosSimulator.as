@@ -67,29 +67,42 @@ package simulator
 				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputShell, false, 0, true);
 				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
 				process.addEventListener(NativeProcessExitEvent.EXIT, onBootExit, false, 0, true);
+				
+				if(AtsMobileStation.startedIosSimulator.indexOf(id,0) == -1) {
+					AtsMobileStation.startedIosSimulator.push(id);
+				}
 
-				procInfo.arguments = new <String>["simctl", "bootstatus", id,"-b"];
+				procInfo.arguments = new <String>["simctl", "boot", id];
 				process.start(procInfo);
 			} else {
-				phase = WAIT;
-				tooltip = "Simulator is terminating ...";
-				dispatchEvent(new Event(STATUS_CHANGED));
-				
-				procInfo.executable = xcrunExec;
-				process.addEventListener(NativeProcessExitEvent.EXIT, onShutdownExit, false, 0, true);
-				
-				var index:int = 0;
-				for each(var d:Device in AtsMobileStation.devices.collection) {
-					if(id == d.id) {
-						AtsMobileStation.devices.collection.removeItemAt(index);
-						AtsMobileStation.devices.collection.refresh();
-						break;
+				if(!process.running) {
+					phase = WAIT;
+					tooltip = "Simulator is terminating ...";
+					dispatchEvent(new Event(STATUS_CHANGED));
+					
+					procInfo.executable = xcrunExec;
+					process.addEventListener(NativeProcessExitEvent.EXIT, onShutdownExit, false, 0, true);
+					
+					var index:int = 0;
+					for each(var d:Device in AtsMobileStation.devices.collection) {
+						if(id == d.id) {
+							(d as IosDevice).dispose();
+							d.close();
+							AtsMobileStation.devices.collection.removeItemAt(index);
+							AtsMobileStation.devices.collection.refresh();
+							break;
+						}
+						index++;
 					}
-					index++;
+					
+					if(AtsMobileStation.startedIosSimulator.indexOf(id,0) > -1) {
+						AtsMobileStation.startedIosSimulator.removeAt(AtsMobileStation.startedIosSimulator.indexOf(id,0));
+					}
+					
+					procInfo.arguments = new <String>["simctl", "shutdown", id];
+					process.start(procInfo);
 				}
 				
-				procInfo.arguments = new <String>["simctl", "shutdown", id];
-				process.start(procInfo);
 			}
 		}
 		

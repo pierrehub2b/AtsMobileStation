@@ -140,29 +140,12 @@ package
 								var currentElement:SimCtlDevice = getByUdid(simctl, data[3]);
 								if((currentElement != null && currentElement.getIsAvailable())) {
 									var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : false;
+									if(isRunning) {
+										AtsMobileStation.startedIosSimulator.push(data[3]);
+									}
 									var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], isRunning, true);
 									sim.addEventListener(Simulator.STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
 									AtsMobileStation.simulators.collection.addItem(sim);
-									if(isRunning) {
-										var dev:Device = AtsMobileStation.devices.findDevice(data[3]) as IosDevice;
-										var isRedifined:Boolean = false;
-										if(dev != null && dev.isCrashed) {
-											isRedifined = true;
-											dev.dispose();
-											dev.close();
-											AtsMobileStation.devices.collection.removeItem(dev);
-											AtsMobileStation.devices.collection.refresh();
-										}
-										if(dev == null || isRedifined) {
-											dev = sim.device;								
-											AtsMobileStation.simulators.updateSimulatorInList(sim);
-											dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
-											AtsMobileStation.devices.collection.addItem(dev);
-											AtsMobileStation.devices.collection.refresh();
-										}else {
-											dev.connected = true;
-										}
-									}
 								}
 							}
 						}
@@ -177,18 +160,13 @@ package
 			}
 		}
 		
-		private function deviceStoppedHandler(ev:Event):void{
-			var dv:Device = ev.currentTarget as Device;
-			dv.removeEventListener("deviceStopped", deviceStoppedHandler);
-			dv.dispose();
-			AtsMobileStation.devices.collection.removeItem(dv);
-		}
-		
-		public function updateSimulatorInList(sim: IosSimulator):void {
+		public function updateSimulatorInList(id:String, started:Boolean):void {
 			var index:int = 0;
 			for each(var elem: IosSimulator in collection) {
-				if(elem.id == sim.id) {
-					collection.setItemAt(sim,index);
+				if(elem.id == id) {
+					elem.phase = started ? Simulator.RUN : Simulator.OFF; 					
+					collection.setItemAt(elem,index);
+					break;
 				}
 				index++;
 			}
