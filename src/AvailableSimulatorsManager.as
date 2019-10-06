@@ -10,12 +10,10 @@ package
 	import flash.system.Capabilities;
 	
 	import mx.collections.ArrayCollection;
+	import mx.core.FlexGlobals;
 	import mx.utils.StringUtil;
 	
 	import CustomClasses.SimCtlDevice;
-	
-	import device.Device;
-	import device.IosDevice;
 	
 	import event.SimulatorEvent;
 	
@@ -42,9 +40,9 @@ package
 		[Bindable]
 		public var collection:ArrayCollection = new ArrayCollection();
 		
-		public function AvailableSimulatorsManager()
+		public function AvailableSimulatorsManager(isMacOs:Boolean)
 		{
-			if(Capabilities.os.indexOf("Mac") > -1){
+			if(isMacOs){
 				procInfo = new NativeProcessStartupInfo();
 				process = new NativeProcess();
 				
@@ -78,7 +76,7 @@ package
 		
 		public function refreshList():void {
 			if(!process.running) {
-				AtsMobileStation.simulators.collection = new ArrayCollection();
+				FlexGlobals.topLevelApplication.simulators.collection = new ArrayCollection();
 				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
 				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onInstrumentsOutput, false, 0, true);
 				process.addEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit, false, 0, true);
@@ -141,18 +139,18 @@ package
 								if((currentElement != null && currentElement.getIsAvailable())) {
 									var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : false;
 									if(isRunning) {
-										AtsMobileStation.startedIosSimulator.push(data[3]);
+										FlexGlobals.topLevelApplication.startedIosSimulator.push(data[3]);
 									}
 									var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], isRunning, true);
 									sim.addEventListener(Simulator.STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
-									AtsMobileStation.simulators.collection.addItem(sim);
+									FlexGlobals.topLevelApplication.simulators.collection.addItem(sim);
 								}
 							}
 						}
 					}
 				}
 				
-				if(AtsMobileStation.simulators.collection.length == 0){
+				if(FlexGlobals.topLevelApplication.simulators.collection.length == 0){
 					info = "No simulators found !\n(Xcode may not be installed on this station !)"
 				}else{
 					info = "";

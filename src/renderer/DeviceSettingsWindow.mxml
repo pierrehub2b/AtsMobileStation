@@ -7,10 +7,10 @@
 			   initialize="settings_initializeHandler(event)">
 	<fx:Script>
 		<![CDATA[
+			import mx.core.FlexGlobals;
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
-			import mx.utils.StringUtil;
 			
 			import device.Device;
 			
@@ -105,7 +105,7 @@
 				}
 				
 				if(hasToRestart) {
-					AtsMobileStation.devices.restartDev(dev);
+					FlexGlobals.topLevelApplication.devices.restartDev(dev);
 				}
 				PopUpManager.removePopUp(this);
 			}			

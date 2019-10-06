@@ -8,17 +8,17 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import device.Device;
-			import device.IosDevice;
-			
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.core.DragSource;
+			import mx.core.FlexGlobals;
 			import mx.managers.DragManager;
 			import mx.managers.PopUpManager;
 			
-			
 			import spark.filters.DropShadowFilter;
+			
+			import device.Device;
+			import device.IosDevice;
 			
 			private function showWindow(event:MouseEvent, dev:Device):void{
 				// create and configure the TitleWindow
@@ -48,7 +48,7 @@
 			
 			protected function restart_clickHandler(event:MouseEvent):void
 			{
-				AtsMobileStation.devices.restartDev(dev);
+				FlexGlobals.topLevelApplication.devices.restartDev(dev);
 			}
 			
 			protected function mainGroup_rollOverHandler(event:MouseEvent):void

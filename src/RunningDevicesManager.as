@@ -4,14 +4,13 @@ package
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
 	import flash.events.NativeProcessExitEvent;
-	import flash.events.OutputProgressEvent;
 	import flash.events.ProgressEvent;
 	import flash.events.TimerEvent;
 	import flash.filesystem.File;
-	import flash.system.Capabilities;
 	import flash.utils.Timer;
 	
 	import mx.collections.ArrayCollection;
+	import mx.core.FlexGlobals;
 	import mx.utils.StringUtil;
 	
 	import spark.collections.Sort;
@@ -29,7 +28,6 @@ package
 	
 	public class RunningDevicesManager
 	{
-		
 		//ios Proc info
 		protected var iosProcInfo:NativeProcessStartupInfo;
 		public var iosProcess:NativeProcess;
@@ -59,7 +57,7 @@ package
 		
 		public static var devTeamId:String = "";
 		
-		public function RunningDevicesManager(port:String)
+		public function RunningDevicesManager(isMacOs:Boolean, port:String)
 		{
 			this.port = port;
 			this.collection.sort = ipSort;
@@ -68,7 +66,7 @@ package
 			this.iosTimer.addEventListener(TimerEvent.TIMER, iosTimerComplete, false, 0, true);
 			
 			var adbPath:String = "assets/tools/android/adb";
-			if(Capabilities.os.indexOf("Mac") > -1){
+			if(isMacOs){
 				
 				//-----------------------------------------------------------------------------
 				// IOS
@@ -318,15 +316,15 @@ package
 								collection.refresh();
 							}
 							
-							if(AtsMobileStation.startedIosSimulator.indexOf(data[3],0) == -1) {
-								AtsMobileStation.startedIosSimulator.push(data[3]);
+							if(FlexGlobals.topLevelApplication.startedIosSimulator.indexOf(data[3],0) == -1) {
+								FlexGlobals.topLevelApplication.startedIosSimulator.push(data[3]);
 							}
 							
 							if(dev == null || isRedifined) {
 								var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], true, !isPhysicalDevice);
 								dev = sim.device;	
 								if(!isPhysicalDevice) {
-									AtsMobileStation.simulators.updateSimulatorInList(data[3], true);
+									FlexGlobals.topLevelApplication.simulators.updateSimulatorInList(data[3], true);
 									dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
 								}
 								collection.addItem(dev);
@@ -337,9 +335,9 @@ package
 								}
 							}
 						} else {
-							if(AtsMobileStation.startedIosSimulator.indexOf(data[3],0) > -1) {
-								AtsMobileStation.startedIosSimulator.removeAt(AtsMobileStation.startedIosSimulator.indexOf(data[3],0));
-								AtsMobileStation.simulators.updateSimulatorInList(data[3], false);
+							if(FlexGlobals.topLevelApplication.startedIosSimulator.indexOf(data[3],0) > -1) {
+								FlexGlobals.topLevelApplication.startedIosSimulator.removeAt(FlexGlobals.topLevelApplication.startedIosSimulator.indexOf(data[3],0));
+								FlexGlobals.topLevelApplication.simulators.updateSimulatorInList(data[3], false);
 								dev = findDevice(data[3]);
 								if(dev != null) {
 									(dev as IosDevice).dispose();
@@ -367,7 +365,7 @@ package
 			
 			for each(dv in collection){
 				if(!dv.connected && dv.isSimulator){
-					AtsMobileStation.devices.restartDev(dev);
+					FlexGlobals.topLevelApplication.devices.restartDev(dev);
 				}
 			}
 			

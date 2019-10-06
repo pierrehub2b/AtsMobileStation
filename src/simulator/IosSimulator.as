@@ -10,6 +10,7 @@ package simulator
 	import flash.net.NetworkInfo;
 	import flash.net.NetworkInterface;
 	
+	import mx.core.FlexGlobals;
 	import mx.utils.StringUtil;
 	
 	import device.Device;
@@ -68,8 +69,8 @@ package simulator
 				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
 				process.addEventListener(NativeProcessExitEvent.EXIT, onBootExit, false, 0, true);
 				
-				if(AtsMobileStation.startedIosSimulator.indexOf(id,0) == -1) {
-					AtsMobileStation.startedIosSimulator.push(id);
+				if(FlexGlobals.topLevelApplication.startedIosSimulator.indexOf(id,0) == -1) {
+					FlexGlobals.topLevelApplication.startedIosSimulator.push(id);
 				}
 
 				procInfo.arguments = new <String>["simctl", "boot", id];
@@ -84,19 +85,19 @@ package simulator
 					process.addEventListener(NativeProcessExitEvent.EXIT, onShutdownExit, false, 0, true);
 					
 					var index:int = 0;
-					for each(var d:Device in AtsMobileStation.devices.collection) {
+					for each(var d:Device in FlexGlobals.topLevelApplication.devices.collection) {
 						if(id == d.id) {
 							(d as IosDevice).dispose();
 							d.close();
-							AtsMobileStation.devices.collection.removeItemAt(index);
-							AtsMobileStation.devices.collection.refresh();
+							FlexGlobals.topLevelApplication.devices.collection.removeItemAt(index);
+							FlexGlobals.topLevelApplication.devices.collection.refresh();
 							break;
 						}
 						index++;
 					}
 					
-					if(AtsMobileStation.startedIosSimulator.indexOf(id,0) > -1) {
-						AtsMobileStation.startedIosSimulator.removeAt(AtsMobileStation.startedIosSimulator.indexOf(id,0));
+					if(FlexGlobals.topLevelApplication.startedIosSimulator.indexOf(id,0) > -1) {
+						FlexGlobals.topLevelApplication.startedIosSimulator.removeAt(FlexGlobals.topLevelApplication.startedIosSimulator.indexOf(id,0));
 					}
 					
 					procInfo.arguments = new <String>["simctl", "shutdown", id];
