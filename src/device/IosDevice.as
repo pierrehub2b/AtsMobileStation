@@ -19,17 +19,17 @@ package device
 		private var testingProcess:NativeProcess = new NativeProcess();
 		private var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 		
-		//private var testingProcessPhysical:NativeProcess = new NativeProcess();
-		//private var procInfoPhysical:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+		private var testingProcessPhysical:NativeProcess = new NativeProcess();
+		private var procInfoPhysical:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 		
 		private static const iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
 		private static const xcodeBuildExec:File = new File("/usr/bin/env");
 		
-		public function IosDevice(id:String, name:String, version:String, isSimulator:Boolean, ip:String)
+		public function IosDevice(id:String, name:String, isSimulator:Boolean, ip:String)
 		{
 			this.id = id;
 			this.ip = ip;
-			this.modelName = name + "(" + version + ")";
+			this.modelName = name;
 			this.manufacturer = "Apple";
 			this.isSimulator = isSimulator;
 			this.isCrashed = false;
@@ -68,9 +68,9 @@ package device
 			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 			
-			//testingProcessPhysical.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingPhysicalOutput, false, 0, true);
+			testingProcessPhysical.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingPhysicalOutput, false, 0, true);
 			
-			/*var resultDir:File = File.documentsDirectory.resolvePath("tmpDir/driver_"+ id);
+			var resultDir:File = File.documentsDirectory.resolvePath("tmpDir/driver_"+ id);
 			iosDriverProjectFolder.copyTo(resultDir, true);
 			var index:int = 0;
 			file = resultDir.resolvePath("atsDriver/Settings.plist");
@@ -99,7 +99,7 @@ package device
 					writeFileStream.writeUTFBytes(str + "\n");
 				}
 				writeFileStream.close();
-			}*/
+			}
 			
 			/*var isDebug:Boolean = false;
 			var isRelease:Boolean = false;
@@ -146,21 +146,21 @@ package device
 			}*/
 			
 			procInfo.executable = xcodeBuildExec;
-			procInfo.workingDirectory = IosDriverCompiler.getProjectFolder(name);
+			procInfo.workingDirectory = resultDir;
 			
-			//procInfoPhysical.executable = xcodeBuildExec;
-			//procInfoPhysical.workingDirectory = resultDir;
+			procInfoPhysical.executable = xcodeBuildExec;
+			procInfoPhysical.workingDirectory = resultDir;
 			
 			output = "";
 			
-			procInfo.arguments = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test-without-building"];;
-			//procInfoPhysical.arguments = args;
-			
-			//if(isSimulator) {
+			var args: Vector.<String> = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test-without-building"];	
+			procInfo.arguments = args;
+			procInfoPhysical.arguments = args;
+			if(isSimulator) {
 				testingProcess.start(procInfo);
-			//} else {
-				//testingProcessPhysical.start(procInfoPhysical);
-			//}
+			} else {
+				testingProcessPhysical.start(procInfoPhysical);
+			}
 			
 		}
 		
@@ -190,7 +190,7 @@ package device
 			}
 		}
 		
-		/*protected function onTestingPhysicalOutput(event:ProgressEvent):void
+		protected function onTestingPhysicalOutput(event:ProgressEvent):void
 		{
 			var data:String = testingProcessPhysical.standardOutput.readUTFBytes(testingProcessPhysical.standardOutput.bytesAvailable);
 			trace("test output -> " + data);
@@ -202,7 +202,7 @@ package device
 				testingProcessPhysical.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingPhysicalError, false, 0, true);
 			}
 			
-		}*/
+		}
 		
 		protected function onTestingError(event:ProgressEvent):void
 		{
@@ -215,7 +215,7 @@ package device
 			}
 		}
 		
-		/*protected function onTestingPhysicalError(event:ProgressEvent):void
+		protected function onTestingPhysicalError(event:ProgressEvent):void
 		{
 			testingProcessPhysical.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
 			
@@ -224,7 +224,7 @@ package device
 			if(data.indexOf("Continuing with testing") < 0 && data.indexOf("** TEST EXECUTE FAILED **") > 0 || data.indexOf("** TEST FAILED **") > 0){
 				this.changeCrashedStatus();
 			}
-		}*/
+		}
 		
 		protected function changeCrashedStatus():void {
 			this.isCrashed = true
