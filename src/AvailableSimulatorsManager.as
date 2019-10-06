@@ -7,7 +7,6 @@ package
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
-	import flash.system.Capabilities;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.FlexGlobals;
@@ -27,6 +26,7 @@ package
 		
 		private const regex:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
+		private const iPhonePattern:RegExp = /iPhone([^(]*)\(([^)]*)\)/;
 			
 		private var procInfo:NativeProcessStartupInfo;
 		public var process:NativeProcess;
@@ -40,9 +40,13 @@ package
 		[Bindable]
 		public var collection:ArrayCollection = new ArrayCollection();
 		
-		public function AvailableSimulatorsManager(isMacOs:Boolean)
+		private var compiler:IosDriverCompiler;
+		private var models:Array = [];
+		
+		public function AvailableSimulatorsManager(compiler:IosDriverCompiler)
 		{
-			if(isMacOs){
+			this.compiler = compiler;
+
 				procInfo = new NativeProcessStartupInfo();
 				process = new NativeProcess();
 				
@@ -55,7 +59,7 @@ package
 				
 				procInfo.arguments = new <String>["defaults", "write" ,"com.apple.iphonesimulator", "ShowChrome", "-int", "0"];
 				process.start(procInfo);
-			}
+
 		}
 		
 		protected function onSetupSimulatorExit(event:NativeProcessExitEvent):void
@@ -175,7 +179,27 @@ package
 		{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit);
 			arrayInstrument = output.split("\n");
+			
+			for each(var line:String in arrayInstrument){
+				var iphone:* = iPhonePattern.exec(line);
+				if(iphone != null){
+					addModel("iPhone " + StringUtil.trim(iphone[1]), iphone[2]);
+				}
+			}
+			
+			compiler.simulatorList = models;
+			compiler.start();
+			
 			getDevicesStates();
+		}
+		
+		private function addModel(name:String, os:String):void{
+			for each(var verif:Object in models){
+				if(verif.name == name && verif.os == os){
+					return;
+				}
+			}
+			models.push({name:name, os:os});
 		}
 		
 		public function getDevicesStates(): void {

@@ -24,8 +24,8 @@ package simulator
 		private var process:NativeProcess = new NativeProcess();
 		private var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 		
-		private static const xcrunExec:File = new File("/usr/bin/xcrun");
-		private static const openExec:File = new File("/usr/bin/open");
+		private const xcrunExec:File = new File("/usr/bin/xcrun");
+		private const openExec:File = new File("/usr/bin/open");
 		
 		public function IosSimulator(id:String, name:String, version:String, isBooted: Boolean, isSimulator: Boolean)
 		{
@@ -53,7 +53,7 @@ package simulator
 					}
 				}
 			}
-			return new IosDevice(id, name + " (" + version +")", isSimulator, ipAddress);
+			return new IosDevice(id, name, version, isSimulator, ipAddress);
 		}
 		
 		override public function startStop():void{

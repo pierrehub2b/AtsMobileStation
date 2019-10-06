@@ -41,7 +41,8 @@
 				if(isMacOs){
 					compiler = new IosDriverCompiler();
 					compiler.addEventListener(Event.COMPLETE, compileComplete, false, 0, true);
-					compiler.start();
+					
+					simulators = new AvailableSimulatorsManager(compiler);
 				}else{
 					height = 390;
 					startApp()
@@ -51,7 +52,6 @@
 			private function startApp():void{
 				mainGroup.visible = true;
 				removeElement(compileInfo)
-				simulators = new AvailableSimulatorsManager(isMacOs);
 				devices = new RunningDevicesManager(isMacOs, port);
 			}
 			
