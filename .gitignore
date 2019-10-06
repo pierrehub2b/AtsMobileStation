@@ -21,3 +21,4 @@ temp/
 .flexProperties
 build.properties
 .DS_Store
+.DS_Store?
