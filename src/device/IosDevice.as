@@ -8,8 +8,6 @@ package device
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	
-	import mx.core.FlexGlobals;
-	
 	public class IosDevice extends Device
 	{
 		private var output:String = "";
@@ -151,9 +149,8 @@ package device
 			procInfoPhysical.executable = xcodeBuildExec;
 			procInfoPhysical.workingDirectory = resultDir;
 			
-			output = "";
 			
-			var args: Vector.<String> = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test-without-building"];	
+			var args: Vector.<String> = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test"];	
 			procInfo.arguments = args;
 			procInfoPhysical.arguments = args;
 			if(isSimulator) {
@@ -174,14 +171,13 @@ package device
 			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
 			
 			trace("testing exit");
-			FlexGlobals.topLevelApplication.devices.restartDev(this);
+			AtsMobileStation.devices.restartDev(this);
 		}
 		
 		protected function onTestingOutput(event:ProgressEvent):void
 		{
 			var data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
-			output += data;
-			
+			trace("test output -> " + data);
 			var find:Array = startInfo.exec(data);
 			if(find != null){
 				ip = find[1];

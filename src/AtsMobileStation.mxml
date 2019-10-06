@@ -2,13 +2,12 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
-					   width="340" height="92" showStatusBar="false"
+					   width="340" height="360" showStatusBar="false"
 					   right="0" bottom="0"
 					   creationComplete="creationCompleteHandler(event)"
 					   close="closeHandler(event)" backgroundColor="0xefefef">
 	<fx:Script>
 		<![CDATA[
-			import com.greensock.TweenLite;
 			import com.greensock.TweenMax;
 			
 			import flash.filters.BitmapFilterQuality;
@@ -19,46 +18,23 @@
 			
 			import renderer.RunningDeviceRenderer;
 			
-			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
-			
-			private var compiler:IosDriverCompiler;
+			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
 			[Bindable]
 			private var port:String = "8080";
 			
 			[Bindable]
-			public var devices:RunningDevicesManager;
+			public static var devices:RunningDevicesManager;
 			
 			[Bindable]
-			public var simulators:AvailableSimulatorsManager;
+			public static var simulators:AvailableSimulatorsManager;
 			
-			public var startedIosSimulator:Vector.<String> = new Vector.<String>();
-			
-			public var isMacOs:Boolean = Capabilities.os.indexOf("Mac") > -1;
+			public static var startedIosSimulator:Vector.<String> = new Vector.<String>();
 			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
-				if(isMacOs){
-					compiler = new IosDriverCompiler();
-					compiler.addEventListener(Event.COMPLETE, compileComplete, false, 0, true);
-					compiler.start();
-				}else{
-					height = 390;
-					startApp()
-				}
-			}
-			
-			private function startApp():void{
-				mainGroup.visible = true;
-				removeElement(compileInfo)
-				simulators = new AvailableSimulatorsManager(isMacOs);
-				devices = new RunningDevicesManager(isMacOs, port);
-			}
-			
-			private function compileComplete(ev:Event):void{
-				compiler.removeEventListener(Event.COMPLETE, compileComplete);
-				
-				TweenLite.to(this, 0.8, {height:390, onComplete:startApp});
+				simulators = new AvailableSimulatorsManager();
+				devices = new RunningDevicesManager(port);
 			}
 			
 			protected function closeHandler(event:Event):void
@@ -93,7 +69,7 @@
 			protected function clickGroup_clickHandler(event:MouseEvent):void
 			{
 				if(simulatorsGroup.height == 26){
-					TweenMax.to(simulatorsGroup, 0.3, {height:350})
+					TweenMax.to(simulatorsGroup, 0.3, {height:320})
 				}else{
 					TweenMax.to(simulatorsGroup, 0.3, {height:26})
 				}
@@ -109,14 +85,6 @@
 		]]>
 	</fx:Script>
 	
-	<s:Group id="compileInfo" horizontalCenter="0" top="20" filters="{dropShadowFilter}">
-		<s:BitmapImage source="assets/icons/48/coffee-machine-icon.png"/>
-		<s:Label text="Compiling Ats-Ios driver for this workstation" width="100%" top="5" left="55"/>
-		<s:Label text="please wait ..." width="100%" top="23" fontStyle="italic" left="62"/>
-	</s:Group>
-	
-	<s:Group id="mainGroup" visible="false" width="100%" height="100%">
-		
 	<s:Group id="clickConnected" buttonMode="true" height="26" left="5" right="5" top="5"
 			 click="clickConnected_clickHandler(event)" filters="{dropShadowFilter}">
 		<s:Rect width="100%" height="100%" radiusX="3">
@@ -186,6 +154,6 @@
 				contentBackgroundAlpha="0.0" dataProvider="{simulators.collection}"
 				itemRenderer="renderer.SimulatorDeviceRenderer"/>
 	</s:Group>
-	</s:Group>
+	
 	
 </s:WindowedApplication>

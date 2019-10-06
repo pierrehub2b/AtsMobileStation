@@ -10,10 +10,12 @@ package
 	import flash.system.Capabilities;
 	
 	import mx.collections.ArrayCollection;
-	import mx.core.FlexGlobals;
 	import mx.utils.StringUtil;
 	
 	import CustomClasses.SimCtlDevice;
+	
+	import device.Device;
+	import device.IosDevice;
 	
 	import event.SimulatorEvent;
 	
@@ -40,9 +42,9 @@ package
 		[Bindable]
 		public var collection:ArrayCollection = new ArrayCollection();
 		
-		public function AvailableSimulatorsManager(isMacOs:Boolean)
+		public function AvailableSimulatorsManager()
 		{
-			if(isMacOs){
+			if(Capabilities.os.indexOf("Mac") > -1){
 				procInfo = new NativeProcessStartupInfo();
 				process = new NativeProcess();
 				
@@ -76,7 +78,7 @@ package
 		
 		public function refreshList():void {
 			if(!process.running) {
-				FlexGlobals.topLevelApplication.simulators.collection = new ArrayCollection();
+				AtsMobileStation.simulators.collection = new ArrayCollection();
 				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
 				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onInstrumentsOutput, false, 0, true);
 				process.addEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit, false, 0, true);
@@ -139,18 +141,18 @@ package
 								if((currentElement != null && currentElement.getIsAvailable())) {
 									var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : false;
 									if(isRunning) {
-										FlexGlobals.topLevelApplication.startedIosSimulator.push(data[3]);
+										AtsMobileStation.startedIosSimulator.push(data[3]);
 									}
 									var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], isRunning, true);
 									sim.addEventListener(Simulator.STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
-									FlexGlobals.topLevelApplication.simulators.collection.addItem(sim);
+									AtsMobileStation.simulators.collection.addItem(sim);
 								}
 							}
 						}
 					}
 				}
 				
-				if(FlexGlobals.topLevelApplication.simulators.collection.length == 0){
+				if(AtsMobileStation.simulators.collection.length == 0){
 					info = "No simulators found !\n(Xcode may not be installed on this station !)"
 				}else{
 					info = "";
