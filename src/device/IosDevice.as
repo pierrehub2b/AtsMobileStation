@@ -68,7 +68,8 @@ package device
 			
 			testingProcessPhysical.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingPhysicalOutput, false, 0, true);
 			
-			var resultDir:File = File.documentsDirectory.resolvePath("tmpDir/driver_"+ id);
+			var resultDir:File = File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id);
+			var alreadyCopied:Boolean = resultDir.exists;
 			iosDriverProjectFolder.copyTo(resultDir, true);
 			var index:int = 0;
 			file = resultDir.resolvePath("atsDriver/Settings.plist");
@@ -150,15 +151,18 @@ package device
 			procInfoPhysical.workingDirectory = resultDir;
 			
 			
-			var args: Vector.<String> = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test"];	
-			procInfo.arguments = args;
-			procInfoPhysical.arguments = args;
-			if(isSimulator) {
-				testingProcess.start(procInfo);
+			var args: Vector.<String> = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id];
+			if(!isSimulator) {
+				args.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + teamId);
+			}
+			if(alreadyCopied) {
+				args.push("test-without-building");
 			} else {
-				testingProcessPhysical.start(procInfoPhysical);
+				args.push("test");
 			}
 			
+			procInfo.arguments = args;
+			testingProcess.start(procInfo);
 		}
 		
 		override public function dispose():Boolean

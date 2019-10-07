@@ -13,9 +13,13 @@
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
 			
 			import spark.filters.DropShadowFilter;
 			
+			import device.Device;
+			
+			import renderer.PhysicialDeviceSettingsWindow;
 			import renderer.RunningDeviceRenderer;
 			
 			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
@@ -33,13 +37,13 @@
 			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
+				cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
 				simulators = new AvailableSimulatorsManager();
 				devices = new RunningDevicesManager(port);
 			}
 			
 			protected function closeHandler(event:Event):void
 			{
-				cleanDirectory(File.documentsDirectory.resolvePath("tmpDir"));
 				simulators.process.exit(true);
 				devices.adbProcess.exit(true);
 				devices.iosProcess.exit(true);
@@ -82,6 +86,22 @@
 				}
 			}
 			
+			protected function settings_clickHandler(event:MouseEvent):void
+			{
+				// create and configure the TitleWindow
+				var tw:PhysicialDeviceSettingsWindow = new PhysicialDeviceSettingsWindow();
+				for each(var dv:Device in devices.collection) {
+					if(!dv.isSimulator) {
+						tw.dev = dv;
+						break;
+					}
+				}
+				
+				// open the TitleWindow as a modal popup window
+				PopUpManager.addPopUp(tw, this, true);
+				PopUpManager.centerPopUp(tw);
+			}
+			
 		]]>
 	</fx:Script>
 	
@@ -100,6 +120,12 @@
 		</s:Rect>
 		<s:HGroup width="100%" paddingLeft="7" paddingRight="10" verticalCenter="0" verticalAlign="middle" gap="3">
 			<s:Label fontSize="13" text="Connected Devices" fontWeight="bold"/>
+			<s:Spacer width="100%"/>
+			
+			<s:Group buttonMode="true" click="settings_clickHandler(event)">
+				<s:BitmapImage id="settingsButton" width="20" height="20" source="assets/icons/24/run.png" smooth="true" smoothingQuality="high"/>
+			</s:Group>
+			
 		</s:HGroup>
 	</s:Group>
 	
