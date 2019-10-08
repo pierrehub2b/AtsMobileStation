@@ -8,13 +8,43 @@
 			<isset property="isMacos"/>
 		</condition>
 		<property name="FLEX_HOME" value="${SDK_HOME_WIN}"/>
-		<echo message="Using SDK ->  ${FLEX_HOME}"/>
+		<echo message="Using SDK -> ${FLEX_HOME}"/>
 		<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />
 		
 		<condition property="package.type" value="bundle">
 			<matches string="${ant.project.invoked-targets}" pattern="^package-bundle$"/>
 		</condition>
 		<property name="package.type" value="normal"/>
+	</target>
+	
+	<target name="compile.workers" depends="init.sdk">
+
+		<mkdir dir="${WORKERS_FOLDER}"/>
+		<mxmlc file="${SRC_FOLDER}/worker/AndroidWorker.as"
+		            output="${WORKERS_FOLDER}/AndroidWorker.swf"
+						default-frame-rate="24"
+						use-network="true"
+						context-root="${APP_NAME}"
+					    actionscript-file-encoding="UTF-8"
+					    optimize="true"
+					 	swf-version="23"
+						debug="false"
+						use-gpu="true"
+						warnings="false">
+		             			
+		            <!-- Get default compiler options. Hand modified to remove extraneous Flex trash -->
+		 			<load-config filename="${FLEX_HOME}/frameworks/air-config.xml"/>
+		             
+		            <!-- List of path elements that form the roots of ActionScript class hierarchies. -->
+		            <source-path path-element="${FLEX_HOME}/frameworks" />
+		            <source-path path-element="${SRC_FOLDER}" />
+
+		            <!-- List of SWC files or directories that contain SWC files. -->
+		            <compiler.library-path dir="libs" append="true">
+		                <include name="*.swc" />
+		            </compiler.library-path>
+		 
+		</mxmlc>
 	</target>
 
 	<target name="compile.project" description="" depends="init.sdk">

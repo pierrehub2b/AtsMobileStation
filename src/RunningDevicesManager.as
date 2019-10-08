@@ -218,7 +218,7 @@ package
 					if(info.length >= 2){
 						dev = findDevice(info[0]);
 						if(dev == null){
-							dev = new AndroidDevice(adbFile, port, info[0], info[1]);
+							dev = new AndroidDevice(adbFile.nativePath, port, info[0], info[1]);
 							dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
 							collection.addItem(dev);
 							collection.refresh();

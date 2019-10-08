@@ -1,190 +1,118 @@
 package device
 {
-	import flash.desktop.NativeProcess;
-	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
-	import flash.events.NativeProcessExitEvent;
-	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
+	import flash.system.MessageChannel;
+	import flash.system.Worker;
+	import flash.system.WorkerDomain;
+	import flash.system.WorkerState;
+	import flash.utils.ByteArray;
+	
+	import worker.WorkerStatus;
 	
 	public class AndroidDevice extends Device
 	{
-		private static const androidDriverFullName:String = "com.ats.atsdroid";
-		private static const androidPropValueRegex:RegExp = /.*:.*\[(.*)\]/;
 		private static const androidDriverFilePath:String = File.applicationDirectory.resolvePath("assets/drivers/atsdroid.apk").nativePath;
 						
 		public var androidVersion:String = "";
 		public var androidSdk:String = "";
 
 		public var type:String;
-				
-		private var output:String = "";
 		
-		private var process:NativeProcess = new NativeProcess();
-		private var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
+		private var androidWorker:Worker;
+		private var inputChannel:MessageChannel;
+		private var outputChannel:MessageChannel;
+						
+		[Embed(source="/AndroidWorker.swf", mimeType="application/octet-stream")]
+		private var AndroidWorker_ByteClass:Class;
+		private function get AndroidsWorker():ByteArray
+		{
+			return new AndroidWorker_ByteClass();
+		}
 		
-		public function AndroidDevice(adbFile:File, port:String, id:String, type:String)
+		private var startDriverArgs:Array;
+		
+		public function AndroidDevice(adbFilePath:String, port:String, id:String, type:String)
 		{
 			this.port = port;
 			this.connected = true;
 			this.id = id;
 			this.type = type;
 			
-			procInfo.executable = adbFile;			
-			procInfo.workingDirectory = adbFile.parent;
+			this.startDriverArgs = ["startDriver", androidDriverFilePath, port, id, adbFilePath];
 			
-			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
-			process.addEventListener(NativeProcessExitEvent.EXIT, onReadLanExit, false, 0, true);
-			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData, false, 0, true);
+			androidWorker = WorkerDomain.current.createWorker(AndroidsWorker, true);
+						
+			outputChannel = androidWorker.createMessageChannel(Worker.current);
+			outputChannel.addEventListener(Event.CHANNEL_MESSAGE, handleProgressMessage);
+			androidWorker.setSharedProperty(WorkerStatus.OUTPUT_CHANNEL, outputChannel);
 			
-			//procInfo.arguments = new <String>["-s", id, "shell", "ip", "addr", "show", "wlan0"];
-			procInfo.arguments = new <String>["-s", id, "shell", "ip", "route"];
+			androidWorker.addEventListener(Event.WORKER_STATE, handleBGWorkerStateChange);
 			
-			process.start(procInfo);
+			inputChannel = Worker.current.createMessageChannel(androidWorker);
+			androidWorker.setSharedProperty(WorkerStatus.INPUT_CHANNEL, inputChannel);
+			
+			androidWorker.start();
+		}
+		
+		private function handleBGWorkerStateChange(event:Event):void
+		{
+			if (androidWorker.state == WorkerState.RUNNING){
+				androidWorker.removeEventListener(Event.WORKER_STATE, handleBGWorkerStateChange);
+				inputChannel.send(startDriverArgs);
+			}
+		}
+		
+		private function handleProgressMessage(event:Event):void
+		{
+			var workerStatus:Array = outputChannel.receive() as Array;
+			var messageType:String = workerStatus[1];
+			
+			if(workerStatus[0] == 1){ // it's an error
+
+				outputChannel.removeEventListener(Event.CHANNEL_MESSAGE, handleProgressMessage);
+				outputChannel.close();
+				
+				androidWorker.terminate();
+				
+				if(messageType == WorkerStatus.LAN_ERROR){
+					//TODO show specific error to user
+				}else if(messageType == WorkerStatus.EXECUTE_ERROR){
+					//TODO show specific error to user
+				}
+				
+				status = FAIL
+				connected = false;
+				
+				dispatchEvent(new Event("deviceStopped"));
+				
+			}else{
+				if(messageType == WorkerStatus.IP_ADDRESS){
+					ip = workerStatus[2];
+				}else if(messageType ==WorkerStatus.STARTING){
+					status = INSTALL;
+				}else if(messageType ==WorkerStatus.DEVICE_INFO){
+					manufacturer = workerStatus[2]
+					modelId = workerStatus[3];
+					modelName = workerStatus[4];
+					androidVersion = workerStatus[5];
+					androidSdk = workerStatus[6];
+				}else if(messageType == WorkerStatus.RUNNING){
+					status = READY
+					tooltip = "Android " + androidVersion + ", API " + androidSdk + " [" + id + "]\nready and waiting testing actions"
+				}else if(messageType == WorkerStatus.STOPPED){
+					androidWorker.terminate();
+					dispatchEvent(new Event("deviceStopped"));
+				}
+			}
 		}
 		
 		override public function dispose():Boolean{
-			if(process.running){
-				process.exit(true);
+			if(androidWorker.state == WorkerState.RUNNING){
+				androidWorker.terminate();
 				return true;
 			}
 			return false;
-		}
-		
-		protected function onOutputErrorShell(event:ProgressEvent):void
-		{
-			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onReadLanExit);
-			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData);
-			
-			error = process.standardError.readUTFBytes(process.standardError.bytesAvailable);
-		}
-		
-		protected function onReadLanData(event:ProgressEvent):void{
-			output += process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
-		}
-		
-		protected function onReadLanExit(event:NativeProcessExitEvent):void{
-			
-			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onReadLanExit);
-			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData);
-			
-			var ipRouteData:Array = output.split(/\s+/g);
-			
-			var idx:int = ipRouteData.indexOf("dev");
-			if(idx > -1 && ipRouteData[idx+1] == "wlan0"){
-				idx = ipRouteData.indexOf("src");
-				if(idx > -1){
-					ip = ipRouteData[idx+1];
-					status = INSTALL
-					tooltip = "Installing driver to the device ..."
-					
-					process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit, false, 0, true);
-					procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", androidDriverFullName];
-					process.start(procInfo);
-
-					return;
-				}
-			}
-			
-			status = FAIL
-			tooltip = "Unable to get a local ip address for this device\nplease change it's network configuration and restart the driver";
-		}
-		
-		protected function onUninstallExit(event:NativeProcessExitEvent):void{
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
-			
-			process.addEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
-			procInfo.arguments = new <String>["-s", id, "install", "-r", androidDriverFilePath];
-			
-			process.start(procInfo);
-		}
-		
-		protected function onInstallExit(event:NativeProcessExitEvent):void{
-			
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallExit);
-			
-			output = "";
-			process.addEventListener(NativeProcessExitEvent.EXIT, onGetPropExit, false, 0, true);
-			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadPropertyData, false, 0, true);
-			
-			procInfo.arguments = new <String>["-s", id, "shell", "getprop"];
-			process.start(procInfo);
-		}
-		
-		protected function onReadPropertyData(event:ProgressEvent):void{
-			output += process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable).replace(/\r/g, "");
-		}
-		
-		protected function onGetPropExit(event:NativeProcessExitEvent):void{
-			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadPropertyData);
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onGetPropExit);
-			
-			var propArray:Array = output.split("\n");
-			for each (var line:String in propArray){
-				if(line.indexOf("[ro.product.brand]") == 0){
-					manufacturer = getPropValue(line)
-				}else if(line.indexOf("[ro.product.model]") == 0){
-					modelId = getPropValue(line)
-				}else if(line.indexOf("[ro.semc.product.name]") == 0){
-					modelName = getPropValue(line)
-				}else if(line.indexOf("[def.tctfw.brandMode.name]") == 0){
-					modelName = getPropValue(line)
-				}else if(line.indexOf("[ro.build.version.release]") == 0){
-					androidVersion = getPropValue(line)
-				}else if(line.indexOf("[ro.build.version.sdk]") == 0){
-					androidSdk = getPropValue(line)
-				}
-			}
-			
-			if(modelName == ""){
-				modelName = modelId;
-			}
-				
-			tooltip = "Driver installed, launch the test process ..."
-			
-			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError, false, 0, true);
-			process.addEventListener(NativeProcessExitEvent.EXIT, onExecuteExit, false, 0, true);
-			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData, false, 0, true);
-			
-			procInfo.arguments = new <String>["-s", id, "shell", "am", "instrument", "-w", "-r", "-e", "atsPort", port, "-e", "debug", "false", "-e", "class", androidDriverFullName + ".AtsRunner", androidDriverFullName + "/android.support.test.runner.AndroidJUnitRunner"];
-			process.start(procInfo);
-		}
-		
-		private function getPropValue(value:String):String{
-			return androidPropValueRegex.exec(value)[1];
-		}
-		
-		protected function onExecuteError(event:ProgressEvent):void
-		{
-			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError);
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onExecuteExit);
-			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData);
-			
-			status = FAIL
-			connected = false;
-			dispatchEvent(new Event("deviceStopped"));
-			
-			trace(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
-		}
-		
-		protected function onExecuteData(event:ProgressEvent):void{
-			var data:String = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
-			trace("last command -> " + data);
-			status = READY
-			tooltip = "Android " + androidVersion + ", API " + androidSdk + " [" + id + "]\nready and waiting testing actions"
-		}
-		
-		protected function onExecuteExit(event:NativeProcessExitEvent):void{
-			
-			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError);
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onExecuteExit);
-			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData);
-			
-			status = FAIL
-			connected = false;
-			dispatchEvent(new Event("deviceStopped"));
 		}
 	}
 }
