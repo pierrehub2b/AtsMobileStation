@@ -92,8 +92,7 @@
 				var tw:PhysicialDeviceSettingsWindow = new PhysicialDeviceSettingsWindow();
 				for each(var dv:Device in devices.collection) {
 					if(!dv.isSimulator) {
-						tw.dev = dv;
-						break;
+						tw.devices.push(dv);
 					}
 				}
 				

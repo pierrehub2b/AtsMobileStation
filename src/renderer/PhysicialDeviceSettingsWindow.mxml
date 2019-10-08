@@ -17,13 +17,9 @@
 			public var arrayString:Array;
 			public var arrayStringDevTeam:Array;
 			
+			public var devices:Array = new Array();
+			
 			protected function settings_initializeHandler(event:FlexEvent):void {
-				
-				if(dev != null) {
-					deviceId.text = dev.id;
-					deviceName.text = dev.modelName;
-				}
-				
 				var fileDevTeam:File = File.userDirectory.resolvePath("actiontestscript/developmentDevTeam.txt");
 				if(fileDevTeam.exists) {
 					var fileStreamDevTeam:FileStream = new FileStream();
@@ -100,7 +96,14 @@
 			
 			protected function copyId_clickHandler(event:MouseEvent):void
 			{
-				Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, dev.id);
+				var file:FileReference = new FileReference();
+				var txtInput: String = "Device ID\tDevice Name\tDevice Platform\n";
+				for each(var d:Device in devices) {
+					if(d.manufacturer == "Apple") {
+						txtInput += d.id + "\t" + d.modelName + "\tios\n";
+					}
+				}
+				file.save(txtInput, "devices.txt")
 			}
 			
 		]]>
@@ -108,14 +111,6 @@
 	
 	<s:VGroup left="6" right="6" top="10" bottom="36" gap="8" horizontalAlign="center"
 			  verticalAlign="middle">
-		<s:HGroup width="100%" verticalAlign="middle">
-			<s:Label fontSize="11" fontWeight="bold" text="Name :"/>
-			<s:Label id="deviceName" width="100%" fontSize="11"/>
-		</s:HGroup>
-		<s:Label id="deviceId" left="3" width="100%" color="#888888" fontSize="10" fontStyle="italic"
-				 text="" verticalCenter="2"/>
-		
-		<mx:HRule width="98%"/>
 		<s:HGroup width="100%" gap="3" verticalAlign="middle" verticalCenter="0">
 			<s:HGroup width="100%" horizontalAlign="left" verticalAlign="baseline">
 				<s:Label fontSize="11" fontWeight="bold" paddingRight="5" text="Development team ID :"/>
@@ -137,7 +132,7 @@
 		</s:Rect>
 		
 		<s:HGroup left="5" right="5" gap="2" horizontalAlign="center" verticalCenter="0">
-			<s:Button label="Copy device id" icon="assets/icons/16/copy.png" click="copyId_clickHandler(event)"/>
+			<s:Button label="Export device list" icon="assets/icons/16/copy.png" click="copyId_clickHandler(event)"/>
 			<s:Button label="Finish" click="save_clickHandler(event)" fontSize="11"
 					  icon="assets/icons/16/tick.png"/>
 		</s:HGroup>
