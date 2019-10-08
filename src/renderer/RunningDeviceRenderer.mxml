@@ -21,10 +21,8 @@
 			import spark.filters.DropShadowFilter;
 			
 			private function showWindow(event:MouseEvent, dev:Device):void{
-				// create and configure the TitleWindow
 				var tw:DeviceSettingsWindow = new DeviceSettingsWindow();
 				tw.dev = dev;
-				// open the TitleWindow as a modal popup window
 				PopUpManager.addPopUp(tw, this, true);
 				PopUpManager.centerPopUp(tw);
 			}

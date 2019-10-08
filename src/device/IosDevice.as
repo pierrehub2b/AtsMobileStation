@@ -50,24 +50,47 @@ package device
 			}
 	
 			var teamId:String = "";
-			file = File.userDirectory.resolvePath("actiontestscript/developmentDevTeam.txt");
+			var lastBuildString:String = "";
+			file = File.userDirectory.resolvePath("actiontestscript/settings.txt");
 			if(file.exists) {
 				fileStream = new FileStream();
 				fileStream.open(file, FileMode.READ);
-				teamId = fileStream.readUTFBytes(fileStream.bytesAvailable);
+				var settingsContent:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
+				var settingsContentArray: Array = settingsContent.split("\n");
+				for each(var setting:String in settingsContentArray) {
+					if(setting != "") {
+						var key:String = setting.split("==")[0];
+						switch(key)
+						{
+							case "development_team":
+							{
+								teamId = setting.split("==")[1];
+								break;
+							}
+								
+							case "last_build":
+							{
+								lastBuildString = setting.split("==")[1];
+								break;
+							}
+						}
+					}
+				}
 				fileStream.close();
 			}
 		
 			installing()
 			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
-			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
-			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
-			
+			if(isSimulator) {
+				testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
+				testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
+			}
 			var resultDir:File = File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id);
 			var alreadyCopied:Boolean = resultDir.exists;
 			iosDriverProjectFolder.copyTo(resultDir, true);
 			var index:int = 0;
 			file = resultDir.resolvePath("atsDriver/Settings.plist");
+			var xcworkspaceFile:File = resultDir.resolvePath("atsios.xcworkspace");
 			if(file.exists) {
 				fileStream = new FileStream();
 				fileStream.open(file, FileMode.READ);
@@ -94,6 +117,21 @@ package device
 				}
 				writeFileStream.close();
 			}
+			
+			if(lastBuildString != "" && !isSimulator) {
+				var d:Date = new Date();
+				d.setTime(Date.parse(lastBuildString));
+				var modificationDate:int = (xcworkspaceFile.modificationDate.time/1000);
+				var oldDate:int = (d.time/1000);
+				alreadyCopied = !(modificationDate > oldDate)
+			}
+			
+			var fileSettings:File = File.userDirectory.resolvePath("actiontestscript/settings.txt");
+			var fileStreamSettings:FileStream = new FileStream();
+			fileStreamSettings.open(fileSettings, FileMode.WRITE);
+			fileStreamSettings.writeUTFBytes("development_team==" + teamId + "\n");
+			fileStreamSettings.writeUTFBytes("last_build==" + xcworkspaceFile.modificationDate.toString());
+			fileStreamSettings.close();
 			
 			procInfo.executable = xcodeBuildExec;
 			procInfo.workingDirectory = resultDir;

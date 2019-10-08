@@ -10,7 +10,6 @@
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
-			import mx.utils.StringUtil;
 			
 			import device.Device;
 			
@@ -94,14 +93,6 @@
 					}
 					fileStream.writeUTFBytes(dev.id.toString().toLowerCase() + "==" + dev.automaticPort + ";" + dev.settingsPort + ";");
 					fileStream.close();
-				}
-				
-				if(dev != null && !dev.isSimulator) {
-					var fileDevTeam:File = File.userDirectory.resolvePath("actiontestscript/developmentDevTeam.txt");
-					var fileStreamDevTeam:FileStream = new FileStream();
-					fileStreamDevTeam.open(fileDevTeam, FileMode.WRITE);
-					//fileStreamDevTeam.writeUTFBytes(developmentTeamId.text);
-					fileStreamDevTeam.close();
 				}
 				
 				if(hasToRestart) {

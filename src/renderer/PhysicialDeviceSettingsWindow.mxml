@@ -16,17 +16,29 @@
 			public var dev:Device;
 			public var arrayString:Array;
 			public var arrayStringDevTeam:Array;
+			public var lastbuild:String = "";
 			
 			public var devices:Array = new Array();
 			
 			protected function settings_initializeHandler(event:FlexEvent):void {
-				var fileDevTeam:File = File.userDirectory.resolvePath("actiontestscript/developmentDevTeam.txt");
+				var fileDevTeam:File = File.userDirectory.resolvePath("actiontestscript/settings.txt");
 				if(fileDevTeam.exists) {
-					var fileStreamDevTeam:FileStream = new FileStream();
-					fileStreamDevTeam.open(fileDevTeam, FileMode.READ);
-					var contentDevTeam:String = fileStreamDevTeam.readUTFBytes(fileStreamDevTeam.bytesAvailable);
-					devTeamId.text = contentDevTeam;
-					fileStreamDevTeam.close();
+					var fileStreamSettings:FileStream = new FileStream();
+					fileStreamSettings.open(fileDevTeam, FileMode.READ);
+					var settingsContent:String = fileStreamSettings.readUTFBytes(fileStreamSettings.bytesAvailable);
+					var settingsContentArray: Array = settingsContent.split("\n");
+					for each(var setting:String in settingsContentArray) {
+						if(setting != "") {
+							var key:String = setting.split("==")[0];
+							if(key == "development_team") {
+								devTeamId.text = setting.split("==")[1];
+							}
+							if(key == "last_build") {
+								lastbuild = setting.split("==")[1];
+							}
+						}
+					}
+					fileStreamSettings.close();
 				}
 			}
 			
@@ -36,11 +48,12 @@
 			
 			protected function save_clickHandler(event:MouseEvent):void
 			{			
-				var fileDevTeam:File = File.userDirectory.resolvePath("actiontestscript/developmentDevTeam.txt");
-				var fileStreamDevTeam:FileStream = new FileStream();
-				fileStreamDevTeam.open(fileDevTeam, FileMode.WRITE);
-				fileStreamDevTeam.writeUTFBytes(devTeamId.text);
-				fileStreamDevTeam.close();
+				var file:File = File.userDirectory.resolvePath("actiontestscript/settings.txt");
+				var fileStream:FileStream = new FileStream();
+				fileStream.open(file, FileMode.WRITE);
+				fileStream.writeUTFBytes("development_team==" + devTeamId.text + "\n");
+				fileStream.writeUTFBytes("last_build==" + lastbuild);
+				fileStream.close();
 				PopUpManager.removePopUp(this);
 			}			
 			
