@@ -21,12 +21,24 @@
 			import spark.filters.DropShadowFilter;
 			
 			private function showWindow(event:MouseEvent, dev:Device):void{
-				// create and configure the TitleWindow
 				var tw:DeviceSettingsWindow = new DeviceSettingsWindow();
 				tw.dev = dev;
-				// open the TitleWindow as a modal popup window
 				PopUpManager.addPopUp(tw, this, true);
 				PopUpManager.centerPopUp(tw);
+			}
+			
+			private function goHome(event:MouseEvent, dev:Device):void{
+				var request:URLRequest = new URLRequest();
+				var urlLoader:URLLoader = new URLLoader();
+				
+				request.url = "http://" + dev.ip + ":" + dev.port + "/button";
+				request.contentType = "text/plain";
+				request.method = URLRequestMethod.POST;
+				request.data = "home";
+				
+				urlLoader = new URLLoader();
+				urlLoader.dataFormat = URLLoaderDataFormat.TEXT;
+				urlLoader.load(request);
 			}
 			
 			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
@@ -54,14 +66,17 @@
 			protected function mainGroup_rollOverHandler(event:MouseEvent):void
 			{
 				if(!DragManager.isDragging && (dev.status == "ready" || dev.status == "fail")){
-					if(this.dev is IosDevice) {
-						settingsButton.includeInLayout = true;
-						settingsButton.visible = true;
-					}
 					restartButton.includeInLayout = true;
 					restartButton.visible = true;
 					iconStatus.visible = false;
 					iconStatus.includeInLayout = false;
+				}
+				
+				if(this.dev is IosDevice) {
+					settingsButton.includeInLayout = true;
+					settingsButton.visible = true;
+					homeButton.includeInLayout = true;
+					homeButton.visible = true;
 				}
 			}
 			
@@ -70,6 +85,8 @@
 				if(this.dev is IosDevice) {
 					settingsButton.includeInLayout = false;
 					settingsButton.visible = false;
+					homeButton.includeInLayout = false;
+					homeButton.visible = false;
 				}
 				restartButton.includeInLayout = false;
 				restartButton.visible = false;
@@ -126,11 +143,17 @@
 		
 		<s:Spacer width="100%"/>
 		
-		<s:BitmapImage id="iconStatus" source="assets/icons/24/{dev.status}.png" smooth="true" smoothingQuality="high"/>
+		<s:Group id="homeButton" buttonMode="true" click="goHome(event, dev)"
+				 toolTip="Device home button" visible="false" includeInLayout="false">
+			<s:BitmapImage source="assets/icons/24/home.png" width="20" height="20" smooth="true" smoothingQuality="high"/>
+		</s:Group>
+		
 		<s:Group id="settingsButton" buttonMode="true" click="showWindow(event, dev)"
 				 toolTip="Settings of device" visible="false" includeInLayout="false">
 			<s:BitmapImage source="assets/icons/24/run.png" smooth="true" smoothingQuality="high"/>
 		</s:Group>
+		
+		<s:BitmapImage id="iconStatus" source="assets/icons/24/{dev.status}.png" smooth="true" smoothingQuality="high"/>
 		<s:Group id="restartButton" buttonMode="true" click="restart_clickHandler(event)"
 				 toolTip="Restart device" visible="false" includeInLayout="false">
 			<s:BitmapImage source="assets/icons/24/restart.png" smooth="true" smoothingQuality="high"/>

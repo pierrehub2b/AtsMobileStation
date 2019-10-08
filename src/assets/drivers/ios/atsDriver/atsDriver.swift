@@ -198,16 +198,12 @@ class atsDriver: XCTestCase {
     }
     
     func refreshView() {
-        let img = self.imageResize(with: XCUIScreen.main.screenshot().image)
-        self.imgView = UIImageJPEGRepresentation(img, 0)
-    }
-    
-    func imageResize(with image: UIImage) -> UIImage {
         UIGraphicsBeginImageContextWithOptions(CGSize(width: self.deviceWidth, height: self.deviceHeight), true, 0.85)
-        image.draw(in: CGRect(x: 0, y: 0, width: self.deviceWidth, height: self.deviceHeight))
+        XCUIScreen.main.screenshot().image.draw(in: CGRect(x: 0, y: 0, width: self.deviceWidth, height: self.deviceHeight))
         let newImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        return newImage ?? UIImage()
+
+        self.imgView = UIImageJPEGRepresentation(newImage ?? UIImage(), 0.2)
     }
     
     func toByteArrary<T>(value: T)  -> [UInt8] where T: UnsignedInteger, T: FixedWidthInteger{
@@ -218,7 +214,6 @@ class atsDriver: XCTestCase {
                 UnsafeBufferPointer(start: $0, count: count)
             }
         }
-        
         return Array(bytePtr)
     }
     

@@ -17,9 +17,6 @@ package device
 		private var testingProcess:NativeProcess = new NativeProcess();
 		private var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 		
-		private var testingProcessPhysical:NativeProcess = new NativeProcess();
-		private var procInfoPhysical:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-		
 		private static const iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
 		private static const xcodeBuildExec:File = new File("/usr/bin/env");
 		
@@ -53,25 +50,47 @@ package device
 			}
 	
 			var teamId:String = "";
-			file = File.userDirectory.resolvePath("actiontestscript/developmentDevTeam.txt");
+			var lastBuildString:String = "";
+			file = File.userDirectory.resolvePath("actiontestscript/settings.txt");
 			if(file.exists) {
 				fileStream = new FileStream();
 				fileStream.open(file, FileMode.READ);
-				teamId = fileStream.readUTFBytes(fileStream.bytesAvailable);
+				var settingsContent:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
+				var settingsContentArray: Array = settingsContent.split("\n");
+				for each(var setting:String in settingsContentArray) {
+					if(setting != "") {
+						var key:String = setting.split("==")[0];
+						switch(key)
+						{
+							case "development_team":
+							{
+								teamId = setting.split("==")[1];
+								break;
+							}
+								
+							case "last_build":
+							{
+								lastBuildString = setting.split("==")[1];
+								break;
+							}
+						}
+					}
+				}
 				fileStream.close();
 			}
 		
 			installing()
 			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
-			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
-			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
-			
-			testingProcessPhysical.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingPhysicalOutput, false, 0, true);
-			
-			var resultDir:File = File.documentsDirectory.resolvePath("tmpDir/driver_"+ id);
+			if(isSimulator) {
+				testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
+				testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
+			}
+			var resultDir:File = File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id);
+			var alreadyCopied:Boolean = resultDir.exists;
 			iosDriverProjectFolder.copyTo(resultDir, true);
 			var index:int = 0;
 			file = resultDir.resolvePath("atsDriver/Settings.plist");
+			var xcworkspaceFile:File = resultDir.resolvePath("atsios.xcworkspace");
 			if(file.exists) {
 				fileStream = new FileStream();
 				fileStream.open(file, FileMode.READ);
@@ -99,66 +118,36 @@ package device
 				writeFileStream.close();
 			}
 			
-			/*var isDebug:Boolean = false;
-			var isRelease:Boolean = false;
-			file = resultDir.resolvePath("atsios.xcodeproj/project.pbxproj");
-			if(file.exists) {
-				fileStream = new FileStream();
-				fileStream.open(file, FileMode.READ);
-				content = fileStream.readUTFBytes(fileStream.bytesAvailable);
-				arrayString = content.split("\n");
-				var indexDevTeam:int = 0;
-				for each(var lineDevTeam:String in arrayString) {
-					if(lineDevTeam.indexOf("/* Debug *//* = {") > -1) {
-						isDebug = true;
-						isRelease = false;
-					}*/
-					
-					/*if(lineDevTeam.indexOf("/* Release */ /*= {") > -1) {
-						isDebug = false;
-						isRelease = true;
-					}*/
-					
-					//if(lineDevTeam.indexOf("CODE_SIGN_STYLE") > 0) {
-						//if(teamId != "") {
-							//arrayString[indexDevTeam] = "\t\t\t\tCODE_SIGN_STYLE = Automatic;";
-							//} else {
-							//	arrayString[indexDevTeam] = "\t\t\t\tCODE_SIGN_STYLE = Manual;";
-						//}
-					//}
-					/*if(lineDevTeam.indexOf("DEVELOPMENT_TEAM") > 0 && isDebug) {
-						if(teamId != "") {
-							arrayString[indexDevTeam] = "\t\t\t\tDEVELOPMENT_TEAM = "+ teamId +";";
-						}
-					}
-					indexDevTeam++;
-				}
-				fileStream.close();
-				
-				writeFileStream = new FileStream();
-				writeFileStream.open(file, FileMode.UPDATE);
-				for each(var strDevTeam:String in arrayString) {
-					writeFileStream.writeUTFBytes(strDevTeam + "\n");
-				}
-				writeFileStream.close();
-			}*/
+			if(lastBuildString != "" && !isSimulator) {
+				var d:Date = new Date();
+				d.setTime(Date.parse(lastBuildString));
+				var modificationDate:int = (xcworkspaceFile.modificationDate.time/1000);
+				var oldDate:int = (d.time/1000);
+				alreadyCopied = !(modificationDate > oldDate)
+			}
+			
+			var fileSettings:File = File.userDirectory.resolvePath("actiontestscript/settings.txt");
+			var fileStreamSettings:FileStream = new FileStream();
+			fileStreamSettings.open(fileSettings, FileMode.WRITE);
+			fileStreamSettings.writeUTFBytes("development_team==" + teamId + "\n");
+			fileStreamSettings.writeUTFBytes("last_build==" + xcworkspaceFile.modificationDate.toString());
+			fileStreamSettings.close();
 			
 			procInfo.executable = xcodeBuildExec;
 			procInfo.workingDirectory = resultDir;
 			
-			procInfoPhysical.executable = xcodeBuildExec;
-			procInfoPhysical.workingDirectory = resultDir;
-			
-			
-			var args: Vector.<String> = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id, "test"];	
-			procInfo.arguments = args;
-			procInfoPhysical.arguments = args;
-			if(isSimulator) {
-				testingProcess.start(procInfo);
+			var args: Vector.<String> = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id];
+			if(!isSimulator) {
+				args.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + teamId);
+			}
+			if(alreadyCopied) {
+				args.push("test-without-building");
 			} else {
-				testingProcessPhysical.start(procInfoPhysical);
+				args.push("test");
 			}
 			
+			procInfo.arguments = args;
+			testingProcess.start(procInfo);
 		}
 		
 		override public function dispose():Boolean
@@ -186,36 +175,11 @@ package device
 			}
 		}
 		
-		protected function onTestingPhysicalOutput(event:ProgressEvent):void
-		{
-			var data:String = testingProcessPhysical.standardOutput.readUTFBytes(testingProcessPhysical.standardOutput.bytesAvailable);
-			trace("test output -> " + data);
-			var find:Array = startInfo.exec(data);
-			if(find != null){
-				ip = find[1];
-				port = find[2];
-				started();
-				testingProcessPhysical.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingPhysicalError, false, 0, true);
-			}
-			
-		}
-		
 		protected function onTestingError(event:ProgressEvent):void
 		{
 			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
 			
 			var data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
-			trace("test error -> " + data);
-			if(data.indexOf("Continuing with testing") < 0 && data.indexOf("** TEST EXECUTE FAILED **") > 0 || data.indexOf("** TEST FAILED **") > 0){
-				this.changeCrashedStatus();
-			}
-		}
-		
-		protected function onTestingPhysicalError(event:ProgressEvent):void
-		{
-			testingProcessPhysical.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
-			
-			var data:String = testingProcessPhysical.standardError.readUTFBytes(testingProcessPhysical.standardError.bytesAvailable);
 			trace("test error -> " + data);
 			if(data.indexOf("Continuing with testing") < 0 && data.indexOf("** TEST EXECUTE FAILED **") > 0 || data.indexOf("** TEST FAILED **") > 0){
 				this.changeCrashedStatus();
