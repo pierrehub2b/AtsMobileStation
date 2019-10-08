@@ -18,12 +18,12 @@ package worker
 		
 		private var outputChannel:MessageChannel;
 		
-		private var port:String = "";
-		private var id:String = "";
+		private var port:String;
+		private var id:String;
 		private var atsdroidFilePath;
 		
 		private var output:String = "";
-		private var error:String = null;
+		private var error:String;
 		
 		private var process:NativeProcess;
 		private var procInfo:NativeProcessStartupInfo
