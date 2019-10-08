@@ -71,6 +71,7 @@
         	warnings="false"
         	default-frame-rate="30">
         	<source-path path-element="src"/>
+			<source-path path-element="workers"/>
             <external-library-path file="${FLEX_HOME}/frameworks/libs/air/airglobal.swc" append="true"/>
             <library-path dir="libs" includes="*.swc" append="true"/>
         	<include-resource-bundles>labels</include-resource-bundles>
