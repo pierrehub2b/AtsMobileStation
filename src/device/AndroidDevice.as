@@ -24,11 +24,7 @@ package device
 		private var outputChannel:MessageChannel;
 						
 		[Embed(source="/AndroidWorker.swf", mimeType="application/octet-stream")]
-		private var AndroidWorker_ByteClass:Class;
-		private function get AndroidsWorker():ByteArray
-		{
-			return new AndroidWorker_ByteClass();
-		}
+		private var AndroidWorkerClass:Class;
 		
 		private var startDriverArgs:Array;
 		
@@ -41,7 +37,7 @@ package device
 			
 			this.startDriverArgs = ["startDriver", androidDriverFilePath, port, id, adbFilePath];
 			
-			androidWorker = WorkerDomain.current.createWorker(AndroidsWorker, true);
+			androidWorker = WorkerDomain.current.createWorker(new AndroidWorkerClass(), true);
 						
 			outputChannel = androidWorker.createMessageChannel(Worker.current);
 			outputChannel.addEventListener(Event.CHANNEL_MESSAGE, handleProgressMessage);
@@ -60,6 +56,7 @@ package device
 			if (androidWorker.state == WorkerState.RUNNING){
 				androidWorker.removeEventListener(Event.WORKER_STATE, handleBGWorkerStateChange);
 				inputChannel.send(startDriverArgs);
+				inputChannel.close();
 			}
 		}
 		
@@ -70,10 +67,7 @@ package device
 			
 			if(workerStatus[0] == 1){ // it's an error
 
-				outputChannel.removeEventListener(Event.CHANNEL_MESSAGE, handleProgressMessage);
-				outputChannel.close();
-				
-				androidWorker.terminate();
+				terminate();
 				
 				if(messageType == WorkerStatus.LAN_ERROR){
 					//TODO show specific error to user
@@ -101,7 +95,7 @@ package device
 					status = READY
 					tooltip = "Android " + androidVersion + ", API " + androidSdk + " [" + id + "]\nready and waiting testing actions"
 				}else if(messageType == WorkerStatus.STOPPED){
-					androidWorker.terminate();
+					terminate();
 					dispatchEvent(new Event("deviceStopped"));
 				}
 			}
@@ -109,10 +103,16 @@ package device
 		
 		override public function dispose():Boolean{
 			if(androidWorker.state == WorkerState.RUNNING){
-				androidWorker.terminate();
+				terminate();
 				return true;
 			}
 			return false;
+		}
+		
+		private function terminate():void{
+			outputChannel.removeEventListener(Event.CHANNEL_MESSAGE, handleProgressMessage);
+			outputChannel.close();
+			androidWorker.terminate();
 		}
 	}
 }

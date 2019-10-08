@@ -19,9 +19,9 @@
 	
 	<target name="compile.workers" depends="init.sdk">
 
-		<mkdir dir="${WORKERS_FOLDER}"/>
+		<mkdir dir="${WORKERS_BIN_FOLDER}"/>
 		<mxmlc file="${SRC_FOLDER}/worker/AndroidWorker.as"
-		            output="${WORKERS_FOLDER}/AndroidWorker.swf"
+		            output="${WORKERS_BIN_FOLDER}/AndroidWorker.swf"
 						default-frame-rate="24"
 						use-network="true"
 						context-root="${APP_NAME}"
@@ -47,7 +47,7 @@
 		</mxmlc>
 	</target>
 
-	<target name="compile.project" description="" depends="init.sdk">
+	<target name="compile.project" description="" depends="compile.workers">
 		
 		<echo message="Application type -> '${package.type}'"/>
 		
@@ -71,7 +71,7 @@
         	warnings="false"
         	default-frame-rate="30">
         	<source-path path-element="src"/>
-			<source-path path-element="workers"/>
+			<source-path path-element="${WORKERS_BIN_FOLDER}"/>
             <external-library-path file="${FLEX_HOME}/frameworks/libs/air/airglobal.swc" append="true"/>
             <library-path dir="libs" includes="*.swc" append="true"/>
         	<include-resource-bundles>labels</include-resource-bundles>
