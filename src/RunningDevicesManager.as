@@ -88,6 +88,8 @@ package
 		{
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
+			proc.closeInput();
+			proc.exit(true);
 			
 			launchAdbProcess();
 		}	
@@ -155,6 +157,9 @@ package
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit);
 			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData);
+			
+			proc.closeInput();
+			proc.exit(true);
 			
 			var dv:Device;
 			for each(dv in collection){
@@ -230,6 +235,9 @@ package
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit);
 			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
 			
+			proc.closeInput();
+			proc.exit(true);
+			
 			arrayInstrument = iosOutput.split("\n");
 			iosOutput = "";
 			
@@ -250,6 +258,9 @@ package
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, onSimCtlExit);
 			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
+			
+			proc.closeInput();
+			proc.exit(true);
 			
 			var dev:Device;
 			var dv:Device;
