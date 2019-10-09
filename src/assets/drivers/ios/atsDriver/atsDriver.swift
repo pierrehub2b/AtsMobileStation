@@ -82,8 +82,6 @@ class atsDriver: XCTestCase {
         }
         
         XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
-        
-        print("Custom port ='" + customPort + "'");
         if(customPort != "") {
             let (isFree, _) = checkTcpPortForListen(port: UInt16(customPort)!)
             if(isFree == true) {
@@ -221,7 +219,6 @@ class atsDriver: XCTestCase {
     private func setupWebApp() {
         
         let loop = try! SelectorEventLoop(selector: try! KqueueSelector())
-        print(self.port);
         let server = DefaultHTTPServer(eventLoop: loop, interface: "0.0.0.0", port: self.port) {
             (
             environ: [String: Any],
@@ -339,7 +336,7 @@ class atsDriver: XCTestCase {
                     var description = app.debugDescription
                     
                     if(self.cachedDescription != description
-                        && self.cachedDescription.split(separator: "\n").count != description.split(separator: "\n").count){
+                        /*&& self.cachedDescription.split(separator: "\n").count != description.split(separator: "\n").count*/){
                         self.cachedDescription = description;
                         
                         description = description.replacingOccurrences(of: "'\n", with: "'⌘")
@@ -581,11 +578,14 @@ class atsDriver: XCTestCase {
         // Start HTTP server to listen on the port
         try! server.start()
         
-        let endPoint = getWiFiAddress()! + ":" + String(self.port)
-        fputs("ATSDRIVER_DRIVER_HOST=" + endPoint + "\n", stderr)
-        
-        // Run event loop
-        loop.runForever()
+        let wifiAdress = getWiFiAddress()
+        if(wifiAdress != nil) {
+            let endPoint = wifiAdress! + ":" + String(self.port)
+            fputs("ATSDRIVER_DRIVER_HOST=" + endPoint + "\n", stderr)
+            loop.runForever()
+        } else {
+            print("** WIFI NOT CONNECTED **")
+        }
     }
     
     func matchingStrings(input: String, regex: String) -> [[String]] {

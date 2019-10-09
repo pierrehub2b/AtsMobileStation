@@ -63,17 +63,7 @@ package
 		protected function onSetupSimulatorExit(event:NativeProcessExitEvent):void
 		{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onSetupSimulatorExit);
-			procInfo.arguments = new <String>["open", "-a", "Simulator"];
-			process.addEventListener(NativeProcessExitEvent.EXIT, onStartSimulatorExit, false, 0, true);
-			process.start(procInfo);
-		}
-		
-		protected function onStartSimulatorExit(event:NativeProcessExitEvent):void
-		{
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onStartSimulatorExit);
-			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
-			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onInstrumentsOutput);
-			this.refreshList();
+			refreshList();
 		}
 		
 		public function refreshList():void {

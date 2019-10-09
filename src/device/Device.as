@@ -32,6 +32,9 @@ package device
 		public var manufacturer:String = "";
 		
 		[Bindable]
+		public var errorMessage:String = "";
+		
+		[Bindable]
 		public var modelId:String = "";
 		
 		[Bindable]

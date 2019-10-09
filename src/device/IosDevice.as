@@ -29,6 +29,7 @@ package device
 			this.isSimulator = isSimulator;
 			this.isCrashed = false;
 			this.connected = !isSimulator;
+			this.errorMessage = "";
 			
 			var fileStream:FileStream = new FileStream();
 			var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
@@ -81,10 +82,9 @@ package device
 		
 			installing()
 			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
-			if(isSimulator) {
-				testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
-				testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
-			}
+			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
+			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
+			
 			var resultDir:File = File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id);
 			var alreadyCopied:Boolean = resultDir.exists;
 			iosDriverProjectFolder.copyTo(resultDir, true);
@@ -153,6 +153,7 @@ package device
 		override public function dispose():Boolean
 		{
 			testingProcess.exit(true);
+			errorMessage = "";
 			return true;
 		}
 				
@@ -160,6 +161,7 @@ package device
 			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
 			
 			trace("testing exit");
+			errorMessage = "";
 			AtsMobileStation.devices.restartDev(this);
 		}
 		
@@ -167,8 +169,14 @@ package device
 		{
 			var data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
 			trace("test output -> " + data);
+			
+			if(data.indexOf("** WIFI NOT CONNECTED **") > -1) {
+				this.errorMessage = "WIFI not connected";
+			}
+			
 			var find:Array = startInfo.exec(data);
 			if(find != null){
+				errorMessage = "";
 				ip = find[1];
 				port = find[2];
 				started();
@@ -183,6 +191,9 @@ package device
 			trace("test error -> " + data);
 			if(data.indexOf("Continuing with testing") < 0 && data.indexOf("** TEST EXECUTE FAILED **") > 0 || data.indexOf("** TEST FAILED **") > 0){
 				this.changeCrashedStatus();
+			}
+			if(data.indexOf(id + " was NULL") > -1) {
+				this.errorMessage = "Device locked";
 			}
 		}
 		

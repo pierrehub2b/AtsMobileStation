@@ -8,17 +8,16 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import device.Device;
-			import device.IosDevice;
-			
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.core.DragSource;
 			import mx.managers.DragManager;
 			import mx.managers.PopUpManager;
 			
-			
 			import spark.filters.DropShadowFilter;
+			
+			import device.Device;
+			import device.IosDevice;
 			
 			private function showWindow(event:MouseEvent, dev:Device):void{
 				var tw:DeviceSettingsWindow = new DeviceSettingsWindow();
@@ -28,17 +27,19 @@
 			}
 			
 			private function goHome(event:MouseEvent, dev:Device):void{
-				var request:URLRequest = new URLRequest();
-				var urlLoader:URLLoader = new URLLoader();
-				
-				request.url = "http://" + dev.ip + ":" + dev.port + "/button";
-				request.contentType = "text/plain";
-				request.method = URLRequestMethod.POST;
-				request.data = "home";
-				
-				urlLoader = new URLLoader();
-				urlLoader.dataFormat = URLLoaderDataFormat.TEXT;
-				urlLoader.load(request);
+				if(dev.status == Device.READY) {
+					var request:URLRequest = new URLRequest();
+					var urlLoader:URLLoader = new URLLoader();
+					
+					request.url = "http://" + dev.ip + ":" + dev.port + "/button";
+					request.contentType = "text/plain";
+					request.method = URLRequestMethod.POST;
+					request.data = "home";
+					
+					urlLoader = new URLLoader();
+					urlLoader.dataFormat = URLLoaderDataFormat.TEXT;
+					urlLoader.load(request);
+				}
 			}
 			
 			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
@@ -65,7 +66,7 @@
 			
 			protected function mainGroup_rollOverHandler(event:MouseEvent):void
 			{
-				if(!DragManager.isDragging && (dev.status == "ready" || dev.status == "fail")){
+				if(!DragManager.isDragging && (dev.status == "ready" || dev.status == "fail" || dev.errorMessage != "" )){
 					restartButton.includeInLayout = true;
 					restartButton.visible = true;
 					iconStatus.visible = false;
@@ -88,10 +89,10 @@
 					homeButton.includeInLayout = false;
 					homeButton.visible = false;
 				}
-				restartButton.includeInLayout = false;
-				restartButton.visible = false;
-				iconStatus.visible = true;
-				iconStatus.includeInLayout = true;
+				restartButton.includeInLayout = dev.errorMessage == "";
+				restartButton.visible = dev.errorMessage == "";
+				iconStatus.includeInLayout = dev.errorMessage != "";
+				iconStatus.visible = dev.errorMessage != "";				
 			}
 			
 			protected function removedFromStageHandler(event:Event):void
@@ -121,8 +122,6 @@
 				
 				DragManager.doDrag(this, dragSource, event, firstGroup, mouseX - 20, mouseY + 10, 1.0);
 			}
-				
-			
 		]]>
 	</fx:Script>
 	
@@ -137,7 +136,10 @@
 					<s:Label text="{dev.ip}" fontWeight="bold"/>
 					<s:Label text=":{dev.port}"/>
 				</s:HGroup>
+				
 				<s:Label text="{dev.manufacturer} - {dev.modelName}" fontSize="11" fontStyle="italic" color="#758696"/>
+				<s:Label visible="{dev.errorMessage != ''}" includeInLayout="{dev.errorMessage != ''}" text="{dev.errorMessage}" fontSize="11" fontStyle="italic" color="#FF0000"/>
+
 			</s:VGroup>
 		</s:HGroup>
 		
