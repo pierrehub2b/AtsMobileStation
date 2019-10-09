@@ -1,8 +1,22 @@
 package 
 {
-	import CustomClasses.SimCtlDevice;
-	
 	import com.greensock.TweenMax;
+	
+	import flash.desktop.NativeProcess;
+	import flash.desktop.NativeProcessStartupInfo;
+	import flash.events.Event;
+	import flash.events.NativeProcessExitEvent;
+	import flash.events.ProgressEvent;
+	import flash.filesystem.File;
+	import flash.system.Capabilities;
+	
+	import mx.collections.ArrayCollection;
+	import mx.utils.StringUtil;
+	
+	import spark.collections.Sort;
+	import spark.collections.SortField;
+	
+	import CustomClasses.SimCtlDevice;
 	
 	import device.AndroidDevice;
 	import device.Device;
@@ -10,24 +24,7 @@ package
 	
 	import event.SimulatorEvent;
 	
-	import flash.desktop.NativeProcess;
-	import flash.desktop.NativeProcessStartupInfo;
-	import flash.events.Event;
-	import flash.events.NativeProcessExitEvent;
-	import flash.events.OutputProgressEvent;
-	import flash.events.ProgressEvent;
-	import flash.events.TimerEvent;
-	import flash.filesystem.File;
-	import flash.system.Capabilities;
-	import flash.utils.Timer;
-	
-	import mx.collections.ArrayCollection;
-	import mx.utils.StringUtil;
-	
 	import simulator.IosSimulator;
-	
-	import spark.collections.Sort;
-	import spark.collections.SortField;
 	
 	public class RunningDevicesManager
 	{
@@ -193,7 +190,7 @@ package
 				}
 			}
 			
-			TweenMax.delayedCall(5000, launchAdbProcess);
+			TweenMax.delayedCall(5, launchAdbProcess);
 		}
 		
 		//---------------------------------------------------------------------------------------------------------
@@ -268,7 +265,7 @@ package
 			try{
 				jsonSimCtlObject = JSON.parse(data[0]);
 			}catch(error:Error){
-				TweenMax.delayedCall(5000, launchIosProcess);
+				TweenMax.delayedCall(5, launchIosProcess);
 				return;
 			}
 			
@@ -283,8 +280,7 @@ package
 				}
 				simCtl.push(new SimCtlDevice(availabilityError,device["isAvailable"] ,device["name"] ,device["state"] ,device["udid"]));
 			}
-			
-			
+						
 			arrayInstrument.removeAt(0)
 			var containsPhysicalDevice:Boolean = false;
 			
@@ -366,7 +362,7 @@ package
 				}
 			}
 			
-			TweenMax.delayedCall(5000, launchIosProcess);
+			TweenMax.delayedCall(5, launchIosProcess);
 		}
 		
 		public function findDevice(id:String):Device{
