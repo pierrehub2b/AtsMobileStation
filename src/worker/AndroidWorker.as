@@ -126,28 +126,27 @@ package worker
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadPropertyData);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onGetPropExit);
 			
-			var deviceIndo:DeviceInfo = new DeviceInfo();
+			var deviceInfo:DeviceInfo = new DeviceInfo();
 			
 			var propArray:Array = output.split("\n");
 			for each (var line:String in propArray){
 				if(line.indexOf("[ro.product.brand]") == 0){
-					deviceIndo.manufacturer = getPropValue(line)
+					deviceInfo.manufacturer = getPropValue(line)
 				}else if(line.indexOf("[ro.product.model]") == 0){
-					deviceIndo.modelId = getPropValue(line)
+					deviceInfo.modelId = getPropValue(line)
 				}else if(line.indexOf("[ro.semc.product.name]") == 0){
-					deviceIndo.modelName = getPropValue(line)
+					deviceInfo.modelName = getPropValue(line)
 				}else if(line.indexOf("[def.tctfw.brandMode.name]") == 0){
-					deviceIndo.modelName = getPropValue(line)
+					deviceInfo.modelName = getPropValue(line)
 				}else if(line.indexOf("[ro.build.version.release]") == 0){
-					deviceIndo.androidVersion = getPropValue(line)
+					deviceInfo.androidVersion = getPropValue(line)
 				}else if(line.indexOf("[ro.build.version.sdk]") == 0){
-					deviceIndo.androidSdk = getPropValue(line)
+					deviceInfo.androidSdk = getPropValue(line)
 				}
 			}
 			
-			deviceIndo.checkName();
-
-			outputChannel.send(deviceIndo);
+			deviceInfo.checkName();
+			outputChannel.send(deviceInfo);
 			
 			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError, false, 0, true);
 			process.addEventListener(NativeProcessExitEvent.EXIT, onExecuteExit, false, 0, true);
