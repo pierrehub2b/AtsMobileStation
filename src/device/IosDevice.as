@@ -14,8 +14,8 @@ package device
 		
 		private static const startInfo:RegExp = /ATSDRIVER_DRIVER_HOST=(.*):(\d+)/
 		
-		private var testingProcess:NativeProcess = new NativeProcess();
-		private var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+		private var testingProcess:NativeProcess
+		private var procInfo:NativeProcessStartupInfo;
 		
 		private static const iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
 		private static const xcodeBuildExec:File = new File("/usr/bin/env");
@@ -54,10 +54,13 @@ package device
 			var lastBuildString:String = "";
 			file = File.userDirectory.resolvePath("actiontestscript/settings.txt");
 			if(file.exists) {
+				
 				fileStream = new FileStream();
 				fileStream.open(file, FileMode.READ);
+				
 				var settingsContent:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
 				var settingsContentArray: Array = settingsContent.split("\n");
+				
 				for each(var setting:String in settingsContentArray) {
 					if(setting != "") {
 						var key:String = setting.split("==")[0];
@@ -81,6 +84,8 @@ package device
 			}
 		
 			installing()
+			
+			testingProcess = new NativeProcess();
 			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
@@ -133,6 +138,7 @@ package device
 			fileStreamSettings.writeUTFBytes("last_build==" + xcworkspaceFile.modificationDate.toString());
 			fileStreamSettings.close();
 			
+			procInfo = new NativeProcessStartupInfo()
 			procInfo.executable = xcodeBuildExec;
 			procInfo.workingDirectory = resultDir;
 			
@@ -152,13 +158,20 @@ package device
 		
 		override public function dispose():Boolean
 		{
+			testingProcess.closeInput();
 			testingProcess.exit(true);
 			errorMessage = "";
+			
 			return true;
 		}
 				
 		protected function onTestingExit(ev:NativeProcessExitEvent):void{
 			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
+			testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput);
+			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
+			
+			testingProcess.closeInput();
+			testingProcess.exit(true);
 			
 			trace("testing exit");
 			errorMessage = "";
@@ -187,8 +200,6 @@ package device
 		
 		protected function onTestingError(event:ProgressEvent):void
 		{
-			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
-			
 			var data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
 			trace("test error -> " + data);
 			if(data.indexOf("Continuing with testing") < 0 && data.indexOf("** TEST EXECUTE FAILED **") > 0 || data.indexOf("** TEST FAILED **") > 0){

@@ -6,7 +6,6 @@ package device
 	import flash.system.Worker;
 	import flash.system.WorkerDomain;
 	import flash.system.WorkerState;
-	import flash.utils.ByteArray;
 	
 	import worker.DeviceInfo;
 	import worker.DeviceIp;

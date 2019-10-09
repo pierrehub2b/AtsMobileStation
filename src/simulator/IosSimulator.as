@@ -68,9 +68,9 @@ package simulator
 				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
 				process.addEventListener(NativeProcessExitEvent.EXIT, onBootExit, false, 0, true);
 				
-				if(AtsMobileStation.startedIosSimulator.indexOf(id,0) == -1) {
+				/*if(AtsMobileStation.startedIosSimulator.indexOf(id,0) == -1) {
 					AtsMobileStation.startedIosSimulator.push(id);
-				}
+				}*/
 
 				procInfo.arguments = new <String>["simctl", "boot", id];
 				process.start(procInfo);
@@ -95,9 +95,9 @@ package simulator
 						index++;
 					}
 					
-					if(AtsMobileStation.startedIosSimulator.indexOf(id,0) > -1) {
+					/*if(AtsMobileStation.startedIosSimulator.indexOf(id,0) > -1) {
 						AtsMobileStation.startedIosSimulator.removeAt(AtsMobileStation.startedIosSimulator.indexOf(id,0));
-					}
+					}*/
 					
 					procInfo.arguments = new <String>["simctl", "shutdown", id];
 					process.start(procInfo);

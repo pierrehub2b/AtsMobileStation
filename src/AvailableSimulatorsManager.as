@@ -10,7 +10,6 @@ package
 	import flash.system.Capabilities;
 	
 	import mx.collections.ArrayCollection;
-	import mx.utils.StringUtil;
 	
 	import CustomClasses.SimCtlDevice;
 	
@@ -28,7 +27,7 @@ package
 		private const jsonPattern:RegExp = /\{[^]*\}/;
 		
 		private var output:String = "";
-		private var arrayInstrument: Array = new Array();
+		//private var arrayInstrument: Array = new Array();
 		
 		[Bindable]
 		public var info:String = "Loading simulators, please wait ...";
@@ -46,28 +45,17 @@ package
 				procInfo.executable = new File("/usr/bin/env");
 				procInfo.workingDirectory = File.userDirectory;
 				
-				//process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
 				process.addEventListener(NativeProcessExitEvent.EXIT, onSetupSimulatorExit, false, 0, true);
-				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onProcessOutput, false, 0, true);
 				
 				procInfo.arguments = new <String>["defaults", "write" ,"com.apple.iphonesimulator", "ShowChrome", "-int", "0"];
 				process.start(procInfo);
 			}
 		}
 		
-		public function terminate():void{
-			//if(process != null && process.running){
-			//	process.exit(true);
-			//}
-		}
-		
 		protected function onSetupSimulatorExit(ev:NativeProcessExitEvent):void
 		{
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-
-			//proc.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, onSetupSimulatorExit);
-			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onProcessOutput);
 			
 			proc.closeInput();
 			proc.exit(true);
@@ -81,23 +69,16 @@ package
 			procInfo.workingDirectory = File.userDirectory;
 			
 			output = "";
-			//proc.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
 			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onProcessOutput, false, 0, true);
-			proc.addEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit, false, 0, true);
+			proc.addEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist, false, 0, true);
 			
-			procInfo.arguments = new <String>["xcrun", "instruments", "-s", "devices"];
+			procInfo.arguments = new <String>["xcrun", "simctl", "list", "devices", "-j"];
 			proc.start(procInfo);
 		}
-				
-		/*protected function onOutputErrorShell(ev:ProgressEvent):void
-		{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			trace(proc.standardError.readUTFBytes(proc.standardError.bytesAvailable));
-		}*/
 		
 		protected function onProcessOutput(ev:ProgressEvent):void{
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			output += StringUtil.trim(proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable));
+			output += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);
 		}
 		
 		public function getByUdid(array:Array, search:String):SimCtlDevice {
@@ -115,7 +96,6 @@ package
 		protected function onSimCtlExist(ev:NativeProcessExitEvent):void
 		{
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			//proc.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
 			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onProcessOutput);
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist);
 			
@@ -128,7 +108,24 @@ package
 				if(data != null && data.length > 0){
 					obj = JSON.parse(data[0]);
 					var devices:Object = obj["devices"];
-					var simctl:Array = new Array();
+					
+					
+					for each(var runtime:Object in devices) {
+						for each(var device:Object in runtime) {
+							if(device["name"].indexOf("iPhone") == 0 && device["isAvailable"]){
+								
+								var sim:IosSimulator = new IosSimulator(device["udid"], device["name"] , "", device["state"] == "Booted", true);
+								sim.addEventListener(Simulator.STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
+								collection.addItem(sim);
+							}
+							
+						}
+					}
+					
+					
+					
+					
+					/*var simctl:Array = new Array();
 					
 					for each(var runtime:Object in devices) {
 						for each(var device:Object in runtime) {
@@ -149,7 +146,7 @@ package
 								if((currentElement != null && currentElement.getIsAvailable())) {
 									var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : false;
 									if(isRunning) {
-										AtsMobileStation.startedIosSimulator.push(data[3]);
+										//AtsMobileStation.startedIosSimulator.push(data[3]);
 									}
 									var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], isRunning, true);
 									sim.addEventListener(Simulator.STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
@@ -157,7 +154,7 @@ package
 								}
 							}
 						}
-					}
+					}*/
 				}
 				
 				if(AtsMobileStation.simulators.collection.length == 0){
@@ -181,10 +178,9 @@ package
 			this.collection.refresh();
 		}
 		
-		protected function onInstrumentsExit(ev:NativeProcessExitEvent):void
+		/*protected function onInstrumentsExit(ev:NativeProcessExitEvent):void
 		{
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			//proc.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
 			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onProcessOutput);
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit);
 			
@@ -195,9 +191,9 @@ package
 			
 			output = ""
 				
-			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			proc = new NativeProcess();
 			
+			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfo.executable = new File("/usr/bin/env");
 			procInfo.workingDirectory = File.userDirectory;
 			
@@ -207,7 +203,7 @@ package
 			
 			procInfo.arguments = new <String>["xcrun", "simctl", "list", "devices", "-j"];
 			proc.start(procInfo);
-		}
+		}*/
 		
 		protected function simulatorStatusChanged(ev:Event):void{
 			var sim:IosSimulator = ev.currentTarget as IosSimulator;

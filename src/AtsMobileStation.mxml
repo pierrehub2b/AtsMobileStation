@@ -33,7 +33,7 @@
 			[Bindable]
 			public static var simulators:AvailableSimulatorsManager;
 			
-			public static var startedIosSimulator:Vector.<String> = new Vector.<String>();
+			//public static var startedIosSimulator:Vector.<String> = new Vector.<String>();
 			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
@@ -44,7 +44,6 @@
 			
 			protected function closeHandler(event:Event):void
 			{
-				simulators.terminate();
 				devices.terminate();
 			}
 			
@@ -177,6 +176,5 @@
 				contentBackgroundAlpha="0.0" dataProvider="{simulators.collection}"
 				itemRenderer="renderer.SimulatorDeviceRenderer"/>
 	</s:Group>
-	
-	
+		
 </s:WindowedApplication>
