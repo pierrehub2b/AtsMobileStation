@@ -118,7 +118,7 @@ package device
 				writeFileStream.close();
 			}
 			
-			if(lastBuildString != "" && !isSimulator) {
+			if(lastBuildString != "") {
 				var d:Date = new Date();
 				d.setTime(Date.parse(lastBuildString));
 				var modificationDate:int = (xcworkspaceFile.modificationDate.time/1000);
@@ -140,7 +140,7 @@ package device
 			if(!isSimulator) {
 				args.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + teamId);
 			}
-			if(alreadyCopied) {
+			if(alreadyCopied && !isSimulator) {
 				args.push("test-without-building");
 			} else {
 				args.push("test");
@@ -168,7 +168,9 @@ package device
 		protected function onTestingOutput(event:ProgressEvent):void
 		{
 			var data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
-			trace("test output -> " + data);
+			if(data.indexOf("Display =>") > -1) {
+				trace("test output -> " + data.replace("Display =>", ""));
+			}
 			
 			if(data.indexOf("** WIFI NOT CONNECTED **") > -1) {
 				this.errorMessage = "WIFI not connected";

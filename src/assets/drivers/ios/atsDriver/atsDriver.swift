@@ -26,8 +26,8 @@ public var app: XCUIApplication!
 
 class atsDriver: XCTestCase {
     
-    let udpThread = DispatchQueue(label: "udpQueue", qos: .userInitiated)
-    var domThread = DispatchQueue(label: "domQueue", qos: .userInitiated)
+    let udpThread = DispatchQueue(label: "udpQueue" + UUID().uuidString, qos: .userInitiated)
+    var domThread = DispatchQueue(label: "domQueue" + UUID().uuidString, qos: .userInitiated)
     var port = 0
     var currentAppIdentifier: String = ""
     var resultElement: [String: Any] = [:]
@@ -54,6 +54,7 @@ class atsDriver: XCTestCase {
     let maxHeight = 840.0
     var ratioScreen = 1.0
     var isAlert = false
+    var forceCapture = false;
     var applications:[[String: Any]] = []
     
     var continueExecution = true
@@ -70,6 +71,10 @@ class atsDriver: XCTestCase {
     override func setUp() {
         super.setUp()
         continueAfterFailure = true
+
+        self.udpPort = Int.random(in: 32000..<64000)
+        print("Display => UDP PORT for " + self.bluetoothName + " = " + String(self.udpPort))
+        
         udpThread.async {
             self.udpStart()
         }
@@ -127,14 +132,6 @@ class atsDriver: XCTestCase {
     }
     
     func udpStart(){
-        for i in 60000..<65000 {
-            let (isFree, _) = checkTcpPortForListen(port: UInt16(i))
-            if isFree == true {
-                self.udpPort = i
-                break;
-            }
-        }
-        
         do {
             var data = Data()
             let socket = try Socket.create(family: .inet, type: .datagram, proto: .udp)
@@ -148,7 +145,7 @@ class atsDriver: XCTestCase {
                 print("Unexpected error...")
                 return
             }
-            print("Error on socket instance creation: \(socketError.description)")
+            print("Display => Error on socket instance creation: \(socketError.description)")
         }
     }
     
@@ -335,9 +332,10 @@ class atsDriver: XCTestCase {
                     
                     var description = app.debugDescription
                     
-                    if(self.cachedDescription != description
-                        /*&& self.cachedDescription.split(separator: "\n").count != description.split(separator: "\n").count*/){
+                    if((self.cachedDescription != description
+                        && self.cachedDescription.split(separator: "\n").count != description.split(separator: "\n").count) || self.forceCapture){
                         self.cachedDescription = description;
+                        self.forceCapture = false;
                         
                         description = description.replacingOccurrences(of: "'\n", with: "'⌘")
                             .replacingOccurrences(of: "}}\n", with: "}}⌘")
@@ -488,6 +486,7 @@ class atsDriver: XCTestCase {
                                     let directionX = (Double(parameters[4]) ?? 0.0)/self.ratioScreen
                                     let directionY = (Double(parameters[5]) ?? 0.0)/self.ratioScreen
                                     self.swipeCoordinate(x: calculateX, y: calculateY, swipeX: directionX, swipeY: directionY)
+                                    self.forceCapture = true;
                                     self.resultElement["status"] = 0
                                     self.resultElement["message"] = "swipe element"
                                 }
@@ -581,10 +580,10 @@ class atsDriver: XCTestCase {
         let wifiAdress = getWiFiAddress()
         if(wifiAdress != nil) {
             let endPoint = wifiAdress! + ":" + String(self.port)
-            fputs("ATSDRIVER_DRIVER_HOST=" + endPoint + "\n", stderr)
+            fputs("Display => ATSDRIVER_DRIVER_HOST=" + endPoint + "\n", stderr)
             loop.runForever()
         } else {
-            print("** WIFI NOT CONNECTED **")
+            print("Display => ** WIFI NOT CONNECTED **")
         }
     }
     
