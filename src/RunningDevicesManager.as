@@ -32,6 +32,8 @@ package
 		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
 		
+		private const relaunchDelay:int = 6;
+		
 		private var adbFile:File;
 		private var errorStack:String = "";
 		private var androidOutput:String = "";
@@ -190,7 +192,7 @@ package
 				}
 			}
 			
-			TweenMax.delayedCall(5, launchAdbProcess);
+			TweenMax.delayedCall(relaunchDelay, launchAdbProcess);
 		}
 		
 		//---------------------------------------------------------------------------------------------------------
@@ -265,7 +267,7 @@ package
 			try{
 				jsonSimCtlObject = JSON.parse(data[0]);
 			}catch(error:Error){
-				TweenMax.delayedCall(5, launchIosProcess);
+				TweenMax.delayedCall(relaunchDelay, launchIosProcess);
 				return;
 			}
 			
@@ -362,7 +364,7 @@ package
 				}
 			}
 			
-			TweenMax.delayedCall(5, launchIosProcess);
+			TweenMax.delayedCall(relaunchDelay, launchIosProcess);
 		}
 		
 		public function findDevice(id:String):Device{
