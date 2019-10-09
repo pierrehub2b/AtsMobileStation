@@ -89,10 +89,10 @@
 					homeButton.includeInLayout = false;
 					homeButton.visible = false;
 				}
-				restartButton.includeInLayout = dev.errorMessage == "";
-				restartButton.visible = dev.errorMessage == "";
-				iconStatus.includeInLayout = dev.errorMessage != "";
-				iconStatus.visible = dev.errorMessage != "";				
+				restartButton.includeInLayout = false;
+				restartButton.visible = false;
+				iconStatus.includeInLayout = true;
+				iconStatus.visible = true;				
 			}
 			
 			protected function removedFromStageHandler(event:Event):void
