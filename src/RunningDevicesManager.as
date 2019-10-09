@@ -1,15 +1,14 @@
 package 
 {
+	import com.greensock.TweenMax;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
 	import flash.events.NativeProcessExitEvent;
-	import flash.events.OutputProgressEvent;
 	import flash.events.ProgressEvent;
-	import flash.events.TimerEvent;
 	import flash.filesystem.File;
 	import flash.system.Capabilities;
-	import flash.utils.Timer;
 	
 	import mx.collections.ArrayCollection;
 	import mx.utils.StringUtil;
@@ -29,25 +28,17 @@ package
 	
 	public class RunningDevicesManager
 	{
-		
-		//ios Proc info
-		protected var iosProcInfo:NativeProcessStartupInfo;
-		public var iosProcess:NativeProcess;
-		
-		//android Proc info
-		protected var adbProcInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-		public var adbProcess:NativeProcess = new NativeProcess();
-		
+		private const adbPath:String = "assets/tools/android/adb";
 		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
+		
+		private const relaunchDelay:int = 6;
 		
 		private var adbFile:File;
 		private var errorStack:String = "";
 		private var androidOutput:String = "";
 		private var iosOutput:String = "";
 		
-		private var androidTimer:Timer = new Timer(5000);
-		private var iosTimer:Timer = new Timer(5000);
 		private var port:String = "8080";
 		
 		private var arrayInstrument: Array = new Array();
@@ -64,56 +55,43 @@ package
 			this.port = port;
 			this.collection.sort = ipSort;
 			
-			this.androidTimer.addEventListener(TimerEvent.TIMER, androidTimerComplete, false, 0, true);
-			this.iosTimer.addEventListener(TimerEvent.TIMER, iosTimerComplete, false, 0, true);
-			
-			var adbPath:String = "assets/tools/android/adb";
 			if(Capabilities.os.indexOf("Mac") > -1){
 				
 				//-----------------------------------------------------------------------------
 				// IOS
 				//-----------------------------------------------------------------------------
-				
-				iosProcInfo = new NativeProcessStartupInfo();
-				iosProcess = new NativeProcess();
-				
-				iosProcInfo.executable = new File("/usr/bin/env");
-				iosProcInfo.workingDirectory = File.userDirectory;
-				
-				this.iosProcInfo.arguments = new <String>["xcrun", "instruments", "-s", "devices"];
+
 				launchIosProcess();
 					
 				//-----------------------------------------------------------------------------
 				// ANDROID
 				//-----------------------------------------------------------------------------
 				
-				var chmod:File = new File("/bin/chmod");
 				this.adbFile = File.applicationDirectory.resolvePath(adbPath);
-				this.adbProcInfo.executable = chmod;			
-				this.adbProcInfo.workingDirectory = adbFile.parent;
-				this.adbProcInfo.arguments = new <String>["+x", "adb"];
-				this.adbProcess.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
-				this.adbProcess.start(this.adbProcInfo);
+				
+				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+				procInfo.executable = new File("/bin/chmod");			
+				procInfo.workingDirectory = adbFile.parent;
+				procInfo.arguments = new <String>["+x", "adb"];
+				
+				var proc:NativeProcess = new NativeProcess();
+				proc.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
+				proc.start(procInfo);
 				
 			}else{
 				this.adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
-				initAdbProcess();
+				launchAdbProcess();
 			}
 		}
 		
-		private function initAdbProcess():void{
-			adbProcess = new NativeProcess();
-			adbProcInfo.executable = adbFile;			
-			adbProcInfo.workingDirectory = adbFile.parent;
-			adbProcInfo.arguments = new <String>["devices"];
+		protected function onChmodExit(ev:NativeProcessExitEvent):void
+		{
+			var proc:NativeProcess = ev.currentTarget as NativeProcess;
+			proc.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
+			proc.closeInput();
+			proc.exit(true);
 			
 			launchAdbProcess();
-		}
-		
-		protected function onChmodExit(event:NativeProcessExitEvent):void
-		{
-			adbProcess.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
-			initAdbProcess();
 		}	
 		
 		public function restartDev(dev:Device):void {
@@ -148,58 +126,40 @@ package
 					dv.dispose();
 				}
 			}
-			
-			iosProcess.exit(true);
-			
-			iosProcInfo.arguments = new <String>["kill-server"];
-			iosProcess.start(iosProcInfo);
+			TweenMax.killDelayedCallsTo(launchAdbProcess);
+			TweenMax.killDelayedCallsTo(launchIosProcess);
 		}
 		
 		private function launchAdbProcess():void{
+			
 			androidOutput = "";
 			errorStack = "";
 			
-			try{
-				//process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
-				adbProcess.addEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit, false, 0, true);
-				adbProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData, false, 0, true);
-				adbProcess.start(adbProcInfo);
-			}catch(err:Error){}
-		}
-		
-		private function launchIosProcess():void{
-			iosOutput = "";
-			errorStack = "";
-			this.iosProcInfo.arguments = new <String>["xcrun", "instruments", "-s", "devices"];
+			var proc:NativeProcess = new NativeProcess();
+			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			
-			iosProcess.addEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit, false, 0, true);
-			iosProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData, false, 0, true);
-			iosProcess.start(iosProcInfo);
+			procInfo.executable = adbFile;			
+			procInfo.workingDirectory = adbFile.parent;
+			procInfo.arguments = new <String>["devices"];
+
+			proc.addEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit, false, 0, true);
+			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData, false, 0, true);
+			proc.start(procInfo);
 		}
 		
-		private function iosTimerComplete(ev:TimerEvent):void{
-			if(!iosProcess.running) {
-				launchIosProcess();
-			}
+		protected function onReadAndroidDevicesData(ev:ProgressEvent):void{
+			var proc:NativeProcess = ev.currentTarget as NativeProcess;
+			androidOutput += StringUtil.trim(proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable));
 		}
 		
-		private function androidTimerComplete(ev:TimerEvent):void{
-			launchAdbProcess();
-		}
-		
-		protected function onReadAndroidDevicesData(event:ProgressEvent):void{
-			androidOutput += StringUtil.trim(adbProcess.standardOutput.readUTFBytes(adbProcess.standardOutput.bytesAvailable));
-		}
-		
-		protected function onReadIosDevicesData(event:ProgressEvent):void{
-			iosOutput += StringUtil.trim(iosProcess.standardOutput.readUTFBytes(iosProcess.standardOutput.bytesAvailable));
-		}
-		
-		protected function onReadAndroidDevicesExit(event:NativeProcessExitEvent):void
+		protected function onReadAndroidDevicesExit(ev:NativeProcessExitEvent):void
 		{
-			//process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
-			adbProcess.removeEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit);
-			adbProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData);
+			var proc:NativeProcess = ev.currentTarget as NativeProcess;
+			proc.removeEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit);
+			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData);
+			
+			proc.closeInput();
+			proc.exit(true);
 			
 			var dv:Device;
 			for each(dv in collection){
@@ -237,32 +197,70 @@ package
 				}
 			}
 			
-			androidTimer.start();
+			TweenMax.delayedCall(relaunchDelay, launchAdbProcess);
 		}
 		
+		//---------------------------------------------------------------------------------------------------------
+		//---------------------------------------------------------------------------------------------------------
+		
+		private function launchIosProcess():void{
+			iosOutput = "";
+			errorStack = "";
+			
+			var proc:NativeProcess = new NativeProcess();
+			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			
+			procInfo.executable = new File("/usr/bin/env");
+			procInfo.workingDirectory = File.userDirectory;
+			procInfo.arguments = new <String>["xcrun", "instruments", "-s", "devices"];
+			
+			proc.addEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit, false, 0, true);
+			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData, false, 0, true);
+			proc.start(procInfo);
+		}
+
+		protected function onReadIosDevicesData(ev:ProgressEvent):void{
+			var proc:NativeProcess = ev.currentTarget as NativeProcess;
+			iosOutput += StringUtil.trim(proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable));
+		}
+				
 		protected function simulatorStatusChanged(ev:Event):void{
 			var sim:IosSimulator = ev.currentTarget as IosSimulator;
 			sim.dispatchEvent(new SimulatorEvent(AvailableSimulatorsManager.SIMULATOR_STATUS_CHANGED, sim));
 		}
 		
-		protected function onInstrumentsExit(event:NativeProcessExitEvent):void
+		protected function onInstrumentsExit(ev:NativeProcessExitEvent):void
 		{
-			//process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
-			iosProcess.removeEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit);
+			var proc:NativeProcess = ev.currentTarget as NativeProcess;
+			proc.removeEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit);
+			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
+			
+			proc.closeInput();
+			proc.exit(true);
+			
 			arrayInstrument = iosOutput.split("\n");
 			iosOutput = "";
 			
-			// get devices with booted state
-			this.iosProcInfo.arguments = new <String>["xcrun", "simctl", "list", "devices", "-j"];
-			iosProcess.addEventListener(NativeProcessExitEvent.EXIT, onSimCtlExit, false, 0, true);
-			iosProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData, false, 0, true);
-			iosProcess.start(iosProcInfo);	
+			proc = new NativeProcess();
+			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			
+			procInfo.executable = new File("/usr/bin/env");
+			procInfo.workingDirectory = File.userDirectory;
+			procInfo.arguments = new <String>["xcrun", "simctl", "list", "devices", "-j"];
+			
+			proc.addEventListener(NativeProcessExitEvent.EXIT, onSimCtlExit, false, 0, true);
+			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData, false, 0, true);
+			proc.start(procInfo);	
 		}
 		
-		private function onSimCtlExit(event: NativeProcessExitEvent): void 
+		private function onSimCtlExit(ev: NativeProcessExitEvent): void 
 		{	
-			iosProcess.removeEventListener(NativeProcessExitEvent.EXIT, onSimCtlExit);
-			iosProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
+			var proc:NativeProcess = ev.currentTarget as NativeProcess;
+			proc.removeEventListener(NativeProcessExitEvent.EXIT, onSimCtlExit);
+			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
+			
+			proc.closeInput();
+			proc.exit(true);
 			
 			var dev:Device;
 			var dv:Device;
@@ -276,7 +274,14 @@ package
 				return;
 			}
 			
-			var jsonSimCtlObject:Object = JSON.parse(data[0]);
+			var jsonSimCtlObject:Object = null;
+			try{
+				jsonSimCtlObject = JSON.parse(data[0]);
+			}catch(error:Error){
+				TweenMax.delayedCall(relaunchDelay, launchIosProcess);
+				return;
+			}
+			
 			var JSONDevicesObject:Object = jsonSimCtlObject["devices"];
 			for each(var runtime:Object in JSONDevicesObject) {
 				for each(var device:Object in runtime) {
@@ -288,8 +293,7 @@ package
 				}
 				simCtl.push(new SimCtlDevice(availabilityError,device["isAvailable"] ,device["name"] ,device["state"] ,device["udid"]));
 			}
-			
-			
+						
 			arrayInstrument.removeAt(0)
 			var containsPhysicalDevice:Boolean = false;
 			
@@ -371,7 +375,7 @@ package
 				}
 			}
 			
-			iosTimer.start();	
+			TweenMax.delayedCall(relaunchDelay, launchIosProcess);
 		}
 		
 		public function findDevice(id:String):Device{

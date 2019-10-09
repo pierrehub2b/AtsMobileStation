@@ -44,9 +44,7 @@
 			
 			protected function closeHandler(event:Event):void
 			{
-				simulators.process.exit(true);
-				devices.adbProcess.exit(true);
-				devices.iosProcess.exit(true);
+				simulators.terminate();
 				devices.terminate();
 			}
 			
