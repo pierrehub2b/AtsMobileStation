@@ -60,6 +60,12 @@ package
 			}
 		}
 		
+		public function terminate():void{
+			if(process != null && process.running){
+				process.exit(true);
+			}
+		}
+		
 		protected function onSetupSimulatorExit(event:NativeProcessExitEvent):void
 		{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onSetupSimulatorExit);
