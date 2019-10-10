@@ -11,6 +11,7 @@ package
 	import flash.system.Capabilities;
 	
 	import mx.collections.ArrayCollection;
+	import mx.core.FlexGlobals;
 	
 	import spark.collections.Sort;
 	import spark.collections.SortField;
@@ -104,6 +105,20 @@ package
 			dev.close();
 			this.collection = tmpCollection;
 			this.collection.refresh();
+		}
+		
+		public function terminateSimulator(id:String):void{
+			var index:int = 0;
+			for each(var d:Device in collection) {
+				if(id == d.id) {
+					(d as IosDevice).dispose();
+					d.close();
+					collection.removeItemAt(index);
+					collection.refresh();
+					break;
+				}
+				index++;
+			}
 		}
 		
 		public function getByUdid(array:Array, search:String):SimCtlDevice {
@@ -331,7 +346,7 @@ package
 									var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], true, !isPhysicalDevice);
 									dev = sim.device;	
 									if(!isPhysicalDevice) {
-										AtsMobileStation.simulators.updateSimulatorInList(data[3], true);
+										FlexGlobals.topLevelApplication.updateSimulatorInList(data[3], true);
 										dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
 									}
 									collection.addItem(dev);
@@ -369,7 +384,7 @@ package
 			
 			for each(dv in collection){
 				if(!dv.connected && dv.isSimulator){
-					AtsMobileStation.devices.restartDev(dev);
+					FlexGlobals.topLevelApplication.restartDevice(dev);
 				}
 			}
 			

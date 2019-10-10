@@ -18,6 +18,7 @@
 			import spark.filters.DropShadowFilter;
 			
 			import device.Device;
+			import device.IosDevice;
 			
 			import renderer.PhysicialDeviceSettingsWindow;
 			import renderer.RunningDeviceRenderer;
@@ -28,12 +29,22 @@
 			private var port:String = "8080";
 			
 			[Bindable]
-			public static var devices:RunningDevicesManager;
+			public var devices:RunningDevicesManager;
 			
 			[Bindable]
-			public static var simulators:AvailableSimulatorsManager;
+			public var simulators:AvailableSimulatorsManager;
 			
-			//public static var startedIosSimulator:Vector.<String> = new Vector.<String>();
+			public function updateSimulatorInList(id:String, started:Boolean):void{
+				simulators.updateSimulatorInList(id, started);
+			}
+			
+			public function restartDevice(dev:Device):void{
+				devices.restartDev(dev);
+			}
+			
+			public function terminateSimulator(id:String):void{
+				devices.terminateSimulator(id);
+			}
 			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{

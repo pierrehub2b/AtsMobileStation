@@ -11,6 +11,7 @@
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.core.DragSource;
+			import mx.core.FlexGlobals;
 			import mx.managers.DragManager;
 			import mx.managers.PopUpManager;
 			
@@ -61,7 +62,7 @@
 			
 			protected function restart_clickHandler(event:MouseEvent):void
 			{
-				AtsMobileStation.devices.restartDev(dev);
+				FlexGlobals.topLevelApplication.restartDevice(dev);
 			}
 			
 			protected function mainGroup_rollOverHandler(event:MouseEvent):void

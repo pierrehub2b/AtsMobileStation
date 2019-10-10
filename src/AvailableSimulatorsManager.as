@@ -110,7 +110,6 @@ package
 					for each(var runtime:Object in devices) {
 						for each(var device:Object in runtime) {
 							if(device["name"].indexOf("iPhone") == 0 && device["isAvailable"]){
-								
 								var sim:IosSimulator = new IosSimulator(device["udid"], device["name"] , "", device["state"] == "Booted", true);
 								sim.addEventListener(Simulator.STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
 								collection.addItem(sim);
@@ -119,7 +118,7 @@ package
 					}
 				}
 				
-				if(AtsMobileStation.simulators.collection.length == 0){
+				if(collection.length == 0){
 					info = "No simulators found !\n(Xcode may not be installed on this station !)"
 				}else{
 					info = "";
@@ -133,11 +132,12 @@ package
 				if(elem.id == id) {
 					elem.phase = started ? Simulator.RUN : Simulator.OFF; 					
 					collection.setItemAt(elem,index);
+					
+					collection.refresh();
 					break;
 				}
 				index++;
 			}
-			this.collection.refresh();
 		}
 		
 		protected function simulatorStatusChanged(ev:Event):void{

@@ -10,6 +10,7 @@ package simulator
 	import flash.net.NetworkInfo;
 	import flash.net.NetworkInterface;
 	
+	import mx.core.FlexGlobals;
 	import mx.utils.StringUtil;
 	
 	import device.Device;
@@ -82,23 +83,6 @@ package simulator
 					
 					procInfo.executable = xcrunExec;
 					process.addEventListener(NativeProcessExitEvent.EXIT, onShutdownExit, false, 0, true);
-					
-					var index:int = 0;
-					for each(var d:Device in AtsMobileStation.devices.collection) {
-						if(id == d.id) {
-							(d as IosDevice).dispose();
-							d.close();
-							AtsMobileStation.devices.collection.removeItemAt(index);
-							AtsMobileStation.devices.collection.refresh();
-							break;
-						}
-						index++;
-					}
-					
-					/*if(AtsMobileStation.startedIosSimulator.indexOf(id,0) > -1) {
-						AtsMobileStation.startedIosSimulator.removeAt(AtsMobileStation.startedIosSimulator.indexOf(id,0));
-					}*/
-					
 					procInfo.arguments = new <String>["simctl", "shutdown", id];
 					process.start(procInfo);
 				}
@@ -109,6 +93,11 @@ package simulator
 		protected function onShutdownExit(event:NativeProcessExitEvent):void
 		{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onShutdownExit);
+			process.closeInput();
+			process.exit(true);
+			
+			FlexGlobals.topLevelApplication.terminateSimulator(id);
+			
 			phase = OFF;
 			tooltip = "Start simulator";
 		}

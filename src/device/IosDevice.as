@@ -8,6 +8,8 @@ package device
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	
+	import mx.core.FlexGlobals;
+	
 	public class IosDevice extends Device
 	{
 		private var output:String = "";
@@ -175,7 +177,7 @@ package device
 			
 			trace("testing exit");
 			errorMessage = "";
-			AtsMobileStation.devices.restartDev(this);
+			FlexGlobals.topLevelApplication.restartDev(this);
 		}
 		
 		protected function onTestingOutput(event:ProgressEvent):void
