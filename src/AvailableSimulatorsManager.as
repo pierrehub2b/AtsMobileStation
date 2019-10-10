@@ -59,8 +59,6 @@ package
 			proc.closeInput();
 			proc.exit(true);
 			
-			AtsMobileStation.simulators.collection = new ArrayCollection();
-			
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			proc = new NativeProcess();
 			
@@ -100,15 +98,15 @@ package
 			
 			proc.closeInput();
 			proc.exit(true);
-						
+			
 			var obj:Object;
 			if(output.length > 0) {
 				var data:Array = jsonPattern.exec(output);
 				if(data != null && data.length > 0){
+					
 					obj = JSON.parse(data[0]);
 					var devices:Object = obj["devices"];
-					
-					
+
 					for each(var runtime:Object in devices) {
 						for each(var device:Object in runtime) {
 							if(device["name"].indexOf("iPhone") == 0 && device["isAvailable"]){
@@ -117,7 +115,6 @@ package
 								sim.addEventListener(Simulator.STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
 								collection.addItem(sim);
 							}
-							
 						}
 					}
 				}
