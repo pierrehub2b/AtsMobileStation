@@ -148,7 +148,7 @@ package device
 			if(!isSimulator) {
 				args.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + teamId);
 			}
-			if(alreadyCopied && !isSimulator) {
+			if(alreadyCopied) {
 				args.push("test-without-building");
 			} else {
 				args.push("test");

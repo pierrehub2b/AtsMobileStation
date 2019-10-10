@@ -110,7 +110,7 @@ class atsDriver: XCTestCase {
     }
     
     func setupInstalledApp(){
-        self.addInstalledApp(label: "Safari", packageName: "com.apple.mobilesafari", version: "", icon:SafariIcon())
+        /*self.addInstalledApp(label: "Safari", packageName: "com.apple.mobilesafari", version: "", icon:SafariIcon())
         self.addInstalledApp(label: "Settings", packageName: "com.apple.Preferences", version: "", icon:SettingsIcon());
         self.addInstalledApp(label: "Contacts", packageName: "com.apple.MobileAddressBook", version: "", icon:AddressIcon());
         self.addInstalledApp(label: "News", packageName: "com.apple.news", version: "", icon:NewsIcon());
@@ -118,7 +118,7 @@ class atsDriver: XCTestCase {
         self.addInstalledApp(label: "Health", packageName: "com.apple.Health", version: "", icon:HealthIcon());
         self.addInstalledApp(label: "Calendar", packageName: "com.apple.mobilecal", version: "", icon:CalendarIcon());
         self.addInstalledApp(label: "Photos", packageName: "com.apple.mobileslideshow", version: "", icon:PhotosIcon());
-        self.addInstalledApp(label: "Files", packageName: "com.apple.DocumentsApp", version: "", icon:DefaultAppIcon());
+        self.addInstalledApp(label: "Files", packageName: "com.apple.DocumentsApp", version: "", icon:DefaultAppIcon());*/
         // TODO add succesfully started app on this device
     }
 

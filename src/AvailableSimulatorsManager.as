@@ -25,6 +25,7 @@ package
 		
 		private const regex:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
+		private const iosVersionReplacmentPattern:RegExp = /-/g; 
 		
 		private var output:String = "";
 		
@@ -106,11 +107,13 @@ package
 					
 					obj = JSON.parse(data[0]);
 					var devices:Object = obj["devices"];
-
-					for each(var runtime:Object in devices) {
-						for each(var device:Object in runtime) {
-							if(device["name"].indexOf("iPhone") == 0 && device["isAvailable"]){
-								var sim:IosSimulator = new IosSimulator(device["udid"], device["name"] , "", device["state"] == "Booted", true);
+					
+					for (var runtime:Object in devices) {
+						var iosVersion:String = runtime.toString().split(".")[runtime.toString().split(".").length-1].replace(iosVersionReplacmentPattern, ".");
+						for (var d:Object in devices[runtime]) {
+							var device:Object = devices[runtime][d];
+							if(device["name"].indexOf("iPhone") == 0 && device["isAvailable"] && iosVersion.indexOf("iOS") > -1) {
+								var sim:IosSimulator = new IosSimulator(device["udid"], device["name"] , iosVersion.replace("iOS.",""), device["state"] == "Booted", true);
 								sim.addEventListener(Simulator.STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
 								collection.addItem(sim);
 							}

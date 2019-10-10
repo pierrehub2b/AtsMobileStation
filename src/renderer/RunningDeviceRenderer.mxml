@@ -20,6 +20,11 @@
 			import device.Device;
 			import device.IosDevice;
 			
+			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
+			
+			[Bindable]
+			private var dev:Device;
+			
 			private function showWindow(event:MouseEvent, dev:Device):void{
 				var tw:DeviceSettingsWindow = new DeviceSettingsWindow();
 				tw.dev = dev;
@@ -28,25 +33,18 @@
 			}
 			
 			private function goHome(event:MouseEvent, dev:Device):void{
-				if(dev.status == Device.READY) {
-					var request:URLRequest = new URLRequest();
-					var urlLoader:URLLoader = new URLLoader();
-					
-					request.url = "http://" + dev.ip + ":" + dev.port + "/button";
-					request.contentType = "text/plain";
-					request.method = URLRequestMethod.POST;
-					request.data = "home";
-					
-					urlLoader = new URLLoader();
-					urlLoader.dataFormat = URLLoaderDataFormat.TEXT;
-					urlLoader.load(request);
-				}
+				var request:URLRequest = new URLRequest();
+				var urlLoader:URLLoader = new URLLoader();
+				
+				request.url = "http://" + dev.ip + ":" + dev.port + "/button";
+				request.contentType = "text/plain";
+				request.method = URLRequestMethod.POST;
+				request.data = "home";
+				
+				urlLoader = new URLLoader();
+				urlLoader.dataFormat = URLLoaderDataFormat.TEXT;
+				urlLoader.load(request);
 			}
-			
-			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
-			
-			[Bindable]
-			private var dev:Device;
 			
 			override public function set data(value:Object):void
 			{
@@ -67,18 +65,16 @@
 			
 			protected function mainGroup_rollOverHandler(event:MouseEvent):void
 			{
-				if(!DragManager.isDragging && (dev.status == "ready" || dev.status == "fail" || dev.errorMessage != "" )){
-					restartButton.includeInLayout = true;
-					restartButton.visible = true;
-					iconStatus.visible = false;
-					iconStatus.includeInLayout = false;
-				}
+				restartButton.includeInLayout = true;
+				restartButton.visible = true;
+				homeButton.visible = dev.status == "ready";
+				homeButton.includeInLayout = dev.status == "ready";
+				iconStatus.visible = false;
+				iconStatus.includeInLayout = false;
 				
 				if(this.dev is IosDevice) {
 					settingsButton.includeInLayout = true;
 					settingsButton.visible = true;
-					homeButton.includeInLayout = true;
-					homeButton.visible = true;
 				}
 			}
 			
@@ -87,13 +83,13 @@
 				if(this.dev is IosDevice) {
 					settingsButton.includeInLayout = false;
 					settingsButton.visible = false;
-					homeButton.includeInLayout = false;
-					homeButton.visible = false;
 				}
 				restartButton.includeInLayout = false;
 				restartButton.visible = false;
+				homeButton.visible = false;
+				homeButton.includeInLayout = true;
+				iconStatus.visible = true;		
 				iconStatus.includeInLayout = true;
-				iconStatus.visible = true;				
 			}
 			
 			protected function removedFromStageHandler(event:Event):void
