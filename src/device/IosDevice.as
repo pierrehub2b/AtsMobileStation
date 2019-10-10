@@ -177,7 +177,7 @@ package device
 			
 			trace("testing exit");
 			errorMessage = "";
-			FlexGlobals.topLevelApplication.restartDev(this);
+			FlexGlobals.topLevelApplication.restartDevice(this);
 		}
 		
 		protected function onTestingOutput(event:ProgressEvent):void

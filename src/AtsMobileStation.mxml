@@ -18,7 +18,6 @@
 			import spark.filters.DropShadowFilter;
 			
 			import device.Device;
-			import device.IosDevice;
 			
 			import renderer.PhysicialDeviceSettingsWindow;
 			import renderer.RunningDeviceRenderer;
