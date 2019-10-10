@@ -30,7 +30,7 @@ package
 		private var output:String = "";
 		
 		[Bindable]
-		public var info:String = "Loading simulators, please wait ...";
+		public var info:String = "";
 			
 		[Bindable]
 		public var collection:ArrayCollection = new ArrayCollection();
@@ -38,6 +38,8 @@ package
 		public function AvailableSimulatorsManager()
 		{
 			if(Capabilities.os.indexOf("Mac") > -1){
+				
+				info = "Loading simulators, please wait ...";
 				
 				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 				var process:NativeProcess = new NativeProcess();
@@ -49,6 +51,8 @@ package
 				
 				procInfo.arguments = new <String>["defaults", "write" ,"com.apple.iphonesimulator", "ShowChrome", "-int", "0"];
 				process.start(procInfo);
+			}else{
+				info = "Android simulators are not yet implemented ...";
 			}
 		}
 		
