@@ -200,7 +200,7 @@ package
 				
 				for(var i:int=1; i<len; i++){
 					info = data[i].split(/\s+/g);
-					if(info.length >= 2){
+					if(info.length >= 2 && info[0].length > 0){
 						dev = findDevice(info[0]);
 						if(dev == null){
 							dev = new AndroidDevice(adbFile, port, info[0], info[1]);
