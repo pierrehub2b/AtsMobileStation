@@ -28,6 +28,12 @@ package
 	
 	public class RunningDevicesManager
 	{
+		private const simCtlArgs:Vector.<String> = new <String>["xcrun", "-n", "-k", "simctl", "list", "devices", "-j"];
+		private const instrumentsArgs:Vector.<String> = new <String>["xcrun", "-n", "-k", "instruments", "-l", "0", "-s", "devices"];
+		private const adbArgs:Vector.<String> = new <String>["devices"];
+		
+		private const envFile:File = new File("/usr/bin/env");
+		
 		private const adbPath:String = "assets/tools/android/adb";
 		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
@@ -141,7 +147,7 @@ package
 			
 			procInfo.executable = adbFile;			
 			procInfo.workingDirectory = adbFile.parent;
-			procInfo.arguments = new <String>["devices"];
+			procInfo.arguments = adbArgs;
 			
 			proc.addEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit, false, 0, true);
 			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData, false, 0, true);
@@ -222,9 +228,9 @@ package
 			var proc:NativeProcess = new NativeProcess();
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			
-			procInfo.executable = new File("/usr/bin/env");
+			procInfo.executable = envFile;
 			procInfo.workingDirectory = File.userDirectory;
-			procInfo.arguments = new <String>["xcrun", "instruments", "-s", "devices"];
+			procInfo.arguments = instrumentsArgs;
 			
 			proc.addEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit, false, 0, true);
 			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData, false, 0, true);
@@ -267,9 +273,9 @@ package
 			proc = new NativeProcess();
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			
-			procInfo.executable = new File("/usr/bin/env");
+			procInfo.executable = envFile;
 			procInfo.workingDirectory = File.userDirectory;
-			procInfo.arguments = new <String>["xcrun", "simctl", "list", "devices", "-j"];
+			procInfo.arguments = simCtlArgs;
 			
 			proc.addEventListener(NativeProcessExitEvent.EXIT, onSimCtlExit, false, 0, true);
 			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData, false, 0, true);
@@ -285,7 +291,6 @@ package
 				
 				TweenMax.delayedCall(relaunchDelay, launchIosProcess);
 			}
-
 		}
 		
 		private function onSimCtlExit(ev: NativeProcessExitEvent): void 
@@ -370,16 +375,6 @@ package
 								}else if(dev != null) {
 									dev.connected = true;
 								}
-								/*}else if(AtsMobileStation.startedIosSimulator.indexOf(data[3],0) > -1) {
-								AtsMobileStation.startedIosSimulator.removeAt(AtsMobileStation.startedIosSimulator.indexOf(data[3],0));
-								AtsMobileStation.simulators.updateSimulatorInList(data[3], false);
-								dev = findDevice(data[3]);
-								if(dev != null) {
-								(dev as IosDevice).dispose();
-								dev.close();
-								collection.removeItem(dev);
-								collection.refresh();
-								}*/
 							}
 						}
 					}
