@@ -27,7 +27,7 @@
 				super.data = value;
 				this.sim = value as Simulator;
 				if(this.sim is IosSimulator){
-					osBitmap.source = "/assets/icons/20/ios.png";
+					osBitmap.source = "/assets/icons/32/ios.png";
 				}
 			}
 			
@@ -50,16 +50,14 @@
 			
 		]]>
 	</fx:Script>
-	
-	<s:BitmapImage left="8" top="16" width="16" height="16" alpha="0.7"
-				   source="assets/icons/20/android.png" verticalCenter="0"/>
-	
+		
 	<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" verticalCenter="0"
 			  paddingRight="6" paddingLeft="5" filters="{dropShadowFilterMiddle}">
-		<s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true">
-			<s:BitmapImage source="assets/icons/32/smartphone.png" smooth="true" smoothingQuality="high"/>
-			<s:VGroup gap="3" mouseEnabled="false">
-				<s:Label text="{sim.name}" fontStyle="italic" color="0x8a844a" maxWidth="234" maxDisplayedLines="1"/>
+		<s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true" gap="0">
+			<s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high"
+						   source="assets/icons/32/android.png"/>
+			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
+				<s:Label text="{sim.name}" fontWeight="bold" color="{sim.phase=='off'?0x8a844a:0x113b55}" maxWidth="234" maxDisplayedLines="1"/>
 				<s:Label text="{sim.version}" fontSize="11" fontStyle="italic" color="#758696"/>
 			</s:VGroup>
 		</s:HGroup>
@@ -75,6 +73,5 @@
 		</s:Group>
 	</s:HGroup>
 
-	<s:BitmapImage id="osBitmap" left="10" width="18" height="18" smooth="true" smoothingQuality="high"
-				   source="assets/icons/20/android.png" verticalCenter="-1"/>
+
 </s:ItemRenderer>

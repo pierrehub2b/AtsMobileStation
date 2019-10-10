@@ -124,14 +124,14 @@
 	
 	<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" verticalCenter="0" filters="{dropShadowFilterMiddle}"
 			  paddingRight="6" paddingLeft="2" rollOver="mainGroup_rollOverHandler(event)" rollOut="mainGroup_rollOutHandler(event)">
-		<s:HGroup id="firstGroup" verticalAlign="middle" mouseDown="mouseDownHandler(event)" buttonMode="true">
+		<s:HGroup id="firstGroup" verticalAlign="middle" mouseDown="mouseDownHandler(event)" buttonMode="true" gap="0">
 			<s:BitmapImage  id="mobile" source="assets/icons/32/android.png" smooth="true" smoothingQuality="high"/>
-			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="middle">
+			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
 				<s:Label visible="{dev.ip==null}" includeInLayout="{dev.ip==null}" 
 						 text="Unable to get local ip !" fontStyle="italic" color="0x8a844a"/>
 				<s:HGroup visible="{dev.ip!=null}" includeInLayout="{dev.ip!=null}" gap="0">
-					<s:Label text="{dev.ip}" fontWeight="bold"/>
-					<s:Label text=":{dev.port}"/>
+					<s:Label text="{dev.ip}" fontWeight="bold" color="0x113b55"/>
+					<s:Label text=":{dev.port}" color="0x113b55"/>
 				</s:HGroup>
 				
 				<s:Label text="{dev.manufacturer} - {dev.modelName}" fontSize="11" fontStyle="italic" color="#758696"/>

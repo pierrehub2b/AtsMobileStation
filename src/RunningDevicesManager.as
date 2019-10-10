@@ -158,7 +158,18 @@ package
 			
 			proc.addEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit, false, 0, true);
 			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData, false, 0, true);
-			proc.start(procInfo);
+			
+			try{
+				proc.start(procInfo);	
+			}catch(err:Error){
+				trace("adb proc start error -> " + err.message);
+				proc.removeEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit);
+				proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData);
+				proc.closeInput();
+				proc.exit(true);
+				
+				TweenMax.delayedCall(relaunchDelay, launchAdbProcess);
+			}
 		}
 		
 		protected function onReadAndroidDevicesData(ev:ProgressEvent):void{
@@ -230,7 +241,18 @@ package
 			
 			proc.addEventListener(NativeProcessExitEvent.EXIT, onInstrumentsExit, false, 0, true);
 			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData, false, 0, true);
-			proc.start(procInfo);
+			
+			try{
+				proc.start(procInfo);	
+			}catch(err:Error){
+				trace("instruments proc start error -> " + err.message);
+				proc.removeEventListener(NativeProcessExitEvent.EXIT, onSimCtlExit);
+				proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
+				proc.closeInput();
+				proc.exit(true);
+				
+				TweenMax.delayedCall(relaunchDelay, launchIosProcess);
+			}
 		}
 		
 		protected function onReadIosDevicesData(ev:ProgressEvent):void{
@@ -264,7 +286,19 @@ package
 			
 			proc.addEventListener(NativeProcessExitEvent.EXIT, onSimCtlExit, false, 0, true);
 			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData, false, 0, true);
-			proc.start(procInfo);	
+			
+			try{
+				proc.start(procInfo);	
+			}catch(err:Error){
+				trace("simctl proc start error -> " + err.message);
+				proc.removeEventListener(NativeProcessExitEvent.EXIT, onSimCtlExit);
+				proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
+				proc.closeInput();
+				proc.exit(true);
+				
+				TweenMax.delayedCall(relaunchDelay, launchIosProcess);
+			}
+
 		}
 		
 		private function onSimCtlExit(ev: NativeProcessExitEvent): void 
