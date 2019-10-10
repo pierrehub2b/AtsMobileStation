@@ -2,7 +2,7 @@
 bin-debug/
 bin-release/
 release/
-src/assets/tools/
+src/assets/tools/android
 temp/
 [Oo]bj/
 [Bb]in/
