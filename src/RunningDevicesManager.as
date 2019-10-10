@@ -8,7 +8,6 @@ package
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
-	import flash.system.Capabilities;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.FlexGlobals;
@@ -56,12 +55,12 @@ package
 		
 		public static var devTeamId:String = "";
 		
-		public function RunningDevicesManager(port:String)
+		public function RunningDevicesManager(port:String, isMacOs:Boolean)
 		{
 			this.port = port;
 			this.collection.sort = ipSort;
 			
-			if(Capabilities.os.indexOf("Mac") > -1){
+			if(isMacOs){
 				
 				//-----------------------------------------------------------------------------
 				// IOS
