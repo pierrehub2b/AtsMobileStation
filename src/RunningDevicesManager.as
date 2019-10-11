@@ -100,16 +100,11 @@ package
 		}	
 
 		public function terminateSimulator(id:String):void{
-			//var index:int = 0;
 			for each(var d:Device in collection) {
 				if(id == d.id) {
-					//(d as IosDevice).dispose();
 					d.close();
-					//collection.removeItemAt(index);
-					//collection.refresh();
 					break;
 				}
-				//index++;
 			}
 		}
 		
@@ -128,9 +123,7 @@ package
 		public function terminate():void{
 			var dv:Device;
 			for each(dv in collection){
-				if(dv.isSimulator) {
-					dv.dispose();
-				}
+				dv.close();
 			}
 			TweenMax.killDelayedCallsTo(launchAdbProcess);
 			TweenMax.killDelayedCallsTo(launchIosProcess);
@@ -178,11 +171,6 @@ package
 			proc.closeInput();
 			proc.exit(true);
 			
-			var dv:Device;
-			for each(dv in collection){
-				dv.connected = false;
-			}
-			
 			var data:Array = androidOutput.split("\n");
 			if(data.length > 1){
 				
@@ -199,16 +187,8 @@ package
 							dev.addEventListener(Device.STOPPED_EVENT, deviceStoppedHandler, false, 0, true);
 							collection.addItem(dev);
 							collection.refresh();
-						}else{
-							dev.connected = true;
 						}
 					}
-				}
-			}
-			
-			for each(dv in collection){
-				if(!dv.connected && dv.manufacturer != "Apple"){
-					dv.close();
 				}
 			}
 			

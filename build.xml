@@ -17,37 +17,7 @@
 		<property name="package.type" value="normal"/>
 	</target>
 	
-	<target name="compile.workers" depends="init.sdk">
-
-		<mkdir dir="${WORKERS_BIN_FOLDER}"/>
-		<mxmlc file="${SRC_FOLDER}/worker/AndroidWorker.as"
-		            output="${WORKERS_BIN_FOLDER}/AndroidWorker.swf"
-						default-frame-rate="24"
-						use-network="true"
-						context-root="${APP_NAME}"
-					    actionscript-file-encoding="UTF-8"
-					    optimize="true"
-					 	swf-version="23"
-						debug="false"
-						use-gpu="true"
-						warnings="false">
-		             			
-		            <!-- Get default compiler options. Hand modified to remove extraneous Flex trash -->
-		 			<load-config filename="${FLEX_HOME}/frameworks/air-config.xml"/>
-		             
-		            <!-- List of path elements that form the roots of ActionScript class hierarchies. -->
-		            <source-path path-element="${FLEX_HOME}/frameworks" />
-		            <source-path path-element="${SRC_FOLDER}" />
-
-		            <!-- List of SWC files or directories that contain SWC files. -->
-		            <compiler.library-path dir="libs" append="true">
-		                <include name="*.swc" />
-		            </compiler.library-path>
-		 
-		</mxmlc>
-	</target>
-
-	<target name="compile.project" description="" depends="compile.workers">
+	<target name="compile.project" description="" depends="init.sdk">
 		
 		<echo message="Application type -> '${package.type}'"/>
 		
@@ -71,7 +41,6 @@
         	warnings="false"
         	default-frame-rate="30">
         	<source-path path-element="src"/>
-			<source-path path-element="${WORKERS_BIN_FOLDER}"/>
             <external-library-path file="${FLEX_HOME}/frameworks/libs/air/airglobal.swc" append="true"/>
             <library-path dir="libs" includes="*.swc" append="true"/>
         	<include-resource-bundles>labels</include-resource-bundles>
