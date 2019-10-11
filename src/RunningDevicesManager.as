@@ -104,7 +104,7 @@ package
 			dev.close();
 			collection.removeItem(dev);
 		}
-		
+
 		public function terminateSimulator(id:String):void{
 			var index:int = 0;
 			for each(var d:Device in collection) {
@@ -356,16 +356,18 @@ package
 							var isRunning:Boolean = currentElement != null ? currentElement.getState() == "Booted" : isPhysicalDevice;
 							if(isRunning) {
 								dev = findDevice(data[3]) as IosDevice;
-								var isRedifined:Boolean = false;
 								
 								if(dev != null && dev.isCrashed) {
-									isRedifined = true;
+									dev.isCrashed = false;
 									dev.dispose();
 									dev.close();
+
 									collection.removeItem(dev);
+
 								}
 								
-								if(dev == null || isRedifined) {
+								if(dev == null) {
+									
 									var sim:IosSimulator = new IosSimulator(data[3], data[1], data[2], true, !isPhysicalDevice);
 									dev = sim.device;	
 									if(!isPhysicalDevice) {

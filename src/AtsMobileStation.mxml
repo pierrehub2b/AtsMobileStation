@@ -40,7 +40,7 @@
 			}
 			
 			public function restartDevice(dev:Device):void{
-				devices.restartDev(dev);
+				dev.isCrashed = true;
 			}
 			
 			public function terminateSimulator(id:String):void{

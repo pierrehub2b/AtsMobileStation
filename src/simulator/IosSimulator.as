@@ -12,8 +12,6 @@ package simulator
 	
 	import mx.core.FlexGlobals;
 	import mx.utils.StringUtil;
-	
-	import device.Device;
 	import device.IosDevice;
 	
 	public class IosSimulator extends Simulator
