@@ -356,6 +356,7 @@ package
 								dev = findDevice(data[3]) as IosDevice;
 								
 								if(dev != null && dev.isCrashed) {
+									dev.isCrashed = false;
 									dev.dispose();
 									dev.close();
 									var tmpSim:IosSimulator = new IosSimulator(data[3], data[1], data[2], true, !isPhysicalDevice);
