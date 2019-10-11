@@ -39,9 +39,9 @@
 				simulators.updateSimulatorInList(id, started);
 			}
 			
-			public function restartDevice(dev:Device):void{
+			/*public function restartDevice(dev:Device):void{
 				dev.isCrashed = true;
-			}
+			}*/
 			
 			public function terminateSimulator(id:String):void{
 				devices.terminateSimulator(id);

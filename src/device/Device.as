@@ -5,6 +5,8 @@ package device
 
 	public class Device extends EventDispatcher
 	{
+		public static const STOPPED_EVENT:String = "deviceStopped";
+		
 		public static const INSTALL:String = "install";
 		public static const START:String = "start";
 		public static const READY:String = "ready";
@@ -46,7 +48,7 @@ package device
 		[Bindable]
 		public var tooltip:String = "Starting driver ...";
 		
-		public var isCrashed:Boolean = false;
+		//public var isCrashed:Boolean = false;
 		private var _connected:Boolean = false;
 		public var isSimulator:Boolean = false;
 		

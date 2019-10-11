@@ -12,7 +12,6 @@
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.core.DragSource;
-			import mx.core.FlexGlobals;
 			import mx.managers.DragManager;
 			import mx.managers.PopUpManager;
 			
@@ -46,22 +45,24 @@
 						
 			protected function restart_clickHandler(event:MouseEvent):void
 			{
-				FlexGlobals.topLevelApplication.restartDevice(dev);
+				restartButton.visible = false;
+				dev.close()
 			}
 			
 			protected function mainGroup_rollOverHandler(event:MouseEvent):void
 			{
-				restartButton.includeInLayout = true;
-				restartButton.visible = true;
-				
-				iconStatus.visible = false;
-				iconStatus.includeInLayout = false;
-				
+				if(dev.status == "ready"){
+					restartButton.includeInLayout = true;
+					restartButton.visible = true;
+					
+					iconStatus.visible = false;
+					iconStatus.includeInLayout = false;
+				}
+								
 				if(dev is IosDevice){
 					iosButtons.visible = true;
 					TweenLite.fromTo(iosButtons, 0.4, {alpha:0.0}, {alpha:1.0});
 				}
-
 			}
 			
 			protected function mainGroup_rollOutHandler(event:MouseEvent):void

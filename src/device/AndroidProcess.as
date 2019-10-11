@@ -1,47 +1,44 @@
-package worker
+package device
 {
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
-	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.events.EventDispatcher;
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
-	import flash.net.registerClassAlias;
-	import flash.system.MessageChannel;
-	import flash.system.Worker;
-	
-	public class AndroidWorker extends Sprite
+		
+	public class AndroidProcess extends EventDispatcher
 	{
+		public static const ERROR_EVENT:String = "errorEvent";
+		public static const IP_ADDRESS:String = "ipAddress";
+		
+		public static const DEVICE_INFO:String = "deviceInfo";
+		
+		public static const RUNNING:String = "running";
+		public static const STOPPED:String = "stopped";
+		
 		private const androidDriverFullName:String = "com.ats.atsdroid";
 		private const androidPropValueRegex:RegExp = /.*:.*\[(.*)\]/;
 		
-		private var outputChannel:MessageChannel;
-		
 		private var port:String;
 		private var id:String;
-		private var atsdroidFilePath;
+		private var atsdroidFilePath:String;
 		
 		private var output:String = "";
-		private var error:String;
+		
+		public var ipAddress:String;
+		public var error:String;
+		public var deviceInfo:DeviceInfo = new DeviceInfo();
 		
 		private var process:NativeProcess;
 		private var procInfo:NativeProcessStartupInfo
 		
-		public function AndroidWorker()
+		public function AndroidProcess(adbFile:File, atsdroid:String, id:String, port:String)
 		{
-			registerClassAlias("worker.DeviceInfo", DeviceInfo);
-			registerClassAlias("worker.DeviceIp", DeviceIp);
-			registerClassAlias("worker.WorkerError", WorkerError);			
-			
-			const currentWorker:Worker = Worker.current;
-			outputChannel = currentWorker.getSharedProperty(WorkerStatus.OUTPUT_CHANNEL) as MessageChannel;
-			
-			atsdroidFilePath = currentWorker.getSharedProperty("atsdroidFilePath") as String
-			port = currentWorker.getSharedProperty("port") as String
-			id = currentWorker.getSharedProperty("id") as String
-			
-			var adbFile:File = new File(currentWorker.getSharedProperty("adbFilePath"));
+			this.id = id;
+			this.port = port;
+			this.atsdroidFilePath = atsdroid;
 			
 			process = new NativeProcess();
 			procInfo = new NativeProcessStartupInfo()
@@ -54,10 +51,18 @@ package worker
 			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData, false, 0, true);
 			
 			procInfo.arguments = new <String>["-s", id, "shell", "ip", "route"];
-			
-			outputChannel.send(WorkerStatus.STARTING);
-			
-			process.start(procInfo);
+		}
+		
+		public function start():void{
+			process.start(procInfo);	
+		}
+		
+		public function terminate():Boolean{
+			if(process.running){
+				process.exit(true);
+				return true;
+			}
+			return false;
 		}
 	
 		protected function onOutputErrorShell(event:ProgressEvent):void
@@ -75,17 +80,21 @@ package worker
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onReadLanExit);
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData);
 			
+			process.closeInput();
+			process.exit(true);			
+			
 			if(error != null){
-				outputChannel.send(new WorkerError(WorkerStatus.LAN_ERROR, error));
+				dispatchEvent(new Event(ERROR_EVENT));
 			}else{
 				var ipRouteData:Array = output.split(/\s+/g);
 				var idx:int = ipRouteData.indexOf("dev");
 				if(idx > -1 && ipRouteData[idx+1] == "wlan0"){
 					idx = ipRouteData.indexOf("src");
 					if(idx > -1){
-
-						outputChannel.send(new DeviceIp(ipRouteData[idx+1]));
+						ipAddress = ipRouteData[idx+1];
+						dispatchEvent(new Event(IP_ADDRESS));
 					
+						process = new NativeProcess();
 						process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit, false, 0, true);
 						procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", androidDriverFullName];
 						process.start(procInfo);
@@ -99,18 +108,24 @@ package worker
 		protected function onUninstallExit(event:NativeProcessExitEvent):void{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
 			
+			process.closeInput();
+			process.exit(true);		
+			
+			process = new NativeProcess();
 			process.addEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
 			procInfo.arguments = new <String>["-s", id, "install", "-r", atsdroidFilePath];
-			
-			outputChannel.send(WorkerStatus.INSTALL);
+
 			process.start(procInfo);
 		}
 		
 		protected function onInstallExit(event:NativeProcessExitEvent):void{
 			
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallExit);
+			process.closeInput();
+			process.exit(true);		
 			
 			output = "";
+			process = new NativeProcess();
 			process.addEventListener(NativeProcessExitEvent.EXIT, onGetPropExit, false, 0, true);
 			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadPropertyData, false, 0, true);
 			
@@ -126,8 +141,9 @@ package worker
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadPropertyData);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onGetPropExit);
 			
-			var deviceInfo:DeviceInfo = new DeviceInfo();
-			
+			process.closeInput();
+			process.exit(true);		
+						
 			var propArray:Array = output.split("\n");
 			for each (var line:String in propArray){
 				if(line.indexOf("[ro.product.brand]") == 0){
@@ -146,8 +162,9 @@ package worker
 			}
 			
 			deviceInfo.checkName();
-			outputChannel.send(deviceInfo);
+			dispatchEvent(new Event(DEVICE_INFO));
 			
+			process = new NativeProcess();
 			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError, false, 0, true);
 			process.addEventListener(NativeProcessExitEvent.EXIT, onExecuteExit, false, 0, true);
 			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData, false, 0, true);
@@ -167,7 +184,7 @@ package worker
 		
 		protected function onExecuteData(event:ProgressEvent):void{
 			//var data:String = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
-			outputChannel.send(WorkerStatus.RUNNING);
+			dispatchEvent(new Event(RUNNING));
 		}
 		
 		protected function onExecuteExit(event:NativeProcessExitEvent):void{
@@ -176,10 +193,13 @@ package worker
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onExecuteExit);
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData);
 			
+			process.closeInput();
+			process.exit(true);		
+			
 			if(error != null){
-				outputChannel.send(new WorkerError(WorkerStatus.EXECUTE_ERROR, error));
+				dispatchEvent(new Event(ERROR_EVENT));
 			}else{
-				outputChannel.send(WorkerStatus.STOPPED);
+				dispatchEvent(new Event(STOPPED));
 			}
 		}
 	}

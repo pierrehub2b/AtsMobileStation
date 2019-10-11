@@ -1,4 +1,4 @@
-package worker
+package device
 {
 	[RemoteClass(alias="worker.DeviceInfo")]
 	public class DeviceInfo

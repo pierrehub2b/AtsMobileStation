@@ -37,7 +37,7 @@ package
 		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
 		
-		private const relaunchDelay:int = 10;
+		private const relaunchDelay:int = 5;
 		
 		private var adbFile:File;
 		private var errorStack:String = "";
@@ -98,23 +98,18 @@ package
 			
 			launchAdbProcess();
 		}	
-		
-		public function restartDev(dev:Device):void {
-			dev.dispose();
-			dev.close();
-			collection.removeItem(dev);
-		}
 
 		public function terminateSimulator(id:String):void{
-			var index:int = 0;
+			//var index:int = 0;
 			for each(var d:Device in collection) {
 				if(id == d.id) {
-					(d as IosDevice).dispose();
+					//(d as IosDevice).dispose();
 					d.close();
-					collection.removeItemAt(index);
+					//collection.removeItemAt(index);
+					//collection.refresh();
 					break;
 				}
-				index++;
+				//index++;
 			}
 		}
 		
@@ -201,8 +196,9 @@ package
 						dev = findDevice(info[0]);
 						if(dev == null){
 							dev = new AndroidDevice(adbFile, port, info[0], info[1]);
-							dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
+							dev.addEventListener(Device.STOPPED_EVENT, deviceStoppedHandler, false, 0, true);
 							collection.addItem(dev);
+							collection.refresh();
 						}else{
 							dev.connected = true;
 						}
@@ -212,8 +208,7 @@ package
 			
 			for each(dv in collection){
 				if(!dv.connected && dv.manufacturer != "Apple"){
-					dv.dispose();
-					collection.removeItem(dv);
+					dv.close();
 				}
 			}
 			
@@ -357,14 +352,14 @@ package
 							if(isRunning) {
 								dev = findDevice(data[3]) as IosDevice;
 								
-								if(dev != null && dev.isCrashed) {
-									dev.isCrashed = false;
+								/*if(dev != null && dev.isCrashed) {
+									//dev.isCrashed = false;
 									dev.dispose();
 									dev.close();
 
 									collection.removeItem(dev);
-
-								}
+									collection.refresh();
+								}*/
 								
 								if(dev == null) {
 									
@@ -372,9 +367,10 @@ package
 									dev = sim.device;	
 									if(!isPhysicalDevice) {
 										FlexGlobals.topLevelApplication.updateSimulatorInList(data[3], true);
-										dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
+										dev.addEventListener(Device.STOPPED_EVENT, deviceStoppedHandler, false, 0, true);
 									}
 									collection.addItem(dev);
+									collection.refresh();
 								}else if(dev != null) {
 									dev.connected = true;
 								}
@@ -388,16 +384,10 @@ package
 				var tmpCollection:ArrayCollection = new ArrayCollection(collection.source);
 				for each(var d:Device in tmpCollection) {
 					if(d is IosDevice && !d.isSimulator) {
-						d.dispose();
 						d.close();
 						collection.removeItem(d);
+						collection.refresh();
 					}
-				}
-			}
-			
-			for each(dv in collection){
-				if(!dv.connected && dv.isSimulator){
-					FlexGlobals.topLevelApplication.restartDevice(dev);
 				}
 			}
 			
@@ -418,10 +408,12 @@ package
 		}
 		
 		public function deviceStoppedHandler(ev:Event):void{
+			
 			var dv:Device = ev.currentTarget as Device;
-			dv.removeEventListener("deviceStopped", deviceStoppedHandler);
-			dv.dispose();
+			dv.removeEventListener(Device.STOPPED_EVENT, deviceStoppedHandler);
+
 			collection.removeItem(dv);
+			collection.refresh();
 		}
 	}
 }

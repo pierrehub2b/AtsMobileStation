@@ -2,13 +2,12 @@ package device
 {
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
+	import flash.events.Event;
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
-	
-	import mx.core.FlexGlobals;
 	
 	public class IosDevice extends Device
 	{
@@ -29,7 +28,7 @@ package device
 			this.modelName = name;
 			this.manufacturer = "Apple";
 			this.isSimulator = isSimulator;
-			this.isCrashed = false;
+
 			this.connected = !isSimulator;
 			this.errorMessage = "";
 			
@@ -177,7 +176,9 @@ package device
 			
 			trace("testing exit");
 			errorMessage = "";
-			FlexGlobals.topLevelApplication.restartDevice(this);
+			
+			dispatchEvent(new Event(STOPPED_EVENT));
+			//FlexGlobals.topLevelApplication.restartDevice(this);
 		}
 		
 		protected function onTestingOutput(event:ProgressEvent):void
@@ -205,15 +206,12 @@ package device
 			var data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
 			trace("test error -> " + data);
 			if(data.indexOf("Continuing with testing") < 0 && data.indexOf("** TEST EXECUTE FAILED **") > 0 || data.indexOf("** TEST FAILED **") > 0){
-				this.changeCrashedStatus();
+				//this.changeCrashedStatus();
+				dispatchEvent(new Event(STOPPED_EVENT));
 			}
 			if(data.indexOf(id + " was NULL") > -1) {
 				this.errorMessage = "Device locked";
 			}
-		}
-		
-		protected function changeCrashedStatus():void {
-			this.isCrashed = true
 		}
 	}
 }
