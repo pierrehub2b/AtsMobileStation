@@ -151,7 +151,7 @@
 		<s:List width="100%" height="100%"
 				alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
 				contentBackgroundAlpha="0.0" dataProvider="{devices.collection}"
-				itemRenderer="renderer.RunningDeviceRenderer"/>
+				itemRenderer="renderer.RunningDeviceRenderer" useVirtualLayout="false"/>
 	</s:VGroup>
 
 	<s:Group id="simulatorsGroup" left="5" right="5" bottom="5" height="26">
