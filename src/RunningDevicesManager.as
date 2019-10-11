@@ -100,16 +100,9 @@ package
 		}	
 		
 		public function restartDev(dev:Device):void {
-			var tmpCollection:ArrayCollection = new ArrayCollection();
-			for each(var dv:Device in this.collection) {
-				if(dv.id != dev.id) {
-					tmpCollection.addItem(dv);
-				}
-			}
 			dev.dispose();
 			dev.close();
-			this.collection = tmpCollection;
-			this.collection.refresh();
+			collection.removeItem(dev);
 		}
 		
 		public function terminateSimulator(id:String):void{
@@ -119,7 +112,6 @@ package
 					(d as IosDevice).dispose();
 					d.close();
 					collection.removeItemAt(index);
-					collection.refresh();
 					break;
 				}
 				index++;
@@ -211,7 +203,6 @@ package
 							dev = new AndroidDevice(adbFile, port, info[0], info[1]);
 							dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
 							collection.addItem(dev);
-							collection.refresh();
 						}else{
 							dev.connected = true;
 						}
@@ -223,7 +214,6 @@ package
 				if(!dv.connected && dv.manufacturer != "Apple"){
 					dv.dispose();
 					collection.removeItem(dv);
-					collection.refresh();
 				}
 			}
 			
@@ -373,7 +363,6 @@ package
 									dev.dispose();
 									dev.close();
 									collection.removeItem(dev);
-									collection.refresh();
 								}
 								
 								if(dev == null || isRedifined) {
@@ -384,7 +373,6 @@ package
 										dev.addEventListener("deviceStopped", deviceStoppedHandler, false, 0, true);
 									}
 									collection.addItem(dev);
-									collection.refresh();
 								}else if(dev != null) {
 									dev.connected = true;
 								}
@@ -401,7 +389,6 @@ package
 						d.dispose();
 						d.close();
 						collection.removeItem(d);
-						collection.refresh();
 					}
 				}
 			}

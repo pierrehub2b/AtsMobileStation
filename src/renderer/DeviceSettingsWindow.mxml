@@ -25,9 +25,6 @@
 					deviceId.text = dev.id;
 					deviceName.text = dev.modelName;
 					
-					if(dev.isSimulator) {
-						//hGroupDevTeam.visible = false;
-					}
 					var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
 					if(file.exists) {
 						var fileStream:FileStream = new FileStream();

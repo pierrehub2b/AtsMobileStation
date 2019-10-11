@@ -187,7 +187,7 @@
 		<s:List width="100%" top="32" bottom="0"
 				alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
 				contentBackgroundAlpha="0.0" dataProvider="{simulators.collection}"
-				itemRenderer="renderer.SimulatorDeviceRenderer"/>
+				itemRenderer="renderer.SimulatorDeviceRenderer" useVirtualLayout="false"/>
 	</s:Group>
 		
 </s:WindowedApplication>

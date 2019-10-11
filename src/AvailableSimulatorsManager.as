@@ -134,16 +134,11 @@ package
 		}
 		
 		public function updateSimulatorInList(id:String, started:Boolean):void {
-			var index:int = 0;
 			for each(var elem: IosSimulator in collection) {
 				if(elem.id == id) {
 					elem.phase = started ? Simulator.RUN : Simulator.OFF; 					
-					collection.setItemAt(elem,index);
-					
-					collection.refresh();
 					break;
 				}
-				index++;
 			}
 		}
 		

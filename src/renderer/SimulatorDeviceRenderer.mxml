@@ -1,35 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+<renderer:SimulatorRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
 				xmlns:s="library://ns.adobe.com/flex/spark" 
 				xmlns:mx="library://ns.adobe.com/flex/mx" 
-				autoDrawBackground="true" height="40">
+				xmlns:renderer="renderer.*">
 	<fx:Script>
 		<![CDATA[
 			import flash.filters.BitmapFilterQuality;
 			
+			import spark.filters.DropShadowFilter;
+			
 			import simulator.IosSimulator;
 			import simulator.Simulator;
 			
-			import spark.filters.DropShadowFilter;
-			
 			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
-			
-			[Bindable]
-			private var sim:Simulator;
-			
-			override protected function get hovered():Boolean { return false; }
-			//override protected function get down():Boolean { return false; }
-			override public function get selected():Boolean { return false; }
-			//override public function get showsCaret():Boolean { return false; }
-			
-			override public function set data(value:Object):void
-			{
-				super.data = value;
-				this.sim = value as Simulator;
-				if(this.sim is IosSimulator){
-					osBitmap.source = "/assets/icons/32/ios.png";
-				}
-			}
 			
 			protected function startStopButton_clickHandler(event:MouseEvent):void
 			{
@@ -48,6 +31,11 @@
 				offButton.visible = false;
 			}
 			
+			protected function removedFromStageHandler(event:Event):void
+			{
+				mainGroup.filters = []
+			}
+			
 		]]>
 	</fx:Script>
 		
@@ -55,9 +43,9 @@
 			  paddingRight="6" paddingLeft="5" filters="{dropShadowFilterMiddle}">
 		<s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true" gap="0">
 			<s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high"
-						   source="assets/icons/32/android.png"/>
+						   source="assets/icons/32/{data is IosSimulator?'ios':'android'}.png"/>
 			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
-				<s:Label text="{sim.name}" fontWeight="bold" color="{sim.phase=='off'?0x8a844a:0x113b55}" maxWidth="234" maxDisplayedLines="1"/>
+				<s:Label text="{sim.name}" fontWeight="bold" color="{(data as Simulator).phase=='off'?0x8a844a:0x113b55}" maxWidth="234" maxDisplayedLines="1"/>
 				<s:Label text="{sim.version}" fontSize="11" fontStyle="italic" color="#758696"/>
 			</s:VGroup>
 		</s:HGroup>
@@ -65,13 +53,12 @@
 		<s:Spacer width="100%"/>
 		
 		<s:Group buttonMode="true" click="startStopButton_clickHandler(event)"
-				 toolTip="{sim.tooltip}" enabled="{sim.phase!=Simulator.WAIT}"
+				 toolTip="{(data as Simulator).tooltip}" enabled="{(data as Simulator).phase!=Simulator.WAIT}"
 				 rollOver="button_rollOverHandler(event)" rollOut="button_rollOutHandler(event)">
-			<s:BitmapImage id="iconStatus" source="assets/icons/24/{sim.phase}.png" smooth="true" smoothingQuality="high"/>
+			<s:BitmapImage id="iconStatus" source="assets/icons/24/{(data as Simulator).phase}.png" smooth="true" smoothingQuality="high"/>
 			<s:BitmapImage id="offButton" source="assets/icons/24/shutdown.png" smooth="true" smoothingQuality="high"
 						   visible="false"/>
 		</s:Group>
 	</s:HGroup>
 
-
-</s:ItemRenderer>
+</renderer:SimulatorRenderer>

@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+<renderer:DeviceRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
 				xmlns:s="library://ns.adobe.com/flex/spark" 
 				xmlns:mx="library://ns.adobe.com/flex/mx" 
-				autoDrawBackground="true" height="40"
-				removedFromStage="removedFromStageHandler(event)"
-				>
+				removedFromStage="removedFromStageHandler(event)" 
+				xmlns:renderer="renderer.*">
 	
 	<fx:Script>
 		<![CDATA[
@@ -24,13 +23,10 @@
 			
 			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
-			[Bindable]
-			private var dev:Device;
-						
 			private function showWindow(event:MouseEvent, dev:Device):void{
 				var tw:DeviceSettingsWindow = new DeviceSettingsWindow();
 				tw.dev = dev;
-				PopUpManager.addPopUp(tw, this, true);
+				PopUpManager.addPopUp(tw, parentApplication as DisplayObject, true);
 				PopUpManager.centerPopUp(tw);
 			}
 			
@@ -47,20 +43,7 @@
 				urlLoader.dataFormat = URLLoaderDataFormat.TEXT;
 				urlLoader.load(request);
 			}
-			
-			override public function set data(value:Object):void
-			{
-				super.data = value;
-				this.dev = value as Device;
-				
-				if(this.dev is IosDevice){
-					mobile.source = "assets/icons/32/ios.png";
-				}else{
-					iosButtons.removeAllElements();
-					mobile.source = "assets/icons/32/android.png";
-				}
-			}
-			
+						
 			protected function restart_clickHandler(event:MouseEvent):void
 			{
 				FlexGlobals.topLevelApplication.restartDevice(dev);
@@ -74,8 +57,11 @@
 				iconStatus.visible = false;
 				iconStatus.includeInLayout = false;
 				
-				iosButtons.visible = true;
-				TweenLite.fromTo(iosButtons, 0.4, {alpha:0.0}, {alpha:1.0});
+				if(dev is IosDevice){
+					iosButtons.visible = true;
+					TweenLite.fromTo(iosButtons, 0.4, {alpha:0.0}, {alpha:1.0});
+				}
+
 			}
 			
 			protected function mainGroup_rollOutHandler(event:MouseEvent):void
@@ -84,7 +70,7 @@
 				
 				iconStatus.visible = true;
 				iconStatus.includeInLayout = true;
-
+				
 				restartButton.includeInLayout = false;
 				restartButton.visible = false;
 			}
@@ -93,11 +79,6 @@
 			{
 				mainGroup.filters = []
 			}
-			
-			override protected function get hovered():Boolean { return false; }
-			//override protected function get down():Boolean { return false; }
-			override public function get selected():Boolean { return false; }
-			//override public function get showsCaret():Boolean { return false; }
 			
 			protected function mouseDownHandler(event:MouseEvent):void
 			{
@@ -123,7 +104,7 @@
 			  paddingRight="6" paddingLeft="2" rollOver="mainGroup_rollOverHandler(event)" rollOut="mainGroup_rollOutHandler(event)">
 		<s:HGroup id="firstGroup" verticalAlign="middle" mouseDown="mouseDownHandler(event)" gap="0"
 				  toolTip="{dev.tooltip}">
-			<s:BitmapImage  id="mobile" source="assets/icons/32/android.png" smooth="true" smoothingQuality="high"/>
+			<s:BitmapImage  id="mobile" source="assets/icons/32/{dev is IosDevice?'ios':'android'}.png" smooth="true" smoothingQuality="high"/>
 			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
 				<s:Label visible="{dev.ip==null}" includeInLayout="{dev.ip==null}" 
 						 text="Unable to get local ip !" fontStyle="italic" color="0x8a844a"/>
@@ -134,7 +115,7 @@
 				
 				<s:Label text="{dev.manufacturer} - {dev.modelName}" fontSize="11" fontStyle="italic" color="#758696"/>
 				<s:Label visible="{dev.errorMessage != ''}" includeInLayout="{dev.errorMessage != ''}" text="{dev.errorMessage}" fontSize="11" fontStyle="italic" color="#FF0000"/>
-
+				
 			</s:VGroup>
 		</s:HGroup>
 		
@@ -155,5 +136,5 @@
 			<s:BitmapImage source="assets/icons/24/restart.png" smooth="true" smoothingQuality="high"/>
 		</s:Group>
 	</s:HGroup>
-
-</s:ItemRenderer>
+	
+</renderer:DeviceRenderer>

@@ -86,7 +86,6 @@ package simulator
 					procInfo.arguments = new <String>["simctl", "shutdown", id];
 					process.start(procInfo);
 				}
-				
 			}
 		}
 		
