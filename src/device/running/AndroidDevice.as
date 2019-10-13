@@ -69,7 +69,7 @@ package device.running
 			var running:Boolean = process.terminate();
 			process = null;
 			
-			return 
+			return running;
 		}
 	}
 }
