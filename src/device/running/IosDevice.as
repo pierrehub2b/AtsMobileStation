@@ -1,4 +1,4 @@
-package device
+package device.running
 {
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
@@ -9,11 +9,15 @@ package device
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	
-	public class IosDevice extends Device
+	import device.RunningDevice;
+	import device.simulator.Simulator;
+	
+	public class IosDevice extends RunningDevice
 	{
 		private var output:String = "";
 		
 		private static const startInfo:RegExp = /ATSDRIVER_DRIVER_HOST=(.*):(\d+)/
+		private static const startInfoLocked:RegExp = /isPasscodeLocked:(\s*)YES/
 		
 		private var testingProcess:NativeProcess
 		private var procInfo:NativeProcessStartupInfo;
@@ -21,16 +25,13 @@ package device
 		private static const iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
 		private static const xcodeBuildExec:File = new File("/usr/bin/env");
 		
-		public function IosDevice(id:String, name:String, isSimulator:Boolean, ip:String)
+		public function IosDevice(id:String, name:String, simulator:Boolean, ip:String)
 		{
 			this.id = id;
 			this.ip = ip;
 			this.modelName = name;
 			this.manufacturer = "Apple";
-			this.isSimulator = isSimulator;
-
-			this.connected = !isSimulator;
-			this.errorMessage = "";
+			this.simulator = simulator;
 			
 			var fileStream:FileStream = new FileStream();
 			var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
@@ -50,7 +51,7 @@ package device
 				}
 				fileStream.close();
 			}
-	
+			
 			var teamId:String = "";
 			var lastBuildString:String = "";
 			file = File.userDirectory.resolvePath("actiontestscript/settings.txt");
@@ -83,7 +84,7 @@ package device
 				}
 				fileStream.close();
 			}
-		
+			
 			installing()
 			
 			testingProcess = new NativeProcess();
@@ -144,9 +145,10 @@ package device
 			procInfo.workingDirectory = resultDir;
 			
 			var args: Vector.<String> = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id];
-			if(!isSimulator) {
+			if(!simulator) {
 				args.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + teamId);
 			}
+			
 			if(alreadyCopied) {
 				args.push("test-without-building");
 			} else {
@@ -154,47 +156,51 @@ package device
 			}
 			
 			procInfo.arguments = args;
+		}
+		
+		public override function start():void{
 			testingProcess.start(procInfo);
 		}
 		
 		override public function dispose():Boolean
 		{
-			testingProcess.closeInput();
-			testingProcess.exit(true);
-			errorMessage = "";
-			
-			return true;
-		}
+			if(testingProcess.running){
 				
+				testingProcess.closeInput();
+				testingProcess.exit();
+				
+				return true;
+			}
+			return false;
+		}
+		
 		protected function onTestingExit(ev:NativeProcessExitEvent):void{
 			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
 			testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput);
 			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
-			
-			testingProcess.closeInput();
-			testingProcess.exit(true);
+						
+			testingProcess = null;
+			procInfo = null;
 			
 			trace("testing exit");
-			errorMessage = "";
-			
-			dispatchEvent(new Event(STOPPED_EVENT));
-			//FlexGlobals.topLevelApplication.restartDevice(this);
+			if(errorMessage == "" || status == Simulator.SHUTDOWN){
+				dispatchEvent(new Event(STOPPED_EVENT));
+			}else{
+				failed();
+			}
 		}
 		
 		protected function onTestingOutput(event:ProgressEvent):void
 		{
-			var data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
-			if(data.indexOf("Display =>") > -1) {
-				trace("test output -> " + data.replace("Display =>", ""));
-			}
+			const data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
 			
 			if(data.indexOf("** WIFI NOT CONNECTED **") > -1) {
-				this.errorMessage = "WIFI not connected";
+				errorMessage = " - WIFI not connected !";
+				testingProcess.exit();
 			}
 			
 			var find:Array = startInfo.exec(data);
 			if(find != null){
-				errorMessage = "";
 				ip = find[1];
 				port = find[2];
 				started();
@@ -203,15 +209,17 @@ package device
 		
 		protected function onTestingError(event:ProgressEvent):void
 		{
-			var data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
+			const data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
 			trace("test error -> " + data);
-			if(data.indexOf("Continuing with testing") < 0 && data.indexOf("** TEST EXECUTE FAILED **") > 0 || data.indexOf("** TEST FAILED **") > 0){
-				//this.changeCrashedStatus();
-				dispatchEvent(new Event(STOPPED_EVENT));
+			
+			if(startInfoLocked.test(data)){
+				errorMessage = " - Locked with passcode !";
+				testingProcess.exit();
 			}
-			if(data.indexOf(id + " was NULL") > -1) {
-				this.errorMessage = "Device locked";
-			}
+			
+			//if(data.indexOf("Continuing with testing") < 0 && data.indexOf("** TEST EXECUTE FAILED **") > 0 || data.indexOf("** TEST FAILED **") > 0){
+				
+			//}
 		}
 	}
 }

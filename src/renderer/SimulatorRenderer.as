@@ -4,7 +4,7 @@ package renderer
 	
 	import spark.components.supportClasses.ItemRenderer;
 	
-	import simulator.Simulator;
+	import device.simulator.Simulator;
 	
 	public class SimulatorRenderer extends ItemRenderer
 	{

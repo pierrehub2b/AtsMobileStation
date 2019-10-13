@@ -12,9 +12,9 @@
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
 			
-			import device.Device;
+			import device.RunningDevice;
 			
-			public var dev:Device;
+			public var dev:RunningDevice;
 			public var arrayString:Array;
 			public var arrayStringDevTeam:Array;
 			

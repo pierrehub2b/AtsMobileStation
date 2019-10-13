@@ -1,25 +1,23 @@
-package device
+package device.running
 {
 	import flash.events.Event;
 	import flash.filesystem.File;
 	
-	public class AndroidDevice extends Device
+	import device.RunningDevice;
+	
+	public class AndroidDevice extends RunningDevice
 	{
 		private static const atsdroidFilePath:String = File.applicationDirectory.resolvePath("assets/drivers/atsdroid.apk").nativePath;
 		
 		public var androidVersion:String = "";
 		public var androidSdk:String = "";
-		
-		public var type:String;
+
 		private var process:AndroidProcess;
 				
-		public function AndroidDevice(adbFile:File, port:String, id:String, type:String)
+		public function AndroidDevice(adbFile:File, port:String, id:String)
 		{
 			this.port = port;
-			this.connected = true;
 			this.id = id;
-			this.type = type;
-			
 			this.status = INSTALL;
 			
 			process = new AndroidProcess(adbFile, atsdroidFilePath, id, port);
@@ -29,28 +27,28 @@ package device
 			process.addEventListener(AndroidProcess.DEVICE_INFO, deviceInfoHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.IP_ADDRESS, ipAdressHandler, false, 0, true);
 			
+			installing()
+		}
+		
+		public override function start():void{
 			process.start();
 		}
 		
 		private function processErrorHandler(ev:Event):void{
-			
 			process.removeEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler);
-			
 			status = FAIL
-			connected = false;
-			
-			terminate();
 		}
 		
 		private function runningTestHandler(ev:Event):void{
 			process.removeEventListener(AndroidProcess.RUNNING, runningTestHandler);
 			status = READY
 			tooltip = "Android " + androidVersion + ", API " + androidSdk + " [" + id + "]\nready and waiting testing actions"
+			started();
 		}
 		
 		private function stoppedTestHandler(ev:Event):void{
 			process.removeEventListener(AndroidProcess.STOPPED, stoppedTestHandler);
-			terminate();
+			dispatchEvent(new Event(STOPPED_EVENT));
 		}
 		
 		private function deviceInfoHandler(ev:Event):void{
@@ -58,8 +56,8 @@ package device
 			manufacturer = process.deviceInfo.manufacturer
 			modelId = process.deviceInfo.modelId
 			modelName = process.deviceInfo.modelName
-			androidVersion = process.deviceInfo.androidVersion
-			androidSdk = process.deviceInfo.androidSdk
+			androidVersion = process.deviceInfo.osVersion
+			androidSdk = process.deviceInfo.sdkVersion
 		}
 		
 		private function ipAdressHandler(ev:Event):void{
@@ -68,13 +66,11 @@ package device
 		}
 				
 		override public function dispose():Boolean{
-			return process.terminate();
-		}
-		
-		private function terminate():void{
-			if(!dispose()){
-				dispatchEvent(new Event(STOPPED_EVENT));
-			}
+			var running:Boolean = process.terminate();
+			process.dispose();
+			process = null;
+			
+			return 
 		}
 	}
 }

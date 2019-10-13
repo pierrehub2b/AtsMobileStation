@@ -17,7 +17,8 @@
 			
 			import spark.filters.DropShadowFilter;
 			
-			import device.Device;
+			import device.RunningDevice;
+			import device.running.IosDevice;
 			
 			import renderer.PhysicialDeviceSettingsWindow;
 			import renderer.RunningDeviceRenderer;
@@ -34,18 +35,6 @@
 			
 			[Bindable]
 			public var simulators:AvailableSimulatorsManager;
-			
-			public function updateSimulatorInList(id:String, started:Boolean):void{
-				simulators.updateSimulatorInList(id, started);
-			}
-			
-			/*public function restartDevice(dev:Device):void{
-				dev.isCrashed = true;
-			}*/
-			
-			public function terminateSimulator(id:String):void{
-				devices.terminateSimulator(id);
-			}
 			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
@@ -101,8 +90,8 @@
 			{
 				// create and configure the TitleWindow
 				var tw:PhysicialDeviceSettingsWindow = new PhysicialDeviceSettingsWindow();
-				for each(var dv:Device in devices.collection) {
-					if(!dv.isSimulator) {
+				for each(var dv:RunningDevice in devices.collection) {
+					if(!dv.simulator && dv is IosDevice) {
 						tw.devices.push(dv);
 					}
 				}
@@ -115,7 +104,7 @@
 		]]>
 	</fx:Script>
 	
-	<s:Group id="clickConnected" buttonMode="true" height="26" left="5" right="2" top="5"
+	<s:Group id="clickConnected" buttonMode="true" height="26" left="5" right="5" top="5"
 			 click="clickConnected_clickHandler(event)" filters="{dropShadowFilter}">
 		<s:Rect width="100%" height="100%" radiusX="3">
 			<s:fill>
@@ -128,18 +117,18 @@
 				<s:SolidColorStroke color="#ffffff" weight="1"/>
 			</s:stroke>
 		</s:Rect>
-		<s:HGroup width="100%" paddingLeft="7" paddingRight="5" verticalCenter="0" verticalAlign="middle" gap="3">
+		<s:HGroup width="100%" paddingLeft="7" paddingRight="3" verticalCenter="0" verticalAlign="middle" gap="3">
 			<s:Label fontSize="13" text="Connected Devices" fontWeight="bold"/>
 			<s:Spacer width="100%"/>
 			<s:Group id="settingsButton" visible="false" buttonMode="true" click="settings_clickHandler(event)"
-					 toolTip="Xcode development settings">
-				<s:BitmapImage source="assets/icons/20/app-store.png" smooth="true" smoothingQuality="high"/>
+					 toolTip="Xcode development settings" height="22" width="24">
+				<s:BitmapImage source="assets/icons/20/apple.png" smooth="true" smoothingQuality="high"/>
 			</s:Group>
 		</s:HGroup>
 	</s:Group>
 	
-	<s:VGroup top="38" left="10" right="10" bottom="30" gap="3">
-		<s:VGroup filters="{RunningDeviceRenderer.dropShadowFilterMiddle}" gap="3" paddingTop="10"
+	<s:VGroup top="26" left="6" right="6" bottom="30" gap="3">
+		<s:VGroup filters="{RunningDeviceRenderer.dropShadowFilterMiddle}" gap="3" paddingTop="12" paddingLeft="2" paddingRight="2"
 				  visible="{devices.collection.length==0}" includeInLayout="{devices.collection.length==0}">
 			<s:Label fontWeight="bold" 
 					 text="No devices found"/>
@@ -156,7 +145,7 @@
 
 	<s:Group id="simulatorsGroup" left="5" right="5" bottom="5" height="26">
 
-		<s:Rect left="1" right="1" top="0" bottom="0">
+		<s:Rect left="1" right="1" height="100%">
 			<s:fill>
 				<s:LinearGradient rotation="90">
 					<s:GradientEntry color="0xFFFFFF"/>
@@ -184,7 +173,7 @@
 		</s:Group>
 		<s:Label fontStyle="italic" fontSize="11" top="36"
 				 text="{simulators.info}" paddingLeft="5"/>
-		<s:List width="100%" top="32" bottom="0"
+		<s:List width="100%" top="26" bottom="0"
 				alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
 				contentBackgroundAlpha="0.0" dataProvider="{simulators.collection}"
 				itemRenderer="renderer.SimulatorDeviceRenderer" useVirtualLayout="false"/>

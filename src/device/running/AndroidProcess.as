@@ -1,4 +1,4 @@
-package device
+package device.running
 {
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
@@ -7,6 +7,8 @@ package device
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
+	
+	import device.Device;
 		
 	public class AndroidProcess extends EventDispatcher
 	{
@@ -29,7 +31,7 @@ package device
 		
 		public var ipAddress:String;
 		public var error:String;
-		public var deviceInfo:DeviceInfo = new DeviceInfo();
+		public var deviceInfo:Device;
 		
 		private var process:NativeProcess;
 		private var procInfo:NativeProcessStartupInfo
@@ -39,6 +41,7 @@ package device
 			this.id = id;
 			this.port = port;
 			this.atsdroidFilePath = atsdroid;
+			this.deviceInfo = new Device(id);
 			
 			process = new NativeProcess();
 			procInfo = new NativeProcessStartupInfo()
@@ -58,8 +61,8 @@ package device
 		}
 		
 		public function terminate():Boolean{
-			if(process.running){
-				process.exit(true);
+			if(process != null && process.running){
+				process.exit();
 				return true;
 			}
 			return false;
@@ -80,9 +83,6 @@ package device
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onReadLanExit);
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData);
 			
-			process.closeInput();
-			process.exit(true);			
-			
 			if(error != null){
 				dispatchEvent(new Event(ERROR_EVENT));
 			}else{
@@ -101,16 +101,16 @@ package device
 
 						return;
 					}
+				}else{
+					error = " - WIFI not connected !";
+					dispatchEvent(new Event(ERROR_EVENT));
 				}
 			}
 		}
 		
 		protected function onUninstallExit(event:NativeProcessExitEvent):void{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
-			
-			process.closeInput();
-			process.exit(true);		
-			
+
 			process = new NativeProcess();
 			process.addEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
 			procInfo.arguments = new <String>["-s", id, "install", "-r", atsdroidFilePath];
@@ -121,8 +121,6 @@ package device
 		protected function onInstallExit(event:NativeProcessExitEvent):void{
 			
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallExit);
-			process.closeInput();
-			process.exit(true);		
 			
 			output = "";
 			process = new NativeProcess();
@@ -140,9 +138,6 @@ package device
 		protected function onGetPropExit(event:NativeProcessExitEvent):void{
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadPropertyData);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onGetPropExit);
-			
-			process.closeInput();
-			process.exit(true);		
 						
 			var propArray:Array = output.split("\n");
 			for each (var line:String in propArray){
@@ -155,9 +150,9 @@ package device
 				}else if(line.indexOf("[def.tctfw.brandMode.name]") == 0){
 					deviceInfo.modelName = getPropValue(line)
 				}else if(line.indexOf("[ro.build.version.release]") == 0){
-					deviceInfo.androidVersion = getPropValue(line)
+					deviceInfo.osVersion = getPropValue(line)
 				}else if(line.indexOf("[ro.build.version.sdk]") == 0){
-					deviceInfo.androidSdk = getPropValue(line)
+					deviceInfo.sdkVersion = getPropValue(line)
 				}
 			}
 			
@@ -192,9 +187,8 @@ package device
 			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onExecuteExit);
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData);
-			
-			process.closeInput();
-			process.exit(true);		
+						
+			process = null;
 			
 			if(error != null){
 				dispatchEvent(new Event(ERROR_EVENT));

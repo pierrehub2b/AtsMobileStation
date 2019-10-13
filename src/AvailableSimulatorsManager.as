@@ -2,7 +2,6 @@ package
 {
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
-	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
@@ -11,16 +10,10 @@ package
 	
 	import mx.collections.ArrayCollection;
 	
-	import CustomClasses.SimCtlDevice;
-	
-	import event.SimulatorEvent;
-	
-	import simulator.IosSimulator;
-	import simulator.Simulator;
+	import device.simulator.IosSimulator;
 	
 	public class AvailableSimulatorsManager extends EventDispatcher
 	{
-		public static const SIMULATOR_STATUS_CHANGED:String = "simulatorStatusChanged";
 		public static const COLLECTION_CHANGED:String = "collectionChanged";
 		
 		private const regex:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
@@ -83,18 +76,6 @@ package
 			output += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);
 		}
 		
-		public function getByUdid(array:Array, search:String):SimCtlDevice {
-			var i:int = 0;
-			for each(var simCtl:SimCtlDevice in array)
-			{
-				if(simCtl.getUdid() == search) {
-					return simCtl;
-				}
-				i++;
-			}
-			return null;
-		}
-		
 		protected function onSimCtlExist(ev:NativeProcessExitEvent):void
 		{
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
@@ -117,9 +98,7 @@ package
 						for (var d:Object in devices[runtime]) {
 							var device:Object = devices[runtime][d];
 							if(device["name"].indexOf("iPhone") == 0 && device["isAvailable"] && iosVersion.indexOf("iOS") > -1) {
-								var sim:IosSimulator = new IosSimulator(device["udid"], device["name"] , iosVersion.replace("iOS.",""), device["state"] == "Booted", true);
-								sim.addEventListener(Simulator.STATUS_CHANGED, simulatorStatusChanged, false, 0, true);
-								collection.addItem(sim);
+								collection.addItem(new IosSimulator(device["udid"], device["name"], iosVersion.replace("iOS.",""), device["state"] == "Booted"));
 							}
 						}
 					}
@@ -131,20 +110,6 @@ package
 					info = "";
 				}
 			}
-		}
-		
-		public function updateSimulatorInList(id:String, started:Boolean):void {
-			for each(var elem: IosSimulator in collection) {
-				if(elem.id == id) {
-					elem.phase = started ? Simulator.RUN : Simulator.OFF; 					
-					break;
-				}
-			}
-		}
-		
-		protected function simulatorStatusChanged(ev:Event):void{
-			var sim:IosSimulator = ev.currentTarget as IosSimulator;
-			dispatchEvent(new SimulatorEvent(SIMULATOR_STATUS_CHANGED, sim));
 		}
 	}
 }

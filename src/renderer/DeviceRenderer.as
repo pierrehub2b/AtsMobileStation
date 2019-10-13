@@ -4,7 +4,7 @@ package renderer
 	
 	import spark.components.supportClasses.ItemRenderer;
 	
-	import device.Device;
+	import device.RunningDevice;
 	
 	public class DeviceRenderer extends ItemRenderer
 	{
@@ -17,18 +17,18 @@ package renderer
 		
 		override public function set data(value:Object):void
 		{
-			if(super.data == null || super.data != value){
+			if(super.data == value){
+				return;
+			}else if(value != null){
 				super.data = value;
 				dispatchEvent(new Event("updateDataEvent"))
 			}
 		}
-			
+		
 		[Bindable(event="updateDataEvent")]
-		public function get dev():Device{
-			return data as Device
+		public function get dev():RunningDevice{
+			return data as RunningDevice
 		}
-		
-		
 		
 		override protected function get hovered():Boolean { return false; }
 		override public function get selected():Boolean { return false; }

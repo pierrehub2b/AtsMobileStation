@@ -2,15 +2,18 @@
 <renderer:SimulatorRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
 				xmlns:s="library://ns.adobe.com/flex/spark" 
 				xmlns:mx="library://ns.adobe.com/flex/mx" 
-				xmlns:renderer="renderer.*">
+				xmlns:renderer="renderer.*" creationComplete="creationCompleteHandler(event)">
 	<fx:Script>
 		<![CDATA[
 			import flash.filters.BitmapFilterQuality;
 			
+			import mx.events.FlexEvent;
+			
 			import spark.filters.DropShadowFilter;
 			
-			import simulator.IosSimulator;
-			import simulator.Simulator;
+			import device.Device;
+			import device.simulator.IosSimulator;
+			import device.simulator.Simulator;
 			
 			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
@@ -21,19 +24,28 @@
 			
 			protected function button_rollOverHandler(event:MouseEvent):void
 			{
-				if(sim.phase == Simulator.RUN){
-					offButton.visible = true;
+				if(sim.status == Simulator.RUNNING){
+					overButton.source = "assets/icons/24/turnoff.png";
+					overButton.visible = true;
+				}else if(sim.status == Simulator.OFF){
+					overButton.source = "assets/icons/24/turnon.png";
+					overButton.visible = true;
 				}
 			}
 			
 			protected function button_rollOutHandler(event:MouseEvent):void
 			{
-				offButton.visible = false;
+				overButton.visible = false;
 			}
 			
 			protected function removedFromStageHandler(event:Event):void
 			{
 				mainGroup.filters = []
+			}
+			
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				overButton.visible = false;
 			}
 			
 		]]>
@@ -45,19 +57,18 @@
 			<s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high"
 						   source="assets/icons/32/{data is IosSimulator?'ios':'android'}.png"/>
 			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
-				<s:Label text="{sim.name}" fontWeight="bold" color="{(data as Simulator).phase=='off'?0x8a844a:0x113b55}" maxWidth="234" maxDisplayedLines="1"/>
-				<s:Label text="{sim.version}" fontSize="11" fontStyle="italic" color="#758696"/>
+				<s:Label text="{sim.modelName}" fontWeight="bold" color="{(data as Simulator).status==Simulator.OFF?0x8a844a:0x113b55}" maxWidth="234" maxDisplayedLines="1"/>
+				<s:Label text="{sim.osVersion}" fontSize="11" fontStyle="italic" color="#758696"/>
 			</s:VGroup>
 		</s:HGroup>
 		
 		<s:Spacer width="100%"/>
 		
-		<s:Group buttonMode="true" click="startStopButton_clickHandler(event)"
-				 toolTip="{(data as Simulator).tooltip}" enabled="{(data as Simulator).phase!=Simulator.WAIT}"
+		<s:Group buttonMode="true" click="startStopButton_clickHandler(event)" height="24" width="24"
+				 toolTip="{(data as Simulator).tooltip}" enabled="{(data as Simulator).status!=Device.INSTALL}"
 				 rollOver="button_rollOverHandler(event)" rollOut="button_rollOutHandler(event)">
-			<s:BitmapImage id="iconStatus" source="assets/icons/24/{(data as Simulator).phase}.png" smooth="true" smoothingQuality="high"/>
-			<s:BitmapImage id="offButton" source="assets/icons/24/shutdown.png" smooth="true" smoothingQuality="high"
-						   visible="false"/>
+			<s:BitmapImage id="iconStatus" source="assets/icons/24/{(data as Simulator).status}.png" smooth="true" smoothingQuality="high"/>
+			<s:BitmapImage id="overButton" source="assets/icons/24/turnoff.png" smooth="true" smoothingQuality="high"/>
 		</s:Group>
 	</s:HGroup>
 

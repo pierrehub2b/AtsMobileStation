@@ -11,9 +11,9 @@
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
 			
-			import device.Device;
+			import device.RunningDevice;
 			
-			public var dev:Device;
+			public var dev:RunningDevice;
 			public var arrayString:Array;
 			public var arrayStringDevTeam:Array;
 			public var lastbuild:String = "";
@@ -111,7 +111,7 @@
 			{
 				var file:FileReference = new FileReference();
 				var txtInput: String = "Device ID\tDevice Name\tDevice Platform\n";
-				for each(var d:Device in devices) {
+				for each(var d:RunningDevice in devices) {
 					if(d.manufacturer == "Apple") {
 						txtInput += d.id + "\t" + d.modelName + "\tios\n";
 					}
