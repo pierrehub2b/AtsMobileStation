@@ -67,7 +67,6 @@ package device.running
 				
 		override public function dispose():Boolean{
 			var running:Boolean = process.terminate();
-			process.dispose();
 			process = null;
 			
 			return 
