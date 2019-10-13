@@ -164,7 +164,7 @@ package device.running
 		
 		override public function dispose():Boolean
 		{
-			if(testingProcess.running){
+			if(testingProcess != null && testingProcess.running){
 				
 				testingProcess.closeInput();
 				testingProcess.exit();
