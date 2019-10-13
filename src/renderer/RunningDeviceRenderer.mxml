@@ -3,7 +3,8 @@
 						 xmlns:s="library://ns.adobe.com/flex/spark" 
 						 xmlns:mx="library://ns.adobe.com/flex/mx" 
 						 removedFromStage="removedFromStageHandler(event)" 
-						 xmlns:renderer="renderer.*">
+						 xmlns:renderer="renderer.*" 
+						 mouseChildren="{(data as RunningDevice).status==Device.READY}">
 	
 	<fx:Script>
 		<![CDATA[
@@ -17,6 +18,7 @@
 			
 			import spark.filters.DropShadowFilter;
 			
+			import device.Device;
 			import device.RunningDevice;
 			import device.running.IosDevice;
 			
@@ -45,13 +47,14 @@
 			
 			protected function restart_clickHandler(event:MouseEvent):void
 			{
+				enabled = false;
 				restartButton.visible = false;
-				callLater(dev.close)
+				callLater((data as RunningDevice).close)
 			}
 			
 			protected function mainGroup_rollOverHandler(event:MouseEvent):void
 			{
-				if(dev.status == "ready"){
+				if((data as RunningDevice).status == Device.READY){
 					restartButton.includeInLayout = true;
 					restartButton.visible = true;
 					
@@ -59,7 +62,7 @@
 					iconStatus.includeInLayout = false;
 				}
 				
-				if(dev is IosDevice){
+				if((data as RunningDevice) is IosDevice){
 					iosButtons.visible = true;
 					TweenLite.fromTo(iosButtons, 0.4, {alpha:0.0}, {alpha:1.0});
 				}
@@ -83,7 +86,7 @@
 			
 			protected function mouseDownHandler(event:MouseEvent):void
 			{
-				if(dev.status == "ready"){
+				if((data as RunningDevice).status == Device.READY){
 					firstGroup.addEventListener(MouseEvent.MOUSE_MOVE, mouseDownForDragHandler, false, 0, true);
 				}
 			}
@@ -94,7 +97,7 @@
 				var dragSource:DragSource = new DragSource();
 				dragSource.addData("", "mobile");
 				
-				Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, dev.ip + ":" + dev.port, false);
+				Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, (data as RunningDevice).ip + ":" + (data as RunningDevice).port, false);
 				
 				DragManager.doDrag(this, dragSource, event, firstGroup, mouseX - 20, mouseY + 10, 1.0);
 			}
@@ -104,35 +107,35 @@
 	<s:Group id="mainGroup" width="100%" verticalCenter="0" filters="{dropShadowFilterMiddle}"
 			 rollOver="mainGroup_rollOverHandler(event)" rollOut="mainGroup_rollOutHandler(event)">
 		<s:HGroup id="firstGroup" verticalAlign="middle" mouseDown="mouseDownHandler(event)" gap="0"
-				  toolTip="{dev.tooltip}" left="2">
-			<s:BitmapImage  id="mobile" source="assets/icons/32/{(dev is IosDevice)?'ios':'android'}.png" smooth="true" smoothingQuality="high"/>
+				  toolTip="{(data as RunningDevice).tooltip}" left="2">
+			<s:BitmapImage  id="mobile" source="assets/icons/32/{(data is IosDevice)?'ios':'android'}.png" smooth="true" smoothingQuality="high"/>
 			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
-				<s:Label visible="{dev.ip==null}" includeInLayout="{dev.ip==null}" 
+				<s:Label visible="{(data as RunningDevice).ip==null}" includeInLayout="{(data as RunningDevice).ip==null}" 
 						 text="Unable to get local ip !" fontStyle="italic" color="0x8a844a"/>
-				<s:HGroup visible="{dev.ip!=null}" includeInLayout="{dev.ip!=null}" gap="0">
-					<s:Label text="{dev.ip}" fontWeight="bold" color="0x113b55"/>
-					<s:Label text=":{dev.port}" color="0x113b55"/>
-					<s:Label text=" {dev.errorMessage}" fontSize="11" fontStyle="italic" color="#FF0000"/>
+				<s:HGroup visible="{(data as RunningDevice).ip!=null}" includeInLayout="{(data as RunningDevice).ip!=null}" gap="0">
+					<s:Label text="{(data as RunningDevice).ip}" fontWeight="bold" color="0x113b55"/>
+					<s:Label text=":{(data as RunningDevice).port}" color="0x113b55"/>
+					<s:Label text=" {(data as RunningDevice).errorMessage}" fontSize="11" fontStyle="italic" color="#FF0000"/>
 				</s:HGroup>
 				
-				<s:Label text="{dev.manufacturer}{dev.simulator?' (Simulator)':''} - {dev.modelName}" fontSize="11" fontStyle="italic" color="#758696"/>
+				<s:Label text="{(data as RunningDevice).manufacturer}{(data as RunningDevice).simulator?' (Simulator)':''} - {(data as RunningDevice).modelName}" fontSize="11" fontStyle="italic" color="#758696"/>
 				
 			</s:VGroup>
 		</s:HGroup>
 		
 		<s:HGroup right="7" verticalAlign="middle" verticalCenter="0">
 			<s:HGroup id="iosButtons" width="100%" horizontalAlign="right" visible="false" verticalAlign="middle">
-				<s:Group id="homeButton" buttonMode="true" click="goHome(event, dev)"
-						 toolTip="Device home button" visible="{dev.status=='ready'}">
+				<s:Group id="homeButton" buttonMode="true" click="goHome(event, (data as RunningDevice))"
+						 toolTip="Device home button" visible="{(data as RunningDevice).status==Device.READY}">
 					<s:BitmapImage source="assets/icons/24/home.png" smooth="true" smoothingQuality="high"/>
 				</s:Group>
-				<s:Group id="settingsButton" buttonMode="true" click="showWindow(event, dev)"
+				<s:Group id="settingsButton" buttonMode="true" click="showWindow(event, (data as RunningDevice))"
 						 toolTip="Settings of device">
 					<s:BitmapImage source="assets/icons/24/tool.png" smooth="true" smoothingQuality="high"/>
 				</s:Group>
 			</s:HGroup>
 			
-			<s:BitmapImage id="iconStatus" source="assets/icons/24/{dev.status}.png" smooth="true" smoothingQuality="high"/>
+			<s:BitmapImage id="iconStatus" source="assets/icons/24/{(data as RunningDevice).status}.png" smooth="true" smoothingQuality="high"/>
 			<s:Group id="restartButton" buttonMode="true" click="restart_clickHandler(event)"
 					 toolTip="Restart driver" visible="false" includeInLayout="false">
 				<s:BitmapImage source="assets/icons/24/restart.png" smooth="true" smoothingQuality="high"/>

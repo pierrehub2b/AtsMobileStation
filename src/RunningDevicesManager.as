@@ -13,9 +13,6 @@ package
 	import mx.collections.ArrayCollection;
 	import mx.core.FlexGlobals;
 	
-	import spark.collections.Sort;
-	import spark.collections.SortField;
-	
 	import device.Device;
 	import device.RunningDevice;
 	import device.running.AndroidDevice;
@@ -39,7 +36,7 @@ package
 		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
 		
-		private const relaunchDelay:int = 3;
+		private const relaunchDelay:int = 4;
 		
 		private var adbFile:File;
 		private var errorStack:String = "";
@@ -51,38 +48,27 @@ package
 		[Bindable]
 		public var collection:ArrayCollection = new ArrayCollection();
 		
-		private var ipSort:Sort = new Sort([new SortField("ip")]);
-		
 		public static var devTeamId:String = "";
 		
 		private var usbDevicesIdList:Vector.<String>;
+		private var macos:Boolean = false;
 		
-		public function RunningDevicesManager(port:String, isMacOs:Boolean)
+		public function RunningDevicesManager(port:String, macos:Boolean)
 		{
 			this.port = port;
-			this.collection.sort = ipSort;
+			this.macos = macos;
 			
-			if(isMacOs){
-				
-				//-----------------------------------------------------------------------------
-				// IOS
-				//-----------------------------------------------------------------------------
-				
-				launchIosProcess();
-				
-				//-----------------------------------------------------------------------------
-				// ANDROID
-				//-----------------------------------------------------------------------------
+			if(macos){
 				
 				this.adbFile = File.applicationDirectory.resolvePath(adbPath);
 				
 				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 				procInfo.executable = new File("/bin/chmod");			
-				procInfo.workingDirectory = adbFile.parent;
-				procInfo.arguments = new <String>["+x", "adb"];
+				procInfo.workingDirectory = File.applicationDirectory.resolvePath("assets/tools");
+				procInfo.arguments = new <String>["+x", "android/adb", "ios/mobiledevice"];
 				
 				var proc:NativeProcess = new NativeProcess();
-				proc.addEventListener(NativeProcessExitEvent.EXIT, onChmodAdbExit, false, 0, true);
+				proc.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
 				proc.start(procInfo);
 				
 			}else{
@@ -91,26 +77,10 @@ package
 			}
 		}
 		
-		protected function onChmodAdbExit(ev:NativeProcessExitEvent):void
-		{
-			const mobileDevice:File = File.applicationDirectory.resolvePath("assets/tools/ios/mobiledevice");
-			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			procInfo.executable = new File("/bin/chmod");			
-			procInfo.workingDirectory = mobileDevice.parent;
-			procInfo.arguments = new <String>["+x", "mobiledevice"];
-			
-			var proc:NativeProcess = new NativeProcess();
-			proc.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
-			proc.start(procInfo);
-		}
-		
 		protected function onChmodExit(ev:NativeProcessExitEvent):void
 		{
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
-			proc.closeInput();
-			proc.exit(true);
-			
 			launchAdbProcess();
 		}	
 		
@@ -137,18 +107,7 @@ package
 			
 			proc.addEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit, false, 0, true);
 			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData, false, 0, true);
-			
-			try{
-				proc.start(procInfo);	
-			}catch(err:Error){
-				trace("adb proc start error -> " + err.message);
-				proc.removeEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit);
-				proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData);
-				proc.closeInput();
-				proc.exit(true);
-				
-				TweenMax.delayedCall(relaunchDelay, launchAdbProcess);
-			}
+			proc.start(procInfo);	
 		}
 		
 		protected function onReadAndroidDevicesData(ev:ProgressEvent):void{
@@ -161,9 +120,6 @@ package
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit);
 			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData);
-			
-			proc.closeInput();
-			proc.exit(true);
 			
 			var data:Array = androidOutput.split("\n");
 			var runingIds:Vector.<String> = new Vector.<String>();
@@ -201,7 +157,11 @@ package
 				}
 			}
 			
-			TweenMax.delayedCall(relaunchDelay, launchAdbProcess);
+			if(macos){
+				TweenMax.delayedCall(relaunchDelay, launchIosProcess);
+			}else{
+				TweenMax.delayedCall(relaunchDelay, launchAdbProcess);
+			}
 		}
 		
 		//---------------------------------------------------------------------------------------------------------
@@ -220,27 +180,13 @@ package
 			
 			proc.addEventListener(NativeProcessExitEvent.EXIT, onUsbDeviceExit, false, 0, true);
 			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData, false, 0, true);
-			
-			try{
-				proc.start(procInfo);	
-			}catch(err:Error){
-				trace("mobile device proc start error -> " + err.message);
-				proc.removeEventListener(NativeProcessExitEvent.EXIT, onUsbDeviceExit);
-				proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
-				proc.closeInput();
-				proc.exit(true);
-				
-				TweenMax.delayedCall(relaunchDelay, launchIosProcess);
-			}
+			proc.start(procInfo);	
 		}
 		
 		protected function onUsbDeviceExit(ev:NativeProcessExitEvent):void{
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, onUsbDeviceExit);
 			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
-			
-			proc.closeInput();
-			proc.exit(true);
 			
 			usbDevicesIdList = new Vector.<String>();
 			
@@ -342,7 +288,7 @@ package
 				}
 			}
 			
-			TweenMax.delayedCall(relaunchDelay, launchIosProcess);
+			TweenMax.delayedCall(relaunchDelay, launchAdbProcess);
 		}
 	}
 }

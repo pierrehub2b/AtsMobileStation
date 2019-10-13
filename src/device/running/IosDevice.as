@@ -192,7 +192,7 @@ package device.running
 		
 		protected function onTestingOutput(event:ProgressEvent):void
 		{
-			const data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
+			var data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
 			
 			if(data.indexOf("** WIFI NOT CONNECTED **") > -1) {
 				errorMessage = " - WIFI not connected !";

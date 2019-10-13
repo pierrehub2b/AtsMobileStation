@@ -66,10 +66,7 @@ package device.running
 		}
 				
 		override public function dispose():Boolean{
-			var running:Boolean = process.terminate();
-			process = null;
-			
-			return running;
+			return process.terminate();
 		}
 	}
 }
