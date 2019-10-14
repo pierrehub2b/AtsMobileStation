@@ -64,8 +64,9 @@
 				
 				if((data as RunningDevice) is IosDevice){
 					iosButtons.visible = true;
-					TweenLite.fromTo(iosButtons, 0.4, {alpha:0.0}, {alpha:1.0});
+					
 				}
+				TweenLite.fromTo([restartButton, iosButtons], 0.4, {alpha:0.0}, {alpha:1.0});
 			}
 			
 			protected function mainGroup_rollOutHandler(event:MouseEvent):void

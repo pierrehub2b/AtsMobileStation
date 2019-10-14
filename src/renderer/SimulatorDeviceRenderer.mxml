@@ -5,6 +5,8 @@
 				xmlns:renderer="renderer.*" creationComplete="creationCompleteHandler(event)">
 	<fx:Script>
 		<![CDATA[
+			import com.greensock.TweenMax;
+			
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.events.FlexEvent;
@@ -25,12 +27,16 @@
 			protected function button_rollOverHandler(event:MouseEvent):void
 			{
 				if(sim.status == Simulator.RUNNING){
-					overButton.source = "assets/icons/24/turnoff.png";
-					overButton.visible = true;
+					showOverButton("turnoff");
 				}else if(sim.status == Simulator.OFF){
-					overButton.source = "assets/icons/24/turnon.png";
-					overButton.visible = true;
+					showOverButton("turnon");
 				}
+			}
+			
+			private function showOverButton(value:String):void{
+				overButton.source = "assets/icons/24/" + value + ".png";
+				overButton.visible = true;
+				TweenMax.fromTo(overButton, 0.2, {alpha:0.0}, {alpha:1.0})
 			}
 			
 			protected function button_rollOutHandler(event:MouseEvent):void
@@ -52,7 +58,8 @@
 	</fx:Script>
 		
 	<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" verticalCenter="0"
-			  paddingRight="6" paddingLeft="5" filters="{dropShadowFilterMiddle}">
+			  paddingRight="6" paddingLeft="5" filters="{dropShadowFilterMiddle}"
+			  rollOver="button_rollOverHandler(event)" rollOut="button_rollOutHandler(event)">
 		<s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true" gap="0">
 			<s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high"
 						   source="assets/icons/32/{data is IosSimulator?'ios':'android'}.png"/>
@@ -65,8 +72,7 @@
 		<s:Spacer width="100%"/>
 		
 		<s:Group buttonMode="true" click="startStopButton_clickHandler(event)" height="24" width="24"
-				 toolTip="{(data as Simulator).tooltip}" enabled="{(data as Simulator).status!=Device.INSTALL}"
-				 rollOver="button_rollOverHandler(event)" rollOut="button_rollOutHandler(event)">
+				 toolTip="{(data as Simulator).tooltip}" enabled="{(data as Simulator).status!=Device.INSTALL}">
 			<s:BitmapImage id="iconStatus" source="assets/icons/24/{(data as Simulator).status}.png" smooth="true" smoothingQuality="high"/>
 			<s:BitmapImage id="overButton" source="assets/icons/24/turnoff.png" smooth="true" smoothingQuality="high"/>
 		</s:Group>
