@@ -36,7 +36,7 @@ package
 		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
 		
-		private const relaunchDelay:int = 4;
+		private const relaunchDelay:int = 2;
 		
 		private var adbFile:File;
 		private var errorStack:String = "";
@@ -51,14 +51,14 @@ package
 		public static var devTeamId:String = "";
 		
 		private var usbDevicesIdList:Vector.<String>;
-		private var macos:Boolean = false;
 		
 		public function RunningDevicesManager(port:String, macos:Boolean)
 		{
 			this.port = port;
-			this.macos = macos;
 			
 			if(macos){
+				
+				TweenMax.delayedCall(0.0, launchIosProcess);
 				
 				this.adbFile = File.applicationDirectory.resolvePath(adbPath);
 				
@@ -73,7 +73,7 @@ package
 				
 			}else{
 				this.adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
-				launchAdbProcess();
+				TweenMax.delayedCall(0.0, launchAdbProcess);
 			}
 		}
 		
@@ -81,7 +81,7 @@ package
 		{
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
-			launchAdbProcess();
+			TweenMax.delayedCall(0.0, launchAdbProcess);
 		}	
 		
 		public function terminate():void{
@@ -157,11 +157,7 @@ package
 				}
 			}
 			
-			if(macos){
-				TweenMax.delayedCall(relaunchDelay, launchIosProcess);
-			}else{
-				TweenMax.delayedCall(relaunchDelay, launchAdbProcess);
-			}
+			TweenMax.delayedCall(relaunchDelay, launchAdbProcess);
 		}
 		
 		//---------------------------------------------------------------------------------------------------------
@@ -288,7 +284,7 @@ package
 				}
 			}
 			
-			TweenMax.delayedCall(relaunchDelay, launchAdbProcess);
+			TweenMax.delayedCall(relaunchDelay, launchIosProcess);
 		}
 	}
 }

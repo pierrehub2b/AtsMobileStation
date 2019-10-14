@@ -149,7 +149,7 @@ package device.running
 				args.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + teamId);
 			}
 			
-			if(alreadyCopied) {
+			if(alreadyCopied && !simulator) {
 				args.push("test-without-building");
 			} else {
 				args.push("test");
