@@ -57,16 +57,13 @@
 				if((data as RunningDevice).status == Device.READY){
 					restartButton.includeInLayout = true;
 					restartButton.visible = true;
-					
-					iconStatus.visible = false;
-					iconStatus.includeInLayout = false;
 				}
 				
 				if((data as RunningDevice) is IosDevice){
 					iosButtons.visible = true;
-					
 				}
-				TweenLite.fromTo([restartButton, iosButtons], 0.4, {alpha:0.0}, {alpha:1.0});
+				
+				TweenLite.fromTo([restartButton, iosButtons], 0.3, {alpha:0.0}, {alpha:1.0});
 			}
 			
 			protected function mainGroup_rollOutHandler(event:MouseEvent):void
@@ -135,11 +132,12 @@
 					<s:BitmapImage source="assets/icons/24/tool.png" smooth="true" smoothingQuality="high"/>
 				</s:Group>
 			</s:HGroup>
-			
-			<s:BitmapImage id="iconStatus" source="assets/icons/24/{(data as RunningDevice).status}.png" smooth="true" smoothingQuality="high"/>
-			<s:Group id="restartButton" buttonMode="true" click="restart_clickHandler(event)"
-					 toolTip="Restart driver" visible="false" includeInLayout="false">
-				<s:BitmapImage source="assets/icons/24/restart.png" smooth="true" smoothingQuality="high"/>
+			<s:Group width="24" height="24">
+				<s:BitmapImage id="iconStatus" source="assets/icons/24/{(data as RunningDevice).status}.png" smooth="true" smoothingQuality="high"/>
+				<s:Group id="restartButton" buttonMode="true" click="restart_clickHandler(event)"
+						 toolTip="Restart driver" visible="false" includeInLayout="false">
+					<s:BitmapImage source="assets/icons/24/restart.png" smooth="true" smoothingQuality="high"/>
+				</s:Group>
 			</s:Group>
 		</s:HGroup>
 	</s:Group>

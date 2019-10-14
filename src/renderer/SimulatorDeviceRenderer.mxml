@@ -65,7 +65,7 @@
 		<s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true" gap="0">
 			<s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high"
 						   source="assets/icons/32/{data is IosSimulator?'ios':'android'}.png"
-						   filters="{(data as Simulator).status==Simulator.OFF?[greyFilter]:[]}"/>
+						   filters="{(data as Simulator).status==Simulator.RUNNING?[]:[greyFilter]}"/>
 			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
 				<s:Label text="{sim.modelName}" fontWeight="bold" color="{(data as Simulator).status==Simulator.OFF?0x968ca3:0x113b55}" maxWidth="234" maxDisplayedLines="1"/>
 				<s:Label text="{sim.osVersion}" fontSize="11" fontStyle="italic" color="#758696"/>
