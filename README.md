@@ -1,29 +1,29 @@
 # AtsMobileStation
 PC and Mac OS application to start and install mobile drivers used by ATS test framework
 
-## Apple Developer settings
-To execute automated tests on real iPhone devices you need to create an Apple developer account ...
+## iOS Devices
+### Apple Developer settings
+To execute automated tests on physical iPhone devices, you need to create an Apple developer account and suscribe to a developer licence
 
-## Process to install and configure a physical device in AtsMobileStation
 ### Prerequisites 
 - Have an Xcode downloaded and **installed**
 - the device **must be in WIFI and don't have a pin code**
 
 ### 1/ Set the Development team ID and retrieve the devices list
 - Open AtsMobileStation and plug an iPhone device
-- In the "Connected devices" section, click on Apple logo
+- In the 'Connected devices' section, click on Apple logo
 - In the textbox, put your Development team ID
-- Click on "Export device list" and save the output file to your computer
+- Click on 'Export device list' and save the output file to your computer
 
 ### Push informations to Apple Developer Website
 - Go and login to your apple dev account (https://developper.apple.com)
-- Go to "Certificates, ID's and profiles" -> "Devices" and add new devices by pushing "+" button
-- In "Register Multiple Devices", upload the file generated previously and save
+- Go to 'Certificates, ID's and profiles' -> 'Devices' and add new devices by pushing '+' button
+- In 'Register Multiple Devices', upload the file generated previously and save
 
 ### Setup provisionning profile into Xcode
-- Open Xcode and go to "Preferences" (Click on Xcode code in the left top corner)
-- In "Accounts", add a new account using "+" button in the bottom left corner
-- Select "Apple ID" in the dropdown list and enter your Apple Developer credentials in the next window
+- Open Xcode and go to 'Preferences' (Click on Xcode code in the left top corner)
+- In 'Accounts', add a new account using '+' button in the bottom left corner
+- Select 'Apple ID' in the dropdown list and enter your Apple Developer credentials in the next window
 - Save and quit xCode
 
 ### Test if driver working effectively
@@ -31,4 +31,9 @@ To execute automated tests on real iPhone devices you need to create an Apple de
 - unplug and plug your iPhone device
 - your driver should start (by seeing the green check image, and show you an Ip adress and port)
 
-**You can now go to your editor and begenning use your iPhone device into it.**
+## Android devices
+### Prerequisites
+- the device **must be in WIFI and don't have a pin code** 
+- Enable the **developer mode** and autorize the connexion to the linked computer
+
+**You can now go the ATS Framework and begenning use it with your physical device.**
