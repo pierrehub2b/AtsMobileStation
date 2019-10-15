@@ -9,6 +9,7 @@ package device.running
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	
+	import device.Device;
 	import device.RunningDevice;
 	import device.simulator.Simulator;
 	
@@ -18,9 +19,11 @@ package device.running
 		
 		private static const startInfo:RegExp = /ATSDRIVER_DRIVER_HOST=(.*):(\d+)/
 		private static const startInfoLocked:RegExp = /isPasscodeLocked:(\s*)YES/
-		
+		private static const noProvisionningProfileError:RegExp = /Xcode couldn't find any iOS App Development provisioning profiles matching(\s*)/
+		private static const noCertificatesError:RegExp = /signing certificate matching team ID(\s*)/	
+
 		private var testingProcess:NativeProcess
-		private var procInfo:NativeProcessStartupInfo;
+		public var procInfo:NativeProcessStartupInfo;
 		
 		private static const iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
 		private static const xcodeBuildExec:File = new File("/usr/bin/env");
@@ -83,6 +86,13 @@ package device.running
 					}
 				}
 				fileStream.close();
+			}
+			
+			if(teamId == "" && !simulator) {
+				trace("No Development Team ID set for " + name);
+				status = Device.FAIL;
+				errorMessage = " - No development team id set"
+				return;
 			}
 			
 			installing()
@@ -149,11 +159,13 @@ package device.running
 				args.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + teamId);
 			}
 			
-			if(alreadyCopied && !simulator) {
-				args.push("test-without-building");
-			} else {
-				args.push("test");
-			}
+			//if(alreadyCopied && !simulator) {
+			//	args.push("test-without-building");
+			//} else {
+			//	args.push("test");
+			//}
+			
+			args.push("test");
 			
 			procInfo.arguments = args;
 		}
@@ -212,14 +224,20 @@ package device.running
 			const data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
 			trace("test error -> " + data);
 			
+			if(noProvisionningProfileError.test(data)){
+				errorMessage = " - No provisioning profiles !";
+				testingProcess.exit();
+			}
+			
+			if(noCertificatesError.test(data)){
+				errorMessage = " - Certificate error !";
+				testingProcess.exit();
+			}
+			
 			if(startInfoLocked.test(data)){
 				errorMessage = " - Locked with passcode !";
 				testingProcess.exit();
 			}
-			
-			//if(data.indexOf("Continuing with testing") < 0 && data.indexOf("** TEST EXECUTE FAILED **") > 0 || data.indexOf("** TEST FAILED **") > 0){
-				
-			//}
 		}
 	}
 }
