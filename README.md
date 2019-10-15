@@ -1,13 +1,16 @@
 # AtsMobileStation
 PC and Mac OS application to start and install mobile drivers used by ATS test framework
 
-## Process to install and configure a physical device on AtsMobileStation
-### prerequisites 
+## Apple Developer settings
+To execute automated tests on real iPhone devices you need to create an Apple developer account ...
+
+## Process to install and configure a physical device in AtsMobileStation
+### Prerequisites 
 - Have an Xcode downloaded and **installed**
 - the device **must be in WIFI and don't have a pin code**
 
 ### 1/ Set the Development team ID and retrieve the devices list
-- Open AtsMobileStation and plug a physical device
+- Open AtsMobileStation and plug an iPhone device
 - In the "Connected devices" section, click on Apple logo
 - In the textbox, put your Development team ID
 - Click on "Export device list" and save the output file to your computer
@@ -25,7 +28,7 @@ PC and Mac OS application to start and install mobile drivers used by ATS test f
 
 ### Test if driver working effectively
 - Go to AtsMobileStation
-- unplug and plug your device
+- unplug and plug your iPhone device
 - your driver should start (by seeing the green check image, and show you an Ip adress and port)
 
-**You can now go to your editeur and begenning use your pysical device into it.**
+**You can now go to your editor and begenning use your iPhone device into it.**
