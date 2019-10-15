@@ -12,6 +12,7 @@ package
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.FlexGlobals;
+	import mx.utils.object_proxy;
 	
 	import device.Device;
 	import device.RunningDevice;
@@ -192,16 +193,16 @@ package
 				var data:XML = new XML(iosOutput);
 				var plist:Plist10 = new Plist10();
 				
-				plist.parse(data.children()[0]);
+				plist.parse(data.children());
 				
-				var itemsList:Array = plist.root._items.object[0].object._items.object as Array;
-				for each(var itm:PDict in itemsList){
-					if(itm.object._name == "iPhone"){
-						usbDevicesIdList.push(itm.object.serial_num);
-					}
+				var usbPorts:Array = plist.root._items.object as Array;
+				for each (var port:PDict in usbPorts) {
+					getDevicesIds(port);
 				}
 				System.disposeXML(data);
-			}catch(error:Error){}
+			}catch(error:Error){
+				trace(error);
+			}
 			
 			//------------------------------------------------------
 			
@@ -212,6 +213,19 @@ package
 			}
 			
 			loadDevicesId();
+		}
+		
+		private function getDevicesIds(itmList:PDict):void {
+			if(itmList.object._items != null) {
+				var itemsListArray:Array = itmList.object._items.object as Array;
+				for each(var itm:PDict in itemsListArray){
+					getDevicesIds(itm);
+					var name:String = itm.object._name.toString().toLowerCase();
+					if(name == "iphone"){
+						usbDevicesIdList.push(itm.object.serial_num);
+					}
+				}
+			}
 		}
 		
 		private function loadDevicesId():void{
