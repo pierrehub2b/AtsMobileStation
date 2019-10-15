@@ -16,10 +16,10 @@
 			
 			import device.RunningDevice;
 			
-			[Embed(source="assets/icons/16/apple_site.png")]
+			[Embed(source="/assets/icons/16/apple_site.png")]
 			private const AppleIcon:Class
 			
-			[Embed(source="assets/icons/16/info.png")]
+			[Embed(source="/assets/icons/16/info.png")]
 			private const InfoIcon:Class
 			
 			public var dev:RunningDevice;
