@@ -15,18 +15,18 @@ To execute automated tests on physical iPhone devices, you need to create an App
 - In the textbox, put your Development team ID
 - Click on 'Export device list' and save the output file to your computer
 
-### Push informations to Apple Developer Website
+### 2/ Push informations to Apple Developer Website
 - Go and login to your apple dev account (https://developper.apple.com)
 - Go to 'Certificates, ID's and profiles' -> 'Devices' and add new devices by pushing '+' button
 - In 'Register Multiple Devices', upload the file generated previously and save
 
-### Setup provisionning profile into Xcode
+### 3/ Setup provisionning profile into Xcode
 - Open Xcode and go to 'Preferences' (Click on Xcode code in the left top corner)
 - In 'Accounts', add a new account using '+' button in the bottom left corner
 - Select 'Apple ID' in the dropdown list and enter your Apple Developer credentials in the next window
 - Save and quit xCode
 
-### Test if driver working effectively
+### 4/ Test if driver working effectively
 - Go to AtsMobileStation
 - unplug and plug your iPhone device
 - your driver should start (by seeing the green check image, and show you an Ip adress and port)
