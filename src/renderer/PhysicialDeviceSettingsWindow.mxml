@@ -2,16 +2,25 @@
 <s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
-			   width="300" title="Device settings" 
+			   width="300" title="Apple Developer settings"
+			   skinClass="skins.AppleDevWindowSkin"
 			   close="closeHandler(event)"
 			   initialize="settings_initializeHandler(event)">
 	<fx:Script>
 		<![CDATA[
+			import flash.net.navigateToURL;
+			
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
 			
 			import device.RunningDevice;
+			
+			[Embed(source="assets/icons/16/apple_site.png")]
+			private const AppleIcon:Class
+			
+			[Embed(source="assets/icons/16/info.png")]
+			private const InfoIcon:Class
 			
 			public var dev:RunningDevice;
 			public var arrayString:Array;
@@ -119,19 +128,30 @@
 				file.save(txtInput, "devices.txt")
 			}
 			
+			protected function linkbutton_clickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest("https://developer.apple.com/account/"));
+			}
+			
+			protected function linkbuttonAts_clickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest("https://github.com/pierrehub2b/AtsMobileStation#apple-developer-settings"));
+			}
+			
 		]]>
 	</fx:Script>
 	
-	<s:VGroup left="6" right="6" top="10" bottom="36" gap="8" horizontalAlign="center"
+	<s:VGroup left="6" right="6" top="10" bottom="36" gap="2" horizontalAlign="center"
 			  verticalAlign="middle">
-		<s:HGroup width="100%" gap="3" verticalAlign="middle" verticalCenter="0">
-			<s:HGroup width="100%" horizontalAlign="left" verticalAlign="baseline">
-				<s:Label fontSize="11" fontWeight="bold" paddingRight="5" text="Development team ID :"/>
+		<s:HGroup width="100%" gap="3" paddingLeft="5" verticalAlign="middle" verticalCenter="0">
+				<s:Label fontWeight="bold" paddingRight="5" text="Development team ID :"/>
 				<s:TextInput id="devTeamId" width="100%" height="100%" maxChars="10"/>
-			</s:HGroup>
-			
 		</s:HGroup>
-		
+		<s:Spacer height="4"/>
+		<mx:LinkButton width="100%" label="ATS MobileStation configuration site" fontStyle="normal" fontSize="11"
+					   textAlign="left" click="linkbuttonAts_clickHandler(event)" icon="{InfoIcon}"/>		
+		<mx:LinkButton width="100%" label="Open Apple Developer account" fontStyle="normal" fontSize="11"
+					   textAlign="left" click="linkbutton_clickHandler(event)" icon="{AppleIcon}"/>
 	</s:VGroup>
 	
 	<s:Group left="0" right="0" bottom="0" height="30">
