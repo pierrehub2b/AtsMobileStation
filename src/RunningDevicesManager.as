@@ -261,6 +261,11 @@ package
 			loadDevicesId()
 		}
 		
+		public function restartDev(dev:Device):void {
+			dev.dispose();
+			dev.close();
+		}
+		
 		protected function onReadIosDevicesData(ev:ProgressEvent):void{
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
 			iosOutput += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);

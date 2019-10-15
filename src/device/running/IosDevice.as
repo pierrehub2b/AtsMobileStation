@@ -159,13 +159,12 @@ package device.running
 				args.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + teamId);
 			}
 			
-			//if(alreadyCopied && !simulator) {
-			//	args.push("test-without-building");
-			//} else {
-			//	args.push("test");
-			//}
-			
-			args.push("test");
+			if(!AtsMobileStation.alreadyBuilded) {
+				AtsMobileStation.alreadyBuilded = true;
+				args.push("test-without-building");
+			} else {
+				args.push("test");
+			}
 			
 			procInfo.arguments = args;
 		}

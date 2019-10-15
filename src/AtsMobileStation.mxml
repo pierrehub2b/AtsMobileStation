@@ -17,6 +17,7 @@
 			
 			import spark.filters.DropShadowFilter;
 			
+			import device.Device;
 			import device.RunningDevice;
 			import device.running.IosDevice;
 			
@@ -26,6 +27,8 @@
 			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
 			private const isMacOs:Boolean = Capabilities.os.indexOf("Mac") > -1;
+			
+			public static var alreadyBuilded:Boolean = false;
 			
 			[Bindable]
 			private var port:String = "8080";
@@ -43,6 +46,10 @@
 				devices = new RunningDevicesManager(port, isMacOs);
 				
 				settingsButton.visible = isMacOs;
+			}
+			
+			public function restartDevice(dev:Device):void{
+				devices.restartDev(dev);
 			}
 			
 			protected function closeHandler(event:Event):void

@@ -3,8 +3,7 @@
 						 xmlns:s="library://ns.adobe.com/flex/spark" 
 						 xmlns:mx="library://ns.adobe.com/flex/mx" 
 						 removedFromStage="removedFromStageHandler(event)" 
-						 xmlns:renderer="renderer.*" 
-						 mouseChildren="{(data as RunningDevice).status==Device.READY}">
+						 xmlns:renderer="renderer.*">
 	
 	<fx:Script>
 		<![CDATA[
@@ -54,11 +53,8 @@
 			
 			protected function mainGroup_rollOverHandler(event:MouseEvent):void
 			{
-				if((data as RunningDevice).status == Device.READY){
-					restartButton.includeInLayout = true;
-					restartButton.visible = true;
-				}
-				
+				restartButton.includeInLayout = true;
+				restartButton.visible = true;				
 				if((data as RunningDevice) is IosDevice){
 					iosButtons.visible = true;
 				}

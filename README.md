@@ -2,6 +2,7 @@
 PC and Mac OS application to start and install mobile drivers used by ATS test framework
 
 ## iOS Devices
+**This procedure is not usefull if you're using iOS Simulators**
 ### Apple Developer settings
 To execute automated tests on physical iPhone devices, you need to create an Apple developer account and suscribe to a developer licence
 
@@ -16,7 +17,7 @@ To execute automated tests on physical iPhone devices, you need to create an App
 - Click on 'Export device list' and save the output file to your computer
 
 ### 2/ Push informations to Apple Developer Website
-- Go and login to your apple dev account (https://developper.apple.com)
+- Go and login to your apple dev account (https://developer.apple.com)
 - Go to 'Certificates, ID's and profiles' -> 'Devices' and add new devices by pushing '+' button
 - In 'Register Multiple Devices', upload the file generated previously and save
 
