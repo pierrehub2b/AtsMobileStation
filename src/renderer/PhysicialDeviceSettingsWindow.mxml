@@ -2,16 +2,18 @@
 <s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
-			   width="300" title="Device settings" 
+			   width="300" title="Apple Developer settings" 
 			   close="closeHandler(event)"
 			   initialize="settings_initializeHandler(event)">
 	<fx:Script>
 		<![CDATA[
+			import device.RunningDevice;
+			
+			import flash.net.navigateToURL;
+			
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
-			
-			import device.RunningDevice;
 			
 			public var dev:RunningDevice;
 			public var arrayString:Array;
@@ -119,18 +121,22 @@
 				file.save(txtInput, "devices.txt")
 			}
 			
+			protected function linkbutton_clickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest("https://developer.apple.com/account/"));
+			}
+			
 		]]>
 	</fx:Script>
 	
 	<s:VGroup left="6" right="6" top="10" bottom="36" gap="8" horizontalAlign="center"
 			  verticalAlign="middle">
-		<s:HGroup width="100%" gap="3" verticalAlign="middle" verticalCenter="0">
-			<s:HGroup width="100%" horizontalAlign="left" verticalAlign="baseline">
-				<s:Label fontSize="11" fontWeight="bold" paddingRight="5" text="Development team ID :"/>
+		<s:HGroup width="100%" gap="3" paddingLeft="5" verticalAlign="middle" verticalCenter="0">
+				<s:Label fontWeight="bold" paddingRight="5" text="Development team ID :"/>
 				<s:TextInput id="devTeamId" width="100%" height="100%" maxChars="10"/>
-			</s:HGroup>
-			
 		</s:HGroup>
+		<mx:LinkButton width="100%" label="Apple Developer site" fontStyle="normal" fontWeight="bold"
+					   textAlign="left" click="linkbutton_clickHandler(event)"/>
 		
 	</s:VGroup>
 	
