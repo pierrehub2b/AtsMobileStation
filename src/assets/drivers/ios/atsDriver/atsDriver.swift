@@ -24,6 +24,12 @@ import Socket
 
 public var app: XCUIApplication!
 
+extension UIDevice {
+    static var isSimulator: Bool {
+        return ProcessInfo.processInfo.environment["SIMULATOR_DEVICE_NAME"] != nil
+    }
+}
+
 class atsDriver: XCTestCase {
     
     let udpThread = DispatchQueue(label: "udpQueue" + UUID().uuidString, qos: .userInitiated)
@@ -86,7 +92,10 @@ class atsDriver: XCTestCase {
             customPort = myDict["CFCustomPort"].unsafelyUnwrapped as! String;
         }
         
-        XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
+        if !UIDevice.isSimulator {
+             XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
+        }
+        
         if(customPort != "") {
             let (isFree, _) = checkTcpPortForListen(port: UInt16(customPort)!)
             if(isFree == true) {
@@ -116,15 +125,10 @@ class atsDriver: XCTestCase {
         self.addInstalledApp(label: "News", packageName: "com.apple.news", version: "", icon:NewsIcon());
         self.addInstalledApp(label: "Maps", packageName: "com.apple.Maps", version: "", icon:MapsIcon());
         self.addInstalledApp(label: "Health", packageName: "com.apple.Health", version: "", icon:HealthIcon());
+        self.addInstalledApp(label: "Calendar", packageName: "com.apple.mobilecal", version: "", icon:CalendarIcon());
         self.addInstalledApp(label: "Photos", packageName: "com.apple.mobileslideshow", version: "", icon:PhotosIcon());
         self.addInstalledApp(label: "Files", packageName: "com.apple.DocumentsApp", version: "", icon:DefaultAppIcon());
-        self.addInstalledApp(label: "Calculator", packageName: "com.apple.calculator", version: "", icon:DefaultAppIcon());
-        self.addInstalledApp(label: "Camera", packageName: "com.apple.camera", version: "", icon:DefaultAppIcon());
-        self.addInstalledApp(label: "Clock", packageName: "com.apple.mobiletimer", version: "", icon:DefaultAppIcon());
-        self.addInstalledApp(label: "Messages", packageName: "com.apple.MobileSMS", version: "", icon:DefaultAppIcon());
-        self.addInstalledApp(label: "Phone", packageName: "com.apple.mobilephone", version: "", icon:DefaultAppIcon());
-        self.addInstalledApp(label: "Reminders", packageName: "com.apple.reminders", version: "", icon:DefaultAppIcon());
-        self.addInstalledApp(label: "Weather", packageName: "com.apple.weather", version: "", icon:DefaultAppIcon());
+        // TODO add succesfully started app on this device
     }
 
     func addInstalledApp(label:String, packageName:String, version:String, icon:String){
@@ -263,7 +267,9 @@ class atsDriver: XCTestCase {
                                 if(app != nil){
                                     app.terminate()
                                     self.continueExecution = false
-                                    XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
+                                    if !UIDevice.isSimulator {
+                                         XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
+                                    }
                                     self.resultElement["status"] = 0
                                     self.resultElement["message"] = "stop ats driver"
                                 }
@@ -271,7 +277,9 @@ class atsDriver: XCTestCase {
                                 if(ActionsEnum.QUIT.rawValue == parameters[0]) {
                                     app.terminate()
                                     self.continueExecution = false
-                                    XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
+                                    if !UIDevice.isSimulator {
+                                         XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
+                                    }
                                     self.resultElement["status"] = 0
                                     self.resultElement["message"] = "close ats driver"
                                 } else if(ActionsEnum.INFO.rawValue == parameters[0]) {
