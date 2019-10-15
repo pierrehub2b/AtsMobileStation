@@ -135,7 +135,7 @@
 			
 			protected function linkbuttonAts_clickHandler(event:MouseEvent):void
 			{
-				navigateToURL(new URLRequest("https://github.com/pierrehub2b/AtsMobileStation#apple-developer-settings"));
+				navigateToURL(new URLRequest("https://github.com/pierrehub2b/AtsMobileStation#ios-devices"));
 			}
 			
 		]]>
