@@ -11,6 +11,7 @@
 			
 			import mx.events.FlexEvent;
 			
+			import spark.filters.ColorMatrixFilter;
 			import spark.filters.DropShadowFilter;
 			
 			import device.Device;
@@ -18,6 +19,7 @@
 			import device.simulator.Simulator;
 			
 			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
+			private static const greyFilter:ColorMatrixFilter = new ColorMatrixFilter([0.3,0.59,0.11,0, 0,0.3,0.59,0.11,0,0,0.3,0.59,0.11,0,0,0,0,0,1,0]);
 			
 			protected function startStopButton_clickHandler(event:MouseEvent):void
 			{
@@ -62,9 +64,10 @@
 			  rollOver="button_rollOverHandler(event)" rollOut="button_rollOutHandler(event)">
 		<s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true" gap="0">
 			<s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high"
-						   source="assets/icons/32/{data is IosSimulator?'ios':'android'}.png"/>
+						   source="assets/icons/32/{data is IosSimulator?'ios':'android'}.png"
+						   filters="{(data as Simulator).status==Simulator.RUNNING?[]:[greyFilter]}"/>
 			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
-				<s:Label text="{sim.modelName}" fontWeight="bold" color="{(data as Simulator).status==Simulator.OFF?0x8a844a:0x113b55}" maxWidth="234" maxDisplayedLines="1"/>
+				<s:Label text="{sim.modelName}" fontWeight="bold" color="{(data as Simulator).status==Simulator.OFF?0x968ca3:0x113b55}" maxWidth="234" maxDisplayedLines="1"/>
 				<s:Label text="{sim.osVersion}" fontSize="11" fontStyle="italic" color="#758696"/>
 			</s:VGroup>
 		</s:HGroup>
