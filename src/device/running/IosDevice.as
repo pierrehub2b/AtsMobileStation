@@ -17,7 +17,9 @@ package device.running
 	{
 		private var output:String = "";
 		
-		private static const startInfo:RegExp = /ATSDRIVER_DRIVER_HOST=(.*):(\d+)/
+		private static const ATSDRIVER_DRIVER_HOST:String = "ATSDRIVER_DRIVER_HOST";
+		
+		private static const startInfo:RegExp = new RegExp(ATSDRIVER_DRIVER_HOST + "=(.*):(\\d+)");
 		private static const startInfoLocked:RegExp = /isPasscodeLocked:(\s*)YES/
 		private static const noProvisionningProfileError:RegExp = /Xcode couldn't find any iOS App Development provisioning profiles matching(\s*)/
 		private static const noCertificatesError:RegExp = /signing certificate matching team ID(\s*)/	
@@ -203,15 +205,18 @@ package device.running
 		
 		protected function onTestingOutput(event:ProgressEvent):void
 		{
-			var data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
-			
+			const data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
+
 			if(data.indexOf("** WIFI NOT CONNECTED **") > -1) {
+				
 				errorMessage = " - WIFI not connected !";
 				testingProcess.exit();
-			}
-			
-			var find:Array = startInfo.exec(data);
-			if(find != null){
+				
+			}else if(data.indexOf(ATSDRIVER_DRIVER_HOST) > -1){
+				
+				testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput);
+				
+				const find:Array = startInfo.exec(data);
 				ip = find[1];
 				port = find[2];
 				started();
