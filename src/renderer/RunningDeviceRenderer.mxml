@@ -46,7 +46,7 @@
 			
 			protected function restart_clickHandler(event:MouseEvent):void
 			{
-				enabled = false;
+				//enabled = false;
 				restartButton.visible = false;
 				callLater((data as RunningDevice).close)
 			}
