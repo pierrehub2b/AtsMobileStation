@@ -93,7 +93,7 @@
 		026CC5DD3610DC871392033C7A6A2B6F /* Pods-atsDriver-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-atsDriver-umbrella.h"; sourceTree = "<group>"; };
 		09C3FE476D25729D32A578C14AE8D91F /* EnvoyAmbassador-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "EnvoyAmbassador-prefix.pch"; sourceTree = "<group>"; };
 		0C15873805488A4169DCA76F1C788D92 /* SelectorEventLoop.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SelectorEventLoop.swift; path = Sources/SelectorEventLoop.swift; sourceTree = "<group>"; };
-		193CA82337D381AD5A74EAE2A276EFA3 /* libEnvoyAmbassador.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libEnvoyAmbassador.a; path = libEnvoyAmbassador.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		193CA82337D381AD5A74EAE2A276EFA3 /* libEnvoyAmbassador.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libEnvoyAmbassador.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		198DBE7C04D382158F2AED93D315EAF6 /* LogFormatter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LogFormatter.swift; path = Sources/LogFormatter.swift; sourceTree = "<group>"; };
 		1FF7BA2F4E8F4CA17C93D4003C4D9098 /* MultiDictionary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MultiDictionary.swift; path = Sources/MultiDictionary.swift; sourceTree = "<group>"; };
 		20FE5EC633DB9BF762FB55DA4061AAC3 /* DelayResponse.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DelayResponse.swift; path = Ambassador/Responses/DelayResponse.swift; sourceTree = "<group>"; };
@@ -103,7 +103,7 @@
 		27668D7855B7F05C261734656F3E6AC3 /* Embassy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Embassy.xcconfig; sourceTree = "<group>"; };
 		27771345F03C75AE04786B9978745356 /* EnvoyAmbassador-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "EnvoyAmbassador-dummy.m"; sourceTree = "<group>"; };
 		2D1636505CD1A84C1647475014D1F249 /* HTTPRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HTTPRequest.swift; path = Sources/HTTPRequest.swift; sourceTree = "<group>"; };
-		2EAA4A7F572E0FFFDA0F24140040D388 /* libBlueSocket.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libBlueSocket.a; path = libBlueSocket.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		2EAA4A7F572E0FFFDA0F24140040D388 /* libBlueSocket.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libBlueSocket.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		326CC8AAE0852B40593E59EF75CAC6CB /* JSONReader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = JSONReader.swift; path = Ambassador/Readers/JSONReader.swift; sourceTree = "<group>"; };
 		3349F1369D853F1B0B302E540C124E8B /* DefaultLogFormatter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DefaultLogFormatter.swift; path = Sources/DefaultLogFormatter.swift; sourceTree = "<group>"; };
 		369023AADB901BD9D9EE8AB5E384907B /* Pods-atsDriver-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-atsDriver-acknowledgements.markdown"; sourceTree = "<group>"; };
@@ -134,7 +134,7 @@
 		88E0D3B15B4CE5910278E060A607562B /* HTTPHeaderParser.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HTTPHeaderParser.swift; path = Sources/HTTPHeaderParser.swift; sourceTree = "<group>"; };
 		95A2D45F84FF9778A34032145E2D53D8 /* WebApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WebApp.swift; path = Ambassador/WebApp.swift; sourceTree = "<group>"; };
 		9BAA97A50BF40CE3FBBFDF95986A891B /* DataResponse.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DataResponse.swift; path = Ambassador/Responses/DataResponse.swift; sourceTree = "<group>"; };
-		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		A0AA15B54B79AC02E421D28AB9C5D9BE /* HeapSort.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HeapSort.swift; path = Sources/HeapSort.swift; sourceTree = "<group>"; };
 		A9F87E9EA1C82D6E4897EBF116D8BF88 /* EnvoyAmbassador-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "EnvoyAmbassador-umbrella.h"; sourceTree = "<group>"; };
 		AA71D6998B7C2124BABA1AC8DF62EB1B /* IOUtils.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = IOUtils.swift; path = Sources/IOUtils.swift; sourceTree = "<group>"; };
@@ -153,8 +153,8 @@
 		E151BA5BEBE1D322875781DB6666F88A /* URLParametersReader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = URLParametersReader.swift; path = Ambassador/Readers/URLParametersReader.swift; sourceTree = "<group>"; };
 		E435D7C7C6BC59FE6FCF6F2395145AAD /* Embassy-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Embassy-prefix.pch"; sourceTree = "<group>"; };
 		F294D48C93B3983B76BD44B86CA0093A /* Logger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Logger.swift; path = Sources/Logger.swift; sourceTree = "<group>"; };
-		F4602BC9FD320E448ECBD0711E1FCC17 /* libEmbassy.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libEmbassy.a; path = libEmbassy.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		F46F918C9AE615F5540E135C312A3D11 /* libPods-atsDriver.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-atsDriver.a"; path = "libPods-atsDriver.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F4602BC9FD320E448ECBD0711E1FCC17 /* libEmbassy.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libEmbassy.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		F46F918C9AE615F5540E135C312A3D11 /* libPods-atsDriver.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-atsDriver.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAE7AD138DB6E89368B511E6184E0638 /* LogHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LogHandler.swift; path = Sources/LogHandler.swift; sourceTree = "<group>"; };
 		FCD18F09C268E376CE62790CDA64F593 /* Embassy-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Embassy-dummy.m"; sourceTree = "<group>"; };
 		FDAA8C1F7594FE19C3347AC0EF35235A /* KqueueSelector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = KqueueSelector.swift; path = Sources/KqueueSelector.swift; sourceTree = "<group>"; };
@@ -226,7 +226,6 @@
 				BE018A2BA67C9A91218429E9A8F9541B /* Transport.swift */,
 				F2C4DB17908B9C364C1853D8EADCE5D2 /* Support Files */,
 			);
-			name = Embassy;
 			path = Embassy;
 			sourceTree = "<group>";
 		};
@@ -303,7 +302,6 @@
 				95A2D45F84FF9778A34032145E2D53D8 /* WebApp.swift */,
 				0881E7E78CE95C9CFA3DB4F6C34B9F5A /* Support Files */,
 			);
-			name = EnvoyAmbassador;
 			path = EnvoyAmbassador;
 			sourceTree = "<group>";
 		};
@@ -315,7 +313,6 @@
 				76D964AF733E2E151D5575A824A9FE2E /* SocketUtils.swift */,
 				297D971C3F4DC36D2D220821CE4DE509 /* Support Files */,
 			);
-			name = BlueSocket;
 			path = BlueSocket;
 			sourceTree = "<group>";
 		};
@@ -489,6 +486,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = CF1408CF629C7361332E53B88F7BD30C;
 			productRefGroup = D30A33E4DED379007F3E1A3F84ABA697 /* Products */;

@@ -37,10 +37,8 @@ class atsDriver: XCTestCase {
     var port = 0
     var currentAppIdentifier: String = ""
     var resultElement: [String: Any] = [:]
-    var captureStruct: String = ""
     var flatStruct: [String: Frame] = [:]
     var thread: Thread! = nil
-    var rootNode: UIElement? = nil
     var udpPort: Int = 47633
     var continueRunningValue = true
     var connectedSockets = [Int32: Socket]()
@@ -127,9 +125,7 @@ class atsDriver: XCTestCase {
         self.addInstalledApp(label: "Health", packageName: "com.apple.Health", version: "", icon:HealthIcon());
         self.addInstalledApp(label: "Calendar", packageName: "com.apple.mobilecal", version: "", icon:CalendarIcon());
         self.addInstalledApp(label: "Photos", packageName: "com.apple.mobileslideshow", version: "", icon:PhotosIcon());
-        self.addInstalledApp(label: "Files", packageName: "com.apple.DocumentsApp", version: "", icon:DefaultAppIcon());
-        // TODO add succesfully started app on this device
-    }
+        self.addInstalledApp(label: "Files", packageName: "com.apple.DocumentsApp", version: "", icon:DefaultAppIcon());    }
 
     func addInstalledApp(label:String, packageName:String, version:String, icon:String){
         var app: [String: Any] = [:]
@@ -313,6 +309,7 @@ class atsDriver: XCTestCase {
                                     self.resultElement["status"] = 0
                                     self.resultElement["message"] = "orientation to landscape mode"
                                 }
+                            
                             } else {
                                 self.resultElement["message"] = "unknow button " + parameters[0]
                                 self.resultElement["status"] = -42
@@ -325,7 +322,7 @@ class atsDriver: XCTestCase {
                     }
                     break
                     
-                case ActionsEnum.CAPTURE2.rawValue:
+                case ActionsEnum.CAPTURE.rawValue:
                     if(app == nil) {
                         self.resultElement["message"] = "no app has been launched"
                         self.resultElement["status"] = -99
@@ -334,140 +331,17 @@ class atsDriver: XCTestCase {
                     
                     self.resultElement["message"] = "root_description"
                     self.resultElement["status"] = 0
+                    self.resultElement["deviceHeight"] = self.deviceHeight
+                    self.resultElement["deviceWidth"] = self.deviceWidth
                     self.resultElement["root"] = app.debugDescription
-                    
-                case ActionsEnum.CAPTURE.rawValue:
-                    if(app == nil) {
-                        self.resultElement["message"] = "no app has been launched"
-                        self.resultElement["status"] = -99
-                        break
-                    }
-                    
-                    var description = app.debugDescription
-                    
-                    if((self.cachedDescription != description
-                        && self.cachedDescription.split(separator: "\n").count != description.split(separator: "\n").count) || self.forceCapture){
-                        self.cachedDescription = description;
-                        self.forceCapture = false;
-                        
-                        description = description.replacingOccurrences(of: "'\n", with: "'⌘")
-                            .replacingOccurrences(of: "}}\n", with: "}}⌘")
-                            .replacingOccurrences(of: "Disabled\n", with: "Disabled⌘")
-                            .replacingOccurrences(of: "Selected\n", with: "Selected⌘")
-                            .replacingOccurrences(of: "\n    ", with: "⌘    ")
-                            .replacingOccurrences(of: "\n", with: " ")
-                        let descriptionTable = description.split(separator: "⌘")
-                        var leveledTable: [(Int,String)] = [(Int,String)]()
-                        
-                        if(descriptionTable.count < 3) {
-                            break
-                        }
-                        self.isAlert = false
-                        for index in 0...descriptionTable.count-3 {
-                            //no traitment of line that are not reference composants
-                            let currentLine = String(descriptionTable[index])
-                            var blankSpacesAtStart = 0
-                            for char in currentLine {
-                                if(char == " ") {
-                                    blankSpacesAtStart += 1
-                                } else {
-                                    break
-                                }
-                            }
-                            let level = (blankSpacesAtStart / 2) - 1
-                            if(level > 0) {
-                                let startString = currentLine.trimmingCharacters(in: NSCharacterSet.whitespaces)
-                                if(startString.starts(with: "Alert")) {
-                                    self.isAlert = true
-                                }
-                                leveledTable.append((level, currentLine))
-                            }
-                        }
-
-                        if(self.rootNode != nil) {
-                            self.captureStruct = self.convertIntoJSONString(arrayObject: self.rootNode!)
-                        } else {
-                            self.captureStruct = "{}"
-                        }
-                        
-                        var firstIndex = 0
-                        var currentLevel = 1
-                        var newLeveledTable = leveledTable
-                        if(self.isAlert) {
-                           newLeveledTable = [(Int,String)]()
-                           for t in 0...leveledTable.count-1 {
-                               if(leveledTable[t].1.localizedCaseInsensitiveContains("alert")) {
-                                   firstIndex = t
-                                   currentLevel = leveledTable[t].0
-                                   break
-                               }
-                           }
-
-                           for t in 0...leveledTable.count-1 {
-                               if((leveledTable[t].0 < currentLevel && t < firstIndex) || t >= firstIndex ) {
-                                   newLeveledTable.append(leveledTable[t])
-                               }
-                           }
-                       }
-                        
-                        let parentFrame = Frame(x: 0, y: 0, width: self.deviceWidth, height: self.deviceHeight)
-                        
-                        let workItem = DispatchWorkItem {
-                            let rootNode = UIElement(
-                                id: UUID().uuidString,
-                                tag: "root",
-                                clickable: false,
-                                x: 0,
-                                y: 0,
-                                width: self.deviceWidth,
-                                height: self.deviceHeight,
-                                children: self.getChildrens(currentLevel: 1, currentIndex: 0, endedIndex: newLeveledTable.count-1, leveledTable: newLeveledTable, parentFrame: parentFrame),
-                                attributes: [:],
-                                channelY: 0,
-                                channelHeight: self.deviceHeight
-                            )
-                            
-                            self.flatStruct = self.getFlatStruct(rootNode: rootNode)
-                            if(self.isAlert) {
-                                var flatArchi: [UIElement] = [UIElement]()
-                                var root = rootNode
-                                root.children = []
-                                for node in rootNode.children! {
-                                    root.children! += self.flatArchitecture(rootNode: node)
-                                }
-                                flatArchi.append(root)
-                                self.captureStruct = self.convertIntoJSONString(arrayObject: root)
-                            } else {
-                                self.captureStruct = self.convertIntoJSONString(arrayObject: rootNode)
-                            }
-                            self.rootNode = rootNode
-                            self.lastCapture = NSDate().timeIntervalSince1970
-                        }
-                        self.domThread.async(execute: workItem)
-                        workItem.wait()
-                    }
-                    
                     break
                 case ActionsEnum.ELEMENT.rawValue:
                     if(parameters.count > 1) {
-                        let flatElement = self.flatStruct[parameters[0]]
-                        if(flatElement == nil) {
-                            self.resultElement["status"] = -21
-                            self.resultElement["message"] = "missing element"
-                            break
-                        }
-                        
-                        let elementX = flatElement!.x/self.ratioScreen
-                        let elementY = flatElement!.y/self.ratioScreen
-                        let elementWidth = flatElement!.width/self.ratioScreen
-                        let elementHeight = flatElement!.height/self.ratioScreen
-                        
                         if(ActionsEnum.INPUT.rawValue == parameters[1]) {
                             let text = parameters[2]
                             if(text == ActionsEnum.EMPTY.rawValue) {
-                                self.tapCoordinate(at: elementX + (elementWidth * 0.90), and: elementY + (elementHeight / 2))
+                                //app.typeText(XCUIKeyboardKey.clear.rawValue)
                             } else {
-                                self.tapCoordinate(at: elementX, and: elementHeight)
                                 self.resultElement["status"] = 0
                                 if(app.keyboards.count > 0) {
                                     app.typeText(text)
@@ -477,6 +351,23 @@ class atsDriver: XCTestCase {
                                 }
                             }
                         } else {
+                            
+                            let coordinates = parameters[parameters.count-1].split(separator: ";")
+                            let frame:Frame = Frame(
+                                x: Double(coordinates[0])!,
+                                y: Double(coordinates[1])!,
+                                width: Double(coordinates[2])!,
+                                height: Double(coordinates[3])!
+                            )
+                            
+                            let ratioWidth = Double(coordinates[4])!
+                            let ratioHeight = Double(coordinates[5])!
+                            
+                            let elementX = frame.x/ratioWidth
+                            let elementY = frame.y/ratioHeight
+                            let elementWidth = frame.width/ratioWidth
+                            let elementHeight = frame.height/ratioHeight
+                            
                             var offSetX = 0.0
                             var offSetY = 0.0
                             if(parameters.count > 3) {
@@ -496,8 +387,8 @@ class atsDriver: XCTestCase {
                                 self.resultElement["message"] = "tap on element"
                             } else {
                                 if(ActionsEnum.SWIPE.rawValue == parameters[1]) {
-                                    let directionX = (Double(parameters[4]) ?? 0.0)/self.ratioScreen
-                                    let directionY = (Double(parameters[5]) ?? 0.0)/self.ratioScreen
+                                    let directionX = (Double(parameters[4]) ?? 0.0)/ratioWidth
+                                    let directionY = (Double(parameters[5]) ?? 0.0)/ratioHeight
                                     self.swipeCoordinate(x: calculateX, y: calculateY, swipeX: directionX, swipeY: directionY)
                                     self.forceCapture = true;
                                     self.resultElement["status"] = 0
@@ -572,17 +463,13 @@ class atsDriver: XCTestCase {
                 }
             }
             
-            if(action == ActionsEnum.CAPTURE.rawValue) {
-                sendBody(Data(self.captureStruct.utf8))
-            } else {
-                if let theJSONData = try?  JSONSerialization.data(
-                    withJSONObject: self.resultElement,
-                    options: []
-                    ),
-                    let theJSONText = String(data: theJSONData,
-                                             encoding: String.Encoding.utf8) {
-                    sendBody(Data(theJSONText.utf8))
-                }
+            if let theJSONData = try?  JSONSerialization.data(
+                withJSONObject: self.resultElement,
+                options: []
+                ),
+                let theJSONText = String(data: theJSONData,
+                                         encoding: String.Encoding.utf8) {
+                sendBody(Data(theJSONText.utf8))
             }
             sendBody(Data())
         }
@@ -627,180 +514,6 @@ class atsDriver: XCTestCase {
             range: NSRange(location: 0, length: nsString.length),
             withTemplate: "")
         return modifiedString.components(separatedBy: stop)
-    }
-    
-    func getFlatStruct(rootNode: UIElement) -> [String: Frame] {
-        let frame = Frame(x: rootNode.x, y: rootNode.y, width: rootNode.width, height: rootNode.height)
-        var currentFlatStruct: [String:Frame] = [:]
-        currentFlatStruct[rootNode.id] = frame
-        for child in rootNode.children! {
-            let c = self.getFlatStruct(rootNode: child)
-            currentFlatStruct = currentFlatStruct.merging(c)
-            { (current, _) in current }
-        }
-        return currentFlatStruct
-    }
-    
-    func flatArchitecture(rootNode: UIElement) -> [UIElement] {
-        var currentArchi: [UIElement] = [UIElement]()
-        var currentNode = rootNode
-        currentNode.children = []
-        if(currentNode.tag != "Other" && currentNode.tag != "Alert") {
-            currentArchi.append(currentNode)
-        }
-        
-        for child in rootNode.children! {
-            currentArchi += self.flatArchitecture(rootNode: child)
-        }
-        return currentArchi
-    }
-    
-    func getChildrens(currentLevel: Int, currentIndex: Int, endedIndex: Int, leveledTable: [(Int,String)], parentFrame: Frame) -> [UIElement] {
-        var tableToReturn: [UIElement] = [UIElement]()
-        if(currentIndex < leveledTable.count-1) {
-            for line in currentIndex...leveledTable.count-1 {
-                let levelUID = UUID().uuidString
-                let currentLine = leveledTable[line]
-                var splittedLine: [String] = [String]()
-                
-                var currentString = ""
-                var stopSplitting = false
-                var index = 0
-                var isValue = false
-                for char in currentLine.1 {
-                    if(isValue) {
-                        currentString += String(char)
-                        if((index + 1) == currentLine.1.count) {
-                            splittedLine.append(currentString)
-                        }
-                    } else if(currentString.contains("value")) {
-                        isValue = !isValue
-                        currentString += String(char)
-                    } else if(char == "," && !stopSplitting){
-                        splittedLine.append(currentString)
-                        currentString = ""
-                    } else {
-                        if(char == "'") {
-                            stopSplitting = !stopSplitting
-                        }
-                        currentString += String(char)
-                        if((index + 1) == currentLine.1.count) {
-                            splittedLine.append(currentString)
-                        }
-                    }
-                    index += 1
-                }
-                
-                if(currentLine.0 == currentLevel && endedIndex >= line) {
-                    var endIn = line + 1
-                    if(endIn < leveledTable.count-1) {
-                        for el in endIn...leveledTable.count-1 {
-                            if(leveledTable[el].0 >= currentLevel+1) {
-                                endIn += 1
-                            } else {
-                                break
-                            }
-                        }
-                    }
-                    
-                    var coordinateIndexes = 2
-                    if(splittedLine.count > 2 && splittedLine[2].contains("pid:")) {
-                        coordinateIndexes += 1
-                    }
-                    
-                    
-                    var attr: [String: String] = [String: String]()
-                    
-                    var label = ""
-                    var placeHolder = ""
-                    var identifier = ""
-                    var value = ""
-                    let pattern = "'(.*?)'"
-                    for str in splittedLine {
-                        if(str.contains("identifier")) {
-                            let currentIdentifier = (self.matchingStrings(input: String(str), regex: pattern).first?[1])!
-                            identifier = currentIdentifier.components(separatedBy: CharacterSet.symbols).joined()
-                        }
-                        if(str.contains("label")) {
-                            let currentLabel = str.replacingOccurrences(of: "label:", with: "").replacingOccurrences(of: "'", with: "").trimmingCharacters(in: NSCharacterSet.whitespaces)
-                            label = currentLabel.components(separatedBy: CharacterSet.symbols).joined()
-                        }
-                        if(str.contains("placeholderValue")) {
-                            let currentPlaceHolder = (self.matchingStrings(input: String(str), regex: pattern).first?[1])!
-                            placeHolder = currentPlaceHolder.components(separatedBy: CharacterSet.symbols).joined()
-                        }
-                        if(str.contains("value")) {
-                            let valueTable = str.split(separator: ":")
-                            if(valueTable.count == 2) {
-                                let val = valueTable[1]
-                                let currentValue = val.trimmingCharacters(in: .whitespacesAndNewlines)
-                                value = currentValue.components(separatedBy: CharacterSet.symbols).joined()
-                            }
-                        }
-                    }
-                    
-                    var enabled = true
-                    if(currentLine.1.contains("Disabled")) {
-                        enabled = false
-                    }
-                    
-                    var selected = false
-                    if(currentLine.1.contains("Selected")) {
-                        selected = true
-                    }
-                    
-                    
-                    attr["text"] = label
-                    attr["description"] = placeHolder
-                    attr["checkable"] = String(self.cleanString(input: String(splittedLine[0])) == "checkbox")
-                    attr["enabled"] = String(enabled)
-                    attr["identifier"] = identifier
-                    attr["selected"] = String(selected)
-                    attr["editable"] = String(enabled)
-                    attr["numeric"] = "false"
-                    attr["value"] = value
-                    
-                    var x = Double(self.cleanString(input: String(splittedLine[coordinateIndexes])))! * self.ratioScreen
-                    var y = Double(self.cleanString(input: String(splittedLine[coordinateIndexes+1])))! * self.ratioScreen
-                    var width = Double(self.cleanString(input: String(splittedLine[coordinateIndexes+2])))! * self.ratioScreen
-                    var height = Double(self.cleanString(input: String(splittedLine[coordinateIndexes+3])))! * self.ratioScreen
-                    
-                    if((y + height) > (parentFrame.height + parentFrame.y)) {
-                        let reduceHeight = (parentFrame.height + parentFrame.y) - height - y
-                        height = height + reduceHeight
-                    }
-                    if((x + width) > (parentFrame.width + parentFrame.x)) {
-                        let reduceWidth = (parentFrame.width + parentFrame.x) - width - x
-                        width = width + reduceWidth
-                    }
-                    
-                    if(y < parentFrame.y) {
-                        y = parentFrame.y
-                    }
-                    if(x < parentFrame.x) {
-                        x = parentFrame.x
-                    }
-                    
-                    let currentParentFrame = Frame(x: x, y: y, width: width, height: height)
-                    
-                    tableToReturn.append(UIElement(
-                        id: levelUID,
-                        tag: self.cleanString(input: String(splittedLine[0])),
-                        clickable: true,
-                        x: x,
-                        y: y,
-                        width: width,
-                        height: height,
-                        children: self.getChildrens(currentLevel: currentLevel+1, currentIndex: line+1, endedIndex: endIn, leveledTable: leveledTable, parentFrame: currentParentFrame),
-                        attributes: attr,
-                        channelY: nil,
-                        channelHeight: nil
-                    ))
-                }
-            }
-        }
-        
-        return tableToReturn
     }
     
     func getAppInfo() -> String {
@@ -936,18 +649,19 @@ class atsDriver: XCTestCase {
         let screenScale = UIScreen.main.nativeScale
         let screenSize = CGSize(width: screenBounds.size.width * screenScale, height: screenBounds.size.height * screenScale)
         
-        if(applyRatio) {
-            let screenNativeBounds = XCUIScreen.main.screenshot().image
-            self.ratioScreen = self.maxHeight / Double(screenNativeBounds.size.height)
-            self.deviceWidth = Double(screenNativeBounds.size.width) * self.ratioScreen
-            self.deviceHeight = Double(screenNativeBounds.size.height) * self.ratioScreen
+        self.deviceHeight = Double(screenSize.height)
+        self.deviceWidth = Double(screenSize.width)
+        if(Double(screenSize.height) > maxHeight) {
+            self.ratioScreen = maxHeight / Double(screenSize.height)
+            self.deviceHeight = Double(screenSize.height) * ratioScreen
+            self.deviceWidth = Double(screenSize.width) * ratioScreen
         }
         
         self.resultElement["os"] = "ios"
         self.resultElement["driverVersion"] = "1.0.0"
         self.resultElement["systemName"] = model + " - " + osVersion
-        self.resultElement["deviceWidth"] = applyRatio ? self.deviceWidth : screenSize.width
-        self.resultElement["deviceHeight"] = applyRatio ? self.deviceHeight : screenSize.height
+        self.resultElement["deviceWidth"] = self.deviceWidth
+        self.resultElement["deviceHeight"] = self.deviceHeight
         self.resultElement["channelWidth"] = applyRatio ? self.deviceWidth : screenSize.width
         self.resultElement["channelHeight"] = applyRatio ? self.deviceHeight : screenSize.height
         self.resultElement["channelX"] = 0
