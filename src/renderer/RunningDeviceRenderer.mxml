@@ -46,30 +46,20 @@
 			
 			protected function restart_clickHandler(event:MouseEvent):void
 			{
-				enabled = false;
 				restartButton.visible = false;
-				callLater((data as RunningDevice).close)
+				(data as RunningDevice).close();
 			}
 			
 			protected function mainGroup_rollOverHandler(event:MouseEvent):void
 			{
-				restartButton.includeInLayout = true;
 				restartButton.visible = true;				
-				if((data as RunningDevice) is IosDevice){
-					iosButtons.visible = true;
-				}
-				
+				iosButtons.visible = data is IosDevice;
 				TweenLite.fromTo([restartButton, iosButtons], 0.3, {alpha:0.0}, {alpha:1.0});
 			}
 			
 			protected function mainGroup_rollOutHandler(event:MouseEvent):void
 			{
 				iosButtons.visible = false;
-				
-				iconStatus.visible = true;
-				iconStatus.includeInLayout = true;
-				
-				restartButton.includeInLayout = false;
 				restartButton.visible = false;
 			}
 			
@@ -97,7 +87,6 @@
 			}
 		]]>
 	</fx:Script>
-	
 	<s:Group id="mainGroup" width="100%" verticalCenter="0" filters="{dropShadowFilterMiddle}"
 			 rollOver="mainGroup_rollOverHandler(event)" rollOut="mainGroup_rollOutHandler(event)">
 		<s:HGroup id="firstGroup" verticalAlign="middle" mouseDown="mouseDownHandler(event)" gap="0"
@@ -116,7 +105,6 @@
 				
 			</s:VGroup>
 		</s:HGroup>
-		
 		<s:HGroup right="7" verticalAlign="middle" verticalCenter="0">
 			<s:HGroup id="iosButtons" width="100%" horizontalAlign="right" visible="false" verticalAlign="middle">
 				<s:Group id="homeButton" buttonMode="true" click="goHome(event, (data as RunningDevice))"
@@ -131,11 +119,10 @@
 			<s:Group width="24" height="24">
 				<s:BitmapImage id="iconStatus" source="assets/icons/24/{(data as RunningDevice).status}.png" smooth="true" smoothingQuality="high"/>
 				<s:Group id="restartButton" buttonMode="true" click="restart_clickHandler(event)"
-						 toolTip="Restart driver" visible="false" includeInLayout="false">
+						 toolTip="Restart driver" visible="false">
 					<s:BitmapImage source="assets/icons/24/restart.png" smooth="true" smoothingQuality="high"/>
 				</s:Group>
 			</s:Group>
 		</s:HGroup>
 	</s:Group>
-	
 </renderer:DeviceRenderer>
