@@ -24,6 +24,8 @@
  package net.tautausan.plist
 {
 	import flash.errors.IllegalOperationError;
+	import flash.system.System;
+
 	/**
 	 *	Property List Foundation 
 	 * @author dai
@@ -50,6 +52,10 @@
 		public function get xml():XML
 		{
 			return x;
+		}
+		
+		public function dispose():void{
+			System.disposeXML(x);
 		}
 	}
 }

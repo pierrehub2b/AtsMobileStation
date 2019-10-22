@@ -23,6 +23,8 @@
  */
  package net.tautausan.plist
 {
+	
+
 	/**
 	 *	Property List ver 1.0 
 	 * @author dai
@@ -32,11 +34,11 @@
 	{
 		protected var data:Object;
 		
-		public function Plist10()
+		public function Plist10(xml:String)
 		{
 			super();
-			
-			data=new Object();
+			data = new Object();
+			parse(xml);
 		}
 		
 		public function get root():Object
