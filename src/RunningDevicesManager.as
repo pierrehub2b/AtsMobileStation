@@ -211,15 +211,16 @@ package
 				iosOutput = iosOutput.substr(plistNodeIndex + 21, iosOutput.length - plistNodeIndex - 29);
 				
 				usbDevicesIdList = new Vector.<String>();
-				
-				var plist:Plist10 = new Plist10();
-				plist.parse(iosOutput);
+					
+				var plist:Plist10 = new Plist10(iosOutput);
 				iosOutput = null;
-								
-				var usbPorts:Array = plist.root._items.object as Array;
+				
+				const usbPorts:Array = plist.root._items.object as Array;
 				for each (var port:PDict in usbPorts) {
 					getDevicesIds(port);
 				}
+				
+				plist.dispose();
 				
 				for each(var iosDev:RunningDevice in collection){
 					if(iosDev is IosDevice && iosDev.simulator == false && usbDevicesIdList.indexOf(iosDev.id) < 0){
