@@ -94,8 +94,11 @@ package
 			for each(dv in collection){
 				dv.close();
 			}
+			
 			relaunchAdb.pause();
-			relaunchIos.pause();
+			if(relaunchIos != null){
+				relaunchIos.pause();
+			}
 		}
 		
 		private function launchAdbProcess():void{
