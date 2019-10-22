@@ -329,11 +329,16 @@ class atsDriver: XCTestCase {
                         break
                     }
                     
-                    self.resultElement["message"] = "root_description"
-                    self.resultElement["status"] = 0
-                    self.resultElement["deviceHeight"] = self.deviceHeight
-                    self.resultElement["deviceWidth"] = self.deviceWidth
-                    self.resultElement["root"] = app.debugDescription
+                    // if last capture > 10 seconds
+                    if(self.cachedDescription != app.debugDescription || NSDate().timeIntervalSince1970 > self.lastCapture+10 ) {
+                        self.lastCapture = NSDate().timeIntervalSince1970
+                        self.cachedDescription = app.debugDescription
+                        self.resultElement["message"] = "root_description"
+                        self.resultElement["status"] = 0
+                        self.resultElement["deviceHeight"] = self.deviceHeight
+                        self.resultElement["deviceWidth"] = self.deviceWidth
+                        self.resultElement["root"] = self.cachedDescription
+                    }
                     break
                 case ActionsEnum.ELEMENT.rawValue:
                     if(parameters.count > 1) {
