@@ -2,23 +2,22 @@ package
 {
 	import com.greensock.TweenLite;
 	
-	import device.Device;
-	import device.RunningDevice;
-	import device.running.AndroidDevice;
-	import device.running.IosDevice;
-	import device.running.IosDeviceInfo;
-	import device.simulator.IosSimulator;
-	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
-	import flash.system.System;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.FlexGlobals;
+	
+	import device.Device;
+	import device.RunningDevice;
+	import device.running.AndroidDevice;
+	import device.running.IosDevice;
+	import device.running.IosDeviceInfo;
+	import device.simulator.IosSimulator;
 	
 	import net.tautausan.plist.PDict;
 	import net.tautausan.plist.Plist10;
@@ -40,16 +39,15 @@ package
 		private const relaunchDelay:int = 1;
 				
 		private var adbFile:File;
-
-		private var androidOutput:String = "";
-		private var iosOutput:String = "";
+		
+		private var androidOutput:String;
+		private var iosOutput:String;
 		
 		private var relaunchAdb:TweenLite;
 		private var relaunchIos:TweenLite;
 		
 		private var port:String = "8080";
-				
-		
+						
 		[Bindable]
 		public var collection:ArrayCollection = new ArrayCollection();
 		
@@ -109,7 +107,7 @@ package
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			
 			procInfo.executable = adbFile;			
-			procInfo.workingDirectory = adbFile.parent;
+			procInfo.workingDirectory = File.userDirectory;
 			procInfo.arguments = adbArgs;
 			
 			proc.addEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit, false, 0, true);
@@ -129,7 +127,7 @@ package
 			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData);
 			
 			proc.closeInput();
-			proc.exit(true);
+			proc.exit();
 			
 			var data:Array = androidOutput.split("\n");
 			androidOutput = null;
@@ -140,14 +138,14 @@ package
 				
 				data.shift();
 				
-				var len:int = data.length;
+				const len:int = data.length;
 				var info:Array;
 				var dev:RunningDevice;
 				
 				for(var i:int=0; i<len; i++){
 					info = data[i].split(/\s+/g);
 					
-					var runningId:String = info[0];
+					const runningId:String = info[0];
 					runingIds.push(runningId);
 					
 					if(info.length >= 2 && runningId.length > 0){
@@ -187,48 +185,53 @@ package
 			procInfo.workingDirectory = File.userDirectory;
 			procInfo.arguments = sysprofilerArgs;
 			
-			proc.addEventListener(NativeProcessExitEvent.EXIT, onUsbDeviceExit, false, 0, true);
-			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData, false, 0, true);
+			proc.addEventListener(NativeProcessExitEvent.EXIT, onUsbDeviceExit);
+			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
 			proc.start(procInfo);	
 		}
 		
+		protected function onReadIosDevicesData(ev:ProgressEvent):void{
+			iosOutput += ev.currentTarget.standardOutput.readUTFBytes(ev.currentTarget.standardOutput.bytesAvailable);
+		}
+		
 		protected function onUsbDeviceExit(ev:NativeProcessExitEvent):void{
-			
+						
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, onUsbDeviceExit);
 			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
 			
-			usbDevicesIdList = new Vector.<String>();
-			
+			proc.closeInput();
+			proc.exit();
+						
 			//------------------------------------------------------
 			
-			try{
-				var data:XML = new XML(iosOutput);
+			iosOutput = iosOutput.replace(/[\n\t]/g, "");
+			var plistNodeIndex:int = iosOutput.indexOf("<plist version=\"1.0\">")
+			if(plistNodeIndex > -1){
+				iosOutput = iosOutput.substr(plistNodeIndex + 21, iosOutput.length - plistNodeIndex - 29);
+				
+				usbDevicesIdList = new Vector.<String>();
+				
 				var plist:Plist10 = new Plist10();
-				
-				plist.parse(data.children());
-				
+				plist.parse(iosOutput);
+				iosOutput = null;
+								
 				var usbPorts:Array = plist.root._items.object as Array;
 				for each (var port:PDict in usbPorts) {
 					getDevicesIds(port);
 				}
-				System.disposeXML(data);
 				
-			}catch(error:Error){
-				trace(error);
-			}
-			
-			iosOutput = null;
-			
-			//------------------------------------------------------
-			
-			for each(var iosDev:RunningDevice in collection){
-				if(iosDev is IosDevice && iosDev.simulator == false && usbDevicesIdList.indexOf(iosDev.id) < 0){
-					iosDev.close()
+				for each(var iosDev:RunningDevice in collection){
+					if(iosDev is IosDevice && iosDev.simulator == false && usbDevicesIdList.indexOf(iosDev.id) < 0){
+						iosDev.close()
+					}
 				}
+				
+				loadDevicesId();
+				
+			}else{
+				relaunchIos.restart(true);
 			}
-			
-			loadDevicesId();
 		}
 		
 		private function getDevicesIds(itmList:PDict):void {
@@ -281,12 +284,7 @@ package
 			dev.dispose();
 			dev.close();
 		}
-		
-		protected function onReadIosDevicesData(ev:ProgressEvent):void{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			iosOutput += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);
-		}
-		
+				
 		public function findDevice(id:String):RunningDevice{
 			for each(var dv:RunningDevice in collection) {
 				if(dv.id == id){
