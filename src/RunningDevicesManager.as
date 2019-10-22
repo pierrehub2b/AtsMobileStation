@@ -1,6 +1,13 @@
 package 
 {
-	import com.greensock.TweenMax;
+	import com.greensock.TweenLite;
+	
+	import device.Device;
+	import device.RunningDevice;
+	import device.running.AndroidDevice;
+	import device.running.IosDevice;
+	import device.running.IosDeviceInfo;
+	import device.simulator.IosSimulator;
 	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
@@ -13,13 +20,6 @@ package
 	import mx.collections.ArrayCollection;
 	import mx.core.FlexGlobals;
 	import mx.utils.object_proxy;
-	
-	import device.Device;
-	import device.RunningDevice;
-	import device.running.AndroidDevice;
-	import device.running.IosDevice;
-	import device.running.IosDeviceInfo;
-	import device.simulator.IosSimulator;
 	
 	import net.tautausan.plist.PDict;
 	import net.tautausan.plist.Plist10;
@@ -37,12 +37,15 @@ package
 		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
 		
-		private const relaunchDelay:int = 2;
+		private const relaunchDelay:int = 3;
 		
 		private var adbFile:File;
-		private var errorStack:String = "";
+
 		private var androidOutput:String = "";
 		private var iosOutput:String = "";
+		
+		private var relaunchAdb:TweenLite;
+		private var relaunchIos:TweenLite;
 		
 		private var port:String = "8080";
 		
@@ -59,7 +62,7 @@ package
 			
 			if(macos){
 				
-				TweenMax.delayedCall(0.0, launchIosProcess);
+				relaunchIos = TweenLite.delayedCall(relaunchDelay, launchIosProcess);
 				
 				this.adbFile = File.applicationDirectory.resolvePath(adbPath);
 				
@@ -74,7 +77,7 @@ package
 				
 			}else{
 				this.adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
-				TweenMax.delayedCall(0.0, launchAdbProcess);
+				relaunchAdb = TweenLite.delayedCall(relaunchDelay, launchAdbProcess);
 			}
 		}
 		
@@ -82,7 +85,7 @@ package
 		{
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
-			TweenMax.delayedCall(0.0, launchAdbProcess);
+			relaunchAdb = TweenLite.delayedCall(relaunchDelay, launchAdbProcess);
 		}	
 		
 		public function terminate():void{
@@ -90,14 +93,13 @@ package
 			for each(dv in collection){
 				dv.close();
 			}
-			TweenMax.killDelayedCallsTo(launchAdbProcess);
-			TweenMax.killDelayedCallsTo(launchIosProcess);
+			relaunchAdb.pause();
+			relaunchIos.pause();
 		}
 		
 		private function launchAdbProcess():void{
 			
 			androidOutput = "";
-			errorStack = "";
 			
 			var proc:NativeProcess = new NativeProcess();
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
@@ -123,15 +125,19 @@ package
 			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData);
 			
 			var data:Array = androidOutput.split("\n");
+			androidOutput = null;
+			
 			var runingIds:Vector.<String> = new Vector.<String>();
 			
 			if(data.length > 1){
+				
+				data.shift();
 				
 				var len:int = data.length;
 				var info:Array;
 				var dev:RunningDevice;
 				
-				for(var i:int=1; i<len; i++){
+				for(var i:int=0; i<len; i++){
 					info = data[i].split(/\s+/g);
 					
 					var runningId:String = info[0];
@@ -158,7 +164,7 @@ package
 				}
 			}
 			
-			TweenMax.delayedCall(relaunchDelay, launchAdbProcess);
+			relaunchAdb.restart(true);
 		}
 		
 		//---------------------------------------------------------------------------------------------------------
@@ -166,7 +172,6 @@ package
 		
 		private function launchIosProcess():void{
 			iosOutput = "";
-			errorStack = "";
 			
 			var proc:NativeProcess = new NativeProcess();
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
@@ -304,8 +309,7 @@ package
 					}
 				}
 			}
-			
-			TweenMax.delayedCall(relaunchDelay, launchIosProcess);
+			relaunchIos.restart(true);
 		}
 	}
 }
