@@ -19,26 +19,26 @@ package
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.FlexGlobals;
-	import mx.utils.object_proxy;
 	
 	import net.tautausan.plist.PDict;
 	import net.tautausan.plist.Plist10;
 	
 	public class RunningDevicesManager
 	{
+		private const mobileDevice:File = File.applicationDirectory.resolvePath("assets/tools/ios/mobiledevice");
+		private const systemProfiler:File = new File("/usr/sbin/system_profiler");
+		private const envFile:File = new File("/usr/bin/env");
+		
+		private const sysprofilerArgs:Vector.<String> = new <String>["system_profiler", "SPUSBDataType", "-xml"];
 		private const simCtlArgs:Vector.<String> = new <String>["xcrun", "simctl", "list", "devices", "-j"];
 		private const adbArgs:Vector.<String> = new <String>["devices"];
-		
-		private const mobileDevice:File = File.applicationDirectory.resolvePath("assets/tools/ios/mobiledevice");
-		
-		private const systemProfiler:File = new File("/usr/sbin/system_profiler");
-		
+						
 		private const adbPath:String = "assets/tools/android/adb";
 		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
 		
-		private const relaunchDelay:int = 3;
-		
+		private const relaunchDelay:int = 1;
+				
 		private var adbFile:File;
 
 		private var androidOutput:String = "";
@@ -48,6 +48,7 @@ package
 		private var relaunchIos:TweenLite;
 		
 		private var port:String = "8080";
+				
 		
 		[Bindable]
 		public var collection:ArrayCollection = new ArrayCollection();
@@ -124,6 +125,9 @@ package
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit);
 			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData);
 			
+			proc.closeInput();
+			proc.exit(true);
+			
 			var data:Array = androidOutput.split("\n");
 			androidOutput = null;
 			
@@ -176,9 +180,9 @@ package
 			var proc:NativeProcess = new NativeProcess();
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			
-			procInfo.executable = new File("/usr/bin/env");
+			procInfo.executable = envFile;
 			procInfo.workingDirectory = File.userDirectory;
-			procInfo.arguments = new <String>["system_profiler", "SPUSBDataType", "-xml"];
+			procInfo.arguments = sysprofilerArgs;
 			
 			proc.addEventListener(NativeProcessExitEvent.EXIT, onUsbDeviceExit, false, 0, true);
 			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData, false, 0, true);
@@ -186,6 +190,7 @@ package
 		}
 		
 		protected function onUsbDeviceExit(ev:NativeProcessExitEvent):void{
+			
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, onUsbDeviceExit);
 			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
@@ -205,9 +210,12 @@ package
 					getDevicesIds(port);
 				}
 				System.disposeXML(data);
+				
 			}catch(error:Error){
 				trace(error);
 			}
+			
+			iosOutput = null;
 			
 			//------------------------------------------------------
 			
