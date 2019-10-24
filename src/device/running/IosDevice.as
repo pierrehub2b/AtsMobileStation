@@ -181,7 +181,8 @@ package device.running
 				
 				testingProcess.closeInput();
 				testingProcess.exit();
-				
+				testingProcess = null;
+				procInfo = null;
 				return true;
 			}
 			return false;
@@ -211,7 +212,8 @@ package device.running
 				
 				errorMessage = " - WIFI not connected !";
 				testingProcess.exit();
-				
+				testingProcess = null;
+				procInfo = null;
 			}else if(data.indexOf(ATSDRIVER_DRIVER_HOST) > -1){
 				
 				testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput);
@@ -231,16 +233,22 @@ package device.running
 			if(noProvisionningProfileError.test(data)){
 				errorMessage = " - No provisioning profiles !";
 				testingProcess.exit();
+				testingProcess = null;
+				procInfo = null;
 			}
 			
 			if(noCertificatesError.test(data)){
 				errorMessage = " - Certificate error !";
 				testingProcess.exit();
+				testingProcess = null;
+				procInfo = null;
 			}
 			
 			if(startInfoLocked.test(data)){
 				errorMessage = " - Locked with passcode !";
 				testingProcess.exit();
+				testingProcess = null;
+				procInfo = null;
 			}
 		}
 	}

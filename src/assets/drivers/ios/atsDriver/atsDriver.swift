@@ -43,10 +43,9 @@ class atsDriver: XCTestCase {
     var continueRunningValue = true
     var connectedSockets = [Int32: Socket]()
     var imgView: Data? = nil
-    var lastCapture: TimeInterval = NSDate().timeIntervalSince1970
+    var lastCapture: TimeInterval = 0.0
     var leveledTableCount = 0
     var tcpSocket = socket(AF_INET, SOCK_STREAM, 0)
-    var cachedDescription: String = ""
     let offsetYShift = 33.0
     let osVersion = UIDevice.current.systemVersion
     let model = UIDevice.modelName.replacingOccurrences(of: "Simulator ", with: "")
@@ -309,7 +308,7 @@ class atsDriver: XCTestCase {
                                     self.resultElement["status"] = 0
                                     self.resultElement["message"] = "orientation to landscape mode"
                                 }
-                            
+                                self.lastCapture = 0.0
                             } else {
                                 self.resultElement["message"] = "unknow button " + parameters[0]
                                 self.resultElement["status"] = -42
@@ -330,14 +329,13 @@ class atsDriver: XCTestCase {
                     }
                     
                     // if last capture > 10 seconds
-                    if(self.cachedDescription != app.debugDescription || NSDate().timeIntervalSince1970 > self.lastCapture+10 ) {
+                    if(NSDate().timeIntervalSince1970 > self.lastCapture+10) {
                         self.lastCapture = NSDate().timeIntervalSince1970
-                        self.cachedDescription = app.debugDescription
                         self.resultElement["message"] = "root_description"
                         self.resultElement["status"] = 0
                         self.resultElement["deviceHeight"] = self.deviceHeight
                         self.resultElement["deviceWidth"] = self.deviceWidth
-                        self.resultElement["root"] = self.cachedDescription
+                        self.resultElement["root"] = app.debugDescription
                     }
                     break
                 case ActionsEnum.ELEMENT.rawValue:
@@ -350,6 +348,7 @@ class atsDriver: XCTestCase {
                                 self.resultElement["status"] = 0
                                 if(app.keyboards.count > 0) {
                                     app.typeText(text)
+                                    self.lastCapture = 0.0
                                     self.resultElement["message"] = "element tap text: " + text
                                 } else {
                                     self.resultElement["message"] = "no keyboard on screen for tap text"
@@ -370,7 +369,6 @@ class atsDriver: XCTestCase {
                             
                             let elementX = frame.x/ratioWidth
                             let elementY = frame.y/ratioHeight
-                            let elementWidth = frame.width/ratioWidth
                             let elementHeight = frame.height/ratioHeight
                             
                             var offSetX = 0.0
@@ -400,6 +398,7 @@ class atsDriver: XCTestCase {
                                     self.resultElement["message"] = "swipe element"
                                 }
                             }
+                            self.lastCapture = 0.0
                         }
                     } else {
                         self.resultElement["message"] = "missing paramters action"
@@ -418,6 +417,7 @@ class atsDriver: XCTestCase {
                                 self.resultElement["label"] = app.label
                                 self.resultElement["icon"] = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH4wgNCzQS2tg9zgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAAMSURBVAjXY2DY/QYAAmYBqC0q4zEAAAAASUVORK5CYII="
                                 self.resultElement["version"] = "0.0.0"
+                                self.lastCapture = 0.0
                             } else {
                                 self.resultElement["message"] = "App package not found in current device: " + parameters[1]
                                 self.resultElement["status"] = -51
@@ -427,6 +427,7 @@ class atsDriver: XCTestCase {
                             if(ActionsEnum.SWITCH.rawValue == parameters[0]) {
                                 app = XCUIApplication(bundleIdentifier: parameters[1])
                                 app.activate()
+                                self.lastCapture = 0.0
                                 self.resultElement["message"] = "switch app " + parameters[1]
                                 self.resultElement["status"] = 0
                             } else {
@@ -649,26 +650,19 @@ class atsDriver: XCTestCase {
         app.launchEnvironment["ENVOY_BASEURL"] = "http://localhost:\(self.port)"
     }
     
-    func driverInfoBase(applyRatio: Bool) {
-        let screenBounds = UIScreen.main.nativeBounds
-        let screenScale = UIScreen.main.nativeScale
-        let screenSize = CGSize(width: screenBounds.size.width * screenScale, height: screenBounds.size.height * screenScale)
-        
-        self.deviceHeight = Double(screenSize.height)
-        self.deviceWidth = Double(screenSize.width)
-        if(Double(screenSize.height) > maxHeight) {
-            self.ratioScreen = maxHeight / Double(screenSize.height)
-            self.deviceHeight = Double(screenSize.height) * ratioScreen
-            self.deviceWidth = Double(screenSize.width) * ratioScreen
-        }
+    func driverInfoBase(applyRatio: Bool) { 
+        let screenNativeBounds = XCUIScreen.main.screenshot().image
+        self.ratioScreen = self.maxHeight / Double(screenNativeBounds.size.height)
+        self.deviceWidth = Double(screenNativeBounds.size.width) * self.ratioScreen
+        self.deviceHeight = Double(screenNativeBounds.size.height) * self.ratioScreen
         
         self.resultElement["os"] = "ios"
         self.resultElement["driverVersion"] = "1.0.0"
         self.resultElement["systemName"] = model + " - " + osVersion
         self.resultElement["deviceWidth"] = self.deviceWidth
         self.resultElement["deviceHeight"] = self.deviceHeight
-        self.resultElement["channelWidth"] = applyRatio ? self.deviceWidth : screenSize.width
-        self.resultElement["channelHeight"] = applyRatio ? self.deviceHeight : screenSize.height
+        self.resultElement["channelWidth"] = applyRatio ? self.deviceWidth : screenNativeBounds.size.width
+        self.resultElement["channelHeight"] = applyRatio ? self.deviceHeight : screenNativeBounds.size.height
         self.resultElement["channelX"] = 0
         self.resultElement["channelY"] = 0
     }

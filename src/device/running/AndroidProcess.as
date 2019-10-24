@@ -70,11 +70,11 @@ package device.running
 	
 		protected function onOutputErrorShell(event:ProgressEvent):void
 		{
-			error = process.standardError.readUTFBytes(process.standardError.bytesAvailable);
+			error = new String(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
 		}
 		
 		protected function onReadLanData(event:ProgressEvent):void{
-			output += process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
+			output = output.concat(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
 		}
 		
 		protected function onReadLanExit(event:NativeProcessExitEvent):void{
@@ -132,7 +132,7 @@ package device.running
 		}
 		
 		protected function onReadPropertyData(event:ProgressEvent):void{
-			output += process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable).replace(/\r/g, "");
+			output = output.concat(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable).replace(/\r/g, ""));
 		}
 		
 		protected function onGetPropExit(event:NativeProcessExitEvent):void{
@@ -174,7 +174,7 @@ package device.running
 		
 		protected function onExecuteError(event:ProgressEvent):void
 		{
-			error = process.standardError.readUTFBytes(process.standardError.bytesAvailable);
+			error = new String(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
 		}
 		
 		protected function onExecuteData(event:ProgressEvent):void{
@@ -188,7 +188,9 @@ package device.running
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onExecuteExit);
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData);
 						
+			process.exit(true);
 			process = null;
+			procInfo = null;
 			
 			if(error != null){
 				dispatchEvent(new Event(ERROR_EVENT));

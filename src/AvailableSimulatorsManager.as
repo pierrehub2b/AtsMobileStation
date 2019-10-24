@@ -28,14 +28,17 @@ package
 		[Bindable]
 		public var collection:ArrayCollection = new ArrayCollection();
 		
+		private var process: NativeProcess;
+		private var procInfo: NativeProcessStartupInfo;
+		
 		public function AvailableSimulatorsManager()
 		{
 			if(Capabilities.os.indexOf("Mac") > -1){
 				
 				info = "Loading simulators, please wait ...";
 				
-				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-				var process:NativeProcess = new NativeProcess();
+				procInfo = new NativeProcessStartupInfo();
+				process = new NativeProcess();
 				
 				procInfo.executable = new File("/usr/bin/env");
 				procInfo.workingDirectory = File.userDirectory;
@@ -51,39 +54,41 @@ package
 		
 		protected function onSetupSimulatorExit(ev:NativeProcessExitEvent):void
 		{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			proc.removeEventListener(NativeProcessExitEvent.EXIT, onSetupSimulatorExit);
+			process = ev.currentTarget as NativeProcess;
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onSetupSimulatorExit);
 			
-			proc.closeInput();
-			proc.exit(true);
+			process.closeInput();
+			process.exit(true);
 			
-			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			proc = new NativeProcess();
+			procInfo = new NativeProcessStartupInfo();
+			process = new NativeProcess();
 			
 			procInfo.executable = new File("/usr/bin/env");
 			procInfo.workingDirectory = File.userDirectory;
 			
 			output = "";
-			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onProcessOutput, false, 0, true);
-			proc.addEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist, false, 0, true);
+			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onProcessOutput, false, 0, true);
+			process.addEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist, false, 0, true);
 			
 			procInfo.arguments = new <String>["xcrun", "simctl", "list", "devices", "-j"];
-			proc.start(procInfo);
+			process.start(procInfo);
+			procInfo = null;
 		}
 		
 		protected function onProcessOutput(ev:ProgressEvent):void{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			output += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);
+			process = ev.currentTarget as NativeProcess;
+			output = output.concat(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
 		}
 		
 		protected function onSimCtlExist(ev:NativeProcessExitEvent):void
 		{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onProcessOutput);
-			proc.removeEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist);
+			process = ev.currentTarget as NativeProcess;
+			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onProcessOutput);
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist);
 			
-			proc.closeInput();
-			proc.exit(true);
+			process.closeInput();
+			process.exit(true);
+			process = null;
 			
 			var obj:Object;
 			if(output.length > 0) {
@@ -100,16 +105,20 @@ package
 							if(device["name"].indexOf("iPhone") == 0 && device["isAvailable"] && iosVersion.indexOf("iOS") > -1) {
 								collection.addItem(new IosSimulator(device["udid"], device["name"], iosVersion.replace("iOS.",""), device["state"] == "Booted"));
 							}
+							device = null;
 						}
+						d = null;
 					}
+					devices = null;
+					runtime = null;					
 				}
 				
 				if(collection.length == 0){
-					info = "No simulators found !\n(Xcode may not be installed on this station !)"
+					info = new String("No simulators found !\n(Xcode may not be installed on this station !)");
 				}else{
-					info = "";
+					info = new String();
 				}
-			}
+			}			
 		}
 	}
 }

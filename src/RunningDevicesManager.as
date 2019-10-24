@@ -85,6 +85,8 @@ package
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
 			relaunchAdb = TweenLite.delayedCall(relaunchDelay, launchAdbProcess);
+			proc.exit();
+			proc = null;
 		}	
 		
 		public function terminate():void{
@@ -117,7 +119,9 @@ package
 		
 		protected function onReadAndroidDevicesData(ev:ProgressEvent):void{
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			androidOutput += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);
+			androidOutput = androidOutput.concat(proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable));
+			proc.exit();
+			proc = null;
 		}
 		
 		protected function onReadAndroidDevicesExit(ev:NativeProcessExitEvent):void
@@ -128,6 +132,8 @@ package
 			
 			proc.closeInput();
 			proc.exit();
+			
+			proc = null;
 			
 			var data:Array = androidOutput.split("\n");
 			androidOutput = null;
@@ -163,6 +169,8 @@ package
 				}
 			}
 			
+			data = null;
+			
 			for each(var androidDev:RunningDevice in collection){
 				if(androidDev is AndroidDevice && androidDev.simulator == false && runingIds.indexOf(androidDev.id) < 0){
 					androidDev.close()
@@ -191,7 +199,7 @@ package
 		}
 		
 		protected function onReadIosDevicesData(ev:ProgressEvent):void{
-			iosOutput += ev.currentTarget.standardOutput.readUTFBytes(ev.currentTarget.standardOutput.bytesAvailable);
+			iosOutput = iosOutput.concat(ev.currentTarget.standardOutput.readUTFBytes(ev.currentTarget.standardOutput.bytesAvailable));
 		}
 		
 		protected function onUsbDeviceExit(ev:NativeProcessExitEvent):void{
@@ -202,37 +210,40 @@ package
 			
 			proc.closeInput();
 			proc.exit();
-						
+			proc = null;		
 			//------------------------------------------------------
 			
-			iosOutput = iosOutput.replace(/[\n\t]/g, "");
-			var plistNodeIndex:int = iosOutput.indexOf("<plist version=\"1.0\">")
+			var output:String = new String(iosOutput.replace(/[\n\t]/g, ""));
+			iosOutput = null;
+			var plistNodeIndex:int = output.indexOf("<plist version=\"1.0\">")
 			if(plistNodeIndex > -1){
-				iosOutput = iosOutput.substr(plistNodeIndex + 21, iosOutput.length - plistNodeIndex - 29);
+				output = output.substr(plistNodeIndex + 21, output.length - plistNodeIndex - 29);
 				
 				usbDevicesIdList = new Vector.<String>();
 					
-				var plist:Plist10 = new Plist10(iosOutput);
-				iosOutput = null;
-				
-				const usbPorts:Array = plist.root._items.object as Array;
+				var plist:Plist10 = new Plist10(output);
+				var usbPorts:Array = plist.root._items.object as Array;
 				for each (var port:PDict in usbPorts) {
 					getDevicesIds(port);
 				}
 				
+				output = null;
 				plist.dispose();
+				plist = null;
+				usbPorts = null;
+				port = null;
 				
 				for each(var iosDev:RunningDevice in collection){
 					if(iosDev is IosDevice && iosDev.simulator == false && usbDevicesIdList.indexOf(iosDev.id) < 0){
 						iosDev.close()
 					}
 				}
-				
+				iosDev = null;
 				loadDevicesId();
-				
 			}else{
 				relaunchIos.restart(true);
 			}
+			
 		}
 		
 		private function getDevicesIds(itmList:PDict):void {
@@ -256,9 +267,12 @@ package
 					var devInfo:IosDeviceInfo = new IosDeviceInfo(id);
 					devInfo.addEventListener(Event.COMPLETE, realDevicesInfoLoaded, false, 0, true);
 					devInfo.load();
+					devInfo = null;
 				}else{
 					loadDevicesId()
 				}
+				id = null;
+				dev = null;
 			}else{
 				realDevicesLoaded();
 			}
@@ -279,6 +293,7 @@ package
 			}
 			
 			loadDevicesId()
+			dev = null;
 		}
 		
 		public function restartDev(dev:Device):void {
@@ -302,6 +317,7 @@ package
 			
 			collection.removeItem(dv);
 			collection.refresh();
+			dv = null;
 		}
 		
 		private function realDevicesLoaded():void{
@@ -319,6 +335,7 @@ package
 					}
 				}
 			}
+			sim = null;
 			relaunchIos.restart(true);
 		}
 	}

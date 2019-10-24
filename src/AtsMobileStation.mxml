@@ -102,6 +102,7 @@
 						tw.devices.push(dv);
 					}
 				}
+				dv.dispose();
 				
 				// open the TitleWindow as a modal popup window
 				PopUpManager.addPopUp(tw, this, true);

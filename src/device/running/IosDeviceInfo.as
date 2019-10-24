@@ -42,6 +42,7 @@ package device.running
 				procInfo.executable = mobileDevice;
 				procInfo.workingDirectory = File.userDirectory;
 				procInfo.arguments = argumentsBase.concat(new <String>[prop[1]]);
+				prop = null;
 				
 				proc.addEventListener(NativeProcessExitEvent.EXIT, onReadDataExit);
 				proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadData);
@@ -63,7 +64,6 @@ package device.running
 			
 			proc.closeInput();
 			proc.exit(true);
-			
 			load();
 		}
 		

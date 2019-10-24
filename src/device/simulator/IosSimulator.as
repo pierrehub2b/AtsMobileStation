@@ -19,6 +19,8 @@ package device.simulator
 	{
 		private const xcrunExec:File = new File("/usr/bin/xcrun");
 		private var runningDevice:IosDevice;
+		private var process:NativeProcess;
+		private var procInfo: NativeProcessStartupInfo;
 		
 		public function IosSimulator(id:String, name:String, version:String, booted:Boolean)
 		{
@@ -30,11 +32,11 @@ package device.simulator
 		
 		override public function startSim():void
 		{
-			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			procInfo = new NativeProcessStartupInfo();
 			procInfo.executable = xcrunExec;
 			procInfo.workingDirectory = File.userDirectory;
 			
-			var process:NativeProcess = new NativeProcess();
+			process = new NativeProcess();
 			process.addEventListener(NativeProcessExitEvent.EXIT, onBootExit);
 			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onBootError);
 			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onBootData);
@@ -44,24 +46,25 @@ package device.simulator
 		}
 		
 		protected function onBootData(ev:ProgressEvent):void{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			var error:String = proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);
+			process = ev.currentTarget as NativeProcess;
+			var error:String = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
 			trace("boot data -> " + error);
 		}
 		
 		protected function onBootError(ev:ProgressEvent):void{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			var error:String = proc.standardError.readUTFBytes(proc.standardError.bytesAvailable);
+			process = ev.currentTarget as NativeProcess;
+			var error:String = process.standardError.readUTFBytes(process.standardError.bytesAvailable);
 			trace("boot error -> " + error);
 		}
 		
 		protected function onBootExit(ev:NativeProcessExitEvent):void{
 			
-			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			proc.removeEventListener(NativeProcessExitEvent.EXIT, onBootExit);
-			proc.closeInput();
-			proc.exit(true);
-			
+			process = ev.currentTarget as NativeProcess;
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onBootExit);
+			process.closeInput();
+			process.exit(true);
+			process = null;
+			procInfo = null;
 			statusOn();
 		}
 		
@@ -94,24 +97,25 @@ package device.simulator
 			runningDevice.removeEventListener(Device.STOPPED_EVENT, deviceStoppedHandler);
 			runningDevice = null;
 			
-			var pinfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			pinfo.executable = xcrunExec;
-			pinfo.workingDirectory = File.userDirectory;
-			pinfo.arguments = new <String>["simctl", "shutdown", id];
+			procInfo = new NativeProcessStartupInfo();
+			procInfo.executable = xcrunExec;
+			procInfo.workingDirectory = File.userDirectory;
+			procInfo.arguments = new <String>["simctl", "shutdown", id];
 			
-			var proc:NativeProcess = new NativeProcess();
-			proc.addEventListener(NativeProcessExitEvent.EXIT, onShutdownExit);
-			proc.start(pinfo);
+			process = new NativeProcess();
+			process.addEventListener(NativeProcessExitEvent.EXIT, onShutdownExit);
+			process.start(procInfo);
 		}
 		
 		protected function onShutdownExit(ev:NativeProcessExitEvent):void
 		{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			proc.removeEventListener(NativeProcessExitEvent.EXIT, onShutdownExit);
+			process = ev.currentTarget as NativeProcess;
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onShutdownExit);
 			
-			proc.closeInput();
-			proc.exit(true);
-			
+			process.closeInput();
+			process.exit(true);
+			process = null;
+			procInfo = null;
 			statusOff();
 		}
 	}
