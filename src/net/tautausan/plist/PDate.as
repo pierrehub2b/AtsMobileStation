@@ -40,8 +40,7 @@
 			
 			if(!data)
 			{
-				
-				var dateStr:String=x.toString();
+				var dateStr:String = x.toString();
 				
 				var d:Array=dateStr.match(/([\d.,:\-W]+)(?:T([\d.,:\-+WZ]*))?/);
 				var dateFormat:String = d[1];
@@ -76,7 +75,7 @@
 					hh = nn = ss = 0;
 				}
 	
-				var date:Date=new Date();
+				var date:Date = new Date();
 				date.setUTCFullYear(yyyy,mm-1,dd);
 				date.setUTCHours(hh,nn,ss,0);
 				
@@ -84,6 +83,5 @@
 			}
 			return data;
 		}
-		
 	}
 }

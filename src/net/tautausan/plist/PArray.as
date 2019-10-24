@@ -35,7 +35,6 @@
 		{
 			super(x);
 		}
-
 		
 		override public function get object():*
 		{

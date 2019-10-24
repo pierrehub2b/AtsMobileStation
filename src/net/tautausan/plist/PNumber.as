@@ -39,11 +39,11 @@
 		{
 			if(!data)
 			{
-				if(x.name()=="real")
+				if(x.name() == "real")
 				{
 					return parseFloat(x.toString());
 				}
-				else if(x.name()=="integer")
+				else if(x.name() == "integer")
 				{
 					return parseInt(x.toString(), 10);
 				}

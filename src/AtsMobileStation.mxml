@@ -3,7 +3,7 @@
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
 					   width="340" height="466" showStatusBar="false"
-					   right="0" bottom="0"
+					   right="0" bottom="0" frameRate="24"
 					   creationComplete="creationCompleteHandler(event)"
 					   close="closeHandler(event)" backgroundColor="0xefefef">
 	<fx:Script>
@@ -102,7 +102,6 @@
 						tw.devices.push(dv);
 					}
 				}
-				dv.dispose();
 				
 				// open the TitleWindow as a modal popup window
 				PopUpManager.addPopUp(tw, this, true);

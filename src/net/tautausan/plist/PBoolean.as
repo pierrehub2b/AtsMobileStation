@@ -33,19 +33,17 @@
 		public function PBoolean(x:XML)
 		{
 			super(x);
-		}
-		
+		}		
 		
 		override public function get object():*
 		{
 			if(!data)
 			{
-			
-				if(x.name()=="true")
+				if(x.name() == "true")
 				{
 					return true;
 				}
-				else if(x.name()=="false")
+				else if(x.name() == "false")
 				{
 					return false;
 				}
