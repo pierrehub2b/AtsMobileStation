@@ -88,20 +88,21 @@ class atsDriver: XCTestCase {
         if let url = testBundle.url(forResource: "Settings", withExtension: "plist"),
           let myDict = NSDictionary(contentsOf: url) as? [String:Any] {
             customPort = myDict["CFCustomPort"].unsafelyUnwrapped as! String;
-            if(!self.simulator) {
-                for itm in myDict {
-                    if(itm.key.contains("CFAppBundleID")) {
-                        self.appsInstalled.append(itm.value as! String)
-                    }
+            for itm in myDict {
+                if(itm.key.contains("CFAppBundleID")) {
+                    self.appsInstalled.append(itm.value as! String)
                 }
             }
         }
         
-        let bundleMain = Bundle.main
-        if let url = bundleMain.url(forResource: "../../../../../Library/SpringBoard/IconState", withExtension: "plist"),
-          let myDict = NSDictionary(contentsOf: url) as? [String:Any] {
-            self.appsInstalled = getAllAppIds(from: myDict)
+        if(UIDevice.isSimulator && self.appsInstalled.count == 0) {
+            let bundleMain = Bundle.main
+            if let url = bundleMain.url(forResource: "../../../../../Library/SpringBoard/IconState", withExtension: "plist"),
+              let myDict = NSDictionary(contentsOf: url) as? [String:Any] {
+                self.appsInstalled = getAllAppIds(from: myDict)
+            }
         }
+        
         
         if !UIDevice.isSimulator {
              XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
