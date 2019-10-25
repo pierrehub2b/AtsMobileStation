@@ -37,8 +37,6 @@ package
 		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
 		private const newlineTabPattern:RegExp = /[\n\t]/g;
-		
-		private const relaunchDelay:int = 5;
 				
 		private var adbFile:File;
 		
@@ -76,7 +74,9 @@ package
 				
 			}else{
 				adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
-				adbLoop = TweenLite.delayedCall(relaunchDelay, launchAdbProcess);
+				
+				// only one type of devices to find, we can do loop faster
+				adbLoop = TweenLite.delayedCall(2, launchAdbProcess);
 			}
 		}
 		
@@ -85,8 +85,9 @@ package
 			ev.target.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
 			ev.target.closeInput();
 			
-			adbLoop = TweenLite.delayedCall(relaunchDelay, launchAdbProcess);
-			iosLoop = TweenLite.delayedCall(relaunchDelay, launchIosProcess);
+			// two types of devices to find, ios loop need more resources to execute
+			adbLoop = TweenLite.delayedCall(3, launchAdbProcess);
+			iosLoop = TweenLite.delayedCall(5, launchIosProcess);
 		}	
 		
 		public function terminate():void{
