@@ -64,7 +64,6 @@ package
 			if(macos){
 				
 				adbFile = File.applicationDirectory.resolvePath(adbPath);
-				iosLoop = TweenLite.delayedCall(relaunchDelay, launchIosProcess);
 								
 				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 				procInfo.executable = new File("/bin/chmod");			
@@ -87,6 +86,7 @@ package
 			ev.target.closeInput();
 			
 			adbLoop = TweenLite.delayedCall(relaunchDelay, launchAdbProcess);
+			iosLoop = TweenLite.delayedCall(relaunchDelay, launchIosProcess);
 		}	
 		
 		public function terminate():void{
