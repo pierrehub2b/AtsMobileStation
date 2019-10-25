@@ -39,6 +39,12 @@
 			[Bindable]
 			public var simulators:AvailableSimulatorsManager;
 			
+			
+			//mobile Device process
+			public var mobileDeviceProcess: NativeProcess;
+			public var mobileDeviceProcessInfo: NativeProcessStartupInfo;
+			private static const iosMobileDeviceTools:File = File.applicationDirectory.resolvePath("assets/tools/ios");
+			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
 				cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
@@ -46,6 +52,9 @@
 				devices = new RunningDevicesManager(port, isMacOs);
 				
 				settingsButton.visible = isMacOs;
+				if(isMacOs) {
+					settingMobileDeviceProcess();
+				}
 			}
 			
 			public function restartDevice(dev:Device):void{
@@ -55,6 +64,16 @@
 			protected function closeHandler(event:Event):void
 			{
 				devices.terminate();
+			}
+			
+			protected function settingMobileDeviceProcess() {
+				//Getting App list
+				mobileDeviceProcess = new NativeProcess();
+				mobileDeviceProcessInfo = new NativeProcessStartupInfo()
+				mobileDeviceProcessInfo.executable = new File("/usr/bin/env");
+				mobileDeviceProcessInfo.workingDirectory = iosMobileDeviceTools;
+				var args: Vector.<String> = new <String>["./mobiledevice", "list_apps", "-u"];
+				mobileDeviceProcessInfo.arguments = args;
 			}
 			
 			protected function cleanDirectory(directory:File):void

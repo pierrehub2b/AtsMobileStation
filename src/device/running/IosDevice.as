@@ -9,6 +9,10 @@ package device.running
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	
+	import mx.core.FlexGlobals;
+	
+	import spark.components.Window;
+	
 	import device.Device;
 	import device.RunningDevice;
 	import device.simulator.Simulator;
@@ -98,7 +102,6 @@ package device.running
 			}
 			
 			installing()
-			
 			testingProcess = new NativeProcess();
 			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
@@ -152,6 +155,12 @@ package device.running
 			fileStreamSettings.writeUTFBytes("last_build==" + xcworkspaceFile.modificationDate.toString());
 			fileStreamSettings.close();
 			
+			var mobileDeviceFile:File = resultDir.resolvePath("list_apps.txt");
+			var mobileDeviceStream:FileStream = new FileStream();
+			mobileDeviceStream.open(mobileDeviceFile, FileMode.WRITE);
+			mobileDeviceStream.writeUTFBytes(Window;
+			mobileDeviceStream.close();
+			
 			procInfo = new NativeProcessStartupInfo()
 			procInfo.executable = xcodeBuildExec;
 			procInfo.workingDirectory = resultDir;
@@ -169,6 +178,18 @@ package device.running
 			}
 			
 			procInfo.arguments = args;
+		}
+		
+		protected function onGettingBundlesOutput(ev:ProgressEvent):void{
+			var proc:NativeProcess = ev.currentTarget as NativeProcess;
+			mobileDeviceOutput = mobileDeviceOutput.concat(proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable));
+		}
+		
+		public function getBundleIds(id: String) {
+			FlexGlobals.topLevelApplication.mobileDeviceProcessInfo.arguments.push(id);
+			AtsMobileStationmobileDeviceProcessInfo.arguments.push(id);
+			mobileDeviceProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onGettingBundlesOutput, false, 0, true);
+			mobileDeviceProcess.start(mobileDeviceProcessInfo);
 		}
 		
 		public override function start():void{
