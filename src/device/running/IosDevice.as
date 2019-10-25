@@ -9,10 +9,6 @@ package device.running
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	
-	import mx.core.FlexGlobals;
-	
-	import spark.components.Window;
-	
 	import device.Device;
 	import device.RunningDevice;
 	import device.simulator.Simulator;
@@ -33,6 +29,9 @@ package device.running
 		
 		private static const iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
 		private static const xcodeBuildExec:File = new File("/usr/bin/env");
+		private static const iosMobileDeviceTools:File = File.applicationDirectory.resolvePath("assets/tools/ios");
+		
+		private var resultDir: File;
 		
 		public function IosDevice(id:String, name:String, simulator:Boolean, ip:String)
 		{
@@ -96,7 +95,7 @@ package device.running
 			
 			if(teamId == "" && !simulator) {
 				status = Device.FAIL;
-				errorMessage = " - No development team id set"
+				errorMessage = " - No development team id set";
 				return;
 			}
 			
@@ -106,7 +105,7 @@ package device.running
 			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 			
-			var resultDir:File = File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id);
+			resultDir = File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id);
 			var alreadyCopied:Boolean = resultDir.exists;
 			iosDriverProjectFolder.copyTo(resultDir, true);
 			var index:int = 0;
@@ -125,10 +124,10 @@ package device.running
 						} else {
 							arrayString[index+1] = "\t<string></string>";
 						}
-						break;
+						break
 					}
 					index++;
-				}
+				}				
 				fileStream.close();
 				
 				var writeFileStream:FileStream = new FileStream();
@@ -144,7 +143,7 @@ package device.running
 				d.setTime(Date.parse(lastBuildString));
 				var modificationDate:int = (xcworkspaceFile.modificationDate.time/1000);
 				var oldDate:int = (d.time/1000);
-				alreadyCopied = !(modificationDate > oldDate)
+				alreadyCopied = !(modificationDate > oldDate);
 			}
 			
 			var fileSettings:File = File.userDirectory.resolvePath("actiontestscript/settings.txt");
@@ -154,13 +153,7 @@ package device.running
 			fileStreamSettings.writeUTFBytes("last_build==" + xcworkspaceFile.modificationDate.toString());
 			fileStreamSettings.close();
 			
-			var mobileDeviceFile:File = resultDir.resolvePath("list_apps.txt");
-			var mobileDeviceStream:FileStream = new FileStream();
-			mobileDeviceStream.open(mobileDeviceFile, FileMode.WRITE);
-			mobileDeviceStream.writeUTFBytes(Window;
-			mobileDeviceStream.close();
-			
-			procInfo = new NativeProcessStartupInfo()
+			procInfo = new NativeProcessStartupInfo();
 			procInfo.executable = xcodeBuildExec;
 			procInfo.workingDirectory = resultDir;
 			
@@ -177,16 +170,50 @@ package device.running
 			}
 			
 			procInfo.arguments = args;
+			getBundleIds(id);
 		}
 		
 		protected function onGettingBundlesOutput(ev:ProgressEvent):void{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			mobileDeviceOutput = mobileDeviceOutput.concat(proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable));
+			var proc:NativeProcess = ev.currentTarget as NativeProcess;			
+			var apps:Array = proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable).split("\n");			
+			var pListFile:File = resultDir.resolvePath("atsDriver/Settings.plist");
+			if(pListFile.exists) {
+				var fileStreamMobileDevice:FileStream = new FileStream();
+				fileStreamMobileDevice.open(pListFile, FileMode.READ);
+				var pListContent:String = fileStreamMobileDevice.readUTFBytes(fileStreamMobileDevice.bytesAvailable);
+				var arrayStringPList:Array = pListContent.split("\n");				
+				fileStreamMobileDevice.close();
+				
+				var writeFileStream:FileStream = new FileStream();
+				writeFileStream.open(pListFile, FileMode.UPDATE);
+				
+				var indexApp: int = 0;
+				for each (var a:String in apps) 
+				{
+					if(a != "") {
+						arrayStringPList.insertAt(4, "\t<key>CFAppBundleID" + indexApp +"</key>\n\t<string>"+a+"</string>");
+						indexApp++;
+					}
+				}
+
+				for each(var str:String in arrayStringPList) {
+					writeFileStream.writeUTFBytes(str + "\n");
+				}
+				writeFileStream.close();
+			}
+			
+			proc.exit();
 		}
 		
-		public function getBundleIds(id: String) {
-			FlexGlobals.topLevelApplication.mobileDeviceProcessInfo.arguments.push(id);
-			AtsMobileStationmobileDeviceProcessInfo.arguments.push(id);
+		public function getBundleIds(id: String):void 
+		{
+			//Getting App list
+			var mobileDeviceProcess:NativeProcess = new NativeProcess();
+			var mobileDeviceProcessInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			mobileDeviceProcessInfo.executable = new File("/usr/bin/env");
+			mobileDeviceProcessInfo.workingDirectory = iosMobileDeviceTools;
+			var args: Vector.<String> = new <String>["./mobiledevice", "list_apps", "-u", id];
+			mobileDeviceProcessInfo.arguments = args;
 			mobileDeviceProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onGettingBundlesOutput, false, 0, true);
 			mobileDeviceProcess.start(mobileDeviceProcessInfo);
 		}
@@ -207,13 +234,11 @@ package device.running
 			return false;
 		}
 		
-		protected function onTestingExit(ev:NativeProcessExitEvent):void{
+		protected function onTestingExit(ev:NativeProcessExitEvent):void
+		{
 			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
 			testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput);
 			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
-						
-			testingProcess = null;
-			procInfo = null;
 			
 			trace("testing exit");
 			if(errorMessage == "" || status == Simulator.SHUTDOWN){
@@ -231,8 +256,6 @@ package device.running
 				
 				errorMessage = " - WIFI not connected !";
 				testingProcess.exit();
-				testingProcess = null;
-				procInfo = null;
 			}else if(data.indexOf(ATSDRIVER_DRIVER_HOST) > -1){
 				
 				testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput);
@@ -252,22 +275,16 @@ package device.running
 			if(noProvisionningProfileError.test(data)){
 				errorMessage = " - No provisioning profiles !";
 				testingProcess.exit();
-				testingProcess = null;
-				procInfo = null;
 			}
 			
 			if(noCertificatesError.test(data)){
 				errorMessage = " - Certificate error !";
 				testingProcess.exit();
-				testingProcess = null;
-				procInfo = null;
 			}
 			
 			if(startInfoLocked.test(data)){
 				errorMessage = " - Locked with passcode !";
 				testingProcess.exit();
-				testingProcess = null;
-				procInfo = null;
 			}
 		}
 	}

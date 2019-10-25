@@ -45,6 +45,7 @@ class atsDriver: XCTestCase {
     var imgView: Data? = nil
     var lastCapture: TimeInterval = 0.0
     var leveledTableCount = 0
+    var appsInstalled:[String] = [];
     var tcpSocket = socket(AF_INET, SOCK_STREAM, 0)
     let offsetYShift = 33.0
     let osVersion = UIDevice.current.systemVersion
@@ -87,6 +88,19 @@ class atsDriver: XCTestCase {
         if let url = testBundle.url(forResource: "Settings", withExtension: "plist"),
           let myDict = NSDictionary(contentsOf: url) as? [String:Any] {
             customPort = myDict["CFCustomPort"].unsafelyUnwrapped as! String;
+            if(!self.simulator) {
+                for itm in myDict {
+                    if(itm.key.contains("CFAppBundleID")) {
+                        self.appsInstalled.append(itm.value as! String)
+                    }
+                }
+            }
+        }
+        
+        let bundleMain = Bundle.main
+        if let url = bundleMain.url(forResource: "../../../../../Library/SpringBoard/IconState", withExtension: "plist"),
+          let myDict = NSDictionary(contentsOf: url) as? [String:Any] {
+            self.appsInstalled = getAllAppIds(from: myDict)
         }
         
         if !UIDevice.isSimulator {
@@ -115,17 +129,45 @@ class atsDriver: XCTestCase {
         self.setupApp()
     }
     
+    func getAllAppIds(from dic: [String: Any]) -> [String] {
+        guard let iconLists = dic["iconLists"] as? [[Any]] else {
+            return []
+        }
+        var icons: [String] = []
+        for page in iconLists {
+            for app in page {
+                if let id = app as? String,
+                    id.contains("com.") {
+                    icons.append(id)
+                }
+                if let dic = app as? [String: Any] {
+                    let iconsTemp = getAllAppIds(from: dic)
+                    icons.append(contentsOf: iconsTemp)
+                }
+            }
+        }
+        
+        guard let buttonBarList = dic["buttonBar"] as? [String] else {
+            return icons
+        }
+        for app in buttonBarList {
+            if let id = app as? String,
+                id.contains("com.") {
+                icons.append(id)
+            }
+        }
+        
+        return icons
+    }
+    
     func setupInstalledApp(){
-        self.addInstalledApp(label: "Safari", packageName: "com.apple.mobilesafari", version: "", icon:SafariIcon())
-        self.addInstalledApp(label: "Settings", packageName: "com.apple.Preferences", version: "", icon:SettingsIcon());
-        self.addInstalledApp(label: "Contacts", packageName: "com.apple.MobileAddressBook", version: "", icon:AddressIcon());
-        self.addInstalledApp(label: "News", packageName: "com.apple.news", version: "", icon:NewsIcon());
-        self.addInstalledApp(label: "Maps", packageName: "com.apple.Maps", version: "", icon:MapsIcon());
-        self.addInstalledApp(label: "Health", packageName: "com.apple.Health", version: "", icon:HealthIcon());
-        self.addInstalledApp(label: "Calendar", packageName: "com.apple.mobilecal", version: "", icon:CalendarIcon());
-        self.addInstalledApp(label: "Photos", packageName: "com.apple.mobileslideshow", version: "", icon:PhotosIcon());
-        self.addInstalledApp(label: "Files", packageName: "com.apple.DocumentsApp", version: "", icon:DefaultAppIcon());    }
-
+        for app in self.appsInstalled {
+            //TODO retrieve right bundle Name
+            let name = "CFBundleName"
+            self.addInstalledApp(label: name, packageName: String(app), version: "", icon:DefaultAppIcon())
+        }
+    }
+    
     func addInstalledApp(label:String, packageName:String, version:String, icon:String){
         var app: [String: Any] = [:]
         app["label"] = label
