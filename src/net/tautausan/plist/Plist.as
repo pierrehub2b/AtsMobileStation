@@ -35,18 +35,20 @@
 	{
 		protected var x:XML;
 		
-		public function Plist()
+		public function Plist(xml:String)
 		{
+			x = new XML(xml);
+			parse();
 		}
 				
-		public function parse(xmlStr:String):void
+		public function parse():void
 		{
 			throw new IllegalOperationError("This is an abstract method.");
 		}
 		
 		public function set xml(x:XML):void
 		{
-			this.x=x;
+			this.x = x;
 		}
 		
 		public function get xml():XML

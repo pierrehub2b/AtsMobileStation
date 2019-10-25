@@ -23,7 +23,8 @@
  */
 package net.tautausan.plist
 {
-	import flash.utils.*;
+	import flash.system.System;
+	
 	/**
 	 *	Property List Dictionary 
 	 * @author dai
@@ -39,26 +40,30 @@ package net.tautausan.plist
 		
 		override public function get object():*
 		{
-			
 			if(!data)
 			{
-				var dic:Object=new Object();
+				var dic:Object = new Object();
 				var key:XML;
 				var node:XML;
+				
 				for each(node in x.*)
 				{
-					if(node.name()=="key")
+					if(node.name() == "key")
 					{
-						key=node;
+						key = node;
 					}
 					else
 					{
 						if(key)
 						{
-							dic[key]=ParseUtils.valueFromXML(node);
+							dic[key] = ParseUtils.valueFromXML(node);
 						}
 					}
 				}
+				
+				System.disposeXML(node);
+				System.disposeXML(key);
+				
 				return dic;
 			}
 			return data;

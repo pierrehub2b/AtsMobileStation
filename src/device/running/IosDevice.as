@@ -95,7 +95,6 @@ package device.running
 			}
 			
 			if(teamId == "" && !simulator) {
-				trace("No Development Team ID set for " + name);
 				status = Device.FAIL;
 				errorMessage = " - No development team id set"
 				return;
@@ -202,8 +201,7 @@ package device.running
 				
 				testingProcess.closeInput();
 				testingProcess.exit();
-				testingProcess = null;
-				procInfo = null;
+
 				return true;
 			}
 			return false;

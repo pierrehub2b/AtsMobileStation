@@ -8,6 +8,7 @@ package
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
+	import flash.system.System;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.FlexGlobals;
@@ -35,16 +36,17 @@ package
 		private const adbPath:String = "assets/tools/android/adb";
 		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
+		private const newlineTabPattern:RegExp = /[\n\t]/g;
 		
-		private const relaunchDelay:int = 1;
+		private const relaunchDelay:int = 5;
 				
 		private var adbFile:File;
 		
 		private var androidOutput:String;
 		private var iosOutput:String;
 		
-		private var relaunchAdb:TweenLite;
-		private var relaunchIos:TweenLite;
+		private var adbLoop:TweenLite;
+		private var iosLoop:TweenLite;
 		
 		private var port:String = "8080";
 						
@@ -61,10 +63,8 @@ package
 			
 			if(macos){
 				
-				relaunchIos = TweenLite.delayedCall(relaunchDelay, launchIosProcess);
-				
-				this.adbFile = File.applicationDirectory.resolvePath(adbPath);
-				
+				adbFile = File.applicationDirectory.resolvePath(adbPath);
+								
 				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 				procInfo.executable = new File("/bin/chmod");			
 				procInfo.workingDirectory = File.applicationDirectory.resolvePath("assets/tools");
@@ -75,18 +75,18 @@ package
 				proc.start(procInfo);
 				
 			}else{
-				this.adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
-				relaunchAdb = TweenLite.delayedCall(relaunchDelay, launchAdbProcess);
+				adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
+				adbLoop = TweenLite.delayedCall(relaunchDelay, launchAdbProcess);
 			}
 		}
 		
 		protected function onChmodExit(ev:NativeProcessExitEvent):void
 		{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			proc.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
-			relaunchAdb = TweenLite.delayedCall(relaunchDelay, launchAdbProcess);
-			proc.exit();
-			proc = null;
+			ev.target.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
+			ev.target.closeInput();
+			
+			adbLoop = TweenLite.delayedCall(relaunchDelay, launchAdbProcess);
+			iosLoop = TweenLite.delayedCall(relaunchDelay, launchIosProcess);
 		}	
 		
 		public function terminate():void{
@@ -95,15 +95,15 @@ package
 				dv.close();
 			}
 			
-			relaunchAdb.pause();
-			if(relaunchIos != null){
-				relaunchIos.pause();
+			adbLoop.pause();
+			if(iosLoop != null){
+				iosLoop.pause();
 			}
 		}
 		
 		private function launchAdbProcess():void{
 			
-			androidOutput = "";
+			androidOutput = new String();
 			
 			var proc:NativeProcess = new NativeProcess();
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
@@ -118,26 +118,20 @@ package
 		}
 		
 		protected function onReadAndroidDevicesData(ev:ProgressEvent):void{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			androidOutput = androidOutput.concat(proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable));
-			proc.exit();
-			proc = null;
+			const len:int = ev.target.standardOutput.bytesAvailable;
+			const data:String = ev.target.standardOutput.readUTFBytes(len);
+			androidOutput = new String(androidOutput.concat(data));
 		}
 		
 		protected function onReadAndroidDevicesExit(ev:NativeProcessExitEvent):void
 		{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			proc.removeEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit);
-			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData);
-			
-			proc.closeInput();
-			proc.exit();
-			
-			proc = null;
+			ev.target.removeEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit);
+			ev.target.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData);
+			ev.target.closeInput();
+						
+			//------------------------------------------------------------------------------------------
 			
 			var data:Array = androidOutput.split("\n");
-			androidOutput = null;
-			
 			var runingIds:Vector.<String> = new Vector.<String>();
 			
 			if(data.length > 1){
@@ -145,13 +139,13 @@ package
 				data.shift();
 				
 				const len:int = data.length;
-				var info:Array;
 				var dev:RunningDevice;
 				
 				for(var i:int=0; i<len; i++){
-					info = data[i].split(/\s+/g);
 					
+					const info:Array = data[i].split(/\s+/g);
 					const runningId:String = info[0];
+					
 					runingIds.push(runningId);
 					
 					if(info.length >= 2 && runningId.length > 0){
@@ -169,22 +163,21 @@ package
 				}
 			}
 			
-			data = null;
-			
 			for each(var androidDev:RunningDevice in collection){
 				if(androidDev is AndroidDevice && androidDev.simulator == false && runingIds.indexOf(androidDev.id) < 0){
 					androidDev.close()
 				}
 			}
 			
-			relaunchAdb.restart(true);
+			System.gc();
+			adbLoop.restart(true);
 		}
 		
 		//---------------------------------------------------------------------------------------------------------
 		//---------------------------------------------------------------------------------------------------------
 		
 		private function launchIosProcess():void{
-			iosOutput = "";
+			iosOutput = new String();
 			
 			var proc:NativeProcess = new NativeProcess();
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
@@ -198,60 +191,59 @@ package
 			proc.start(procInfo);	
 		}
 		
-		protected function onReadIosDevicesData(ev:ProgressEvent):void{
-			iosOutput = iosOutput.concat(ev.currentTarget.standardOutput.readUTFBytes(ev.currentTarget.standardOutput.bytesAvailable));
+		private function onReadIosDevicesData(ev:ProgressEvent):void{
+			const len:int = ev.target.standardOutput.bytesAvailable;
+			const data:String = ev.target.standardOutput.readUTFBytes(len);
+			iosOutput = new String(iosOutput.concat(data));
 		}
 		
-		protected function onUsbDeviceExit(ev:NativeProcessExitEvent):void{
+		private function onUsbDeviceExit(ev:NativeProcessExitEvent):void{
 						
-			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			proc.removeEventListener(NativeProcessExitEvent.EXIT, onUsbDeviceExit);
-			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
+			ev.target.removeEventListener(NativeProcessExitEvent.EXIT, onUsbDeviceExit);
+			ev.target.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
+			ev.target.closeInput();
 			
-			proc.closeInput();
-			proc.exit();
-			proc = null;		
-			//------------------------------------------------------
+			//------------------------------------------------------------------------------------------
 			
-			var output:String = new String(iosOutput.replace(/[\n\t]/g, ""));
-			iosOutput = null;
-			var plistNodeIndex:int = output.indexOf("<plist version=\"1.0\">")
+			var output:String = new String(iosOutput.replace(newlineTabPattern, ""));
+			const plistNodeIndex:int = output.indexOf("<plist version=\"1.0\">");
+			
 			if(plistNodeIndex > -1){
 				output = output.substr(plistNodeIndex + 21, output.length - plistNodeIndex - 29);
 				
 				usbDevicesIdList = new Vector.<String>();
 					
 				var plist:Plist10 = new Plist10(output);
-				var usbPorts:Array = plist.root._items.object as Array;
+				const usbPorts:Array = plist.root._items.object as Array;
+				
 				for each (var port:PDict in usbPorts) {
 					getDevicesIds(port);
 				}
 				
-				output = null;
 				plist.dispose();
 				plist = null;
-				usbPorts = null;
-				port = null;
 				
 				for each(var iosDev:RunningDevice in collection){
 					if(iosDev is IosDevice && iosDev.simulator == false && usbDevicesIdList.indexOf(iosDev.id) < 0){
 						iosDev.close()
 					}
 				}
-				iosDev = null;
+				
 				loadDevicesId();
+				
 			}else{
-				relaunchIos.restart(true);
+				iosLoop.restart(true);
 			}
 			
+			System.gc();
 		}
 		
 		private function getDevicesIds(itmList:PDict):void {
 			if(itmList.object._items != null) {
-				var itemsListArray:Array = itmList.object._items.object as Array;
+				const itemsListArray:Array = itmList.object._items.object as Array;
 				for each(var itm:PDict in itemsListArray){
 					getDevicesIds(itm);
-					var name:String = itm.object._name.toString().toLowerCase();
+					const name:String = itm.object._name.toString().toLowerCase();
 					if(name == "iphone"){
 						usbDevicesIdList.push(itm.object.serial_num);
 					}
@@ -261,28 +253,27 @@ package
 		
 		private function loadDevicesId():void{
 			if(usbDevicesIdList.length > 0){
-				var id:String = usbDevicesIdList.pop();
-				var dev:RunningDevice = findDevice(id) as IosDevice;
+				
+				const id:String = usbDevicesIdList.pop();
+				const dev:RunningDevice = findDevice(id) as IosDevice;
+				
 				if(dev == null) {
 					var devInfo:IosDeviceInfo = new IosDeviceInfo(id);
 					devInfo.addEventListener(Event.COMPLETE, realDevicesInfoLoaded, false, 0, true);
 					devInfo.load();
-					devInfo = null;
 				}else{
 					loadDevicesId()
 				}
-				id = null;
-				dev = null;
 			}else{
 				realDevicesLoaded();
 			}
 		}
 		
 		private function realDevicesInfoLoaded(ev:Event):void{
-			var devInfo:IosDeviceInfo = ev.currentTarget as IosDeviceInfo;
-			devInfo.removeEventListener(Event.COMPLETE, realDevicesInfoLoaded);
 			
-			var dev:IosDevice = devInfo.device;	
+			ev.target.removeEventListener(Event.COMPLETE, realDevicesInfoLoaded);
+			
+			var dev:IosDevice = ev.target.device;	
 			dev.addEventListener(Device.STOPPED_EVENT, deviceStoppedHandler, false, 0, true);
 			
 			collection.addItem(dev);
@@ -293,7 +284,6 @@ package
 			}
 			
 			loadDevicesId()
-			dev = null;
 		}
 		
 		public function restartDev(dev:Device):void {
@@ -317,11 +307,9 @@ package
 			
 			collection.removeItem(dv);
 			collection.refresh();
-			dv = null;
 		}
 		
 		private function realDevicesLoaded():void{
-			
 			for each(var sim:IosSimulator in FlexGlobals.topLevelApplication.simulators.collection){
 				if(sim.started){
 					var dev:IosDevice = findDevice(sim.id) as IosDevice;
@@ -335,8 +323,7 @@ package
 					}
 				}
 			}
-			sim = null;
-			relaunchIos.restart(true);
+			iosLoop.restart(true);
 		}
 	}
 }

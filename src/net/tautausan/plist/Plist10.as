@@ -23,8 +23,8 @@
  */
  package net.tautausan.plist
 {
+	import flash.system.System;
 	
-
 	/**
 	 *	Property List ver 1.0 
 	 * @author dai
@@ -32,13 +32,11 @@
 	 */	
 	public class Plist10 extends Plist
 	{
-		protected var data:Object;
+		protected var data:Object = new Object();
 		
 		public function Plist10(xml:String)
 		{
-			super();
-			data = new Object();
-			parse(xml);
+			super(xml);
 		}
 		
 		public function get root():Object
@@ -46,34 +44,35 @@
 			return data;
 		}
 		
-		override public function parse(xmlStr:String):void
+		override public function parse():void
 		{
-			x=new XML(xmlStr);
-						
-			if(x.dict==null)
+			if(x.dict == null)
 			{
-				data=null;
+				data = null;
 			}
 			else
 			{
-				data=new Object();
+				data = new Object();
 				var node:XML;
 				var key:XML;
 				
 				for each(node in x.dict.*)
 				{
-					if(node.name()=="key")
+					if(node.name() == "key")
 					{
-						key=node;
+						key = node;
 					}
 					else
 					{
 						if(key)
 						{
-							data[key]=ParseUtils.valueFromXML(node);
+							data[key] = ParseUtils.valueFromXML(node);
 						}
 					}
 				}
+				
+				System.disposeXML(node);
+				System.disposeXML(key);
 			}
 		}
 	}

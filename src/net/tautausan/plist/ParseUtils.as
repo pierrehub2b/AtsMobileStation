@@ -28,42 +28,25 @@
 	 * @author dai
 	 * 
 	 */	
-	public class ParseUtils
+	public final class ParseUtils
 	{
-		public function ParseUtils()
-		{
-		}
-		
-		
 		static public function valueFromXML(node:XML):*
 		{
-			var val:*;
-
-			switch(node.name().toString())
-			{
-				case "array":
-					val=new PArray(node);
-					break;
-				case "dict":
-					val=new PDict(node);
-					break;
-				case "date":
-					val=new PDate(node);
-					break;
-				case "string":
-				case "data": 
-					val=new PString(node);
-					break;
-				case "true": 
-				case "false":
-					val=new PBoolean(node);
-					break;
-				case "real":
-				case "integer":
-					val=new PNumber(node);
-
+			const type:String = node.name().toString();
+			if(type == "array"){
+				return new PArray(node);
+			}else if(type == "dict"){
+				return new PDict(node);
+			}else if(type == "date"){
+				return new PDate(node);
+			}else if(type == "data" || type == "string"){
+				return new PString(node);
+			}else if(type == "false" || type == "true"){
+				return new PBoolean(node);
+			}else if(type == "integer" || type == "real"){
+				return new PNumber(node);
 			}
-			return val;
+			return null;
 		}
 	}
 }
