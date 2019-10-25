@@ -63,10 +63,9 @@ package
 			
 			if(macos){
 				
-				adbLoop = TweenLite.delayedCall(relaunchDelay, launchIosProcess);
-				
-				this.adbFile = File.applicationDirectory.resolvePath(adbPath);
-				
+				adbFile = File.applicationDirectory.resolvePath(adbPath);
+				iosLoop = TweenLite.delayedCall(relaunchDelay, launchIosProcess);
+								
 				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 				procInfo.executable = new File("/bin/chmod");			
 				procInfo.workingDirectory = File.applicationDirectory.resolvePath("assets/tools");
@@ -77,7 +76,7 @@ package
 				proc.start(procInfo);
 				
 			}else{
-				this.adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
+				adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
 				adbLoop = TweenLite.delayedCall(relaunchDelay, launchAdbProcess);
 			}
 		}
