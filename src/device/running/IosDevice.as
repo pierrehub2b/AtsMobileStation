@@ -181,8 +181,7 @@ package device.running
 				
 				testingProcess.closeInput();
 				testingProcess.exit();
-				testingProcess = null;
-				procInfo = null;
+
 				return true;
 			}
 			return false;
