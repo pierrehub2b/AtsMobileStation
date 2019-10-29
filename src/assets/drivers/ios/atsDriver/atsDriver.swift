@@ -43,7 +43,6 @@ class atsDriver: XCTestCase {
     var continueRunningValue = true
     var connectedSockets = [Int32: Socket]()
     var imgView: Data? = nil
-    var lastCapture: TimeInterval = 0.0
     var leveledTableCount = 0
     var appsInstalled:[String] = [];
     var tcpSocket = socket(AF_INET, SOCK_STREAM, 0)
@@ -297,8 +296,7 @@ class atsDriver: XCTestCase {
                 if(app == nil) {
                     self.resultElement["message"] = "no app has been launched"
                     self.resultElement["status"] = -99
-                }else  if(NSDate().timeIntervalSince1970 > self.lastCapture+10) {// if last capture > 10 seconds
-                    self.lastCapture = NSDate().timeIntervalSince1970
+                } else {
                     self.resultElement["message"] = "root_description"
                     self.resultElement["status"] = 0
                     self.resultElement["deviceHeight"] = self.deviceHeight
@@ -372,7 +370,6 @@ class atsDriver: XCTestCase {
                                     self.resultElement["status"] = 0
                                     self.resultElement["message"] = "orientation to landscape mode"
                                 }
-                                self.lastCapture = 0.0
                             } else {
                                 self.resultElement["message"] = "unknow button " + firstParam
                                 self.resultElement["status"] = -42
@@ -388,7 +385,6 @@ class atsDriver: XCTestCase {
                                     self.resultElement["status"] = 0
                                     if(app.keyboards.count > 0) {
                                         app.typeText(text)
-                                        self.lastCapture = 0.0
                                         self.resultElement["message"] = "element tap text: " + text
                                     } else {
                                         self.resultElement["message"] = "no keyboard on screen for tap text"
@@ -438,7 +434,6 @@ class atsDriver: XCTestCase {
                                         self.resultElement["message"] = "swipe element"
                                     }
                                 }
-                                self.lastCapture = 0.0
                             }
                         }
                     }else if(action == ActionsEnum.APP.rawValue){
@@ -450,7 +445,6 @@ class atsDriver: XCTestCase {
                                  self.resultElement["label"] = app.label
                                  self.resultElement["icon"] = self.emptyImg
                                  self.resultElement["version"] = "0.0.0"
-                                 self.lastCapture = 0.0
                             } else {
                                 self.resultElement["message"] = "App package not found in current device: " + parameters[1]
                                 self.resultElement["status"] = -51
@@ -459,7 +453,6 @@ class atsDriver: XCTestCase {
                         } else if(ActionsEnum.SWITCH.rawValue == firstParam) {
                             app = XCUIApplication(bundleIdentifier: parameters[1])
                             app.activate()
-                            self.lastCapture = 0.0
                             self.resultElement["message"] = "switch app " + parameters[1]
                             self.resultElement["status"] = 0
                         } else if(ActionsEnum.STOP.rawValue == firstParam) {
