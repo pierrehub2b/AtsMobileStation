@@ -107,7 +107,10 @@ package device.running
 			
 			resultDir = File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id);
 			var alreadyCopied:Boolean = resultDir.exists;
-			iosDriverProjectFolder.copyTo(resultDir, true);
+			if(!alreadyCopied) {
+				iosDriverProjectFolder.copyTo(resultDir, true);
+			}
+
 			var index:int = 0;
 			file = resultDir.resolvePath("atsDriver/Settings.plist");
 			var xcworkspaceFile:File = resultDir.resolvePath("atsios.xcworkspace");
@@ -171,6 +174,20 @@ package device.running
 			
 			procInfo.arguments = args;
 			getBundleIds(id);
+		}
+		
+		protected function addLineToLogs(log: String):void {
+			var file:File = resultDir.resolvePath("logs.txt");
+			var fileStream:FileStream = new FileStream();
+			if(file.exists) {
+				fileStream.open(file, FileMode.APPEND);
+				fileStream.writeUTFBytes(log);
+			} else {
+				fileStream.open(file, FileMode.WRITE);
+				fileStream.writeUTFBytes(log);
+			}
+			
+			fileStream.close();
 		}
 		
 		protected function onGettingBundlesOutput(ev:ProgressEvent):void{
@@ -271,6 +288,7 @@ package device.running
 		{
 			const data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
 			trace("test error -> " + data);
+			addLineToLogs(data);
 			
 			if(noProvisionningProfileError.test(data)){
 				errorMessage = " - No provisioning profiles !";
