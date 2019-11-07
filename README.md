@@ -34,9 +34,6 @@ To execute automated tests on physical iPhone devices, you need to create an App
 - your driver should start (by seeing the green check image, and show you an Ip adress and port)
 
 ### 5/ Error handling
-- If the device appeard and deappeard recurrently:
-  - uninstall app in the physical device
-  - restart the Driver by clicking "restart" button (or unplug and plug the device)
 - If the Apple key vault ask credential recurrently: 
   - unplug the device
   - open the key vault application

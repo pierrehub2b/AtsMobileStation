@@ -236,7 +236,15 @@ package device.running
 		}
 		
 		public override function start():void{
-			testingProcess.start(procInfo);
+			//Getting App list
+			var mobileDeviceProcess:NativeProcess = new NativeProcess();
+			var mobileDeviceProcessInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			mobileDeviceProcessInfo.executable = new File("/usr/bin/env");
+			mobileDeviceProcessInfo.workingDirectory = iosMobileDeviceTools;
+			var args: Vector.<String> = new <String>["./mobiledevice", "uninstall_app", "-u", id, "com.atsios.xctrunner"];
+			mobileDeviceProcessInfo.arguments = args;
+			mobileDeviceProcess.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
+			mobileDeviceProcess.start(mobileDeviceProcessInfo);
 		}
 		
 		override public function dispose():Boolean
@@ -249,6 +257,12 @@ package device.running
 				return true;
 			}
 			return false;
+		}
+		
+		protected function onUninstallExit(ev:NativeProcessExitEvent):void
+		{
+			ev.target.removeEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
+			testingProcess.start(procInfo);
 		}
 		
 		protected function onTestingExit(ev:NativeProcessExitEvent):void
