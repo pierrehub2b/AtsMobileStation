@@ -426,8 +426,8 @@ class atsDriver: XCTestCase {
                                     self.resultElement["message"] = "tap on element"
                                 } else {
                                     if(ActionsEnum.SWIPE.rawValue == parameters[1]) {
-                                        let directionX = (Double(parameters[4]) ?? 0.0)/ratioWidth
-                                        let directionY = (Double(parameters[5]) ?? 0.0)/ratioHeight
+                                        let directionX = (Double(parameters[4]) ?? 0.0)
+                                        let directionY = (Double(parameters[5]) ?? 0.0)
                                         self.swipeCoordinate(x: calculateX, y: calculateY, swipeX: directionX, swipeY: directionY)
                                         self.forceCapture = true;
                                         self.resultElement["status"] = 0
@@ -439,7 +439,7 @@ class atsDriver: XCTestCase {
                     }else if(action == ActionsEnum.APP.rawValue){
                         if(ActionsEnum.START.rawValue == firstParam) {
                             app = XCUIApplication.init(bundleIdentifier: parameters[1])
-                            if(self.appsInstalled.contains(parameters[1])) {
+                            if(self.appsInstalled.contains(parameters[1]) || true) {
                                  app.launch()
                                  self.resultElement["status"] = 0
                                  self.resultElement["label"] = app.label
@@ -571,16 +571,51 @@ class atsDriver: XCTestCase {
         }
     }
     
+    enum direction : Int {
+        case Up, Down, Left, Right
+    }
+    
     func swipeCoordinate(x xCoordinate: Double, y yCoordinate: Double, swipeX xSwipe: Double, swipeY ySwipe: Double) {
+        var direction:direction;
+        var adjustment: CGFloat = 0
+        if(xSwipe > 0) {
+            direction = .Right
+            adjustment = 0.5
+        } else if(xSwipe < 0) {
+            direction = .Left
+            adjustment = -0.5
+        } else if(ySwipe < 0) {
+            direction = .Up
+            adjustment = -0.5
+        } else {
+            direction = .Down
+            adjustment = 0.5
+        }
+        
+        let halfX : CGFloat = CGFloat(xCoordinate*ratioScreen / self.deviceWidth)
+        let halfY : CGFloat = CGFloat(yCoordinate*ratioScreen / self.deviceHeight)
         let pressDuration : TimeInterval = 0.05
         
-        let startNormalized = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
-        let startCoordinate = startNormalized.withOffset(CGVector(dx: xCoordinate, dy: yCoordinate))
+        let centre = app.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY))
+        let aboveCentre = app.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY + adjustment))
+        let belowCentre = app.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY + adjustment))
+        let leftOfCentre = app.coordinate(withNormalizedOffset: CGVector(dx: halfX + adjustment, dy: halfY))
+        let rightOfCentre = app.coordinate(withNormalizedOffset: CGVector(dx: halfX + adjustment, dy: halfY))
         
-        let endNormalized = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
-        let endCoordinate = endNormalized.withOffset(CGVector(dx: (xCoordinate+xSwipe), dy: (yCoordinate + ySwipe)))
-        
-        startCoordinate.press(forDuration: pressDuration, thenDragTo: endCoordinate)
+        switch direction {
+            case .Up:
+                centre.press(forDuration: pressDuration, thenDragTo: aboveCentre)
+                break
+            case .Down:
+                centre.press(forDuration: pressDuration, thenDragTo: belowCentre)
+                break
+            case .Left:
+                centre.press(forDuration: pressDuration, thenDragTo: leftOfCentre)
+                break
+            case .Right:
+                centre.press(forDuration: pressDuration, thenDragTo: rightOfCentre)
+                break
+        }
     }
     
     func retrieveElement(parameter: String, field: String) -> XCUIElement? {
@@ -662,17 +697,24 @@ class atsDriver: XCTestCase {
     
     func driverInfoBase(applyRatio: Bool) {
         let screenNativeBounds = XCUIScreen.main.screenshot().image
+        let screenNativeBoundsWidth = screenNativeBounds.size.width
+        let screenNativeBoundsHeight = screenNativeBounds.size.height
+        
+        let screenBounds = UIScreen.main.bounds
+        let screenScale = UIScreen.main.scale
+        let screenSize = CGSize(width: screenBounds.size.width * screenScale, height: screenBounds.size.height * screenScale)
+        
         self.ratioScreen = self.maxHeight / Double(screenNativeBounds.size.height)
-        self.deviceWidth = Double(screenNativeBounds.size.width) * self.ratioScreen
-        self.deviceHeight = Double(screenNativeBounds.size.height) * self.ratioScreen
+        self.deviceWidth = Double(screenNativeBoundsWidth) * self.ratioScreen
+        self.deviceHeight = Double(screenNativeBoundsHeight) * self.ratioScreen
         
         self.resultElement["os"] = "ios"
         self.resultElement["driverVersion"] = "1.0.0"
         self.resultElement["systemName"] = model + " - " + osVersion
-        self.resultElement["deviceWidth"] = self.deviceWidth
-        self.resultElement["deviceHeight"] = self.deviceHeight
-        self.resultElement["channelWidth"] = applyRatio ? self.deviceWidth : screenNativeBounds.size.width
-        self.resultElement["channelHeight"] = applyRatio ? self.deviceHeight : screenNativeBounds.size.height
+        self.resultElement["deviceWidth"] = applyRatio ? self.deviceWidth : screenSize.width
+        self.resultElement["deviceHeight"] = applyRatio ? self.deviceHeight : screenSize.height
+        self.resultElement["channelWidth"] = applyRatio ? self.deviceWidth : screenSize.width
+        self.resultElement["channelHeight"] = applyRatio ? self.deviceHeight : screenSize.height
         self.resultElement["channelX"] = 0
         self.resultElement["channelY"] = 0
     }
@@ -776,3 +818,4 @@ class atsDriver: XCTestCase {
         }
     }
 }
+
