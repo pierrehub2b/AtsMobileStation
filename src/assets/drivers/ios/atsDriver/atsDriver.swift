@@ -32,6 +32,8 @@ extension UIDevice {
 
 class atsDriver: XCTestCase {
     
+    let driverVersion:String = "1.0.0"
+    
     let udpThread = DispatchQueue(label: "udpQueue" + UUID().uuidString, qos: .userInitiated)
     var domThread = DispatchQueue(label: "domQueue" + UUID().uuidString, qos: .userInitiated)
     var port = 0
@@ -52,10 +54,8 @@ class atsDriver: XCTestCase {
     let simulator = UIDevice.modelName.range(of: "Simulator", options: .caseInsensitive) != nil
     let uid = UIDevice.current.identifierForVendor!.uuidString
     let bluetoothName = UIDevice.current.name
-    var deviceWidth = 1.0
-    var deviceHeight = 1.0
-    let maxHeight = 840.0
-    var ratioScreen = 1.0
+    var channelWidth = 1.0
+    var channelHeight = 1.0
     var isAlert = false
     var forceCapture = false;
     var applications:[[String: Any]] = []
@@ -240,8 +240,8 @@ class atsDriver: XCTestCase {
     }
     
     func refreshView() {
-        UIGraphicsBeginImageContextWithOptions(CGSize(width: self.deviceWidth, height: self.deviceHeight), true, 0.85)
-        XCUIScreen.main.screenshot().image.draw(in: CGRect(x: 0, y: 0, width: self.deviceWidth, height: self.deviceHeight))
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: self.channelWidth, height: self.channelHeight), true, 0.85)
+        XCUIScreen.main.screenshot().image.draw(in: CGRect(x: 0, y: 0, width: self.channelWidth, height: self.channelHeight))
         let newImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         
@@ -299,8 +299,8 @@ class atsDriver: XCTestCase {
                 } else {
                     self.resultElement["message"] = "root_description"
                     self.resultElement["status"] = 0
-                    self.resultElement["deviceHeight"] = self.deviceHeight
-                    self.resultElement["deviceWidth"] = self.deviceWidth
+                    self.resultElement["deviceHeight"] = self.channelHeight
+                    self.resultElement["deviceWidth"] = self.channelWidth
                     self.resultElement["root"] = app.debugDescription
                 }
             }else if(action == ActionsEnum.INFO.rawValue){
@@ -592,8 +592,8 @@ class atsDriver: XCTestCase {
             adjustment = 0.5
         }
         
-        let halfX : CGFloat = CGFloat(xCoordinate*ratioScreen / self.deviceWidth)
-        let halfY : CGFloat = CGFloat(yCoordinate*ratioScreen / self.deviceHeight)
+        let halfX : CGFloat = CGFloat(xCoordinate / self.channelWidth)
+        let halfY : CGFloat = CGFloat(yCoordinate / self.channelHeight)
         let pressDuration : TimeInterval = 0.05
         
         let centre = app.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY))
@@ -696,25 +696,27 @@ class atsDriver: XCTestCase {
     }
     
     func driverInfoBase(applyRatio: Bool) {
-        let screenNativeBounds = XCUIScreen.main.screenshot().image
-        let screenNativeBoundsWidth = screenNativeBounds.size.width
-        let screenNativeBoundsHeight = screenNativeBounds.size.height
         
+        // Application size
+        let screenNativeBounds = XCUIScreen.main.screenshot().image
+        let screenShotWidth = screenNativeBounds.size.width
+        let screenShotHeight = screenNativeBounds.size.height
+        
+        // Device size
         let screenBounds = UIScreen.main.bounds
         let screenScale = UIScreen.main.scale
         let screenSize = CGSize(width: screenBounds.size.width * screenScale, height: screenBounds.size.height * screenScale)
         
-        self.ratioScreen = self.maxHeight / Double(screenNativeBounds.size.height)
-        self.deviceWidth = Double(screenNativeBoundsWidth) * self.ratioScreen
-        self.deviceHeight = Double(screenNativeBoundsHeight) * self.ratioScreen
+        self.channelWidth = Double(screenSize.width)
+        self.channelHeight = Double(screenSize.height)
         
         self.resultElement["os"] = "ios"
-        self.resultElement["driverVersion"] = "1.0.0"
+        self.resultElement["driverVersion"] = self.driverVersion
         self.resultElement["systemName"] = model + " - " + osVersion
-        self.resultElement["deviceWidth"] = applyRatio ? self.deviceWidth : screenSize.width
-        self.resultElement["deviceHeight"] = applyRatio ? self.deviceHeight : screenSize.height
-        self.resultElement["channelWidth"] = applyRatio ? self.deviceWidth : screenSize.width
-        self.resultElement["channelHeight"] = applyRatio ? self.deviceHeight : screenSize.height
+        self.resultElement["deviceWidth"] = screenShotWidth
+        self.resultElement["deviceHeight"] = screenShotHeight
+        self.resultElement["channelWidth"] = screenSize.width
+        self.resultElement["channelHeight"] = screenSize.height
         self.resultElement["channelX"] = 0
         self.resultElement["channelY"] = 0
     }
