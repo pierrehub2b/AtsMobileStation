@@ -571,48 +571,40 @@ class atsDriver: XCTestCase {
     }
     
     enum direction : Int {
-        case Up, Down, Left, Right
+        case horizontal, vertical
     }
     
     func swipeCoordinate(x xCoordinate: Double, y yCoordinate: Double, swipeX xSwipe: Double, swipeY ySwipe: Double) {
         var direction:direction;
         var adjustment: CGFloat = 0
         if(xSwipe > 0) {
-            direction = .Right
-            adjustment = 0.5
+            direction = .horizontal
+            adjustment = 1
         } else if(xSwipe < 0) {
-            direction = .Left
-            adjustment = -0.5
+            direction = .horizontal
+            adjustment = -1
         } else if(ySwipe < 0) {
-            direction = .Up
-            adjustment = -0.5
+            direction = .vertical
+            adjustment = -1
         } else {
-            direction = .Down
-            adjustment = 0.5
+            direction = .vertical
+            adjustment = 1
         }
         
         let halfX : CGFloat = CGFloat(xCoordinate / self.channelWidth)
         let halfY : CGFloat = CGFloat(yCoordinate / self.channelHeight)
-        let pressDuration : TimeInterval = 0.05
+        let pressDuration : TimeInterval = 0.1
         
         let centre = app.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY))
-        let aboveCentre = app.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY + adjustment))
-        let belowCentre = app.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY + adjustment))
-        let leftOfCentre = app.coordinate(withNormalizedOffset: CGVector(dx: halfX + adjustment, dy: halfY))
-        let rightOfCentre = app.coordinate(withNormalizedOffset: CGVector(dx: halfX + adjustment, dy: halfY))
+        let ySwipe = app.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY + adjustment))
+        let xSwipe = app.coordinate(withNormalizedOffset: CGVector(dx: halfX + adjustment, dy: halfY))
         
         switch direction {
-            case .Up:
-                centre.press(forDuration: pressDuration, thenDragTo: aboveCentre)
+            case .vertical:
+                centre.press(forDuration: pressDuration, thenDragTo: ySwipe)
                 break
-            case .Down:
-                centre.press(forDuration: pressDuration, thenDragTo: belowCentre)
-                break
-            case .Left:
-                centre.press(forDuration: pressDuration, thenDragTo: leftOfCentre)
-                break
-            case .Right:
-                centre.press(forDuration: pressDuration, thenDragTo: rightOfCentre)
+            case .horizontal:
+                centre.press(forDuration: pressDuration, thenDragTo: xSwipe)
                 break
         }
     }
