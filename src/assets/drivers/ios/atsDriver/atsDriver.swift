@@ -56,6 +56,8 @@ class atsDriver: XCTestCase {
     let bluetoothName = UIDevice.current.name
     var channelWidth = 1.0
     var channelHeight = 1.0
+    var deviceWidth = 1.0
+    var deviceHeight = 1.0
     var isAlert = false
     var forceCapture = false;
     var applications:[[String: Any]] = []
@@ -400,12 +402,9 @@ class atsDriver: XCTestCase {
                                     height: Double(coordinates[3])!
                                 )
                                 
-                                let ratioWidth = Double(coordinates[4])!
-                                let ratioHeight = Double(coordinates[5])!
-                                
-                                let elementX = frame.x/ratioWidth
-                                let elementY = frame.y/ratioHeight
-                                let elementHeight = frame.height/ratioHeight
+                                let elementX = frame.x
+                                let elementY = frame.y
+                                let elementHeight = frame.height
                                 
                                 var offSetX = 0.0
                                 var offSetY = 0.0
@@ -421,7 +420,7 @@ class atsDriver: XCTestCase {
                                 let calculateY = elementY + offSetY
                                 
                                 if(ActionsEnum.TAP.rawValue == parameters[1]) {
-                                    self.tapCoordinate(at: calculateX, and: calculateY)
+                                    self.tapCoordinate(at: (calculateX * self.deviceWidth / self.channelWidth), and: (calculateY * self.deviceHeight / self.channelHeight))
                                     self.resultElement["status"] = 0
                                     self.resultElement["message"] = "tap on element"
                                 } else {
@@ -709,6 +708,9 @@ class atsDriver: XCTestCase {
         
         self.channelWidth = Double(screenSize.width)
         self.channelHeight = Double(screenSize.height)
+        
+        self.deviceWidth = Double(screenShotWidth);
+        self.deviceHeight = Double(screenShotHeight);
         
         self.resultElement["os"] = "ios"
         self.resultElement["driverVersion"] = self.driverVersion
