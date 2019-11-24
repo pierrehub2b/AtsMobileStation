@@ -107,7 +107,10 @@ package device.running
 			
 			resultDir = File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id);
 			var alreadyCopied:Boolean = resultDir.exists;
-			iosDriverProjectFolder.copyTo(resultDir, true);
+			if(!alreadyCopied) {
+				iosDriverProjectFolder.copyTo(resultDir, true);
+			}
+
 			var index:int = 0;
 			file = resultDir.resolvePath("atsDriver/Settings.plist");
 			var xcworkspaceFile:File = resultDir.resolvePath("atsios.xcworkspace");
@@ -173,6 +176,20 @@ package device.running
 			getBundleIds(id);
 		}
 		
+		protected function addLineToLogs(log: String):void {
+			var file:File = resultDir.resolvePath("logs.txt");
+			var fileStream:FileStream = new FileStream();
+			if(file.exists) {
+				fileStream.open(file, FileMode.APPEND);
+				fileStream.writeUTFBytes(log);
+			} else {
+				fileStream.open(file, FileMode.WRITE);
+				fileStream.writeUTFBytes(log);
+			}
+			
+			fileStream.close();
+		}
+		
 		protected function onGettingBundlesOutput(ev:ProgressEvent):void{
 			var proc:NativeProcess = ev.currentTarget as NativeProcess;			
 			var apps:Array = proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable).split("\n");			
@@ -219,7 +236,15 @@ package device.running
 		}
 		
 		public override function start():void{
-			testingProcess.start(procInfo);
+			//Getting App list
+			var mobileDeviceProcess:NativeProcess = new NativeProcess();
+			var mobileDeviceProcessInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			mobileDeviceProcessInfo.executable = new File("/usr/bin/env");
+			mobileDeviceProcessInfo.workingDirectory = iosMobileDeviceTools;
+			var args: Vector.<String> = new <String>["./mobiledevice", "uninstall_app", "-u", id, "com.atsios.xctrunner"];
+			mobileDeviceProcessInfo.arguments = args;
+			mobileDeviceProcess.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
+			mobileDeviceProcess.start(mobileDeviceProcessInfo);
 		}
 		
 		override public function dispose():Boolean
@@ -232,6 +257,12 @@ package device.running
 				return true;
 			}
 			return false;
+		}
+		
+		protected function onUninstallExit(ev:NativeProcessExitEvent):void
+		{
+			ev.target.removeEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
+			testingProcess.start(procInfo);
 		}
 		
 		protected function onTestingExit(ev:NativeProcessExitEvent):void
@@ -271,6 +302,7 @@ package device.running
 		{
 			const data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
 			trace("test error -> " + data);
+			addLineToLogs(data);
 			
 			if(noProvisionningProfileError.test(data)){
 				errorMessage = " - No provisioning profiles !";

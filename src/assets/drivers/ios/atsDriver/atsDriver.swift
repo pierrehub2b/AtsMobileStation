@@ -32,6 +32,8 @@ extension UIDevice {
 
 class atsDriver: XCTestCase {
     
+    let driverVersion:String = "1.0.0"
+    
     let udpThread = DispatchQueue(label: "udpQueue" + UUID().uuidString, qos: .userInitiated)
     var domThread = DispatchQueue(label: "domQueue" + UUID().uuidString, qos: .userInitiated)
     var port = 0
@@ -52,10 +54,10 @@ class atsDriver: XCTestCase {
     let simulator = UIDevice.modelName.range(of: "Simulator", options: .caseInsensitive) != nil
     let uid = UIDevice.current.identifierForVendor!.uuidString
     let bluetoothName = UIDevice.current.name
+    var channelWidth = 1.0
+    var channelHeight = 1.0
     var deviceWidth = 1.0
     var deviceHeight = 1.0
-    let maxHeight = 840.0
-    var ratioScreen = 1.0
     var isAlert = false
     var forceCapture = false;
     var applications:[[String: Any]] = []
@@ -240,8 +242,8 @@ class atsDriver: XCTestCase {
     }
     
     func refreshView() {
-        UIGraphicsBeginImageContextWithOptions(CGSize(width: self.deviceWidth, height: self.deviceHeight), true, 0.85)
-        XCUIScreen.main.screenshot().image.draw(in: CGRect(x: 0, y: 0, width: self.deviceWidth, height: self.deviceHeight))
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: self.channelWidth, height: self.channelHeight), true, 0.85)
+        XCUIScreen.main.screenshot().image.draw(in: CGRect(x: 0, y: 0, width: self.channelWidth, height: self.channelHeight))
         let newImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         
@@ -299,8 +301,8 @@ class atsDriver: XCTestCase {
                 } else {
                     self.resultElement["message"] = "root_description"
                     self.resultElement["status"] = 0
-                    self.resultElement["deviceHeight"] = self.deviceHeight
-                    self.resultElement["deviceWidth"] = self.deviceWidth
+                    self.resultElement["deviceHeight"] = self.channelHeight
+                    self.resultElement["deviceWidth"] = self.channelWidth
                     self.resultElement["root"] = app.debugDescription
                 }
             }else if(action == ActionsEnum.INFO.rawValue){
@@ -400,12 +402,9 @@ class atsDriver: XCTestCase {
                                     height: Double(coordinates[3])!
                                 )
                                 
-                                let ratioWidth = Double(coordinates[4])!
-                                let ratioHeight = Double(coordinates[5])!
-                                
-                                let elementX = frame.x/ratioWidth
-                                let elementY = frame.y/ratioHeight
-                                let elementHeight = frame.height/ratioHeight
+                                let elementX = frame.x
+                                let elementY = frame.y
+                                let elementHeight = frame.height
                                 
                                 var offSetX = 0.0
                                 var offSetY = 0.0
@@ -421,13 +420,13 @@ class atsDriver: XCTestCase {
                                 let calculateY = elementY + offSetY
                                 
                                 if(ActionsEnum.TAP.rawValue == parameters[1]) {
-                                    self.tapCoordinate(at: calculateX, and: calculateY)
+                                    self.tapCoordinate(at: (calculateX * self.deviceWidth / self.channelWidth), and: (calculateY * self.deviceHeight / self.channelHeight))
                                     self.resultElement["status"] = 0
                                     self.resultElement["message"] = "tap on element"
                                 } else {
                                     if(ActionsEnum.SWIPE.rawValue == parameters[1]) {
-                                        let directionX = (Double(parameters[4]) ?? 0.0)/ratioWidth
-                                        let directionY = (Double(parameters[5]) ?? 0.0)/ratioHeight
+                                        let directionX = (Double(parameters[4]) ?? 0.0)
+                                        let directionY = (Double(parameters[5]) ?? 0.0)
                                         self.swipeCoordinate(x: calculateX, y: calculateY, swipeX: directionX, swipeY: directionY)
                                         self.forceCapture = true;
                                         self.resultElement["status"] = 0
@@ -439,7 +438,7 @@ class atsDriver: XCTestCase {
                     }else if(action == ActionsEnum.APP.rawValue){
                         if(ActionsEnum.START.rawValue == firstParam) {
                             app = XCUIApplication.init(bundleIdentifier: parameters[1])
-                            if(self.appsInstalled.contains(parameters[1])) {
+                            if(self.appsInstalled.contains(parameters[1]) || true) {
                                  app.launch()
                                  self.resultElement["status"] = 0
                                  self.resultElement["label"] = app.label
@@ -571,16 +570,43 @@ class atsDriver: XCTestCase {
         }
     }
     
+    enum direction : Int {
+        case horizontal, vertical
+    }
+    
     func swipeCoordinate(x xCoordinate: Double, y yCoordinate: Double, swipeX xSwipe: Double, swipeY ySwipe: Double) {
-        let pressDuration : TimeInterval = 0.05
+        var direction:direction;
+        var adjustment: CGFloat = 0
+        if(xSwipe > 0) {
+            direction = .horizontal
+            adjustment = 1
+        } else if(xSwipe < 0) {
+            direction = .horizontal
+            adjustment = -1
+        } else if(ySwipe < 0) {
+            direction = .vertical
+            adjustment = -1
+        } else {
+            direction = .vertical
+            adjustment = 1
+        }
         
-        let startNormalized = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
-        let startCoordinate = startNormalized.withOffset(CGVector(dx: xCoordinate, dy: yCoordinate))
+        let halfX : CGFloat = CGFloat(xCoordinate / self.channelWidth)
+        let halfY : CGFloat = CGFloat(yCoordinate / self.channelHeight)
+        let pressDuration : TimeInterval = 0.1
         
-        let endNormalized = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
-        let endCoordinate = endNormalized.withOffset(CGVector(dx: (xCoordinate+xSwipe), dy: (yCoordinate + ySwipe)))
+        let centre = app.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY))
+        let ySwipe = app.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY + adjustment))
+        let xSwipe = app.coordinate(withNormalizedOffset: CGVector(dx: halfX + adjustment, dy: halfY))
         
-        startCoordinate.press(forDuration: pressDuration, thenDragTo: endCoordinate)
+        switch direction {
+            case .vertical:
+                centre.press(forDuration: pressDuration, thenDragTo: ySwipe)
+                break
+            case .horizontal:
+                centre.press(forDuration: pressDuration, thenDragTo: xSwipe)
+                break
+        }
     }
     
     func retrieveElement(parameter: String, field: String) -> XCUIElement? {
@@ -661,18 +687,30 @@ class atsDriver: XCTestCase {
     }
     
     func driverInfoBase(applyRatio: Bool) {
+        
+        // Application size
         let screenNativeBounds = XCUIScreen.main.screenshot().image
-        self.ratioScreen = self.maxHeight / Double(screenNativeBounds.size.height)
-        self.deviceWidth = Double(screenNativeBounds.size.width) * self.ratioScreen
-        self.deviceHeight = Double(screenNativeBounds.size.height) * self.ratioScreen
+        let screenShotWidth = screenNativeBounds.size.width
+        let screenShotHeight = screenNativeBounds.size.height
+        
+        // Device size
+        let screenBounds = UIScreen.main.bounds
+        let screenScale = UIScreen.main.scale
+        let screenSize = CGSize(width: screenBounds.size.width * screenScale, height: screenBounds.size.height * screenScale)
+        
+        self.channelWidth = Double(screenSize.width)
+        self.channelHeight = Double(screenSize.height)
+        
+        self.deviceWidth = Double(screenShotWidth);
+        self.deviceHeight = Double(screenShotHeight);
         
         self.resultElement["os"] = "ios"
-        self.resultElement["driverVersion"] = "1.0.0"
+        self.resultElement["driverVersion"] = self.driverVersion
         self.resultElement["systemName"] = model + " - " + osVersion
-        self.resultElement["deviceWidth"] = self.deviceWidth
-        self.resultElement["deviceHeight"] = self.deviceHeight
-        self.resultElement["channelWidth"] = applyRatio ? self.deviceWidth : screenNativeBounds.size.width
-        self.resultElement["channelHeight"] = applyRatio ? self.deviceHeight : screenNativeBounds.size.height
+        self.resultElement["deviceWidth"] = screenShotWidth
+        self.resultElement["deviceHeight"] = screenShotHeight
+        self.resultElement["channelWidth"] = screenSize.width
+        self.resultElement["channelHeight"] = screenSize.height
         self.resultElement["channelX"] = 0
         self.resultElement["channelY"] = 0
     }
