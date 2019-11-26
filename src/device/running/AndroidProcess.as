@@ -178,8 +178,8 @@ package device.running
 		}
 		
 		protected function onExecuteData(event:ProgressEvent):void{
-			var data:String = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
-			trace(data);
+			//var data:String = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
+			//trace(data);
 			dispatchEvent(new Event(RUNNING));
 		}
 		
