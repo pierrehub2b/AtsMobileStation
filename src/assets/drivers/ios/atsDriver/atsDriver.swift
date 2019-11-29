@@ -305,6 +305,11 @@ class atsDriver: XCTestCase {
                     self.resultElement["deviceWidth"] = self.channelWidth
                     self.resultElement["root"] = app.debugDescription
                 }
+            }else if(action == ActionsEnum.SCREENSHOT.rawValue){
+                let screenshot = XCUIScreen.main.screenshot()
+                self.resultElement["imgdata"] = screenshot.pngRepresentation.base64EncodedString()
+                self.resultElement["status"] = 0
+                self.resultElement["message"] = "Screenshot data sent"
             }else if(action == ActionsEnum.INFO.rawValue){
                 self.driverInfoBase(applyRatio: false)
                 self.resultElement["message"] = "device capabilities"
@@ -514,7 +519,6 @@ class atsDriver: XCTestCase {
             }
         }
     }
-    
     
     func split(input: String, regex: String) -> [String] {
         
