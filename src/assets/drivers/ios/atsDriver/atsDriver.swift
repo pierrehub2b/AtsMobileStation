@@ -271,8 +271,7 @@ class atsDriver: XCTestCase {
             startResponse: ((String, [(String, String)]) -> Void),
             sendBody: ((Data) -> Void)
             ) in
-            // Start HTTP response
-            startResponse("200 OK", [("Content-Type", "application/json")])
+            
             let query_String = environ["PATH_INFO"]! as! String
             let action = query_String.replacingOccurrences(of: "/", with: "")
             var parameters: [String] = [String]()
@@ -306,10 +305,11 @@ class atsDriver: XCTestCase {
                     self.resultElement["root"] = app.debugDescription
                 }
             }else if(action == ActionsEnum.SCREENSHOT.rawValue){
+                startResponse("200 OK", [("Content-Type", "application/octet-stream")])
                 let screenshot = XCUIScreen.main.screenshot()
-                self.resultElement["imgdata"] = screenshot.pngRepresentation.base64EncodedString()
-                self.resultElement["status"] = 0
-                self.resultElement["message"] = "Screenshot data sent"
+                let bytes = self.getArrayOfBytesFromImage(imageData: screenshot.pngRepresentation)
+                sendBody(Data(bytes: bytes))
+                sendBody(Data())
             }else if(action == ActionsEnum.INFO.rawValue){
                 self.driverInfoBase(applyRatio: false)
                 self.resultElement["message"] = "device capabilities"
@@ -465,7 +465,6 @@ class atsDriver: XCTestCase {
                             self.resultElement["message"] = "stop app " + parameters[1]
                             self.resultElement["status"] = 0
                         } else if(ActionsEnum.INFO.rawValue == firstParam) {
-                            //TODO check if app exists, if not exists return status -43
                             var info: [String:String] = [:]
                             info["os"] = "ios"
                             info["icon"] = ""
@@ -482,7 +481,8 @@ class atsDriver: XCTestCase {
                     self.resultElement["status"] = -41
                 }
             }
-            
+            // Start HTTP response
+            startResponse("200 OK", [("Content-Type", "application/json")])
             if let theJSONData = try?  JSONSerialization.data(
                 withJSONObject: self.resultElement,
                 options: []
@@ -505,6 +505,15 @@ class atsDriver: XCTestCase {
         } else {
             print("Display => ** WIFI NOT CONNECTED **")
         }
+    }
+    
+    func getArrayOfBytesFromImage(imageData:Data) ->[UInt8]{
+
+        let count = imageData.count / MemoryLayout<UInt8>.size
+        var byteArray = [UInt8](repeating: 0, count: count)
+        imageData.copyBytes(to: &byteArray, count:count)
+        return byteArray
+
     }
     
     func matchingStrings(input: String, regex: String) -> [[String]] {
