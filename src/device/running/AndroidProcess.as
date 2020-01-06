@@ -7,6 +7,9 @@ package device.running
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
+	import flash.net.NetworkInfo;
+	import flash.net.NetworkInterface;
+	import flash.net.InterfaceAddress;
 	
 	import device.Device;
 		
@@ -26,6 +29,7 @@ package device.running
 		private var port:String;
 		private var id:String;
 		private var atsdroidFilePath:String;
+		private var usbMode:Boolean;
 		
 		private var output:String = "";
 		
@@ -36,12 +40,13 @@ package device.running
 		private var process:NativeProcess;
 		private var procInfo:NativeProcessStartupInfo
 		
-		public function AndroidProcess(adbFile:File, atsdroid:String, id:String, port:String)
+		public function AndroidProcess(adbFile:File, atsdroid:String, id:String, port:String, usbMode:Boolean)
 		{
 			this.id = id;
 			this.port = port;
 			this.atsdroidFilePath = atsdroid;
 			this.deviceInfo = new Device(id);
+			this.usbMode = usbMode;
 			
 			process = new NativeProcess();
 			procInfo = new NativeProcessStartupInfo()
@@ -86,26 +91,55 @@ package device.running
 			if(error != null){
 				dispatchEvent(new Event(ERROR_EVENT));
 			}else{
-				var ipRouteData:Array = output.split(/\s+/g);
-				var idx:int = ipRouteData.indexOf("dev");
-				if(idx > -1 && ipRouteData[idx+1] == "wlan0"){
-					idx = ipRouteData.indexOf("src");
-					if(idx > -1){
-						ipAddress = ipRouteData[idx+1];
-						dispatchEvent(new Event(IP_ADDRESS));
-					
-						process = new NativeProcess();
-						process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit, false, 0, true);
-						procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", androidDriverFullName];
-						process.start(procInfo);
-
-						return;
+				if(!usbMode) {
+					var ipRouteData:Array = output.split(/\s+/g);
+					var idx:int = ipRouteData.indexOf("dev");
+					if(idx > -1 && ipRouteData[idx+1] == "wlan0"){
+						idx = ipRouteData.indexOf("src");
+						if(idx > -1){
+							ipAddress = ipRouteData[idx+1];
+							dispatchEvent(new Event(IP_ADDRESS));
+							
+							process = new NativeProcess();
+							process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit, false, 0, true);
+							procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", androidDriverFullName];
+							process.start(procInfo);
+							
+							return;
+						}
+					}else{
+						error = " - WIFI not connected !";
+						dispatchEvent(new Event(ERROR_EVENT));
 					}
-				}else{
-					error = " - WIFI not connected !";
-					dispatchEvent(new Event(ERROR_EVENT));
+				} else {
+					ipAddress = getClientIPAddress("IPv4");
+					dispatchEvent(new Event(IP_ADDRESS));
+					
+					process = new NativeProcess();
+					process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit, false, 0, true);
+					procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", androidDriverFullName];
+					process.start(procInfo);
+					
+					return;
 				}
 			}
+		}
+		
+		public static function getClientIPAddress (version:String):String {
+			var ni:NetworkInfo = NetworkInfo.networkInfo;
+			var interfaceVector:Vector.<NetworkInterface> = ni.findInterfaces();
+			var currentNetwork:NetworkInterface;
+			
+			for each (var networkInt:NetworkInterface in interfaceVector) {
+				if (networkInt.active) {
+					for each (var address:InterfaceAddress in networkInt.addresses) {
+						if (address.ipVersion == version) {
+							return address.address;
+						}
+					}
+				}
+			}
+			return "";
 		}
 		
 		protected function onUninstallExit(event:NativeProcessExitEvent):void{
@@ -199,5 +233,102 @@ package device.running
 				dispatchEvent(new Event(STOPPED));
 			}
 		}
+	
+		protected function sendUsbCommand(commandName:String, commandParameter:String, parameters:Array) {
+			var commandLine:String = "";
+			switch(commandName.toLocaleLowerCase()) {
+				case "app":
+					switch(commandParameter.toLocaleLowerCase()) {
+						case "start":
+							//start app
+							commandLine = "adb shell am start -n " + parameters[0];
+							break;
+						case "stop":
+							//stop app
+							commandLine = "adb shell am stop -n " + parameters[0];
+							break;
+						case "switch":
+							//switch app
+							commandLine = "adb shell am start -n " + parameters[0];
+							break;
+						case "info":
+							//info app
+							commandLine = "adb shell dumpsys package " + parameters[0];
+							break;
+					}
+					break;
+				case "info":
+					//device info
+					commandLine = "adb shell getprop";
+					break;
+				case "driver":
+					switch(commandParameter.toLocaleLowerCase()) {
+						case "start":
+							//start driver
+							commandLine =  "adb -s " + this.deviceInfo.id + " shell am instrument -w -r -e atsPort 8080 -e debug false -e class com.ats.atsdroid.AtsRunner com.ats.atsdroid/android.support.test.runner.AndroidJUnitRunner"
+							break;
+						case "stop":
+							//stop driver
+							break;
+						case "quit":
+							//quit driver
+							break;
+					}
+					break;
+				case "button":
+					commandLine = "adb shell input keyevent ";
+					switch(commandParameter.toLocaleLowerCase()) {
+						case "home":
+							//home
+							commandLine += "home";
+							break;
+						case "back":
+							//back
+							commandLine += "back";
+							break;
+						case "enter":
+							//enter
+							commandLine += "enter";
+							break;
+						case "menu":
+							//menu
+							commandLine += "menu";
+							break;
+						case "search":
+							//search
+							commandLine += "search";
+							break;
+						case "app":
+							//app
+							commandLine += "app";
+							break;
+						case "delete":
+							//delete
+							commandLine += "delete";
+							break;
+					}
+					break;
+				case "capture":
+					//send dom
+					break;
+				case "element":
+					switch(commandParameter.toLocaleLowerCase()) {
+						case "input":
+							//input text
+							break;
+						case "tap":
+							//tap screen
+							break;
+						case "swipe":
+							//swipe screen
+							break;
+					}
+					break;
+				case "screenshot":
+					//send screenshot
+					break;
+			}
+		}
+	
 	}
 }

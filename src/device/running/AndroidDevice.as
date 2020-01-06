@@ -2,8 +2,11 @@ package device.running
 {
 	import flash.events.Event;
 	import flash.filesystem.File;
-	
+	import httpServer.*
 	import device.RunningDevice;
+	import flash.filesystem.File;
+	import flash.filesystem.FileMode;
+	import flash.filesystem.FileStream;
 	
 	public class AndroidDevice extends RunningDevice
 	{
@@ -13,14 +16,40 @@ package device.running
 		public var androidSdk:String = "";
 
 		private var process:AndroidProcess;
+		private var webserv:HttpServer;
 				
 		public function AndroidDevice(adbFile:File, port:String, id:String)
 		{
-			this.port = port;
+			
 			this.id = id;
 			this.status = INSTALL;
 			
-			process = new AndroidProcess(adbFile, atsdroidFilePath, id, port);
+			webserv = (new HttpServer());
+			var fileStream:FileStream = new FileStream();
+			var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
+			if(file.exists) {
+				fileStream.open(file, FileMode.READ);
+				var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
+				var arrayString: Array = content.split("\n");
+				for each(var line:String in arrayString) {
+					if(line != "") {
+						var arrayLineId: Array = line.split("==");
+						if(arrayLineId[0].toString().toLowerCase() == id.toString().toLowerCase()) {
+							var arrayLineAttributes: Array = arrayLineId[1].split(";");
+							this.usbMode = (arrayLineAttributes[2] == "true");
+						}
+					}
+				}
+				fileStream.close();
+			}
+			
+			if(usbMode) {
+				this.port = webserv.listen(8080);
+			} else {
+				this.port = port;
+			}
+			
+			process = new AndroidProcess(adbFile, atsdroidFilePath, id, port, usbMode);
 			process.addEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.RUNNING, runningTestHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.STOPPED, stoppedTestHandler, false, 0, true);
@@ -28,6 +57,7 @@ package device.running
 			process.addEventListener(AndroidProcess.IP_ADDRESS, ipAdressHandler, false, 0, true);
 			
 			installing()
+
 		}
 		
 		public override function start():void{

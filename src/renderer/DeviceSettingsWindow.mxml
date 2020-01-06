@@ -7,12 +7,14 @@
 			   initialize="settings_initializeHandler(event)">
 	<fx:Script>
 		<![CDATA[
+			import device.RunningDevice;
+			import device.running.AndroidDevice;
+			import device.running.IosDevice;
+			
 			import mx.core.FlexGlobals;
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
-			
-			import device.RunningDevice;
 			
 			public var dev:RunningDevice;
 			public var arrayString:Array;
@@ -25,6 +27,13 @@
 					deviceId.text = dev.id;
 					deviceName.text = dev.modelName;
 					
+					if(dev is AndroidDevice){
+						androidUsbGroup.visible = true;
+						portSelectionGroup.visible = false;
+						portSelectionGroup.height = 0;
+						installAppButton.visible = false;
+					}
+					
 					var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
 					if(file.exists) {
 						var fileStream:FileStream = new FileStream();
@@ -36,21 +45,13 @@
 								var arrayLineId: Array = line.split("==");
 								if(arrayLineId[0].toString().toLowerCase() == dev.id.toString().toLowerCase()) {
 									var arrayLineAttributes: Array = arrayLineId[1].split(";");
-									portAutomatic.selected = (arrayLineAttributes[0] == "true");
-									portSelection.text = arrayLineAttributes[1];
+									portAutomatic.selected = arrayLineAttributes.length > 0 ? arrayLineAttributes[0] == "true" : false;
+									portSelection.text = arrayLineAttributes.length > 1 ? arrayLineAttributes[1] : "";
+									androidUsb.selected = arrayLineAttributes.length > 2 ? arrayLineAttributes[2] == "true" : false;
 								}
 							}
 						}
 						fileStream.close();
-					}
-					
-					var fileDevTeam:File = File.userDirectory.resolvePath("actiontestscript/developmentDevTeam.txt");
-					if(fileDevTeam.exists) {
-						var fileStreamDevTeam:FileStream = new FileStream();
-						fileStreamDevTeam.open(fileDevTeam, FileMode.READ);
-						var contentDevTeam:String = fileStreamDevTeam.readUTFBytes(fileStreamDevTeam.bytesAvailable);
-						//developmentTeamId.text = contentDevTeam;
-						fileStreamDevTeam.close();
 					}
 				}
 				portAutomatic.selected = portSelection.text == "";
@@ -78,6 +79,7 @@
 					
 					dev.settingsPort = portSelection.text;
 					dev.automaticPort = portAutomatic.selected;
+					dev.usbMode = androidUsb.selected;
 					//save profile
 					var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
 					var fileStream:FileStream = new FileStream();
@@ -89,7 +91,7 @@
 							fileStream.writeUTFBytes(str + "\n");
 						}
 					}
-					fileStream.writeUTFBytes(dev.id.toString().toLowerCase() + "==" + dev.automaticPort + ";" + dev.settingsPort + ";");
+					fileStream.writeUTFBytes(dev.id.toString().toLowerCase() + "==" + dev.automaticPort + ";" + dev.settingsPort + ";" + dev.usbMode);
 					fileStream.close();
 				}
 				
@@ -167,7 +169,7 @@
 				 text="sdf54sd65f46sd5" verticalCenter="2"/>
 
 		<mx:HRule width="98%"/>
-		<s:HGroup width="100%" gap="3" verticalAlign="middle" verticalCenter="0">
+		<s:HGroup id="portSelectionGroup" width="100%" gap="3" verticalAlign="middle" verticalCenter="0">
 			<s:HGroup width="100%" horizontalAlign="left" verticalAlign="baseline">
 				<s:Label fontSize="11" fontWeight="bold" paddingRight="5" text="Driver port :"/>
 				<s:CheckBox id="portAutomatic" label="Auto"
@@ -175,8 +177,15 @@
 							fontStyle="normal" textDecoration="none"/>
 				<s:TextInput id="portSelection" width="100%" height="100%" restrict="0-9" maxChars="5" change="portSelection_changeHandler(event)" />
 			</s:HGroup>
-			
 		</s:HGroup>
+		<s:HGroup width="100%" gap="3" verticalAlign="middle" verticalCenter="0">
+			<s:HGroup id="androidUsbGroup" width="100%" horizontalAlign="left" verticalAlign="baseline" visible="false">
+				<s:Label fontSize="11" fontWeight="bold" paddingRight="5" text="USB mode :"/>
+				<s:CheckBox id="androidUsb"
+							change="portAutomatic_changeHandler(event)" fontSize="11"
+							fontStyle="normal" textDecoration="none"/>
+			</s:HGroup>
+			</s:HGroup>
 
 	</s:VGroup>
 	
@@ -192,7 +201,7 @@
 		
 		<s:HGroup left="5" right="5" gap="2" horizontalAlign="center" verticalCenter="0">
 			<s:Button label="Copy device id" icon="assets/icons/16/copy.png" click="copyId_clickHandler(event)"/>
-			<s:Button label="Install app" click="install_clickHandler(event)" fontSize="11"
+			<s:Button id="installAppButton" label="Install app" click="install_clickHandler(event)" fontSize="11"
 					  icon="assets/icons/16/download.png"/>
 			<s:Button label="Finish" click="save_clickHandler(event)" fontSize="11"
 					  icon="assets/icons/16/tick.png"/>

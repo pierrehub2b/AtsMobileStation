@@ -25,6 +25,9 @@ package device
 		[Bindable]
 		public var simulator:Boolean = false;
 		
+		[Bindable]
+		public var usbMode:Boolean = false;
+		
 		public function RunningDevice(id:String=""){
 			super(id);
 			tooltip = "Starting driver ..."

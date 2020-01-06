@@ -9,6 +9,10 @@
 		<![CDATA[
 			import com.greensock.TweenLite;
 			
+			import device.Device;
+			import device.RunningDevice;
+			import device.running.IosDevice;
+			
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.core.DragSource;
@@ -16,10 +20,6 @@
 			import mx.managers.PopUpManager;
 			
 			import spark.filters.DropShadowFilter;
-			
-			import device.Device;
-			import device.RunningDevice;
-			import device.running.IosDevice;
 			
 			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
@@ -31,16 +31,12 @@
 			}
 			
 			private function goHome(event:MouseEvent, dev:RunningDevice):void{
-				var request:URLRequest = new URLRequest();
 				var urlLoader:URLLoader = new URLLoader();
-				
-				request.url = "http://" + dev.ip + ":" + dev.port + "/button";
-				request.contentType = "text/plain";
-				request.method = URLRequestMethod.POST;
+				var request:URLRequest = new URLRequest("http://" + dev.ip + ":" + dev.port + "/button");
 				request.data = "home";
-				
-				urlLoader = new URLLoader();
-				urlLoader.dataFormat = URLLoaderDataFormat.TEXT;
+				request.method = URLRequestMethod.POST;
+				request.contentType = "application/x-www-form-urlencoded";
+				request.requestHeaders.push(new URLRequestHeader("Content-Length", "home".length+""));
 				urlLoader.load(request);
 			}
 			
@@ -53,13 +49,11 @@
 			protected function mainGroup_rollOverHandler(event:MouseEvent):void
 			{
 				restartButton.visible = true;				
-				iosButtons.visible = data is IosDevice;
-				TweenLite.fromTo([restartButton, iosButtons], 0.3, {alpha:0.0}, {alpha:1.0});
+				//iosButtons.visible = data is IosDevice;
 			}
 			
 			protected function mainGroup_rollOutHandler(event:MouseEvent):void
 			{
-				iosButtons.visible = false;
 				restartButton.visible = false;
 			}
 			
@@ -106,16 +100,14 @@
 			</s:VGroup>
 		</s:HGroup>
 		<s:HGroup right="7" verticalAlign="middle" verticalCenter="0">
-			<s:HGroup id="iosButtons" width="100%" horizontalAlign="right" visible="false" verticalAlign="middle">
-				<s:Group id="homeButton" buttonMode="true" click="goHome(event, (data as RunningDevice))"
-						 toolTip="Device home button" visible="{(data as RunningDevice).status==Device.READY}">
-					<s:BitmapImage source="assets/icons/24/home.png" smooth="true" smoothingQuality="high"/>
-				</s:Group>
-				<s:Group id="settingsButton" buttonMode="true" click="showWindow(event, (data as RunningDevice))"
-						 toolTip="Settings of device">
-					<s:BitmapImage source="assets/icons/24/tool.png" smooth="true" smoothingQuality="high"/>
-				</s:Group>
-			</s:HGroup>
+			<s:Group id="homeButton" buttonMode="true" click="goHome(event, (data as RunningDevice))"
+					 toolTip="Device home button" visible="{(data as RunningDevice).status==Device.READY}">
+				<s:BitmapImage source="assets/icons/24/home.png" smooth="true" smoothingQuality="high"/>
+			</s:Group>
+			<s:Group id="settingsButton" buttonMode="true" click="showWindow(event, (data as RunningDevice))"
+					 toolTip="Settings of device">
+				<s:BitmapImage source="assets/icons/24/tool.png" smooth="true" smoothingQuality="high"/>
+			</s:Group>
 			<s:Group width="24" height="24">
 				<s:BitmapImage id="iconStatus" source="assets/icons/24/{(data as RunningDevice).status}.png" smooth="true" smoothingQuality="high"/>
 				<s:Group id="restartButton" buttonMode="true" click="restart_clickHandler(event)"
