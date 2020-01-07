@@ -24,7 +24,7 @@ package device.running
 			this.id = id;
 			this.status = INSTALL;
 			
-			webserv = (new HttpServer());
+			
 			var fileStream:FileStream = new FileStream();
 			var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
 			if(file.exists) {
@@ -43,8 +43,9 @@ package device.running
 				fileStream.close();
 			}
 			
+			webserv = (new HttpServer());
 			if(usbMode) {
-				this.port = webserv.listen(8080);
+				this.port = webserv.listen(8080, this.id);
 			} else {
 				this.port = port;
 			}
@@ -55,9 +56,7 @@ package device.running
 			process.addEventListener(AndroidProcess.STOPPED, stoppedTestHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.DEVICE_INFO, deviceInfoHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.IP_ADDRESS, ipAdressHandler, false, 0, true);
-			
 			installing()
-
 		}
 		
 		public override function start():void{
@@ -68,6 +67,11 @@ package device.running
 			process.removeEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler);
 			status = FAIL
 		}
+		
+		public function get getProcess():AndroidProcess
+		{
+			return this.process;
+		} 
 		
 		private function runningTestHandler(ev:Event):void{
 			process.removeEventListener(AndroidProcess.RUNNING, runningTestHandler);

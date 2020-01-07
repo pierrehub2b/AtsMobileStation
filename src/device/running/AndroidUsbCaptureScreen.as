@@ -30,7 +30,7 @@ package device.running
 			process.addEventListener(NativeProcessExitEvent.EXIT, onScreenCaptureExit, false, 0, true);
 			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onScreenCaptureDataInit, false, 0, true);
 			
-			procInfo.arguments = new <String>["-s", id, "shell"];
+			procInfo.arguments = new <String>["-s", id, "shell", "screenshot"];
 		}
 		
 		public function start():void{

@@ -146,6 +146,17 @@ package httpServer
 		}
 		
 		/**
+		 * Convenience function to respond when a Resource is Over.
+		 * 
+		 * @returns a String with the error response.
+		 */
+		public static function responseJSON(content:String):String
+		{
+			return response(200, "Response", content);    
+		}
+		
+		
+		/**
 		 * Convenience function to respond to a web request.
 		 * 
 		 * @param code is the HTTP header response code
