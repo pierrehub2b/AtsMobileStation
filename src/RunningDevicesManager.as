@@ -33,7 +33,7 @@ package
 		private const simCtlArgs:Vector.<String> = new <String>["xcrun", "simctl", "list", "devices", "-j"];
 		private const adbArgs:Vector.<String> = new <String>["devices"];
 						
-		private const adbPath:String = "assets/tools/android/adb";
+		public static const adbPath:String = "assets/tools/android/adb";
 		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
 		private const newlineTabPattern:RegExp = /[\n\t]/g;

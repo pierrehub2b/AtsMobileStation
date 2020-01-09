@@ -12,17 +12,20 @@ package device.running
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
+	import flash.net.Socket;
 	import flash.utils.ByteArray;
 	
 	public class AndroidUsbCaptureScreen extends EventDispatcher
 	{
 		private var process:NativeProcess = new NativeProcess();
 		private var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
-		
+			
 		private var baImage:ByteArray;
+		private var socket:Socket;
 		
-		public function AndroidUsbCaptureScreen(adbFile:File, atsdroid:String, id:String, port:String)
+		public function AndroidUsbCaptureScreen(id:String)
 		{
+			var adbFile:File = File.applicationDirectory.resolvePath(RunningDevicesManager.adbPath + ".exe");
 			procInfo.executable = adbFile;
 			procInfo.workingDirectory = adbFile.parent;
 			
@@ -30,7 +33,7 @@ package device.running
 			process.addEventListener(NativeProcessExitEvent.EXIT, onScreenCaptureExit, false, 0, true);
 			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onScreenCaptureDataInit, false, 0, true);
 			
-			procInfo.arguments = new <String>["-s", id, "shell", "screenshot"];
+			procInfo.arguments = new <String>["-s", id, "shell", "dumpsys", "activity", AndroidProcess.ANDROIDDRIVER, "screenshot"];
 		}
 		
 		public function start():void{
@@ -93,7 +96,7 @@ package device.running
 			bitmapData.draw(loaderInfo.loader);
 			
 			process.standardInput.writeUTF("screencap -p\n");
-			dispatchEvent(new Event("screenCapture"));
+			dispatchEvent(new Event(AndroidProcess.USBSCREENSHOTRESPONSE));
 		}
 		
 		protected function onScreenCaptureExit(event:NativeProcessExitEvent):void{

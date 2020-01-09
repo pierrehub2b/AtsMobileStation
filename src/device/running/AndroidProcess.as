@@ -18,12 +18,15 @@ package device.running
 		public static const ERROR_EVENT:String = "errorEvent";
 		public static const IP_ADDRESS:String = "ipAddress";
 		
+		public static const USBACTIONRESPONSE:String = "usbResponse";
+		public static const USBSCREENSHOTRESPONSE:String = "usbScreenshot";
+		
 		public static const DEVICE_INFO:String = "deviceInfo";
 		
 		public static const RUNNING:String = "running";
 		public static const STOPPED:String = "stopped";
 		
-		private const androidDriverFullName:String = "com.ats.atsdroid";
+		public static const ANDROIDDRIVER:String = "com.ats.atsdroid";
 		private const androidPropValueRegex:RegExp = /.*:.*\[(.*)\]/;
 		
 		private var port:String;
@@ -102,7 +105,7 @@ package device.running
 							
 							process = new NativeProcess();
 							process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit, false, 0, true);
-							procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", androidDriverFullName];
+							procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", ANDROIDDRIVER];
 							process.start(procInfo);
 							
 							return;
@@ -117,7 +120,7 @@ package device.running
 					
 					process = new NativeProcess();
 					process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit, false, 0, true);
-					procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", androidDriverFullName];
+					procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", ANDROIDDRIVER];
 					process.start(procInfo);
 					
 					return;
@@ -198,7 +201,7 @@ package device.running
 			process.addEventListener(NativeProcessExitEvent.EXIT, onExecuteExit, false, 0, true);
 			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData, false, 0, true);
 			
-			procInfo.arguments = new <String>["-s", id, "shell", "am", "instrument", "-w", "-r", "-e", "atsPort", port, "-e", "debug", "false", "-e", "class", androidDriverFullName + ".AtsRunner", androidDriverFullName + "/android.support.test.runner.AndroidJUnitRunner"];
+			procInfo.arguments = new <String>["-s", id, "shell", "am", "instrument", "-w", "-r", "-e", "atsPort", port, "-e", "debug", "false", "-e", "class", ANDROIDDRIVER + ".AtsRunner", ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner"];
 			process.start(procInfo);
 		}
 		

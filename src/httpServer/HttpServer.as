@@ -2,6 +2,8 @@ package httpServer
 {
 	import device.running.AndroidDevice;
 	import device.running.AndroidProcess;
+	import device.running.AndroidUsbActions;
+	import device.running.AndroidUsbCaptureScreen;
 	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
@@ -51,10 +53,7 @@ package httpServer
 	 * 
 	 */
 	public class HttpServer
-	{
-		private const adbPath:String = "assets/tools/android/adb.exe";
-		private const androidDriverFullName:String = "com.ats.atsdroid";
-		
+	{		
 		private var _serverSocket:ServerSocket;
 		private var _mimeTypes:Object = new Object();
 		private var _controllers:Object = new Object();
@@ -62,13 +61,10 @@ package httpServer
 		private var _errorCallback:Function = null;
 		private var _isConnected:Boolean = false;
 		private var _maxRequestLength:int = 2048;
-		private var _process:AndroidProcess;
-		private var androidOutput:String;
-		private var adbFile:File;
-		private var proc:NativeProcess;
-		private var procInfo:NativeProcessStartupInfo;
-		private var socket:Socket;
-		private var _deviceId:String;
+		private var _socket:Socket;
+		private var androidUsbAction:AndroidUsbActions;
+		private var androidUsbCaptureScreen:AndroidUsbCaptureScreen;	
+		private var rex:RegExp = /[\s\r\n]+/gim;
 		
 		public function HttpServer()
 		{
@@ -97,38 +93,6 @@ package httpServer
 			return _maxRequestLength;
 		}
 		
-		private function launchAdbProcess():void{
-			
-			androidOutput = new String();
-			
-			proc = new NativeProcess();
-			procInfo = new NativeProcessStartupInfo();
-			
-			procInfo.executable = adbFile;			
-			procInfo.workingDirectory = File.userDirectory;
-			procInfo.arguments = new <String>[];
-			
-			proc.addEventListener(NativeProcessExitEvent.EXIT, onSendAndroidDevicesActionExit, false, 0, true);
-			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onSendAndroidDevicesAction, false, 0, true);
-		}
-		
-		protected function onSendAndroidDevicesAction(ev:ProgressEvent):void{
-			androidOutput = androidOutput.concat(proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable));
-			//androidOutput = proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);
-		}
-		
-		protected function onSendAndroidDevicesActionExit(ev:NativeProcessExitEvent):void
-		{
-			proc = ev.currentTarget as NativeProcess;
-			var output:Array = androidOutput.split("\r\r\n");
-			var response:String = output[output.length-1];
-			if(response != "") {
-				socket.writeUTFBytes(ActionController.responseJSON(response))
-			}
-			socket.flush();
-			socket.close();
-		}
-		
 		/**
 		 * Set the maximum lenght of a request in bytes.
 		 * Requests longer than this will be truncated.
@@ -154,9 +118,8 @@ package httpServer
 			_serverSocket.addEventListener(Event.CONNECT, socketConnectHandler);
 			initServerSocket(port, errorCallback);
 			
-			_deviceId = deviceId;
-			adbFile = File.applicationDirectory.resolvePath(adbPath);
-			launchAdbProcess();
+			androidUsbAction = new AndroidUsbActions(deviceId);
+			androidUsbCaptureScreen = new AndroidUsbCaptureScreen(deviceId)
 			
 			return _serverSocket.localPort.toString();
 		}
@@ -203,14 +166,15 @@ package httpServer
 		{
 			try
 			{
-				socket = event.target as Socket;
+				_socket = event.target as Socket;
+				androidUsbAction.addEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded, false, 0, true);
 				var bytes:ByteArray = new ByteArray();
 				
 				// Do not read more than _maxRequestLength bytes
-				var bytes_to_read:int = (socket.bytesAvailable > _maxRequestLength) ? _maxRequestLength : socket.bytesAvailable;
+				var bytes_to_read:int = (_socket.bytesAvailable > _maxRequestLength) ? _maxRequestLength : _socket.bytesAvailable;
 				
 				// Get the request string and pull out the URL 
-				var request:String          = socket.readUTFBytes(socket.bytesAvailable);
+				var request:String          = _socket.readUTFBytes(_socket.bytesAvailable);
 				var url:String              = request.substring(4, request.indexOf("HTTP/") - 1);
 				
 				// It must be a GET request
@@ -218,12 +182,11 @@ package httpServer
 					//retrieving the dbody data
 					var requestData:Array = request.split("\n");
 					var data:Array = new Array();
+					data.push(url.replace("/","").replace(rex,''));
 					var isData:Boolean = false;
-					procInfo.arguments = new <String>["-s", _deviceId, "shell", "dumpsys", "activity", androidDriverFullName, url.replace("/","")];
 					for(var i:int=0;i<requestData.length;i++){
 						if(isData) {
 							data.push(requestData[i]);
-							procInfo.arguments.push(requestData[i]);
 						}
 						if(requestData[i] == "\r") {
 							isData = true;
@@ -231,8 +194,7 @@ package httpServer
 					}
 					
 					// sending request to the device
-					androidOutput = "";
-					proc.start(procInfo);	
+					androidUsbAction.start(data);
 				}
 			}
 			catch (error:Error)
@@ -244,6 +206,15 @@ package httpServer
 					Alert.show(error.message, "Error");
 				}
 			}
+		}
+		
+		private function usbActionResponseEnded(ev:Event):void {
+			if(androidUsbAction.Response != "") {
+				_socket.writeUTFBytes(ActionController.responseJSON(androidUsbAction.Response))
+			}
+			androidUsbAction.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded);
+			_socket.flush();
+			_socket.close();
 		}
 	}
 }
