@@ -16,15 +16,15 @@ package device.running
 	import flash.text.ReturnKeyLabel;
 	import flash.utils.ByteArray;
 	
-	public class AndroidUsbActions extends EventDispatcher
+	public class AndroidUsbActions extends AndroidUsb
 	{
 		private var process:NativeProcess = new NativeProcess();
 		private var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
 		
 		private var androidOutput:String;
-		
 		private var response:String = "";
 		private var id:String = "";
+		private var udpServerPort:String = "";
 		
 		public function AndroidUsbActions(id:String)
 		{
@@ -38,13 +38,9 @@ package device.running
 			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onUsbDataInit, false, 0, true);
 		}
 		
-		public function get Response():String {
-			return this.response;
-		}
-		
-		public function start(args:Array):void{
+		public override function start(args:Array):void{
 			androidOutput = "";
-			procInfo.arguments = new <String>["-s", id, "shell", "dumpsys", "activity", AndroidProcess.ANDROIDDRIVER];;
+			procInfo.arguments = new <String>["-s", this.id, "shell", "dumpsys", "activity", AndroidProcess.ANDROIDDRIVER];;
 			
 			for(var i:int=0; i<args.length; i++){
 				procInfo.arguments.push(args[i]);
@@ -52,16 +48,30 @@ package device.running
 			process.start(procInfo);
 		}
 		
-		protected function onUsbDataInit(event:ProgressEvent):void{
+		protected override function onUsbDataInit(event:ProgressEvent):void{
 			androidOutput = androidOutput.concat(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
 		}
 		
-		protected function onUsbActionExit(ev:NativeProcessExitEvent):void
+		protected override function onUsbActionExit(ev:NativeProcessExitEvent):void
 		{
 			process = ev.currentTarget as NativeProcess;
 			var output:Array = androidOutput.split("\r\r\n");
-			response = output[output.length-1];
+			if(this.procInfo.arguments[6] == "screenshot") {
+				this.response = "";
+				for(var i:int=2;i<output.length;i++) {
+					this.response += output[i];
+					if(i != output.length-1) {
+						this.response += "\r\r\n";
+					}
+				}
+			} else {
+				this.response = output[output.length-1];
+			}
 			dispatchEvent(new Event(AndroidProcess.USBACTIONRESPONSE));
+		}
+		
+		public override function getResponse():String {
+			return this.response;
 		}
 	}
 }

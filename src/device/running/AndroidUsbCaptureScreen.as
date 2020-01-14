@@ -12,16 +12,16 @@ package device.running
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
-	import flash.net.Socket;
 	import flash.utils.ByteArray;
 	
-	public class AndroidUsbCaptureScreen extends EventDispatcher
+	public class AndroidUsbCaptureScreen extends AndroidUsb
 	{
 		private var process:NativeProcess = new NativeProcess();
 		private var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
 			
+		private var androidOutput:String;
 		private var baImage:ByteArray;
-		private var socket:Socket;
+		public var targetFile:File;
 		
 		public function AndroidUsbCaptureScreen(id:String)
 		{
@@ -29,78 +29,67 @@ package device.running
 			procInfo.executable = adbFile;
 			procInfo.workingDirectory = adbFile.parent;
 			
-			//process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
-			process.addEventListener(NativeProcessExitEvent.EXIT, onScreenCaptureExit, false, 0, true);
-			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onScreenCaptureDataInit, false, 0, true);
+			process.addEventListener(NativeProcessExitEvent.EXIT, onUsbActionExit, false, 0, true);
+			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onUsbDataInit, false, 0, true);
 			
-			procInfo.arguments = new <String>["-s", id, "shell", "dumpsys", "activity", AndroidProcess.ANDROIDDRIVER, "screenshot"];
+			procInfo.arguments = new <String>["-s", id, "shell", "dumpsys", "activity", AndroidProcess.ANDROIDDRIVER, "screenshot", "lores"];
 		}
 		
-		public function start():void{
-			baImage = new ByteArray();
+		public override function start(data:Array):void{
+			this.baImage = new ByteArray();
 			process.start(procInfo);
 		}
 		
-		protected function onScreenCaptureDataInit(event:ProgressEvent):void{
-			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onScreenCaptureDataInit);
-			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onScreenCaptureData, false, 0, true);
-			process.addEventListener(Event.COMPLETE, completeHandler);
-			
-			process.standardInput.writeUTF("screencap -p\n");
-		}
-		
-		private function completeHandler(event:Event):void {
-			trace("completeHandler: " + event);
+		protected override function onUsbDataInit(event:ProgressEvent):void{
+			androidOutput = androidOutput.concat(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
 		}
 		
 		private var pngReadStarted:Boolean = false;
-		protected function onScreenCaptureData(ev:ProgressEvent):void{
+		protected function onScreenCaptureData(bytes:ByteArray):void{
 			
-			var ba:ByteArray = new ByteArray();
-			process.standardOutput.readBytes(ba);
+			var ba:ByteArray = bytes;
 			
 			const check:String = ba.toString();
 			if(pngReadStarted || check.indexOf("PNG") >= 0){
 				pngReadStarted = true;
 				const iend:int = check.indexOf("IEND");
 				if(iend > -1){
-					ba.readBytes(baImage, baImage.length, iend+9);
+					ba.readBytes(this.baImage, this.baImage.length, iend+9);
 					
 					//trace(baImage.toString());
 					
 					var fs : FileStream = new FileStream();
-					var targetFile : File = File.userDirectory.resolvePath("pic.png");
+					targetFile = File.userDirectory.resolvePath("pic.png");
 					fs.open(targetFile, FileMode.WRITE);
-					fs.writeBytes(baImage,0,baImage.length);
+					fs.writeBytes(this.baImage,0,this.baImage.length);
 					fs.close();
 					
 					pngReadStarted = false;
-					baImage = new ByteArray();
-					process.standardInput.writeUTF("screencap -p\n");
-
-					/*var loader:Loader = new Loader();
-					loader.loadBytes(baImage);
-					loader.contentLoaderInfo.addEventListener(Event.COMPLETE, loaderComplete);*/
-						
+					this.baImage = new ByteArray();
 				}else{
-					ba.readBytes(baImage, baImage.length);
+					ba.readBytes(this.baImage, this.baImage.length);
 				}
 			}
 		}
 		
-		public var bitmapData:BitmapData
-		private function loaderComplete(ev:Event):void
-		{
-			var loaderInfo:LoaderInfo = LoaderInfo(ev.target);
-			bitmapData = new BitmapData(loaderInfo.width, loaderInfo.height, false, 0xFFFFFF);
-			bitmapData.draw(loaderInfo.loader);
-			
-			process.standardInput.writeUTF("screencap -p\n");
+		protected override function onUsbActionExit(ev:NativeProcessExitEvent):void{
+			process = ev.currentTarget as NativeProcess;
+			var output:Array = androidOutput.split("\r\r\n");
+			var response:String = "";
+			for(var i:int=2;i<output.length;i++) {
+				response += output[i];
+				if(i != output.length-1) {
+					response += "\r\r\n";
+				}
+			}
+			var bytes:ByteArray = new ByteArray();
+			bytes.writeMultiByte(response, "iso-8859-1");
+			onScreenCaptureData(bytes);
 			dispatchEvent(new Event(AndroidProcess.USBSCREENSHOTRESPONSE));
 		}
 		
-		protected function onScreenCaptureExit(event:NativeProcessExitEvent):void{
-			trace("exit");
+		public override function getFile():File {
+			return this.targetFile;
 		}
 	}
 }

@@ -1,6 +1,12 @@
 package httpServer
 {
+	import flash.display.BitmapData;
+	import flash.geom.Rectangle;
 	import flash.net.URLVariables;
+	import flash.utils.ByteArray;
+	import flash.filesystem.File;
+	
+	import mx.graphics.codec.PNGEncoder;
 	
 	/**
 	 * ActionController is the base class for all web requests
@@ -153,6 +159,11 @@ package httpServer
 		public static function responseJSON(content:String):String
 		{
 			return response(200, "Response", content);    
+		}
+		
+		public static function responseBinary(file:File):String
+		{
+			return response(200, "ResponseBinary", file.toString(), "octet/stream");    
 		}
 		
 		

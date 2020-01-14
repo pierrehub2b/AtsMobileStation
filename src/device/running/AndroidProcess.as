@@ -20,6 +20,7 @@ package device.running
 		
 		public static const USBACTIONRESPONSE:String = "usbResponse";
 		public static const USBSCREENSHOTRESPONSE:String = "usbScreenshot";
+		public static const USBSCREENSHOTSTARTED:String = "usbScreenshotStarted";
 		
 		public static const DEVICE_INFO:String = "deviceInfo";
 		
@@ -37,6 +38,7 @@ package device.running
 		private var output:String = "";
 		
 		public var ipAddress:String;
+		public var udpIpAdresse:String;
 		public var error:String;
 		public var deviceInfo:Device;
 		
@@ -116,6 +118,16 @@ package device.running
 					}
 				} else {
 					ipAddress = getClientIPAddress("IPv4");
+					
+					var ipRouteDataUdp:Array = output.split(/\s+/g);
+					var idxUdp:int = ipRouteDataUdp.indexOf("dev");
+					if(idxUdp > -1 && ipRouteDataUdp[idxUdp+1] == "wlan0"){
+						idxUdp = ipRouteDataUdp.indexOf("src");
+						if(idxUdp > -1){
+							this.udpIpAdresse = ipRouteDataUdp[idxUdp+1];
+						}
+					}
+					
 					dispatchEvent(new Event(IP_ADDRESS));
 					
 					process = new NativeProcess();

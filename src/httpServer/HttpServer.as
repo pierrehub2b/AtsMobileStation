@@ -1,12 +1,15 @@
 package httpServer
 {
+	import device.Device;
 	import device.running.AndroidDevice;
 	import device.running.AndroidProcess;
+	import device.running.AndroidUsb;
 	import device.running.AndroidUsbActions;
 	import device.running.AndroidUsbCaptureScreen;
 	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
+	import flash.events.*;
 	import flash.events.Event;
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
@@ -16,42 +19,10 @@ package httpServer
 	import flash.net.Socket;
 	import flash.net.URLVariables;
 	import flash.utils.ByteArray;
+	import flash.utils.flash_proxy;
 	
 	import mx.controls.Alert;
 	
-	/**
-	 * HttpServer is a simple HTTP server capable of responding to GET requests
-	 * for Controllers that have been registered with it and files that can
-	 * be found relative to webroot under an AIR application's applicationStorage
-	 * directory. This server only binds to a port on localhost and is meant as
-	 * a way to provide access to services within/for a local process.
-	 * <p>
-	 * After construction, instances of controllers may be added to respond to
-	 * various HTTP GET requests. @see com.minihttp.HttpController for more on this.
-	 * </p>
-	 * <p>
-	 * If a matching controller to a request is found, the action (defaulting to
-	 * index) specified is called along with any provided parameters.
-	 * </p>
-	 * </p>
-	 * If no matching controller is found, the server attempts to use its FileController
-	 * to load the specified file (@see com.minihttp.FileController).
-	 * <p>
-	 * <p>
-	 * The following is a simple example showing how to initialize and start a server
-	 * instance. This example will respond to the urls <code>http://localhost/app/config</code>
-	 * and <code>http://localhost/app/status</code>.
-	 * </p>
-	 * <code>
-	 * ...
-	 *   var webserv:HttpServer = new HttpServer();
-	 * 
-	 *   webserv.registerController(new Appcontroller(myApplication));
-	 *   webserv.listen(4567);
-	 * ...
-	 * </code>
-	 * 
-	 */
 	public class HttpServer
 	{		
 		private var _serverSocket:ServerSocket;
@@ -62,18 +33,15 @@ package httpServer
 		private var _isConnected:Boolean = false;
 		private var _maxRequestLength:int = 2048;
 		private var _socket:Socket;
-		private var androidUsbAction:AndroidUsbActions;
-		private var androidUsbCaptureScreen:AndroidUsbCaptureScreen;	
+		private var androidUsb:AndroidUsb;
 		private var rex:RegExp = /[\s\r\n]+/gim;
+		private var _device:AndroidDevice;
 		
 		public function HttpServer()
 		{
 			_fileController = new FileController();  
 		}
 		
-		/**
-		 * Retrieve the document root from the server.
-		 */
 		public function get docRoot():String
 		{
 			return _fileController.docRoot;
@@ -84,42 +52,34 @@ package httpServer
 			return _isConnected;
 		}
 		
-		/**
-		 * Get the maximum lenght of a request in bytes.
-		 * Requests longer than this will be truncated.
-		 */
+		public function closeServer():void {
+			this.androidUsb = null;
+			this._serverSocket.close();
+		}
+		
 		public function get maxRequestLength():int
 		{
 			return _maxRequestLength;
 		}
 		
-		/**
-		 * Set the maximum lenght of a request in bytes.
-		 * Requests longer than this will be truncated.
-		 */
 		public function set maxRequestLength(value:int):void
 		{
 			_maxRequestLength = value;
 		}
 		
-		/**
-		 * Begin listening on a specified port.
-		 * 
-		 * @param port The localhost port to begin listening on.
-		 * @param errorCallback The callback to call when an error occurs. If this
-		 * is null, an Alert box is displayed.
-		 * 
-		 * @return true if the port was opened, false if it could not be opened.
-		 */
-		public function listen(port:int, deviceId:String, errorCallback:Function = null):String
+		public function listen(port:int, currentDevice:AndroidDevice, type:String, errorCallback:Function = null):String
 		{
+			this._device = currentDevice;
 			this._errorCallback = errorCallback;
 			_serverSocket = new ServerSocket();
 			_serverSocket.addEventListener(Event.CONNECT, socketConnectHandler);
 			initServerSocket(port, errorCallback);
 			
-			androidUsbAction = new AndroidUsbActions(deviceId);
-			androidUsbCaptureScreen = new AndroidUsbCaptureScreen(deviceId)
+			if(type == AndroidDevice.ACTIONSSERVER) {
+				androidUsb = new AndroidUsbActions(_device.id);
+			} else {
+				//androidUsb = new AndroidUsbCaptureScreen(_device.id);
+			}
 			
 			return _serverSocket.localPort.toString();
 		}
@@ -167,7 +127,6 @@ package httpServer
 			try
 			{
 				_socket = event.target as Socket;
-				androidUsbAction.addEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded, false, 0, true);
 				var bytes:ByteArray = new ByteArray();
 				
 				// Do not read more than _maxRequestLength bytes
@@ -176,25 +135,42 @@ package httpServer
 				// Get the request string and pull out the URL 
 				var request:String          = _socket.readUTFBytes(_socket.bytesAvailable);
 				var url:String              = request.substring(4, request.indexOf("HTTP/") - 1);
-				
+				url = url.replace("/","").replace(rex,'');
+				var data:Array = new Array();
 				// It must be a GET request
 				if (request.substring(0, 4).toUpperCase() == 'POST') {
-					//retrieving the dbody data
-					var requestData:Array = request.split("\n");
-					var data:Array = new Array();
-					data.push(url.replace("/","").replace(rex,''));
-					var isData:Boolean = false;
-					for(var i:int=0;i<requestData.length;i++){
-						if(isData) {
-							data.push(requestData[i]);
+					if(androidUsb as AndroidUsbCaptureScreen) {
+						androidUsb.addEventListener(AndroidProcess.USBSCREENSHOTRESPONSE, usbScreenshotResponseEnded, false, 0, true);
+						androidUsb.start(data);
+					} else {
+						androidUsb.addEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded, false, 0, true);
+						var requestData:Array = request.split("\n");
+						
+						data.push(url);
+						if(url == "screenshot") {
+							data.push("screenshot", "hires");
 						}
-						if(requestData[i] == "\r") {
-							isData = true;
+						var isData:Boolean = false;
+						for(var i:int=0;i<requestData.length;i++){
+							if(isData) {
+								data.push(requestData[i]);
+							}
+							if(requestData[i] == "\r") {
+								isData = true;
+							}
 						}
+						
+						if(url == "driver" && data[1] == "start") {
+							data.push(AndroidDevice.UDPSERVER.toString().toLocaleLowerCase(), _device.udpIpAdresse);
+						}
+						
+						if(url == "driver" && data[1] == "stop") {
+							//_device.stopScreenshotServer();
+						}
+						
+						// sending request to the device
+						androidUsb.start(data);
 					}
-					
-					// sending request to the device
-					androidUsbAction.start(data);
 				}
 			}
 			catch (error:Error)
@@ -209,10 +185,19 @@ package httpServer
 		}
 		
 		private function usbActionResponseEnded(ev:Event):void {
-			if(androidUsbAction.Response != "") {
-				_socket.writeUTFBytes(ActionController.responseJSON(androidUsbAction.Response))
+			if(androidUsb.getResponse() != "") {
+				_socket.writeUTFBytes(ActionController.responseJSON(androidUsb.getResponse()));
 			}
-			androidUsbAction.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded);
+			androidUsb.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded);
+			_socket.flush();
+			_socket.close();
+		}
+		
+		private function usbScreenshotResponseEnded(ev:Event):void {
+			if(androidUsb.getFile() != null) {
+				_socket.writeUTFBytes(ActionController.responseBinary(androidUsb.getFile()));
+			}
+			androidUsb.removeEventListener(AndroidProcess.USBSCREENSHOTRESPONSE, usbScreenshotResponseEnded);
 			_socket.flush();
 			_socket.close();
 		}

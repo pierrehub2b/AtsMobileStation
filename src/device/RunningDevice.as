@@ -11,6 +11,9 @@ package device
 		public var port:String = "";
 		
 		[Bindable]
+		public var screenshotPort:String = "";
+		
+		[Bindable]
 		public var settingsPort:String = "";
 		
 		[Bindable]
@@ -27,6 +30,9 @@ package device
 		
 		[Bindable]
 		public var usbMode:Boolean = false;
+		
+		[Bindable]
+		public var udpIpAdresse:String;
 		
 		public function RunningDevice(id:String=""){
 			super(id);

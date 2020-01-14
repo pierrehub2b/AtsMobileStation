@@ -1,29 +1,34 @@
 package device.running
 {
-	import flash.events.Event;
-	import flash.filesystem.File;
-	import httpServer.*
 	import device.RunningDevice;
+	
+	import flash.events.Event;
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	
+	import httpServer.*;
+	
 	public class AndroidDevice extends RunningDevice
 	{
 		private static const atsdroidFilePath:String = File.applicationDirectory.resolvePath("assets/drivers/atsdroid.apk").nativePath;
+		public static const SCREENSHOTSERVER:String = "screenshotServer";
+		public static const ACTIONSSERVER:String = "actionsServer";
 		
 		public var androidVersion:String = "";
 		public var androidSdk:String = "";
 
 		private var process:AndroidProcess;
-		private var webserv:HttpServer;
+		private var webServActions:HttpServer;
+		private var webServScreenshot:HttpServer;
+		
+		public static const UDPSERVER:Boolean = true;
 				
 		public function AndroidDevice(adbFile:File, port:String, id:String)
 		{
 			
 			this.id = id;
 			this.status = INSTALL;
-			
 			
 			var fileStream:FileStream = new FileStream();
 			var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
@@ -43,12 +48,9 @@ package device.running
 				fileStream.close();
 			}
 			
-			webserv = (new HttpServer());
-			if(usbMode) {
-				this.port = webserv.listen(8080, this.id);
-			} else {
-				this.port = port;
-			}
+			webServActions = (new HttpServer());
+			webServScreenshot = (new HttpServer());
+			
 			
 			process = new AndroidProcess(adbFile, atsdroidFilePath, id, port, usbMode);
 			process.addEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler, false, 0, true);
@@ -56,6 +58,9 @@ package device.running
 			process.addEventListener(AndroidProcess.STOPPED, stoppedTestHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.DEVICE_INFO, deviceInfoHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.IP_ADDRESS, ipAdressHandler, false, 0, true);
+			
+			this.port = usbMode ? webServActions.listen(8080, this, ACTIONSSERVER) : port;
+			
 			installing()
 		}
 		
@@ -71,7 +76,16 @@ package device.running
 		public function get getProcess():AndroidProcess
 		{
 			return this.process;
-		} 
+		}
+		
+		public function stopScreenshotServer():void {
+			this.webServScreenshot.closeServer();
+		}
+		
+		public function startScreenshotServer():String {
+			this.screenshotPort = this.webServScreenshot.listen(9000,this,SCREENSHOTSERVER);
+			return this.screenshotPort;
+		}
 		
 		private function runningTestHandler(ev:Event):void{
 			process.removeEventListener(AndroidProcess.RUNNING, runningTestHandler);
@@ -97,6 +111,7 @@ package device.running
 		private function ipAdressHandler(ev:Event):void{
 			process.removeEventListener(AndroidProcess.IP_ADDRESS, ipAdressHandler);
 			ip = process.ipAddress;
+			udpIpAdresse = process.udpIpAdresse;
 		}
 				
 		override public function dispose():Boolean{
