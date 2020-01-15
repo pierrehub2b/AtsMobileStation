@@ -9,10 +9,6 @@
 		<![CDATA[
 			import com.greensock.TweenLite;
 			
-			import device.Device;
-			import device.RunningDevice;
-			import device.running.IosDevice;
-			
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.core.DragSource;
@@ -20,6 +16,10 @@
 			import mx.managers.PopUpManager;
 			
 			import spark.filters.DropShadowFilter;
+			
+			import device.Device;
+			import device.RunningDevice;
+			import device.running.IosDevice;
 			
 			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
@@ -48,13 +48,19 @@
 			
 			protected function mainGroup_rollOverHandler(event:MouseEvent):void
 			{
-				restartButton.visible = true;				
+				restartButton.visible = true;
+				TweenLite.fromTo([restartButton], 0.3, {alpha:0.0}, {alpha:1.0});
+				TweenLite.fromTo([settingsButton], 0.3, {alpha:0.0}, {alpha:1.0, delay:0.1});
+				TweenLite.fromTo([homeButton], 0.3, {alpha:0.0}, {alpha:1.0, delay:0.2});
 				//iosButtons.visible = data is IosDevice;
 			}
 			
 			protected function mainGroup_rollOutHandler(event:MouseEvent):void
 			{
 				restartButton.visible = false;
+				TweenLite.killTweensOf([homeButton, settingsButton, restartButton]);
+				TweenLite.fromTo(restartButton, 0.3, {alpha:1.0}, {alpha:0.0});
+				TweenLite.set([homeButton, settingsButton], {alpha:0.0});
 			}
 			
 			protected function removedFromStageHandler(event:Event):void
@@ -101,11 +107,11 @@
 		</s:HGroup>
 		<s:HGroup right="7" verticalAlign="middle" verticalCenter="0">
 			<s:Group id="homeButton" buttonMode="true" click="goHome(event, (data as RunningDevice))"
-					 toolTip="Device home button" visible="{(data as RunningDevice).status==Device.READY}">
+					 toolTip="Device home button" visible="{(data as RunningDevice).status==Device.READY}" alpha="0.0">
 				<s:BitmapImage source="assets/icons/24/home.png" smooth="true" smoothingQuality="high"/>
 			</s:Group>
 			<s:Group id="settingsButton" buttonMode="true" click="showWindow(event, (data as RunningDevice))"
-					 toolTip="Settings of device">
+					 toolTip="Settings of device" alpha="0.0">
 				<s:BitmapImage source="assets/icons/24/tool.png" smooth="true" smoothingQuality="high"/>
 			</s:Group>
 			<s:Group width="24" height="24">
