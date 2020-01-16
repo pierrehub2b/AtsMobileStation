@@ -9,6 +9,8 @@ package device.running
 	
 	import httpServer.*;
 	
+	import udpServer.ScreenshotServer;
+	
 	public class AndroidDevice extends RunningDevice
 	{
 		private static const atsdroidFilePath:String = File.applicationDirectory.resolvePath("assets/drivers/atsdroid.apk").nativePath;
@@ -20,9 +22,9 @@ package device.running
 
 		private var process:AndroidProcess;
 		private var webServActions:HttpServer;
-		private var webServScreenshot:HttpServer;
+		private var udpServScreenshot:ScreenshotServer;
 		
-		public static const UDPSERVER:Boolean = true;
+		public static const UDPSERVER:Boolean = false;
 				
 		public function AndroidDevice(adbFile:File, port:String, id:String)
 		{
@@ -49,8 +51,7 @@ package device.running
 			}
 			
 			webServActions = (new HttpServer());
-			webServScreenshot = (new HttpServer());
-			
+			udpServScreenshot = new ScreenshotServer();
 			
 			process = new AndroidProcess(adbFile, atsdroidFilePath, id, port, usbMode);
 			process.addEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler, false, 0, true);
@@ -79,12 +80,13 @@ package device.running
 		}
 		
 		public function stopScreenshotServer():void {
-			this.webServScreenshot.closeServer();
+			this.udpServScreenshot._datagramSocket.close();
+			this.udpServScreenshot = new ScreenshotServer();
 		}
 		
-		public function startScreenshotServer():String {
-			this.screenshotPort = this.webServScreenshot.listen(9000,this,SCREENSHOTSERVER);
-			return this.screenshotPort;
+		public function startScreenshotServer():int {
+			this.udpServScreenshot.bind(ip, id);
+			return this.udpServScreenshot._datagramSocket.localPort;
 		}
 		
 		private function runningTestHandler(ev:Event):void{
@@ -111,7 +113,7 @@ package device.running
 		private function ipAdressHandler(ev:Event):void{
 			process.removeEventListener(AndroidProcess.IP_ADDRESS, ipAdressHandler);
 			ip = process.ipAddress;
-			udpIpAdresse = process.udpIpAdresse;
+			udpIpAdresse = process.deviceIp;
 		}
 				
 		override public function dispose():Boolean{

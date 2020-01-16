@@ -1,18 +1,19 @@
 package device.running
 {
+	import device.Device;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.NativeProcessExitEvent;
+	import flash.events.OutputProgressEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
+	import flash.net.InterfaceAddress;
 	import flash.net.NetworkInfo;
 	import flash.net.NetworkInterface;
-	import flash.net.InterfaceAddress;
 	
-	import device.Device;
-		
 	public class AndroidProcess extends EventDispatcher
 	{
 		public static const ERROR_EVENT:String = "errorEvent";
@@ -38,15 +39,19 @@ package device.running
 		private var output:String = "";
 		
 		public var ipAddress:String;
-		public var udpIpAdresse:String;
+		public var deviceIp:String;
 		public var error:String;
 		public var deviceInfo:Device;
 		
 		private var process:NativeProcess;
 		private var procInfo:NativeProcessStartupInfo
+		public var processIp:NativeProcess;
+		private static var _wmicFile:File = null;
+		private var currentAdbFile:File;
 		
 		public function AndroidProcess(adbFile:File, atsdroid:String, id:String, port:String, usbMode:Boolean)
 		{
+			this.currentAdbFile = adbFile;
 			this.id = id;
 			this.port = port;
 			this.atsdroidFilePath = atsdroid;
@@ -55,9 +60,9 @@ package device.running
 			
 			process = new NativeProcess();
 			procInfo = new NativeProcessStartupInfo()
-						
-			procInfo.executable = adbFile;
-			procInfo.workingDirectory = adbFile.parent;
+			
+			procInfo.executable = currentAdbFile;
+			procInfo.workingDirectory = currentAdbFile.parent;
 			
 			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
 			process.addEventListener(NativeProcessExitEvent.EXIT, onReadLanExit, false, 0, true);
@@ -77,7 +82,7 @@ package device.running
 			}
 			return false;
 		}
-	
+		
 		protected function onOutputErrorShell(event:ProgressEvent):void
 		{
 			error = new String(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
@@ -96,75 +101,103 @@ package device.running
 			if(error != null){
 				dispatchEvent(new Event(ERROR_EVENT));
 			}else{
-				if(!usbMode) {
-					var ipRouteData:Array = output.split(/\s+/g);
-					var idx:int = ipRouteData.indexOf("dev");
-					if(idx > -1 && ipRouteData[idx+1] == "wlan0"){
-						idx = ipRouteData.indexOf("src");
-						if(idx > -1){
-							ipAddress = ipRouteData[idx+1];
-							dispatchEvent(new Event(IP_ADDRESS));
-							
-							process = new NativeProcess();
-							process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit, false, 0, true);
-							procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", ANDROIDDRIVER];
-							process.start(procInfo);
-							
-							return;
-						}
-					}else{
-						error = " - WIFI not connected !";
-						dispatchEvent(new Event(ERROR_EVENT));
+				//get device ip @
+				var ipRouteDataUdp:Array = output.split(/\s+/g);
+				var idxUdp:int = ipRouteDataUdp.indexOf("dev");
+				if(idxUdp > -1 && ipRouteDataUdp[idxUdp+1] == "wlan0"){
+					idxUdp = ipRouteDataUdp.indexOf("src");
+					if(idxUdp > -1){
+						this.deviceIp = ipRouteDataUdp[idxUdp+1];
+						this.ipAddress = ipRouteDataUdp[idxUdp+1];
 					}
-				} else {
-					ipAddress = getClientIPAddress("IPv4");
-					
-					var ipRouteDataUdp:Array = output.split(/\s+/g);
-					var idxUdp:int = ipRouteDataUdp.indexOf("dev");
-					if(idxUdp > -1 && ipRouteDataUdp[idxUdp+1] == "wlan0"){
-						idxUdp = ipRouteDataUdp.indexOf("src");
-						if(idxUdp > -1){
-							this.udpIpAdresse = ipRouteDataUdp[idxUdp+1];
-						}
-					}
-					
-					dispatchEvent(new Event(IP_ADDRESS));
-					
-					process = new NativeProcess();
-					process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit, false, 0, true);
-					procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", ANDROIDDRIVER];
-					process.start(procInfo);
-					
+				} else if(!usbMode) {
+					error = " - WIFI not connected !";
+					dispatchEvent(new Event(ERROR_EVENT));
 					return;
 				}
+				
+				if(usbMode) {
+					getClientIPAddress();
+				} else {
+					dispatchEvent(new Event(IP_ADDRESS));
+				}
+				
+				process = new NativeProcess();
+				process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit, false, 0, true);
+				procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", ANDROIDDRIVER];
+				process.start(procInfo);
+				return;
 			}
 		}
 		
-		public static function getClientIPAddress (version:String):String {
-			var ni:NetworkInfo = NetworkInfo.networkInfo;
-			var interfaceVector:Vector.<NetworkInterface> = ni.findInterfaces();
-			var currentNetwork:NetworkInterface;
-			
-			for each (var networkInt:NetworkInterface in interfaceVector) {
-				if (networkInt.active) {
-					for each (var address:InterfaceAddress in networkInt.addresses) {
-						if (address.ipVersion == version) {
-							return address.address;
-						}
-					}
-				}
+		private var outputIpAdresse:String = "";
+		private function getClientIPAddress ():void {
+			var file:File;
+			var processArgs:Vector.<String> = new Vector.<String>(); 
+			if(!AtsMobileStation.isMacOs) {
+				file = wmicFile;
+				processArgs.push("nicconfig", "where", "(IPEnabled=TRUE and DHCPEnabled=TRUE)", "get", "IPAddress", "/format:list");
+			} else {
+				file = new File("/usr/bin/env");
+				processArgs.push("ipconfig","getpacket","en0");
 			}
-			return "";
+			
+			outputIpAdresse = "";
+			processIp = new NativeProcess();
+			var procInfoIp:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			procInfoIp.executable = file;
+			procInfoIp.workingDirectory = file.parent;
+			procInfoIp.arguments = processArgs;
+			processIp.start(procInfoIp);
+			
+			processIp.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputData);
+			processIp.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onErrorData);
+			processIp.addEventListener(NativeProcessExitEvent.EXIT, onExit);
+		}
+		
+		public function onOutputData(event:ProgressEvent):void
+		{
+			var pattern:RegExp = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/;
+			var arrayAddresses:Array = processIp.standardOutput.readUTFBytes(processIp.standardOutput.bytesAvailable).match(pattern);
+			if(arrayAddresses.length > 0) {
+				this.ipAddress = outputIpAdresse[0];
+				dispatchEvent(new Event(IP_ADDRESS));
+			}
+		}
+		
+		public function onErrorData(event:ProgressEvent):void
+		{
+			trace("ERROR -", processIp.standardError.readUTFBytes(processIp.standardError.bytesAvailable)); 
+		}
+		
+		public function onExit(event:NativeProcessExitEvent):void
+		{
+			trace("Process exited with ", event.exitCode);
 		}
 		
 		protected function onUninstallExit(event:NativeProcessExitEvent):void{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
-
+			
 			process = new NativeProcess();
 			process.addEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
 			procInfo.arguments = new <String>["-s", id, "install", "-r", atsdroidFilePath];
-
+			
 			process.start(procInfo);
+		}
+		
+		private static function get wmicFile():File{
+			if(_wmicFile == null){
+				var rootPath:Array = File.getRootDirectories();
+				for each(var file:File in rootPath){
+					_wmicFile = file.resolvePath("Windows/System32/wbem/WMIC.exe");
+					if(_wmicFile.exists){
+						break;
+					}else{
+						_wmicFile = null;
+					}
+				}
+			}
+			return _wmicFile;
 		}
 		
 		protected function onInstallExit(event:NativeProcessExitEvent):void{
@@ -187,7 +220,7 @@ package device.running
 		protected function onGetPropExit(event:NativeProcessExitEvent):void{
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadPropertyData);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onGetPropExit);
-						
+			
 			var propArray:Array = output.split("\n");
 			for each (var line:String in propArray){
 				if(line.indexOf("[ro.product.brand]") == 0){
@@ -237,7 +270,7 @@ package device.running
 			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onExecuteExit);
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData);
-						
+			
 			process.exit(true);
 			process = null;
 			procInfo = null;

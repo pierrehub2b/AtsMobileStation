@@ -74,7 +74,7 @@
 			
 			protected function save_clickHandler(event:MouseEvent):void
 			{
-				var hasToRestart:Boolean = dev.settingsPort != portSelection.text  || dev.automaticPort != portAutomatic.selected;
+				var hasToRestart:Boolean = dev.settingsPort != portSelection.text || dev.automaticPort != portAutomatic.selected || dev.usbMode != androidUsb.selected;
 				if(dev != null){ 
 					
 					dev.settingsPort = portSelection.text;

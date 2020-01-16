@@ -74,13 +74,7 @@ package httpServer
 			_serverSocket = new ServerSocket();
 			_serverSocket.addEventListener(Event.CONNECT, socketConnectHandler);
 			initServerSocket(port, errorCallback);
-			
-			if(type == AndroidDevice.ACTIONSSERVER) {
-				androidUsb = new AndroidUsbActions(_device.id);
-			} else {
-				//androidUsb = new AndroidUsbCaptureScreen(_device.id);
-			}
-			
+			androidUsb = new AndroidUsbActions(_device.id);
 			return _serverSocket.localPort.toString();
 		}
 		
@@ -139,38 +133,34 @@ package httpServer
 				var data:Array = new Array();
 				// It must be a GET request
 				if (request.substring(0, 4).toUpperCase() == 'POST') {
-					if(androidUsb as AndroidUsbCaptureScreen) {
-						androidUsb.addEventListener(AndroidProcess.USBSCREENSHOTRESPONSE, usbScreenshotResponseEnded, false, 0, true);
-						androidUsb.start(data);
-					} else {
-						androidUsb.addEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded, false, 0, true);
-						var requestData:Array = request.split("\n");
-						
-						data.push(url);
-						if(url == "screenshot") {
-							data.push("screenshot", "hires");
-						}
-						var isData:Boolean = false;
-						for(var i:int=0;i<requestData.length;i++){
-							if(isData) {
-								data.push(requestData[i]);
-							}
-							if(requestData[i] == "\r") {
-								isData = true;
-							}
-						}
-						
-						if(url == "driver" && data[1] == "start") {
-							data.push(AndroidDevice.UDPSERVER.toString().toLocaleLowerCase(), _device.udpIpAdresse);
-						}
-						
-						if(url == "driver" && data[1] == "stop") {
-							//_device.stopScreenshotServer();
-						}
-						
-						// sending request to the device
-						androidUsb.start(data);
+					androidUsb.addEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded, false, 0, true);
+					var requestData:Array = request.split("\n");
+					
+					data.push(url);
+					if(url == "screenshot") {
+						data.push("screenshot", "hires");
 					}
+					var isData:Boolean = false;
+					for(var i:int=0;i<requestData.length;i++){
+						if(isData) {
+							data.push(requestData[i]);
+						}
+						if(requestData[i] == "\r") {
+							isData = true;
+						}
+					}
+					
+					if(url == "driver" && data[1] == "start") {
+						data.push(AndroidDevice.UDPSERVER.toString().toLocaleLowerCase());
+						AndroidDevice.UDPSERVER ? data.push(_device.udpIpAdresse) : data.push(_device.startScreenshotServer());
+					}
+					
+					if(url == "driver" && data[1] == "stop") {
+						_device.stopScreenshotServer();
+					}
+					
+					// sending request to the device
+					androidUsb.start(data);
 				}
 			}
 			catch (error:Error)
@@ -189,15 +179,6 @@ package httpServer
 				_socket.writeUTFBytes(ActionController.responseJSON(androidUsb.getResponse()));
 			}
 			androidUsb.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded);
-			_socket.flush();
-			_socket.close();
-		}
-		
-		private function usbScreenshotResponseEnded(ev:Event):void {
-			if(androidUsb.getFile() != null) {
-				_socket.writeUTFBytes(ActionController.responseBinary(androidUsb.getFile()));
-			}
-			androidUsb.removeEventListener(AndroidProcess.USBSCREENSHOTRESPONSE, usbScreenshotResponseEnded);
 			_socket.flush();
 			_socket.close();
 		}

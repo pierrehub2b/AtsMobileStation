@@ -27,7 +27,7 @@
 			
 			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
-			private const isMacOs:Boolean = Capabilities.os.indexOf("Mac") > -1;
+			public static const isMacOs:Boolean = Capabilities.os.indexOf("Mac") > -1;
 			
 			public static var alreadyBuilded:Boolean = false;
 			

@@ -1,5 +1,9 @@
 package udpServer
 {
+	import device.running.AndroidUsb;
+	import device.running.AndroidUsbActions;
+	import device.running.AndroidUsbCaptureScreen;
+	
 	import flash.display.Sprite;
 	import flash.events.DatagramSocketDataEvent;
 	import flash.events.Event;
@@ -11,111 +15,44 @@ package udpServer
 	import flash.text.TextFieldType;
 	import flash.utils.ByteArray;
 	import flash.utils.Timer;
+	import device.running.AndroidProcess;
 	
 	public class ScreenshotServer extends Sprite
 	{
-		private var datagramSocket:ScreenshotServer = new ScreenshotServer();
-		private var targetIP:String;
-		private var targetPort:String;
-		private var message:String;
-
-		public function DatagramSocketExample()
-		{
-			ScreenshotServer();
+		public var _datagramSocket:DatagramSocket = new DatagramSocket();;
+		
+		private var _sourceIp:String;
+		private var _sourcePort:String;
+		private var _message:TextField;
+		private var androidUsb:AndroidUsb;
+		
+		public function ScreenshotServer(){
+			_datagramSocket = new DatagramSocket();
 		}
 		
-		private function bind( event:Event ):void
+		public function bind(ip:String, id:String):void
 		{
-			if( datagramSocket.bound ) 
+			if(_datagramSocket.bound) 
 			{
-				datagramSocket.close();
-				datagramSocket = new ScreenshotServer();
-				
+				_datagramSocket.close();
+				_datagramSocket = new DatagramSocket();
 			}
-			datagramSocket.bind( parseInt( localPort.text ), localIP.text );
-			datagramSocket.addEventListener( DatagramSocketDataEvent.DATA, dataReceived );
-			datagramSocket.receive();
-			log( "Bound to: " + datagramSocket.localAddress + ":" + datagramSocket.localPort );
+			this.androidUsb = new AndroidUsbCaptureScreen(id);
+			_datagramSocket.bind(0,ip);
+			_datagramSocket.addEventListener(DatagramSocketDataEvent.DATA, dataReceived);
+			_datagramSocket.receive();
 		}
 		
-		private function dataReceived( event:DatagramSocketDataEvent ):void
+		private function dataReceived(event:DatagramSocketDataEvent):void
 		{
-			//Read the data from the datagram
-			log("Received from " + event.srcAddress + ":" + event.srcPort + "> " + 
-				event.data.readUTFBytes( event.data.bytesAvailable ) );
+			androidUsb.addEventListener(AndroidProcess.USBSCREENSHOTRESPONSE, usbActionResponseEnded, false, 0, true);
+			androidUsb.start(new Array());
 		}
 		
-		private function send( event:Event ):void
-		{
-			//Create a message in a ByteArray
-			var data:ByteArray = new ByteArray();
-			data.writeUTFBytes( message.text );
-			
-			//Send a datagram to the target
-			try
-			{
-				datagramSocket.send( data, 0, 0, targetIP.text, parseInt( targetPort.text )); 
-				log( "Sent message to " + targetIP.text + ":" + targetPort.text );
+		private function usbActionResponseEnded(ev:Event):void {
+			if(androidUsb.getBaImage() != null && androidUsb.getBaImage().bytesAvailable > 0) {
+				_datagramSocket.send(androidUsb.getBaImage(), 0, 0, _sourceIp, parseInt(_sourcePort));
 			}
-			catch ( error:Error )
-			{
-				log( error.message );
-			}
-		}
-		
-		private function log( text:String ):void
-		{
-			logField.appendText( text + "\n" );
-			logField.scrollV = logField.maxScrollV;
-			trace( text );
-		}
-		
-		private function ScreenshotServer(ipAdress:String, port:String):void
-		{
-			targetIP = ipAdress;
-			targetPort = port;
-			this.stage.nativeWindow.activate();
-		}
-		
-		private function createTextField( x:int, y:int, label:String, defaultValue:String = '', editable:Boolean = true, height:int = 20 ):TextField
-		{
-			var labelField:TextField = new TextField();
-			labelField.text = label;
-			labelField.type = TextFieldType.DYNAMIC;
-			labelField.width = 180;
-			labelField.x = x;
-			labelField.y = y;
-			
-			var input:TextField = new TextField();
-			input.text = defaultValue;
-			input.type = TextFieldType.INPUT;
-			input.border = editable;
-			input.selectable = editable;
-			input.width = 280;
-			input.height = height;
-			input.x = x + labelField.width;
-			input.y = y;
-			
-			this.addChild( labelField );
-			this.addChild( input );
-			
-			return input;
-		}
-		
-		private function createTextButton( x:int, y:int, label:String, clickHandler:Function ):TextField
-		{
-			var button:TextField = new TextField();
-			button.htmlText = "<u><b>" + label + "</b></u>";
-			button.type = TextFieldType.DYNAMIC;
-			button.selectable = false;
-			button.width = 180;
-			button.x = x;
-			button.y = y;
-			button.addEventListener( MouseEvent.CLICK, clickHandler );
-			
-			this.addChild( button );
-			return button;
-			
 		}
 	}
 }

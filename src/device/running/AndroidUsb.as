@@ -20,7 +20,7 @@ package device.running
 	{
 		private var process:NativeProcess = new NativeProcess();
 		private var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
-
+			
 		private var response:String = "";
 		private var id:String = "";
 		private var baImage:ByteArray;
@@ -35,7 +35,7 @@ package device.running
 			return "";
 		}
 		
-		public function getFile():File {
+		public function getBaImage():ByteArray {
 			return null;
 		}
 	}

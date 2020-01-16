@@ -13,6 +13,7 @@ package device.running
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	import flash.net.Socket;
+	import flash.system.Capabilities;
 	import flash.text.ReturnKeyLabel;
 	import flash.utils.ByteArray;
 	
@@ -29,8 +30,9 @@ package device.running
 		public function AndroidUsbActions(id:String)
 		{
 			this.id = id;
-			var adbFile:File = File.applicationDirectory.resolvePath(RunningDevicesManager.adbPath + ".exe");
-			
+			var adbFile:File = File.applicationDirectory.resolvePath(
+				AtsMobileStation.isMacOs ? RunningDevicesManager.adbPath : RunningDevicesManager.adbPath + ".exe"
+			);
 			procInfo.executable = adbFile;			
 			procInfo.workingDirectory = File.userDirectory;
 			
