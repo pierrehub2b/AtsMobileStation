@@ -1,7 +1,5 @@
 package device.running
 {
-	import device.Device;
-	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -13,6 +11,8 @@ package device.running
 	import flash.net.InterfaceAddress;
 	import flash.net.NetworkInfo;
 	import flash.net.NetworkInterface;
+	
+	import device.Device;
 	
 	public class AndroidProcess extends EventDispatcher
 	{
@@ -130,49 +130,45 @@ package device.running
 			}
 		}
 		
-		private var outputIpAdresse:String = "";
 		private function getClientIPAddress ():void {
+			processIp = new NativeProcess();
 			var file:File;
 			var processArgs:Vector.<String> = new Vector.<String>(); 
 			if(!AtsMobileStation.isMacOs) {
 				file = wmicFile;
 				processArgs.push("nicconfig", "where", "(IPEnabled=TRUE and DHCPEnabled=TRUE)", "get", "IPAddress", "/format:list");
+				processIp.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataWin);
 			} else {
 				file = new File("/usr/bin/env");
-				processArgs.push("ipconfig","getpacket","en0");
+				processArgs.push("ipconfig","getifaddr","en1");
+				processIp.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataMac);
 			}
 			
-			outputIpAdresse = "";
-			processIp = new NativeProcess();
 			var procInfoIp:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfoIp.executable = file;
 			procInfoIp.workingDirectory = file.parent;
 			procInfoIp.arguments = processArgs;
 			processIp.start(procInfoIp);
 			
-			processIp.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputData);
-			processIp.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onErrorData);
-			processIp.addEventListener(NativeProcessExitEvent.EXIT, onExit);
+			
 		}
 		
-		public function onOutputData(event:ProgressEvent):void
+		public function onOutputDataWin(event:ProgressEvent):void
 		{
+			processIp.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataWin);
 			var pattern:RegExp = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/;
 			var arrayAddresses:Array = processIp.standardOutput.readUTFBytes(processIp.standardOutput.bytesAvailable).match(pattern);
 			if(arrayAddresses.length > 0) {
-				this.ipAddress = outputIpAdresse[0];
+				this.ipAddress = arrayAddresses[0];
 				dispatchEvent(new Event(IP_ADDRESS));
 			}
 		}
 		
-		public function onErrorData(event:ProgressEvent):void
+		public function onOutputDataMac(event:ProgressEvent):void
 		{
-			trace("ERROR -", processIp.standardError.readUTFBytes(processIp.standardError.bytesAvailable)); 
-		}
-		
-		public function onExit(event:NativeProcessExitEvent):void
-		{
-			trace("Process exited with ", event.exitCode);
+			processIp.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataMac);
+			this.ipAddress = processIp.standardOutput.readUTFBytes(processIp.standardOutput.bytesAvailable);
+			dispatchEvent(new Event(IP_ADDRESS));
 		}
 		
 		protected function onUninstallExit(event:NativeProcessExitEvent):void{
