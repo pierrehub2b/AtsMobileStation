@@ -24,7 +24,7 @@ package device.running
 		private var webServActions:HttpServer;
 		private var udpServScreenshot:ScreenshotServer;
 		
-		public static const UDPSERVER:Boolean = false;
+		public static const UDPSERVER:Boolean = true;
 				
 		public function AndroidDevice(adbFile:File, port:String, id:String)
 		{
@@ -52,16 +52,15 @@ package device.running
 			
 			webServActions = (new HttpServer());
 			udpServScreenshot = new ScreenshotServer();
+			this.port = usbMode ? webServActions.listen(8080, this, ACTIONSSERVER) : port;
 			
-			process = new AndroidProcess(adbFile, atsdroidFilePath, id, port, usbMode);
+			process = new AndroidProcess(adbFile, atsdroidFilePath, id, this.port, usbMode);
 			process.addEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.RUNNING, runningTestHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.STOPPED, stoppedTestHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.DEVICE_INFO, deviceInfoHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.IP_ADDRESS, ipAdressHandler, false, 0, true);
-			
-			this.port = usbMode ? webServActions.listen(8080, this, ACTIONSSERVER) : port;
-			
+
 			installing()
 		}
 		

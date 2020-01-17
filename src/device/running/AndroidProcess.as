@@ -242,7 +242,7 @@ package device.running
 			process.addEventListener(NativeProcessExitEvent.EXIT, onExecuteExit, false, 0, true);
 			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData, false, 0, true);
 			
-			procInfo.arguments = new <String>["-s", id, "shell", "am", "instrument", "-w", "-r", "-e", "atsPort", port, "-e", "debug", "false", "-e", "class", ANDROIDDRIVER + ".AtsRunner", ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner"];
+			procInfo.arguments = new <String>["-s", id, "shell", "am", "instrument", "-w", "-r", "-e", "ipAddress", ipAddress, "-e", "atsPort", port, "-e", "usbMode", usbMode.toString(), "-e", "debug", "false", "-e", "class", ANDROIDDRIVER + ".AtsRunner", ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner"];
 			process.start(procInfo);
 		}
 		

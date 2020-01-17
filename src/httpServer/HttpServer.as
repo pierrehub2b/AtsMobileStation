@@ -151,8 +151,11 @@ package httpServer
 					}
 					
 					if(url == "driver" && data[1] == "start") {
-						data.push(AndroidDevice.UDPSERVER.toString().toLocaleLowerCase());
-						AndroidDevice.UDPSERVER ? data.push(_device.udpIpAdresse) : data.push(_device.startScreenshotServer());
+						if(_device.usbMode) {
+							data.push(AndroidDevice.UDPSERVER.toString().toLocaleLowerCase());
+							AndroidDevice.UDPSERVER ? data.push(_device.udpIpAdresse) : data.push(_device.ip, _device.startScreenshotServer());
+						}
+
 					}
 					
 					if(url == "driver" && data[1] == "stop") {
@@ -169,7 +172,7 @@ package httpServer
 					_errorCallback(error, error.message);
 				}
 				else {
-					Alert.show(error.message, "Error");
+					//Alert.show(error.message, "Error");
 				}
 			}
 		}
