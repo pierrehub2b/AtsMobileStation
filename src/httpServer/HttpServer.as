@@ -159,7 +159,7 @@ package httpServer
 					}
 					
 					if(url == "driver" && data[1] == "stop") {
-						_device.stopScreenshotServer();
+						//_device.stopScreenshotServer();
 					}
 					
 					// sending request to the device

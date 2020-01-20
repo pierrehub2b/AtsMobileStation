@@ -57,7 +57,7 @@ package device.running
 		protected override function onUsbActionExit(ev:NativeProcessExitEvent):void
 		{
 			process = ev.currentTarget as NativeProcess;
-			var output:Array = androidOutput.split("\r\r\n");
+			var output:Array = androidOutput.split("\r\n");
 			if(this.procInfo.arguments[6] == "screenshot") {
 				this.response = "";
 				for(var i:int=2;i<output.length;i++) {

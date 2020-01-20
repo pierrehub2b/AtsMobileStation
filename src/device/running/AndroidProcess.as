@@ -167,7 +167,8 @@ package device.running
 		public function onOutputDataMac(event:ProgressEvent):void
 		{
 			processIp.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataMac);
-			this.ipAddress = processIp.standardOutput.readUTFBytes(processIp.standardOutput.bytesAvailable);
+			var rex:RegExp = /[\s\r\n]+/gim;
+			this.ipAddress = processIp.standardOutput.readUTFBytes(processIp.standardOutput.bytesAvailable).replace(rex,"");
 			dispatchEvent(new Event(IP_ADDRESS));
 		}
 		
