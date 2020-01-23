@@ -5,12 +5,8 @@ package device.running
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.NativeProcessExitEvent;
-	import flash.events.OutputProgressEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
-	import flash.net.InterfaceAddress;
-	import flash.net.NetworkInfo;
-	import flash.net.NetworkInterface;
 	
 	import device.Device;
 	
@@ -22,6 +18,7 @@ package device.running
 		public static const USBACTIONRESPONSE:String = "usbResponse";
 		public static const USBSCREENSHOTRESPONSE:String = "usbScreenshot";
 		public static const USBSCREENSHOTSTARTED:String = "usbScreenshotStarted";
+		public static const USBACTIONERROR:String = "usbActionError";
 		
 		public static const DEVICE_INFO:String = "deviceInfo";
 		

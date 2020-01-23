@@ -1,9 +1,5 @@
 package udpServer
 {
-	import device.running.AndroidUsb;
-	import device.running.AndroidUsbActions;
-	import device.running.AndroidUsbCaptureScreen;
-	
 	import flash.display.Sprite;
 	import flash.events.DatagramSocketDataEvent;
 	import flash.events.Event;
@@ -15,7 +11,13 @@ package udpServer
 	import flash.text.TextFieldType;
 	import flash.utils.ByteArray;
 	import flash.utils.Timer;
+	
 	import device.running.AndroidProcess;
+	
+	import usb.AndroidUsb;
+	import usb.AndroidUsbActions;
+	import usb.AndroidUsbCaptureScreen;
+	import usb.UsbAction;
 	
 	public class ScreenshotServer extends Sprite
 	{
@@ -46,7 +48,7 @@ package udpServer
 		private function dataReceived(event:DatagramSocketDataEvent):void
 		{
 			androidUsb.addEventListener(AndroidProcess.USBSCREENSHOTRESPONSE, usbActionResponseEnded, false, 0, true);
-			androidUsb.start(new Array());
+			androidUsb.start(new UsbAction(new Array()));
 		}
 		
 		private function usbActionResponseEnded(ev:Event):void {

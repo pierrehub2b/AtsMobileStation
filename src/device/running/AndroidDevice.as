@@ -1,21 +1,24 @@
 package device.running
 {
-	import device.RunningDevice;
-	
 	import flash.events.Event;
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	
-	import httpServer.*;
+	import mx.collections.ArrayList;
+	import mx.events.CollectionEvent;
+	
+	import device.RunningDevice;
+	
+	import httpServer.HttpServer;
 	
 	import udpServer.ScreenshotServer;
+	
+	import usb.UsbAction;
 	
 	public class AndroidDevice extends RunningDevice
 	{
 		private static const atsdroidFilePath:String = File.applicationDirectory.resolvePath("assets/drivers/atsdroid.apk").nativePath;
-		public static const SCREENSHOTSERVER:String = "screenshotServer";
-		public static const ACTIONSSERVER:String = "actionsServer";
 		
 		public var androidVersion:String = "";
 		public var androidSdk:String = "";
@@ -23,6 +26,7 @@ package device.running
 		private var process:AndroidProcess;
 		private var webServActions:HttpServer;
 		private var udpServScreenshot:ScreenshotServer;
+		private var currentAdbFile:File;
 		
 		public static const UDPSERVER:Boolean = true;
 				
@@ -31,6 +35,7 @@ package device.running
 			
 			this.id = id;
 			this.status = INSTALL;
+			this.currentAdbFile = adbFile;
 			
 			var fileStream:FileStream = new FileStream();
 			var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
@@ -52,7 +57,7 @@ package device.running
 			
 			webServActions = (new HttpServer());
 			udpServScreenshot = new ScreenshotServer();
-			this.port = usbMode ? webServActions.listen(8080, this, ACTIONSSERVER) : port;
+			this.port = usbMode ? webServActions.listenActions(8081, this) : port;
 			
 			process = new AndroidProcess(adbFile, atsdroidFilePath, id, this.port, usbMode);
 			process.addEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler, false, 0, true);
@@ -64,6 +69,10 @@ package device.running
 			installing()
 		}
 		
+		public function get getCurrentAdbFile():File {
+			return this.currentAdbFile;
+		}
+	
 		public override function start():void{
 			process.start();
 		}
@@ -71,6 +80,10 @@ package device.running
 		private function processErrorHandler(ev:Event):void{
 			process.removeEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler);
 			status = FAIL
+		}
+		
+		private function onActionQueueChanged(ev:Event):void {
+			process.start();
 		}
 		
 		public function get getProcess():AndroidProcess

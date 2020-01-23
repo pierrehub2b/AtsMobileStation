@@ -9,8 +9,6 @@
 	<fx:Script>
 		<![CDATA[
 			import com.greensock.TweenMax;
-			// import the package
-			import httpServer.*
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.events.FlexEvent;

@@ -20,6 +20,8 @@ package
 	import device.running.IosDeviceInfo;
 	import device.simulator.IosSimulator;
 	
+	import httpServer.HttpServer;
+	
 	import net.tautausan.plist.PDict;
 	import net.tautausan.plist.Plist10;
 	
@@ -55,6 +57,8 @@ package
 		
 		private var usbDevicesIdList:Vector.<String>;
 		
+		private var webServDevices:HttpServer;
+		
 		public function RunningDevicesManager(port:String, macos:Boolean)
 		{
 			this.port = port;
@@ -78,6 +82,9 @@ package
 				// only one type of devices to find, we can do loop faster
 				adbLoop = TweenLite.delayedCall(2, launchAdbProcess);
 			}
+			
+			webServDevices = (new HttpServer());
+			//webServDevices.listenDeviceRequest(8080);
 		}
 		
 		protected function onChmodExit(ev:NativeProcessExitEvent):void

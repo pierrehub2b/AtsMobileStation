@@ -1,27 +1,21 @@
 package httpServer
 {
+	import flash.events.Event;
+	import flash.events.ProgressEvent;
+	import flash.events.ServerSocketConnectEvent;
+	import flash.events.TimerEvent;
+	import flash.net.ServerSocket;
+	import flash.net.Socket;
+	import flash.utils.ByteArray;
+	import flash.utils.Timer;
+	
 	import device.Device;
 	import device.running.AndroidDevice;
 	import device.running.AndroidProcess;
-	import device.running.AndroidUsb;
-	import device.running.AndroidUsbActions;
-	import device.running.AndroidUsbCaptureScreen;
 	
-	import flash.desktop.NativeProcess;
-	import flash.desktop.NativeProcessStartupInfo;
-	import flash.events.*;
-	import flash.events.Event;
-	import flash.events.NativeProcessExitEvent;
-	import flash.events.ProgressEvent;
-	import flash.events.ServerSocketConnectEvent;
-	import flash.filesystem.File;
-	import flash.net.ServerSocket;
-	import flash.net.Socket;
-	import flash.net.URLVariables;
-	import flash.utils.ByteArray;
-	import flash.utils.flash_proxy;
-	
-	import mx.controls.Alert;
+	import usb.AndroidUsb;
+	import usb.AndroidUsbActions;
+	import usb.UsbAction;
 	
 	public class HttpServer
 	{		
@@ -36,6 +30,9 @@ package httpServer
 		private var androidUsb:AndroidUsb;
 		private var rex:RegExp = /[\s\r\n]+/gim;
 		private var _device:AndroidDevice;
+		private var _actionQueue:Vector.<UsbAction> = new Vector.<UsbAction>();
+		private var processRunning:Boolean = false;
+		private var actionTimer:Timer; 
 		
 		public function HttpServer()
 		{
@@ -67,14 +64,23 @@ package httpServer
 			_maxRequestLength = value;
 		}
 		
-		public function listen(port:int, currentDevice:AndroidDevice, type:String, errorCallback:Function = null):String
+		public function listenActions(port:int, currentDevice:AndroidDevice, errorCallback:Function = null):String
 		{
 			this._device = currentDevice;
 			this._errorCallback = errorCallback;
 			_serverSocket = new ServerSocket();
 			_serverSocket.addEventListener(Event.CONNECT, socketConnectHandler);
 			initServerSocket(port, errorCallback);
-			androidUsb = new AndroidUsbActions(_device.id);
+			androidUsb = new AndroidUsbActions(currentDevice);
+			return _serverSocket.localPort.toString();
+		}
+		
+		public function listenDeviceRequest(port:int, errorCallback:Function = null):String
+		{
+			this._errorCallback = errorCallback;
+			_serverSocket = new ServerSocket();
+			_serverSocket.addEventListener(Event.CONNECT, socketConnectRunningDevicesHandler);
+			initServerSocket(port, errorCallback);
 			return _serverSocket.localPort.toString();
 		}
 		
@@ -113,6 +119,15 @@ package httpServer
 		}
 		
 		/**
+		 * Handle new connections to the server.
+		 */
+		private function socketConnectRunningDevicesHandler(event:ServerSocketConnectEvent):void
+		{
+			var socket:Socket = event.socket;
+			//socket.addEventListener(ProgressEvent.SOCKET_DATA, socketDataRunningDevicesHandler);
+		}
+		
+		/**
 		 * Handle data written to open connections. This is where the request is
 		 * parsed and routed to a controller.
 		 */
@@ -132,8 +147,9 @@ package httpServer
 				url = url.replace("/","").replace(rex,'');
 				var data:Array = new Array();
 				// It must be a GET request
-				if (request.substring(0, 4).toUpperCase() == 'POST') {
+				if (request.substring(0, 4).toUpperCase() == 'POST') {			
 					androidUsb.addEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded, false, 0, true);
+					androidUsb.addEventListener(AndroidProcess.USBACTIONERROR, usbActionErrorEnded, false, 0, true);
 					var requestData:Array = request.split("\n");
 					
 					data.push(url);
@@ -162,8 +178,9 @@ package httpServer
 						//_device.stopScreenshotServer();
 					}
 					
-					// sending request to the device
-					androidUsb.start(data);
+					// sending request to the channel
+					_actionQueue.push(new UsbAction(data));
+					onActionQueueChanged();
 				}
 			}
 			catch (error:Error)
@@ -175,13 +192,38 @@ package httpServer
 					//Alert.show(error.message, "Error");
 				}
 			}
-		}
+		}	
 		
 		private function usbActionResponseEnded(ev:Event):void {
 			if(androidUsb.getResponse() != "") {
 				_socket.writeUTFBytes(ActionController.responseJSON(androidUsb.getResponse()));
 			}
 			androidUsb.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded);
+			_socket.flush();
+			_socket.close();
+			processRunning = false;
+		}
+		
+		
+		private function onActionQueueChanged():void {
+			if(!processRunning) {
+				processRunning = true;
+				if(actionTimer != null) {
+					actionTimer.removeEventListener(TimerEvent.TIMER, onActionQueueChanged);
+					actionTimer = null;
+				}
+				var usbAction:UsbAction = _actionQueue.shift();
+				androidUsb.start(usbAction);
+			} else if(actionTimer == null) {
+				actionTimer = new Timer(1000, 5); 
+				actionTimer.addEventListener(TimerEvent.TIMER, onActionQueueChanged); 
+			}
+		}
+		
+		private function usbActionErrorEnded(ev:Event):void {
+			androidUsb.removeEventListener(AndroidProcess.USBACTIONERROR, usbActionErrorEnded);
+			_device.dispatchEvent(new Event(Device.STOPPED_EVENT));
+			androidUsb = null;
 			_socket.flush();
 			_socket.close();
 		}

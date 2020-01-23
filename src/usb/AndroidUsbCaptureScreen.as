@@ -1,4 +1,4 @@
-package device.running
+package usb
 {
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
@@ -6,13 +6,13 @@ package device.running
 	import flash.display.Loader;
 	import flash.display.LoaderInfo;
 	import flash.events.Event;
-	import flash.events.EventDispatcher;
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	import flash.utils.ByteArray;
+	import device.running.AndroidProcess;
 	
 	public class AndroidUsbCaptureScreen extends AndroidUsb
 	{
@@ -36,7 +36,7 @@ package device.running
 			procInfo.arguments = new <String>["-s", id, "shell", "dumpsys", "activity", AndroidProcess.ANDROIDDRIVER, "screenshot", "screenshot", "lores"];
 		}
 		
-		public override function start(data:Array):void{
+		public override function start(act:UsbAction):void{
 			this.baImage = new ByteArray();
 			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onUsbDataInit, false, 0, true);
 			process.start(procInfo);
