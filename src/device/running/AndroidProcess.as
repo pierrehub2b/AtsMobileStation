@@ -16,9 +16,11 @@ package device.running
 		public static const IP_ADDRESS:String = "ipAddress";
 		
 		public static const USBACTIONRESPONSE:String = "usbResponse";
+		public static const USBSTARTRESPONSE:String = "usbResponseStart";
 		public static const USBSCREENSHOTRESPONSE:String = "usbScreenshot";
 		public static const USBSCREENSHOTSTARTED:String = "usbScreenshotStarted";
 		public static const USBACTIONERROR:String = "usbActionError";
+		public static const USBSTARTENDEDRESPONSE:String = "usbResponseStartEnded"
 		
 		public static const DEVICE_INFO:String = "deviceInfo";
 		

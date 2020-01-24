@@ -1,15 +1,15 @@
 package usb
 {
+	import device.Device;
+	import device.running.AndroidDevice;
+	import device.running.AndroidProcess;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
-	
-	import device.Device;
-	import device.running.AndroidDevice;
-	import device.running.AndroidProcess;
 	
 	public class AndroidUsbActions extends AndroidUsb
 	{
@@ -43,8 +43,8 @@ package usb
 		
 		public override function start(act:UsbAction):void{
 			if(!process.running) {
-				androidOutput = "";
-				procInfo.arguments = new <String>["-s", this.currentDevice.id, "shell", "dumpsys", "activity", AndroidProcess.ANDROIDDRIVER];
+				androidOutput = "";				
+				procInfo.arguments = new <String>["-s", this.currentDevice.id, "shell"];
 				for(var i:int=0; i<act.getArgs.length; i++){
 					procInfo.arguments.push(act.getArgs[i]);
 				}
@@ -62,7 +62,7 @@ package usb
 			if(androidOutput.indexOf("Bad activity command") == -1) {
 				process = ev.currentTarget as NativeProcess;
 				var output:Array = androidOutput.split("\r\n");
-				if(this.procInfo.arguments[6] == "screenshot") {
+				if(this.procInfo.arguments.length > 6 && this.procInfo.arguments[6] == "screenshot") {
 					this.response = "";
 					for(var i:int=2;i<output.length;i++) {
 						this.response += output[i];
@@ -73,7 +73,16 @@ package usb
 				} else {
 					this.response = output[output.length-1];
 				}
-				dispatchEvent(new Event(AndroidProcess.USBACTIONRESPONSE));
+				if(this.procInfo.arguments[4] == "activity" && this.procInfo.arguments[6] != "package") {
+					dispatchEvent(new Event(AndroidProcess.USBACTIONRESPONSE));
+				} else if(this.procInfo.arguments[6] == "package") {
+					var outputJson:String = androidOutput.split("\r\n")[androidOutput.split("\r\n").length-1];
+					var jsonObject:Object = JSON.parse(outputJson);
+					this.response = jsonObject["activityName"].toString();
+					dispatchEvent(new Event(AndroidProcess.USBSTARTRESPONSE));
+				} else {
+					dispatchEvent(new Event(AndroidProcess.USBSTARTENDEDRESPONSE));
+				}
 			} else {
 				dispatchEvent(new Event(AndroidProcess.USBACTIONERROR));
 			}

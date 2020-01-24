@@ -1,5 +1,9 @@
 package httpServer
 {
+	import device.Device;
+	import device.running.AndroidDevice;
+	import device.running.AndroidProcess;
+	
 	import flash.events.Event;
 	import flash.events.ProgressEvent;
 	import flash.events.ServerSocketConnectEvent;
@@ -8,10 +12,6 @@ package httpServer
 	import flash.net.Socket;
 	import flash.utils.ByteArray;
 	import flash.utils.Timer;
-	
-	import device.Device;
-	import device.running.AndroidDevice;
-	import device.running.AndroidProcess;
 	
 	import usb.AndroidUsb;
 	import usb.AndroidUsbActions;
@@ -31,7 +31,6 @@ package httpServer
 		private var rex:RegExp = /[\s\r\n]+/gim;
 		private var _device:AndroidDevice;
 		private var _actionQueue:Vector.<UsbAction> = new Vector.<UsbAction>();
-		private var processRunning:Boolean = false;
 		private var actionTimer:Timer; 
 		
 		public function HttpServer()
@@ -146,10 +145,14 @@ package httpServer
 				var url:String              = request.substring(4, request.indexOf("HTTP/") - 1);
 				url = url.replace("/","").replace(rex,'');
 				var data:Array = new Array();
+				data.push("dumpsys", "activity", AndroidProcess.ANDROIDDRIVER);
+				
 				// It must be a GET request
 				if (request.substring(0, 4).toUpperCase() == 'POST') {			
 					androidUsb.addEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded, false, 0, true);
 					androidUsb.addEventListener(AndroidProcess.USBACTIONERROR, usbActionErrorEnded, false, 0, true);
+					androidUsb.addEventListener(AndroidProcess.USBSTARTRESPONSE, usbStartResponseEnded, false, 0, true);
+					androidUsb.addEventListener(AndroidProcess.USBSTARTENDEDRESPONSE, usbStartEndedResponseEnded, false, 0, true);
 					var requestData:Array = request.split("\n");
 					
 					data.push(url);
@@ -164,17 +167,26 @@ package httpServer
 						if(requestData[i] == "\r") {
 							isData = true;
 						}
-					}
+					}					
 					
-					if(url == "driver" && data[1] == "start") {
+					if(url == "driver" && data[4] == "start") {
 						if(_device.usbMode) {
 							data.push(AndroidDevice.UDPSERVER.toString().toLocaleLowerCase());
 							AndroidDevice.UDPSERVER ? data.push(_device.udpIpAdresse) : data.push(_device.ip, _device.startScreenshotServer());
 						}
-
 					}
 					
-					if(url == "driver" && data[1] == "stop") {
+					if(url == "app" && data[4] == "start") {
+						//pushing the start app command before
+						var startData:Array = new Array();
+						startData.push("dumpsys", "activity", AndroidProcess.ANDROIDDRIVER, "package", data[5]);
+						_actionQueue.push(new UsbAction(startData));
+					}
+					
+					if((url == "driver" || url == "app") && data[4] == "stop") {
+						var stopData:Array = new Array();
+						stopData.push("am", "force", "stop", AndroidProcess.ANDROIDDRIVER);
+						_actionQueue.push(new UsbAction(stopData));
 						//_device.stopScreenshotServer();
 					}
 					
@@ -201,23 +213,26 @@ package httpServer
 			androidUsb.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded);
 			_socket.flush();
 			_socket.close();
-			processRunning = false;
 		}
 		
+		private function usbStartResponseEnded(ev:Event):void {
+			var ActivityName:String = androidUsb.getResponse();
+			androidUsb.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbStartResponseEnded);
+			var startData:Array = new Array();
+			startData.push("am", "start", "-W", "-S","--activity-brought-to-front", 
+				"--activity-multiple-task", "--activity-no-animation", "--activity-no-history", "-n", ActivityName);
+			_actionQueue.insertAt(0, new UsbAction(startData));
+			onActionQueueChanged();
+		}
+		
+		private function usbStartEndedResponseEnded(ev:Event):void {
+			androidUsb.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbStartEndedResponseEnded);
+			onActionQueueChanged();
+		}
 		
 		private function onActionQueueChanged():void {
-			if(!processRunning) {
-				processRunning = true;
-				if(actionTimer != null) {
-					actionTimer.removeEventListener(TimerEvent.TIMER, onActionQueueChanged);
-					actionTimer = null;
-				}
-				var usbAction:UsbAction = _actionQueue.shift();
-				androidUsb.start(usbAction);
-			} else if(actionTimer == null) {
-				actionTimer = new Timer(1000, 5); 
-				actionTimer.addEventListener(TimerEvent.TIMER, onActionQueueChanged); 
-			}
+			var usbAction:UsbAction = _actionQueue.shift();
+			androidUsb.start(usbAction);
 		}
 		
 		private function usbActionErrorEnded(ev:Event):void {
