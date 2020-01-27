@@ -10,6 +10,7 @@ package httpServer
 	import flash.events.TimerEvent;
 	import flash.net.ServerSocket;
 	import flash.net.Socket;
+	import flash.text.ReturnKeyLabel;
 	import flash.utils.ByteArray;
 	import flash.utils.Timer;
 	
@@ -19,7 +20,7 @@ package httpServer
 	
 	public class HttpServer
 	{		
-		private var _serverSocket:ServerSocket;
+		public var _serverSocket:ServerSocket;
 		private var _mimeTypes:Object = new Object();
 		private var _controllers:Object = new Object();
 		private var _fileController:FileController;
@@ -31,7 +32,7 @@ package httpServer
 		private var rex:RegExp = /[\s\r\n]+/gim;
 		private var _device:AndroidDevice;
 		private var _actionQueue:Vector.<UsbAction> = new Vector.<UsbAction>();
-		private var actionTimer:Timer; 
+		private var isStarted:Boolean;
 		
 		public function HttpServer()
 		{
@@ -63,39 +64,34 @@ package httpServer
 			_maxRequestLength = value;
 		}
 		
-		public function listenActions(port:int, currentDevice:AndroidDevice, errorCallback:Function = null):String
+		public function processStarted():void {
+			this.isStarted = true;
+		}
+
+		public function listenActions(port:int, currentDevice:AndroidDevice, fixedPort:Boolean, errorCallback:Function):String
 		{
 			this._device = currentDevice;
 			this._errorCallback = errorCallback;
+			this.isStarted = false;
 			_serverSocket = new ServerSocket();
 			_serverSocket.addEventListener(Event.CONNECT, socketConnectHandler);
-			initServerSocket(port, errorCallback);
-			androidUsb = new AndroidUsbActions(currentDevice);
-			return _serverSocket.localPort.toString();
+			initServerSocket(port, fixedPort, errorCallback);
+			return _serverSocket != null ? _serverSocket.localPort.toString() : "";
 		}
 		
-		public function listenDeviceRequest(port:int, errorCallback:Function = null):String
-		{
-			this._errorCallback = errorCallback;
-			_serverSocket = new ServerSocket();
-			_serverSocket.addEventListener(Event.CONNECT, socketConnectRunningDevicesHandler);
-			initServerSocket(port, errorCallback);
-			return _serverSocket.localPort.toString();
-		}
-		
-		public function initServerSocket(port:int, errorCallback:Function = null):void {
+		public function initServerSocket(port:int, fixedPort:Boolean, errorCallback:Function):void {
 			try {
 				_serverSocket.bind(port);
 				_serverSocket.listen();
-			} catch (error:Error)
-			{
-				var message:String = "Port " + port.toString() +
-					" may be in use. Enter another port number and try again.\n(" +
-					error.message +")";
-				if (errorCallback != null) {
-					errorCallback(error, message);
+				androidUsb = new AndroidUsbActions(_device);
+			} catch (error:Error) {
+				if(!fixedPort) {
+					initServerSocket(port+1,fixedPort,errorCallback);
+				} else {
+					_serverSocket = null;	
+					_fileController = null;
+					errorCallback("Port "+ port +" is in use. Retrying...");
 				}
-				initServerSocket(port+1,errorCallback);
 			}
 		}
 		
@@ -115,6 +111,7 @@ package httpServer
 		{
 			var socket:Socket = event.socket;
 			socket.addEventListener(ProgressEvent.SOCKET_DATA, socketDataHandler);
+			_device.dispatchEvent(new Event(Device.STARTEDHTTP_EVENT));
 		}
 		
 		/**
@@ -134,6 +131,9 @@ package httpServer
 		{
 			try
 			{
+				if(!isStarted) {
+					return;
+				}
 				_socket = event.target as Socket;
 				var bytes:ByteArray = new ByteArray();
 				

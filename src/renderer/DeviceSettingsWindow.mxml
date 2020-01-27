@@ -29,8 +29,6 @@
 					
 					if(dev is AndroidDevice){
 						androidUsbGroup.visible = true;
-						portSelectionGroup.visible = false;
-						portSelectionGroup.height = 0;
 						installAppButton.visible = false;
 					}
 					

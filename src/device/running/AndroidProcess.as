@@ -157,7 +157,7 @@ package device.running
 			processIp.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataWin);
 			var pattern:RegExp = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/;
 			var arrayAddresses:Array = processIp.standardOutput.readUTFBytes(processIp.standardOutput.bytesAvailable).match(pattern);
-			if(arrayAddresses.length > 0) {
+			if(arrayAddresses != null && arrayAddresses.length > 0) {
 				this.ipAddress = arrayAddresses[0];
 				dispatchEvent(new Event(IP_ADDRESS));
 			}
@@ -216,34 +216,45 @@ package device.running
 		protected function onGetPropExit(event:NativeProcessExitEvent):void{
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadPropertyData);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onGetPropExit);
+			if(port != "") {
+				var propArray:Array = output.split("\n");
+				for each (var line:String in propArray){
+					if(line.indexOf("[ro.product.brand]") == 0){
+						deviceInfo.manufacturer = getPropValue(line)
+					}else if(line.indexOf("[ro.product.model]") == 0){
+						deviceInfo.modelId = getPropValue(line)
+					}else if(line.indexOf("[ro.semc.product.name]") == 0){
+						deviceInfo.modelName = getPropValue(line)
+					}else if(line.indexOf("[def.tctfw.brandMode.name]") == 0){
+						deviceInfo.modelName = getPropValue(line)
+					}else if(line.indexOf("[ro.build.version.release]") == 0){
+						deviceInfo.osVersion = getPropValue(line)
+					}else if(line.indexOf("[ro.build.version.sdk]") == 0){
+						deviceInfo.sdkVersion = getPropValue(line)
+					}
+				}
+				
+				deviceInfo.checkName();
+				dispatchEvent(new Event(DEVICE_INFO));
+				
+				process = new NativeProcess();
+				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError, false, 0, true);
+				process.addEventListener(NativeProcessExitEvent.EXIT, onExecuteExit, false, 0, true);
+				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData, false, 0, true);
 			
-			var propArray:Array = output.split("\n");
-			for each (var line:String in propArray){
-				if(line.indexOf("[ro.product.brand]") == 0){
-					deviceInfo.manufacturer = getPropValue(line)
-				}else if(line.indexOf("[ro.product.model]") == 0){
-					deviceInfo.modelId = getPropValue(line)
-				}else if(line.indexOf("[ro.semc.product.name]") == 0){
-					deviceInfo.modelName = getPropValue(line)
-				}else if(line.indexOf("[def.tctfw.brandMode.name]") == 0){
-					deviceInfo.modelName = getPropValue(line)
-				}else if(line.indexOf("[ro.build.version.release]") == 0){
-					deviceInfo.osVersion = getPropValue(line)
-				}else if(line.indexOf("[ro.build.version.sdk]") == 0){
-					deviceInfo.sdkVersion = getPropValue(line)
+				procInfo.arguments = new <String>["-s", id, "shell", "am", "instrument", "-w", "-r", "-e", "ipAddress", ipAddress, "-e", "atsPort", port, "-e", "usbMode", usbMode.toString(), "-e", "debug", "false", "-e", "class", ANDROIDDRIVER + ".AtsRunner", ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner"];
+				process.start(procInfo);
+			} else {
+				process.exit(true);
+				process = null;
+				procInfo = null;
+				
+				if(error != null){
+					dispatchEvent(new Event(ERROR_EVENT));
+				}else{
+					dispatchEvent(new Event(STOPPED));
 				}
 			}
-			
-			deviceInfo.checkName();
-			dispatchEvent(new Event(DEVICE_INFO));
-			
-			process = new NativeProcess();
-			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError, false, 0, true);
-			process.addEventListener(NativeProcessExitEvent.EXIT, onExecuteExit, false, 0, true);
-			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData, false, 0, true);
-			
-			procInfo.arguments = new <String>["-s", id, "shell", "am", "instrument", "-w", "-r", "-e", "ipAddress", ipAddress, "-e", "atsPort", port, "-e", "usbMode", usbMode.toString(), "-e", "debug", "false", "-e", "class", ANDROIDDRIVER + ".AtsRunner", ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner"];
-			process.start(procInfo);
 		}
 		
 		private function getPropValue(value:String):String{
