@@ -111,7 +111,6 @@ package httpServer
 		{
 			var socket:Socket = event.socket;
 			socket.addEventListener(ProgressEvent.SOCKET_DATA, socketDataHandler);
-			_device.dispatchEvent(new Event(Device.STARTEDHTTP_EVENT));
 		}
 		
 		/**
