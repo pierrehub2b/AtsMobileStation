@@ -62,10 +62,30 @@
 			protected function portAutomatic_changeHandler(event:Event):void
 			{
 				portSelection.enabled = !portAutomatic.selected;
+				if(portSelection.enabled && (parseInt(portSelection.text) >= 64999 || parseInt(portSelection.text) <= 1024)) {
+					portErrorMessage.visible = true;
+					saveButton.enabled = false;
+					portErrorMessageGroup.height = 10;
+				} else {
+					portErrorMessage.visible = false;
+					saveButton.enabled = true;
+					portErrorMessageGroup.height = 0;
+				}
 			}
 			
 			protected function portSelection_changeHandler(event:Event):void
 			{
+				var target:TextInput = event.currentTarget as TextInput;
+				if(!target) return;
+				if(parseInt(target.text) >= 64999 || parseInt(target.text) <= 1024){
+					portErrorMessage.visible = true;
+					saveButton.enabled = false;
+					portErrorMessageGroup.height = 10;
+				} else {
+					portErrorMessage.visible = false;
+					saveButton.enabled = true;
+					portErrorMessageGroup.height = 0;
+				}
 				portAutomatic.selected = portSelection.text == "";
 			}
 			
@@ -73,7 +93,6 @@
 			{
 				var hasToRestart:Boolean = dev.settingsPort != portSelection.text || dev.automaticPort != portAutomatic.selected || dev.usbMode != androidUsb.selected;
 				if(dev != null){ 
-					
 					dev.settingsPort = portSelection.text;
 					dev.automaticPort = portAutomatic.selected;
 					dev.usbMode = androidUsb.selected;
@@ -166,6 +185,7 @@
 				 text="sdf54sd65f46sd5" verticalCenter="2"/>
 
 		<mx:HRule width="98%"/>
+
 		<s:HGroup id="portSelectionGroup" width="100%" gap="3" verticalAlign="middle" verticalCenter="0">
 			<s:HGroup width="100%" horizontalAlign="left" verticalAlign="baseline">
 				<s:Label fontSize="11" fontWeight="bold" paddingRight="5" text="Driver port :"/>
@@ -175,6 +195,13 @@
 				<s:TextInput id="portSelection" width="100%" height="100%" restrict="0-9" maxChars="5" change="portSelection_changeHandler(event)" />
 			</s:HGroup>
 		</s:HGroup>
+		
+		<s:HGroup height="0" id="portErrorMessageGroup" width="100%" gap="3" verticalAlign="middle" verticalCenter="0">
+			<s:HGroup width="100%" horizontalAlign="left" verticalAlign="baseline">
+				<s:Label id="portErrorMessage" visible="false" fontSize="11" paddingRight="5" color="#FF0000" text="Port value must be between 1024 and 64999"/>
+			</s:HGroup>
+		</s:HGroup>
+		
 		<s:HGroup width="100%" gap="3" verticalAlign="middle" verticalCenter="0">
 			<s:HGroup id="androidUsbGroup" width="100%" horizontalAlign="left" verticalAlign="baseline" visible="false">
 				<s:Label fontSize="11" fontWeight="bold" paddingRight="5" text="USB mode :"/>
@@ -200,7 +227,7 @@
 			<s:Button label="Copy device id" icon="assets/icons/16/copy.png" click="copyId_clickHandler(event)"/>
 			<s:Button id="installAppButton" label="Install app" click="install_clickHandler(event)" fontSize="11"
 					  icon="assets/icons/16/download.png"/>
-			<s:Button label="Finish" click="save_clickHandler(event)" fontSize="11"
+			<s:Button label="Finish" click="save_clickHandler(event)" fontSize="11" id="saveButton"
 					  icon="assets/icons/16/tick.png"/>
 		</s:HGroup>
 	</s:Group>
