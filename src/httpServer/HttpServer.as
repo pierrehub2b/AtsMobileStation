@@ -68,25 +68,25 @@ package httpServer
 			this.isStarted = true;
 		}
 
-		public function listenActions(port:int, currentDevice:AndroidDevice, fixedPort:Boolean, errorCallback:Function):String
+		public function listenActions(port:int, currentDevice:AndroidDevice, automaticPort:Boolean, errorCallback:Function):String
 		{
 			this._device = currentDevice;
 			this._errorCallback = errorCallback;
 			this.isStarted = false;
 			_serverSocket = new ServerSocket();
 			_serverSocket.addEventListener(Event.CONNECT, socketConnectHandler);
-			initServerSocket(port, fixedPort, errorCallback);
+			initServerSocket(port, automaticPort, errorCallback);
 			return _serverSocket != null ? _serverSocket.localPort.toString() : "";
 		}
 		
-		public function initServerSocket(port:int, fixedPort:Boolean, errorCallback:Function):void {
+		public function initServerSocket(port:int, automaticPort:Boolean, errorCallback:Function):void {
 			try {
 				_serverSocket.bind(port);
 				_serverSocket.listen();
 				androidUsb = new AndroidUsbActions(_device);
 			} catch (error:Error) {
-				if(!fixedPort) {
-					initServerSocket(port+1,fixedPort,errorCallback);
+				if(automaticPort) {
+					initServerSocket(port+1,automaticPort,errorCallback);
 				} else {
 					_serverSocket = null;	
 					_fileController = null;
@@ -186,7 +186,7 @@ package httpServer
 						var stopData:Array = new Array();
 						stopData.push("am", "force", "stop", AndroidProcess.ANDROIDDRIVER);
 						_actionQueue.push(new UsbAction(stopData));
-						//_device.stopScreenshotServer();
+						_device.stopScreenshotServer();
 					}
 					
 					// sending request to the channel
@@ -197,7 +197,7 @@ package httpServer
 			catch (error:Error)
 			{
 				if (_errorCallback != null) {
-					_errorCallback(error, error.message);
+					_errorCallback(error.message);
 				}
 				else {
 					//Alert.show(error.message, "Error");

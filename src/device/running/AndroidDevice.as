@@ -38,7 +38,7 @@ package device.running
 			this.status = INSTALL;
 			this.currentAdbFile = adbFile;
 			
-			var fixedPort:Boolean = false;
+			var portAutomatic:Boolean = false;
 			
 			var fileStream:FileStream = new FileStream();
 			var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
@@ -51,9 +51,9 @@ package device.running
 						var arrayLineId: Array = line.split("==");
 						if(arrayLineId[0].toString().toLowerCase() == id.toString().toLowerCase()) {
 							var arrayLineAttributes: Array = arrayLineId[1].split(";");
-							fixedPort = (arrayLineAttributes[0] != "true");
-							this.port = arrayLineAttributes[1];
-							this.usbMode = (arrayLineAttributes[2] == "true");
+							portAutomatic = arrayLineAttributes.length > 0 ? arrayLineAttributes[0].toString().toLocaleLowerCase() == "true" : false;
+							this.port = arrayLineAttributes.length > 1 && !portAutomatic ? arrayLineAttributes[1] : port;
+							this.usbMode = arrayLineAttributes.length > 2 ? arrayLineAttributes[2].toString().toLocaleLowerCase() == "true" : false;
 						}
 					}
 				}
@@ -64,7 +64,7 @@ package device.running
 			udpServScreenshot = new ScreenshotServer();
 			
 			if(usbMode) {
-				this.port = webServActions.listenActions(parseInt(this.port), this, fixedPort, httpServerError);
+				this.port = webServActions.listenActions(parseInt(this.port), this, portAutomatic, httpServerError);
 			}
 			
 			if(this.port == "") {

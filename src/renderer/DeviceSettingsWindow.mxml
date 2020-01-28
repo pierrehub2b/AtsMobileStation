@@ -43,16 +43,15 @@
 								var arrayLineId: Array = line.split("==");
 								if(arrayLineId[0].toString().toLowerCase() == dev.id.toString().toLowerCase()) {
 									var arrayLineAttributes: Array = arrayLineId[1].split(";");
-									portAutomatic.selected = arrayLineAttributes.length > 0 ? arrayLineAttributes[0] == "true" : false;
+									portAutomatic.selected = arrayLineAttributes.length > 0 ? arrayLineAttributes[0].toString().toLocaleLowerCase() == "true" : false;
 									portSelection.text = arrayLineAttributes.length > 1 ? arrayLineAttributes[1] : "";
-									androidUsb.selected = arrayLineAttributes.length > 2 ? arrayLineAttributes[2] == "true" : false;
+									androidUsb.selected = arrayLineAttributes.length > 2 ? arrayLineAttributes[2].toString().toLocaleLowerCase() == "true" : false;
 								}
 							}
 						}
 						fileStream.close();
 					}
 				}
-				portAutomatic.selected = portSelection.text == "";
 				portSelection.enabled = !portAutomatic.selected;
 			}
 			
