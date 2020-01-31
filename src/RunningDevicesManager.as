@@ -2,6 +2,13 @@ package
 {
 	import com.greensock.TweenLite;
 	
+	import device.Device;
+	import device.RunningDevice;
+	import device.running.AndroidDevice;
+	import device.running.IosDevice;
+	import device.running.IosDeviceInfo;
+	import device.simulator.IosSimulator;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -12,15 +19,6 @@ package
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.FlexGlobals;
-	
-	import device.Device;
-	import device.RunningDevice;
-	import device.running.AndroidDevice;
-	import device.running.IosDevice;
-	import device.running.IosDeviceInfo;
-	import device.simulator.IosSimulator;
-	
-	import httpServer.HttpServer;
 	
 	import net.tautausan.plist.PDict;
 	import net.tautausan.plist.Plist10;
@@ -57,8 +55,6 @@ package
 		
 		private var usbDevicesIdList:Vector.<String>;
 		
-		private var webServDevices:HttpServer;
-		
 		public function RunningDevicesManager(port:String, macos:Boolean)
 		{
 			this.port = port;
@@ -82,9 +78,6 @@ package
 				// only one type of devices to find, we can do loop faster
 				adbLoop = TweenLite.delayedCall(2, launchAdbProcess);
 			}
-			
-			webServDevices = (new HttpServer());
-			//webServDevices.listenDeviceRequest(8080);
 		}
 		
 		protected function onChmodExit(ev:NativeProcessExitEvent):void
@@ -156,8 +149,15 @@ package
 					
 					runingIds.push(runningId);
 					
+					
+					
 					if(info.length >= 2 && runningId.length > 0){
 						dev = findDevice(runningId);
+						
+						if(dev != null && dev.status == Device.FAIL) {
+							dev.close();
+						}
+						
 						if(dev == null){
 							
 							dev = new AndroidDevice(adbFile, port, runningId);

@@ -77,7 +77,7 @@
 			{
 				var target:TextInput = event.currentTarget as TextInput;
 				if(!target) return;
-				if(parseInt(target.text) >= 64999 || parseInt(target.text) <= 1024){
+				if(parseInt(target.text) > 64999 || parseInt(target.text) <= 1024){
 					portErrorMessage.visible = true;
 					saveButton.enabled = false;
 					portErrorMessageGroup.height = 10;
@@ -198,7 +198,7 @@
 		
 		<s:HGroup height="0" id="portErrorMessageGroup" width="100%" gap="3" verticalAlign="middle" verticalCenter="0">
 			<s:HGroup width="100%" horizontalAlign="left" verticalAlign="baseline">
-				<s:Label id="portErrorMessage" visible="false" fontSize="11" paddingRight="5" color="#FF0000" text="Port value must be between 1024 and 64999"/>
+				<s:Label id="portErrorMessage" visible="false" fontSize="11" paddingRight="5" color="#FF0000" text="Port value must be between 1025 and 64999"/>
 			</s:HGroup>
 		</s:HGroup>
 		

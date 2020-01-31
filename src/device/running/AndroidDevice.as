@@ -8,14 +8,15 @@ package device.running
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	
-	import httpServer.HttpServer;
-	
 	import mx.collections.ArrayList;
 	import mx.events.CollectionEvent;
 	
 	import udpServer.ScreenshotServer;
 	
+	import usb.AndroidUsbActions;
 	import usb.UsbAction;
+	
+	import webServer.WebServer;
 	
 	public class AndroidDevice extends RunningDevice
 	{
@@ -25,11 +26,13 @@ package device.running
 		public var androidSdk:String = "";
 
 		private var process:AndroidProcess;
-		private var webServActions:HttpServer;
+		private var webServActions:WebServer;
 		private var udpServScreenshot:ScreenshotServer;
 		private var currentAdbFile:File;
 		
-		public static const UDPSERVER:Boolean = true;
+		private var actionQueue:Vector.<UsbAction> = new Vector.<UsbAction>();
+		public var androidUsb:AndroidUsbActions;
+		public static const UDPSERVER:Boolean = false;
 				
 		public function AndroidDevice(adbFile:File, port:String, id:String)
 		{
@@ -59,16 +62,13 @@ package device.running
 				}
 				fileStream.close();
 			}
-			
-			webServActions = (new HttpServer());
+			errorMessage = "";
+			webServActions = new WebServer(this);
 			udpServScreenshot = new ScreenshotServer();
 			
 			if(usbMode) {
-				this.port = webServActions.listenActions(parseInt(this.port), this, portAutomatic, httpServerError);
-			}
-			
-			if(this.port == "") {
-				webServActions = null;
+				this.androidUsb = new AndroidUsbActions(this);
+				this.port = webServActions.initServerSocket(parseInt(this.port), portAutomatic, httpServerError);
 			}
 			
 			process = new AndroidProcess(adbFile, atsdroidFilePath, id, this.port, usbMode);
@@ -77,11 +77,12 @@ package device.running
 			process.addEventListener(AndroidProcess.STOPPED, stoppedTestHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.DEVICE_INFO, deviceInfoHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.IP_ADDRESS, ipAdressHandler, false, 0, true);
-			installing()
+			
+			installing();
 		}
 		
 		public function httpServerError(error:String):void {
-			status = FAIL;
+			this.webServActions = null;
 			errorMessage = error;
 		}
 		
@@ -94,6 +95,18 @@ package device.running
 				process.start();
 			}
 			
+		}
+		
+		public function actionsInsertAt(pos:int, act:UsbAction):void {
+			this.actionQueue.insertAt(pos, act);
+		}
+		
+		public function actionsPush(act:UsbAction):void {
+			this.actionQueue.push(act);
+		}
+		
+		public function actionsShift():UsbAction {
+			return this.actionQueue.shift();
 		}
 		
 		private function processErrorHandler(ev:Event):void{
@@ -111,21 +124,25 @@ package device.running
 		}
 		
 		public function stopScreenshotServer():void {
-			this.udpServScreenshot._datagramSocket.close();
 			this.udpServScreenshot = new ScreenshotServer();
 		}
 		
 		public function startScreenshotServer():int {
-			this.udpServScreenshot.bind(ip, id);
+			this.udpServScreenshot.bind(ip, this);
 			return this.udpServScreenshot._datagramSocket.localPort;
 		}
 		
 		private function runningTestHandler(ev:Event):void{
 			process.removeEventListener(AndroidProcess.RUNNING, runningTestHandler);
-			status = READY;
-			tooltip = "Android " + androidVersion + ", API " + androidSdk + " [" + id + "]\nready and waiting testing actions";
-			webServActions.processStarted();
-			started();
+			if(this.usbMode && this.webServActions == null) {
+				status = FAIL;
+				tooltip = "ths usb WebServer is not running";
+				failed();
+			} else {
+				status = READY;
+				tooltip = "Android " + androidVersion + ", API " + androidSdk + " [" + id + "]\nready and waiting testing actions";
+				started();
+			}
 		}
 		
 		private function stoppedTestHandler(ev:Event):void{

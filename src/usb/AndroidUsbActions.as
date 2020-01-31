@@ -10,8 +10,9 @@ package usb
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
+	import flash.events.EventDispatcher;
 	
-	public class AndroidUsbActions extends AndroidUsb
+	public class AndroidUsbActions extends EventDispatcher
 	{
 		private var process:NativeProcess = new NativeProcess();
 		private var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
@@ -41,7 +42,7 @@ package usb
 			error = new String(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
 		}
 		
-		public override function start(act:UsbAction):void{
+		public function start(act:UsbAction):void{
 			if(!process.running) {
 				androidOutput = "";				
 				procInfo.arguments = new <String>["-s", this.currentDevice.id, "shell"];
@@ -52,24 +53,22 @@ package usb
 			}
 		}
 		
-		protected override function onUsbDataInit(event:ProgressEvent):void{
+		protected function onUsbDataInit(event:ProgressEvent):void{
 			androidOutput = androidOutput.concat(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
 		}
 		
-		protected override function onUsbActionExit(ev:NativeProcessExitEvent):void
+		protected function onUsbActionExit(ev:NativeProcessExitEvent):void
 		{
 			this.response = "";
 			if(androidOutput.indexOf("Bad activity command") == -1) {
 				process = ev.currentTarget as NativeProcess;
 				var output:Array = androidOutput.split("\r\n");
 				if(this.procInfo.arguments.length > 6 && this.procInfo.arguments[6] == "screenshot") {
-					this.response = "";
-					for(var i:int=2;i<output.length;i++) {
-						this.response += output[i];
-						if(i != output.length-1) {
-							this.response += "\r\n";
-						}
-					}
+					var outputJsonScreen:String = androidOutput.split("\r\n")[androidOutput.split("\r\n").length-1];
+					var jsonObjectScreen:Object = JSON.parse(outputJsonScreen);
+					this.response = jsonObjectScreen["data"].toString();
+					dispatchEvent(new Event(AndroidProcess.SCREENSHOTRESPONSE));
+					return;
 				} else {
 					this.response = output[output.length-1];
 				}
@@ -88,7 +87,7 @@ package usb
 			}
 		}
 		
-		public override function getResponse():String {
+		public function getResponse():String {
 			return this.response;
 		}
 	}

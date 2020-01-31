@@ -14,11 +14,9 @@ package device.running
 	{
 		public static const ERROR_EVENT:String = "errorEvent";
 		public static const IP_ADDRESS:String = "ipAddress";
-		
+		public static const SCREENSHOTRESPONSE:String = "screenshotResponse";
 		public static const USBACTIONRESPONSE:String = "usbResponse";
 		public static const USBSTARTRESPONSE:String = "usbResponseStart";
-		public static const USBSCREENSHOTRESPONSE:String = "usbScreenshot";
-		public static const USBSCREENSHOTSTARTED:String = "usbScreenshotStarted";
 		public static const USBACTIONERROR:String = "usbActionError";
 		public static const USBSTARTENDEDRESPONSE:String = "usbResponseStartEnded"
 		
@@ -71,7 +69,7 @@ package device.running
 		}
 		
 		public function start():void{
-			process.start(procInfo);	
+			process.start(procInfo);
 		}
 		
 		public function terminate():Boolean{
@@ -156,7 +154,8 @@ package device.running
 		{
 			processIp.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataWin);
 			var pattern:RegExp = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/;
-			var arrayAddresses:Array = processIp.standardOutput.readUTFBytes(processIp.standardOutput.bytesAvailable).match(pattern);
+			var output:String = processIp.standardOutput.readUTFBytes(processIp.standardOutput.bytesAvailable);
+			 var arrayAddresses:Array = output.match(pattern);
 			if(arrayAddresses != null && arrayAddresses.length > 0) {
 				this.ipAddress = arrayAddresses[0];
 				dispatchEvent(new Event(IP_ADDRESS));
@@ -267,8 +266,6 @@ package device.running
 		}
 		
 		protected function onExecuteData(event:ProgressEvent):void{
-			//var data:String = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
-			//trace(data);
 			dispatchEvent(new Event(RUNNING));
 		}
 		
