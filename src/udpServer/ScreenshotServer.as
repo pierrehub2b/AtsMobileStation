@@ -1,8 +1,11 @@
 package udpServer
 {
+	import com.sociodox.utils.Base64;
+	
 	import device.running.AndroidDevice;
 	import device.running.AndroidProcess;
 	
+	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Loader;
 	import flash.display.LoaderInfo;
@@ -23,6 +26,9 @@ package udpServer
 	import flash.utils.ByteArray;
 	import flash.utils.Timer;
 	
+	import mx.utils.Base64Decoder;
+	import mx.utils.Base64Encoder;
+	
 	import usb.AndroidUsbActions;
 	import usb.UsbAction;
 	
@@ -35,9 +41,7 @@ package udpServer
 		private var _message:TextField;
 		private var androidUsb:AndroidUsbActions;
 		private var currentDevice:AndroidDevice;
-		private static const PACKET_SIZE:int = 2000;
-		private var pngReadStarted:Boolean = false;
-		public var bitmapData:BitmapData;
+		private static const PACKET_SIZE:int = 1468;
 		private var baImage:ByteArray = new ByteArray();
 		
 		public function ScreenshotServer(){
@@ -71,67 +75,20 @@ package udpServer
 		
 		public function sendBackData(ev:Event):void
 		{
-			//Create a message in a ByteArray
-			var data:ByteArray = new ByteArray();
-			data.writeUTFBytes(currentDevice.androidUsb.getResponse());
-			dataTraitment(data);
-		}
-		
-		public function sendData(screen:ByteArray, currentPos:int, dataLength:int, packetSize:int):void {
-			//var bytes:[] = getData(currentPos, dataLength, packetSize);
-			var bytes:ByteArray = new ByteArray();
-			for(var i:int=0; i < packetSize; i++) {
-				bytes[i] = screen[currentPos + i];
-			}
-			
-			_datagramSocket.send(bytes, 0, bytes.length, _datagramSocket.localAddress, _datagramSocket.localPort);
-		}
-		
-		
-		protected function dataTraitment(data:ByteArray):void{			
-			const check:String = data.toString();
-			baImage = new ByteArray();
-			if(pngReadStarted || check.indexOf("PNG") >= 0){
-				pngReadStarted = true;
-				const iend:int = check.indexOf("IEND");
-				if(iend > -1){
-					baImage.writeBytes(data,8,iend+9);
-					
-					//trace(baImage.toString());
-					
-					var fs : FileStream = new FileStream();
-					var targetFile : File = File.userDirectory.resolvePath("pic.png");
-					fs.open(targetFile, FileMode.WRITE);
-					fs.writeBytes(baImage,0,baImage.length);
-					fs.close();
-					
-					pngReadStarted = false;
-					
-					var loader:Loader = new Loader();
-					loader.loadBytes(baImage);
-					loader.contentLoaderInfo.addEventListener(Event.COMPLETE, loaderComplete);
-					
-				}else{
-					data.readBytes(baImage, baImage.length);
-				}
-			}
-		}
-		
-		private function loaderComplete(ev:Event):void
-		{
-			var loaderInfo:LoaderInfo = LoaderInfo(ev.target);
-			bitmapData = new BitmapData(loaderInfo.width, loaderInfo.height, false, 0xFFFFFF);
-			bitmapData.draw(loaderInfo.loader);
-			
-			
-			var myBitmapData:BitmapData = new BitmapData(loaderInfo.width, loaderInfo.width);
-			myBitmapData.drawWithQuality(bitmapData,null,null,null,null,false,StageQuality.MEDIUM);
+			//var decoder:Base64Decoder = new Base64Decoder();
+			//decoder.decode();
+			var ba:ByteArray = new ByteArray();
+			ba.writeUTFBytes(currentDevice.androidUsb.getResponse());
+			//ba.position = 0;
+			var rect:Rectangle = new Rectangle(0,0,parseInt(currentDevice.androidUsb.getWidth()),parseInt(currentDevice.androidUsb.getHeight()));
+			var newBmd:BitmapData = new BitmapData(rect.width,rect.height,true,0xFFFFFFFF);
+			newBmd.setPixels(rect, ba);
+			newBmd.drawWithQuality(newBmd,null,null,null,null,false,StageQuality.MEDIUM);
 			
 			//Send a datagram to the target
 			try
 			{
-				var bounds:Rectangle = new Rectangle(0, 0, myBitmapData.width, myBitmapData.height);
-				var data:ByteArray = myBitmapData.getPixels(bounds);
+				var data:ByteArray = newBmd.getPixels(rect);
 				var dataLength:int = data.length;
 				
 				var packetSize:int = PACKET_SIZE;
@@ -153,22 +110,13 @@ package udpServer
 			}
 		}
 		
-		/*private function getData(dataPos:int, dataLength:int, packetSize:int):[] {
-			var data:[] = new [packetSize + 8];
+		public function sendData(screen:ByteArray, currentPos:int, dataLength:int, packetSize:int):void {
+			var bytes:ByteArray = new ByteArray();
+			for(var i:int=0; i < packetSize; i++) {
+				bytes[i] = screen[currentPos + i];
+			}
 			
-			data[0] = (dataPos >>> 24);
-			data[1] = (dataPos >>> 16);
-			data[2] = (dataPos >>> 8);
-			data[3] = (dataPos);
-			
-			data[4] = (dataLength >>> 24);
-			data[5] = (dataLength >>> 16);
-			data[6] = (dataLength >>> 8);
-			data[7] = (dataLength);
-			
-			return data;
-		}*/
-		
-
+			_datagramSocket.send(bytes, 0, bytes.length, _datagramSocket.localAddress, _datagramSocket.localPort);
+		}
 	}
 }

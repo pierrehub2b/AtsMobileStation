@@ -103,6 +103,7 @@ package webServer
 		
 		private function onSocketSendData(ev:ProgressEvent):void
 		{
+			if(currentDevice.status != Device.READY) { return; }
 			socket=Socket(ev.target);
 			var headerData:ByteArray=new ByteArray();
 			socket.readBytes(headerData);

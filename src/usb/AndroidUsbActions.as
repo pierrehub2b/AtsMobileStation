@@ -19,6 +19,8 @@ package usb
 		
 		private var androidOutput:String;
 		private var response:String = "";
+		private var screenWidth:String = "";
+		private var screenHeight:String = "";
 		private var currentDevice:AndroidDevice;
 		private var udpServerPort:String = "";
 		private var error:String = "";
@@ -67,6 +69,8 @@ package usb
 					var outputJsonScreen:String = androidOutput.split("\r\n")[androidOutput.split("\r\n").length-1];
 					var jsonObjectScreen:Object = JSON.parse(outputJsonScreen);
 					this.response = jsonObjectScreen["data"].toString();
+					this.screenHeight = jsonObjectScreen["height"].toString();
+					this.screenWidth = jsonObjectScreen["width"].toString();
 					dispatchEvent(new Event(AndroidProcess.SCREENSHOTRESPONSE));
 					return;
 				} else {
@@ -89,6 +93,14 @@ package usb
 		
 		public function getResponse():String {
 			return this.response;
+		}
+		
+		public function getWidth():String {
+			return this.screenWidth;
+		}
+		
+		public function getHeight():String {
+			return this.screenHeight;
 		}
 	}
 }
