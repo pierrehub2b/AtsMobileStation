@@ -7,10 +7,10 @@ package usb
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
+	import flash.events.EventDispatcher;
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
-	import flash.events.EventDispatcher;
 	
 	public class AndroidUsbActions extends EventDispatcher
 	{
@@ -44,10 +44,13 @@ package usb
 			error = new String(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
 		}
 		
-		public function start(act:UsbAction):void{
-			if(!process.running) {
+		public function start(act:UsbAction, isShell:Boolean = true):void{
+			if(!process.running && act != null) {
 				androidOutput = "";				
-				procInfo.arguments = new <String>["-s", this.currentDevice.id, "shell"];
+				procInfo.arguments = new <String>["-s", this.currentDevice.id];
+				if(isShell) {
+					procInfo.arguments.push("shell");
+				}
 				for(var i:int=0; i<act.getArgs.length; i++){
 					procInfo.arguments.push(act.getArgs[i]);
 				}
@@ -65,16 +68,36 @@ package usb
 			if(androidOutput.indexOf("Bad activity command") == -1) {
 				process = ev.currentTarget as NativeProcess;
 				var output:Array = androidOutput.split("\r\n");
-				if(this.procInfo.arguments.length > 6 && this.procInfo.arguments[6] == "screenshot") {
-					var outputJsonScreen:String = androidOutput.split("\r\n")[androidOutput.split("\r\n").length-1];
-					var jsonObjectScreen:Object = JSON.parse(outputJsonScreen);
-					this.response = jsonObjectScreen["data"].toString();
-					this.screenHeight = jsonObjectScreen["height"].toString();
-					this.screenWidth = jsonObjectScreen["width"].toString();
+				if(this.procInfo.arguments[2] == "pull") {
+					this.response = androidOutput.split("\r\n")[androidOutput.split("\r\n").length-1];
+					dispatchEvent(new Event(AndroidProcess.SCREENSHOTRESPONSE));
+					return;
+				} else if(this.procInfo.arguments.length > 6 && this.procInfo.arguments[6] == "screenshot") {
+					/*var resp:String = "";
+					var splittedOutput:Array = androidOutput.split("\r\n");
+					var isData:Boolean = false;
+					for(var i:int=0;i<splittedOutput.length;i++) {
+						if(splittedOutput[i].toString().indexOf("PNG") > -1) {
+							isData = true;
+						}
+						if(isData) {
+							resp += splittedOutput[i];
+							if(i != splittedOutput.length-1) {
+								resp += "\r\n";
+							}
+						}
+					}*/
+					
+					this.response = androidOutput.split("\r\n")[androidOutput.split("\r\n").length-1];
 					dispatchEvent(new Event(AndroidProcess.SCREENSHOTRESPONSE));
 					return;
 				} else {
 					this.response = output[output.length-1];
+					if(this.procInfo.arguments[6] == "driver" && this.procInfo.arguments[7] == "start") {
+						var jsonObjectStart:Object = JSON.parse(this.response);
+						this.screenWidth = jsonObjectStart["channelWidth"].toString();
+						this.screenHeight = jsonObjectStart["channelHeight"].toString();
+					}
 				}
 				if(this.procInfo.arguments[4] == "activity" && this.procInfo.arguments[6] != "package") {
 					dispatchEvent(new Event(AndroidProcess.USBACTIONRESPONSE));
