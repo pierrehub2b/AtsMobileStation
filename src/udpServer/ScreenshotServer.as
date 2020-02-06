@@ -1,42 +1,27 @@
 package udpServer
 {
-	import com.greensock.easing.Strong;
-	import com.sociodox.utils.Base64;
-	
 	import device.running.AndroidDevice;
 	import device.running.AndroidProcess;
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Loader;
-	import flash.display.LoaderInfo;
-	import flash.display.Sprite;
 	import flash.display.StageQuality;
 	import flash.events.DatagramSocketDataEvent;
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
-	import flash.events.MouseEvent;
-	import flash.events.TimerEvent;
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	import flash.geom.Rectangle;
 	import flash.net.DatagramSocket;
 	import flash.text.TextField;
-	import flash.text.TextFieldAutoSize;
-	import flash.text.TextFieldType;
 	import flash.utils.ByteArray;
-	import flash.utils.Timer;
-	
-	import mx.utils.Base64Decoder;
-	import mx.utils.Base64Encoder;
-	
-	import tools.StringHelper;
 	
 	import usb.AndroidUsbActions;
 	import usb.UsbAction;
 	
-	public class ScreenshotServer extends Sprite
+	public class ScreenshotServer
 	{
 		public var _datagramSocket:DatagramSocket = new DatagramSocket();;
 		
@@ -126,7 +111,7 @@ package udpServer
 				sendData(data, currentPos, dataLength, packetSize);
 			}
 			
-			_datagramSocket.
+			//_datagramSocket.
 		}
 		
 		public function sendBackData(ev:Event):void
