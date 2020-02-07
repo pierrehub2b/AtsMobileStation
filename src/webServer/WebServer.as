@@ -20,7 +20,6 @@ package webServer
 	import flash.utils.clearInterval;
 	import flash.utils.setInterval;
 	
-	import usb.AndroidUsbActions;
 	import usb.UsbAction;
 	
 	import webServer.mimetype.MimeType;
@@ -45,6 +44,7 @@ package webServer
 		private var currentDevice:AndroidDevice;
 		private var errorCallback:Function = null;
 		private var socket:Socket;
+				
 		/**
 		 * This is a simple WebServer implementation in AS3. It can only however stream videos properly to
 		 * Safari browsers (desktop and mobile) 
@@ -135,21 +135,20 @@ package webServer
 					var splittedHeader:Array = headerSplit[0].split(" ");
 					var url:String = splittedHeader[1].substring(1, splittedHeader[1].length);
 					
-					currentDevice.androidUsb.addEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded, false, 0, true);
-					currentDevice.androidUsb.addEventListener(AndroidProcess.USBACTIONERROR, usbActionErrorEnded, false, 0, true);
-					currentDevice.androidUsb.addEventListener(AndroidProcess.USBSTARTRESPONSE, usbStartResponseEnded, false, 0, true);
-					currentDevice.androidUsb.addEventListener(AndroidProcess.USBSTARTENDEDRESPONSE, usbStartEndedResponseEnded, false, 0, true);
+					currentDevice.androidUsbAction.addEventListener(AndroidProcess.USBACTIONERROR, usbActionErrorEnded, false, 0, true);
+					currentDevice.androidUsbAction.addEventListener(AndroidProcess.USBSTARTRESPONSE, usbStartResponseEnded, false, 0, true);
+					currentDevice.androidUsbAction.addEventListener(AndroidProcess.USBSTARTENDEDRESPONSE, usbStartEndedResponseEnded, false, 0, true);
 					var requestData:Array = header.split("\n");
 					var data:Array = new Array();
 					data.push("dumpsys", "activity", AndroidProcess.ANDROIDDRIVER);
 					data.push(url);
 					if(url == "screenshot") {
 						data.push("hires");
-						currentDevice.androidUsb.addEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionScreenshotResponseEnded, false, 0, true);
+						currentDevice.androidUsbAction.addEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionScreenshotResponseEnded, false, 0, true);
 						currentDevice.actionsPush(new UsbAction(data));
 						onActionQueueChanged();
 					} else {
-						currentDevice.androidUsb.addEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded, false, 0, true);
+						currentDevice.androidUsbAction.addEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded, false, 0, true);
 						var isData:Boolean = false;
 						for(var j:int=0;j<requestData.length;j++){
 							if(isData) {
@@ -175,7 +174,7 @@ package webServer
 						
 						if((url == "driver" || url == "app") && data[4] == "stop") {
 							var stopData:Array = new Array();
-							stopData.push("am", "force", "stop", AndroidProcess.ANDROIDDRIVER);
+							stopData.push("am", "force-stop", AndroidProcess.ANDROIDDRIVER);
 							currentDevice.actionsPush(new UsbAction(stopData));
 							currentDevice.stopScreenshotServer();
 						}
@@ -197,8 +196,8 @@ package webServer
 		}
 		
 		private function usbStartResponseEnded(ev:Event):void {
-			var ActivityName:String = currentDevice.androidUsb.getResponse();
-			currentDevice.androidUsb.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbStartResponseEnded);
+			var ActivityName:String = currentDevice.androidUsbAction.getResponse();
+			currentDevice.androidUsbAction.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbStartResponseEnded);
 			var startData:Array = new Array();
 			startData.push("am", "start", "-W", "-S","--activity-brought-to-front", 
 				"--activity-multiple-task", "--activity-no-animation", "--activity-no-history", "-n", ActivityName);
@@ -207,32 +206,32 @@ package webServer
 		}
 		
 		private function usbActionResponseEnded(ev:Event):void {
-			if(currentDevice.androidUsb.getResponse() != "") {
-				get(socket, currentDevice.androidUsb.getResponse(), "text/html");
+			if(currentDevice.androidUsbAction.getResponse() != "") {
+				get(socket, currentDevice.androidUsbAction.getResponse(), "text/html");
 			}
-			currentDevice.androidUsb.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded);
+			currentDevice.androidUsbAction.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded);
 		}
 		
 		private function usbActionScreenshotResponseEnded(ev:Event):void {
-			if(currentDevice.androidUsb.getResponse() != "") {
-				get(socket, currentDevice.androidUsb.getResponse(), "application/octet-stream", new Array());
+			if(currentDevice.androidUsbAction.getResponse() != "") {
+				get(socket, currentDevice.androidUsbAction.getResponse(), "application/octet-stream", new Array());
 			}
-			currentDevice.androidUsb.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionScreenshotResponseEnded);
+			currentDevice.androidUsbAction.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionScreenshotResponseEnded);
 		}
 		
 		private function usbActionErrorEnded(ev:Event):void {
-			currentDevice.androidUsb.removeEventListener(AndroidProcess.USBACTIONERROR, usbActionErrorEnded);
+			currentDevice.androidUsbAction.removeEventListener(AndroidProcess.USBACTIONERROR, usbActionErrorEnded);
 			currentDevice.dispatchEvent(new Event(Device.STOPPED_EVENT));
 		}
 		
 		private function usbStartEndedResponseEnded(ev:Event):void {
-			currentDevice.androidUsb.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbStartEndedResponseEnded);
+			currentDevice.androidUsbAction.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbStartEndedResponseEnded);
 			onActionQueueChanged();
 		}
 		
 		private function onActionQueueChanged():void {
 			var usbAction:UsbAction = currentDevice.actionsShift();
-			currentDevice.androidUsb.start(usbAction);
+			currentDevice.androidUsbAction.requestAction(usbAction);
 		}
 		
 		private function get(socket:Socket, data:String, fileExtension:String, range:Array=null):void

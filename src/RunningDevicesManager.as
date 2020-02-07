@@ -34,6 +34,7 @@ package
 		private const adbArgs:Vector.<String> = new <String>["devices"];
 						
 		public static const adbPath:String = "assets/tools/android/adb";
+		public static const endOfMessage:String = "<$ATSDROID_endOfMessage$>";
 		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
 		private const newlineTabPattern:RegExp = /[\n\t]/g;

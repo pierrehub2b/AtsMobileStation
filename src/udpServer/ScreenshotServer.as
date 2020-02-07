@@ -2,7 +2,7 @@ package udpServer
 {
 	import device.running.AndroidDevice;
 	import device.running.AndroidProcess;
-	
+	import mx.utils.Base64Decoder;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Loader;
@@ -18,7 +18,6 @@ package udpServer
 	import flash.text.TextField;
 	import flash.utils.ByteArray;
 	
-	import usb.AndroidUsbActions;
 	import usb.UsbAction;
 	
 	public class ScreenshotServer
@@ -28,12 +27,12 @@ package udpServer
 		private var _sourceIp:String;
 		private var _sourcePort:String;
 		private var _message:TextField;
-		private var androidUsb:AndroidUsbActions;
 		private var currentDevice:AndroidDevice;
-		private static const PACKET_SIZE:int = 1472;
+		private static const PACKET_SIZE:int = 1024;
 		private var baImage:ByteArray = new ByteArray();
 		private var usrDir:File = File.userDirectory;
 		private var _load:Loader = new Loader();
+		private var decode:Base64Decoder = new Base64Decoder();
 		
 		public function ScreenshotServer(){
 			_datagramSocket = new DatagramSocket();
@@ -57,12 +56,11 @@ package udpServer
 		{
 			var data:Array = new Array();
 			data.push("dumpsys", "activity", AndroidProcess.ANDROIDDRIVER, "screenshot", "hires");
-			//data.push("screencap", "-p", "|", "sed", "'s/\r$//'",">","screenshot.png");
-			currentDevice.androidUsb.addEventListener(AndroidProcess.SCREENSHOTRESPONSE, sendBackData, false, 0, true);
-			
+			currentDevice.androidUsbScreenshot.addEventListener(AndroidProcess.SCREENSHOTRESPONSE, sendBackData, false, 0, true);
+						
 			currentDevice.actionsInsertAt(0, new UsbAction(data));
 			var usbAction:UsbAction = currentDevice.actionsShift();
-			currentDevice.androidUsb.start(usbAction);
+			currentDevice.androidUsbScreenshot.requestScreenshot(usbAction);
 		}
 		
 		private function errorSocket(event:IOErrorEvent):void
@@ -70,7 +68,7 @@ package udpServer
 			var error:String = event.text;
 		}
 		
-		public function getImage(ev:Event):void {
+		/*public function getImage(ev:Event):void {
 			var file:File = File.userDirectory.resolvePath("screenCapture.png");
 			var outFile:File = File.userDirectory;
 			outFile = outFile.resolvePath(file.url);
@@ -85,7 +83,7 @@ package udpServer
 			
 			_load.contentLoaderInfo.addEventListener( Event.COMPLETE, loadbytesComplete);
 			_load.loadBytes(bytes);
-		}
+		}*/
 		
 		private function loadbytesComplete( event:Event ):void {
 			var bit:Bitmap = _load.content as Bitmap;
@@ -110,14 +108,31 @@ package udpServer
 				}
 				sendData(data, currentPos, dataLength, packetSize);
 			}
-			
-			//_datagramSocket.
 		}
 		
 		public function sendBackData(ev:Event):void
 		{
-			currentDevice.androidUsb.removeEventListener(AndroidProcess.SCREENSHOTRESPONSE, sendBackData);
-			if(currentDevice.androidUsb.getResponse().toLocaleLowerCase().indexOf("error") == -1) {
+			currentDevice.androidUsbScreenshot.removeEventListener(AndroidProcess.SCREENSHOTRESPONSE, sendBackData);
+			decode.decode(currentDevice.androidUsbScreenshot.getResponse());
+			var ba:ByteArray = decode.toByteArray();
+			
+			var dataLength:int = ba.length;
+			
+			var packetSize:int = PACKET_SIZE;
+			var currentPos:int = 0;
+			
+			sendData(ba, 0, ba.length, PACKET_SIZE);
+			
+			while (dataLength > 0) {
+				currentPos += packetSize;
+				dataLength -= packetSize;
+				if (dataLength < packetSize) {
+					packetSize = dataLength;
+				}
+				sendData(ba, currentPos, dataLength, packetSize);
+			}
+			
+			/*if(currentDevice.androidUsb.getResponse().toLocaleLowerCase().indexOf("error") == -1) {
 				var data:Array = new Array();
 				data.push("pull", currentDevice.androidUsb.getResponse(), "screenCapture.png");
 				currentDevice.androidUsb.addEventListener(AndroidProcess.SCREENSHOTRESPONSE, getImage, false, 0, true);
@@ -126,7 +141,7 @@ package udpServer
 				var usbAction:UsbAction = currentDevice.actionsShift();
 				currentDevice.androidUsb.start(usbAction, false);
 			}
-			/*var ba:ByteArray = new ByteArray();
+			var ba:ByteArray = new ByteArray();
 			ba.writeUTF(currentDevice.androidUsb.getResponse());
 			var rect:Rectangle = new Rectangle(0,0,parseInt(currentDevice.androidUsb.getWidth()),parseInt(currentDevice.androidUsb.getHeight()));
 			var newBmd:BitmapData = new BitmapData(rect.width,rect.height,true,0xFFFFFFFF);

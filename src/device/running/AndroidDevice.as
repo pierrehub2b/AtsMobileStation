@@ -13,8 +13,9 @@ package device.running
 	
 	import udpServer.ScreenshotServer;
 	
-	import usb.AndroidUsbActions;
 	import usb.UsbAction;
+	import usb.UsbActionProcess;
+	import usb.UsbScreenshotProcess;
 	
 	import webServer.WebServer;
 	
@@ -31,12 +32,12 @@ package device.running
 		private var currentAdbFile:File;
 		
 		private var actionQueue:Vector.<UsbAction> = new Vector.<UsbAction>();
-		public var androidUsb:AndroidUsbActions;
+		public var androidUsbAction:UsbActionProcess;
+		public var androidUsbScreenshot:UsbScreenshotProcess;
 		public static const UDPSERVER:Boolean = false;
 				
 		public function AndroidDevice(adbFile:File, port:String, id:String)
 		{
-			
 			this.id = id;
 			this.status = INSTALL;
 			this.currentAdbFile = adbFile;
@@ -63,12 +64,12 @@ package device.running
 				fileStream.close();
 			}
 			errorMessage = "";
-			webServActions = new WebServer(this);
-			udpServScreenshot = new ScreenshotServer();
-			
 			if(usbMode) {
-				this.androidUsb = new AndroidUsbActions(this);
+				webServActions = new WebServer(this);
+				udpServScreenshot = new ScreenshotServer();
 				this.port = webServActions.initServerSocket(parseInt(this.port), portAutomatic, httpServerError);
+				this.androidUsbAction = new UsbActionProcess(this.id);
+				this.androidUsbScreenshot = new UsbScreenshotProcess(this.id);
 			}
 			
 			process = new AndroidProcess(adbFile, atsdroidFilePath, id, this.port, usbMode);
@@ -82,8 +83,10 @@ package device.running
 		}
 		
 		public function httpServerError(error:String):void {
-			this.webServActions = null;
 			errorMessage = error;
+			if(androidUsbAction != null) {
+				androidUsbAction.closeProcess();
+			}
 		}
 		
 		public function get getCurrentAdbFile():File {
@@ -114,10 +117,6 @@ package device.running
 			status = FAIL
 		}
 		
-		private function onActionQueueChanged(ev:Event):void {
-			process.start();
-		}
-		
 		public function get getProcess():AndroidProcess
 		{
 			return this.process;
@@ -128,7 +127,7 @@ package device.running
 		}
 		
 		public function startScreenshotServer():int {
-			this.udpServScreenshot.bind(ip, this);
+			udpServScreenshot.bind(ip, this);
 			return this.udpServScreenshot._datagramSocket.localPort;
 		}
 		
