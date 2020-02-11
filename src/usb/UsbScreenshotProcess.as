@@ -29,18 +29,14 @@ package usb
 			procInfo.workingDirectory = File.userDirectory;
 			
 			procInfo.arguments = new <String>["-s", id, "shell"];
-			
-			process.addEventListener(NativeProcessExitEvent.EXIT, onUsbScreenshotProcessExit, false, 0, true);
 			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onUsbScreenshotProcessOutput, false, 0, true);
 			
 			process.start(procInfo);
 		}
 		
 		protected function onUsbScreenshotProcessOutput(event:ProgressEvent):void{
-			output = output.concat(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
-			if(output.substring(0,6) == "shell@" && endOfShell == "") {
-				endOfShell = output;
-			}
+			output = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
+			dataTraitment();
 		}
 		
 		protected function onUsbScreenshotProcessExit(ev:NativeProcessExitEvent):void {
@@ -49,32 +45,29 @@ package usb
 		
 		public function requestScreenshot(act:UsbAction): void {
 			var input:String = "";
+			output = "";
 			for(var i:int = 0;i<act.getArgs.length;i++) {
 				input += act.getArgs[i] + " ";
 			}
-			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, dataTraitment, false, 0, true);
-			output = "";
-			process.standardInput.writeUTFBytes(input + "\r\n");
+			process.standardInput.writeUTFBytes(input + "\n");
 		}
 		
-		public function closeProcess():void {
-			process.closeInput();
+		public function stopProcess():void {
+			process.exit(true);
 		}
 		
-		protected function dataTraitment(ev:ProgressEvent):void {
+		protected function dataTraitment():void {
 			response = "";
-			if(output.indexOf(endOfShell) > -1) {
-				output = output.replace(endOfShell, "");
-				var outputSplitted:Array = output.split("\r\n");
+			if(output.indexOf(RunningDevicesManager.responseSplitter) > -1) {
+				var outputSplitted:Array = output.split(RunningDevicesManager.responseSplitter);
 				output = "";
-				for(var j:int = 2;j<outputSplitted.length;j++) {
-					response += outputSplitted[j];
-					if(j != outputSplitted.length-1 && this.procInfo.arguments[6] != "screenshot") {
-						response += "\r\n";
-					}
+				
+				if(outputSplitted.length > 0) {
+					response = outputSplitted[1];
 				}
 				dispatchEvent(new Event(AndroidProcess.SCREENSHOTRESPONSE));
 			}
+			output = "";
 		}
 		
 		public function getResponse():String {

@@ -53,21 +53,25 @@ package webServer
 		{
 			this.currentDevice = device
 			this.mimeType=new MimeType(["html", "htm", "png", "jpg", "jpeg", "png", "gif", "mp4"]);
-			
-			server=new ServerSocket();
-			server.addEventListener(ServerSocketConnectEvent.CONNECT, onConnect);
 		}
 		
 		public function initServerSocket(port:int, automaticPort:Boolean, errorCallback:Function):String {
 			try {
+				server=new ServerSocket();
+				server.addEventListener(ServerSocketConnectEvent.CONNECT, onConnect);
+				
 				server.bind(port);
 				server.listen();
+
 				return port.toString();
 			} catch (error:Error) {
 				if(automaticPort) {
 					return initServerSocket(port+1,automaticPort,errorCallback);
 				} else {
 					errorCallback("Port "+ port +" is in use. Retrying...");
+					if(server.bound) {
+						server.close();
+					}
 				}
 			}
 			return port.toString();
@@ -90,7 +94,10 @@ package webServer
 		 */		
 		public function close():void
 		{
-			server.close();
+			if(server.localPort != 0) {
+				server.close();
+			}
+			
 		}
 		
 		private function onConnect(ev:ServerSocketConnectEvent):void
@@ -103,7 +110,6 @@ package webServer
 		
 		private function onSocketSendData(ev:ProgressEvent):void
 		{
-			if(currentDevice.status != Device.READY) { return; }
 			socket=Socket(ev.target);
 			var headerData:ByteArray=new ByteArray();
 			socket.readBytes(headerData);
@@ -135,9 +141,6 @@ package webServer
 					var splittedHeader:Array = headerSplit[0].split(" ");
 					var url:String = splittedHeader[1].substring(1, splittedHeader[1].length);
 					
-					currentDevice.androidUsbAction.addEventListener(AndroidProcess.USBACTIONERROR, usbActionErrorEnded, false, 0, true);
-					currentDevice.androidUsbAction.addEventListener(AndroidProcess.USBSTARTRESPONSE, usbStartResponseEnded, false, 0, true);
-					currentDevice.androidUsbAction.addEventListener(AndroidProcess.USBSTARTENDEDRESPONSE, usbStartEndedResponseEnded, false, 0, true);
 					var requestData:Array = header.split("\n");
 					var data:Array = new Array();
 					data.push("dumpsys", "activity", AndroidProcess.ANDROIDDRIVER);
@@ -145,8 +148,6 @@ package webServer
 					if(url == "screenshot") {
 						data.push("hires");
 						currentDevice.androidUsbAction.addEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionScreenshotResponseEnded, false, 0, true);
-						currentDevice.actionsPush(new UsbAction(data));
-						onActionQueueChanged();
 					} else {
 						currentDevice.androidUsbAction.addEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded, false, 0, true);
 						var isData:Boolean = false;
@@ -161,6 +162,7 @@ package webServer
 						
 						if(url == "driver" && data[4] == "start") {
 							if(currentDevice.usbMode) {
+								currentDevice.androidUsbAction.addEventListener(AndroidProcess.USBSTARTRESPONSE, usbStartResponseEnded, false, 0, true);
 								data.push(AndroidDevice.UDPSERVER.toString().toLocaleLowerCase());
 								AndroidDevice.UDPSERVER ? data.push(currentDevice.udpIpAdresse) : data.push(currentDevice.ip, currentDevice.startScreenshotServer().toString());
 							}
@@ -178,10 +180,11 @@ package webServer
 							currentDevice.actionsPush(new UsbAction(stopData));
 							currentDevice.stopScreenshotServer();
 						}
-						
-						currentDevice.actionsPush(new UsbAction(data));
-						onActionQueueChanged();
 					}
+					
+					currentDevice.actionsPush(new UsbAction(data));
+					onActionQueueChanged();
+					
 					break;
 				default:
 					trace("OH NO DEFINE |"+requestType+"|");
@@ -196,18 +199,20 @@ package webServer
 		}
 		
 		private function usbStartResponseEnded(ev:Event):void {
+			currentDevice.androidUsbAction.removeEventListener(AndroidProcess.USBSTARTRESPONSE, usbStartResponseEnded);
+			currentDevice.androidUsbAction.addEventListener(AndroidProcess.USBSTARTENDEDRESPONSE, usbStartEndedResponseEnded, false, 0, true);
+			
 			var ActivityName:String = currentDevice.androidUsbAction.getResponse();
-			currentDevice.androidUsbAction.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbStartResponseEnded);
 			var startData:Array = new Array();
 			startData.push("am", "start", "-W", "-S","--activity-brought-to-front", 
 				"--activity-multiple-task", "--activity-no-animation", "--activity-no-history", "-n", ActivityName);
 			currentDevice.actionsInsertAt(0, new UsbAction(startData));
-			onActionQueueChanged();
+			onActionQueueChanged(true);
 		}
 		
 		private function usbActionResponseEnded(ev:Event):void {
 			if(currentDevice.androidUsbAction.getResponse() != "") {
-				get(socket, currentDevice.androidUsbAction.getResponse(), "text/html");
+				get(socket, currentDevice.androidUsbAction.getResponse(), "application/json");
 			}
 			currentDevice.androidUsbAction.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionResponseEnded);
 		}
@@ -219,19 +224,14 @@ package webServer
 			currentDevice.androidUsbAction.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionScreenshotResponseEnded);
 		}
 		
-		private function usbActionErrorEnded(ev:Event):void {
-			currentDevice.androidUsbAction.removeEventListener(AndroidProcess.USBACTIONERROR, usbActionErrorEnded);
-			currentDevice.dispatchEvent(new Event(Device.STOPPED_EVENT));
-		}
-		
 		private function usbStartEndedResponseEnded(ev:Event):void {
 			currentDevice.androidUsbAction.removeEventListener(AndroidProcess.USBACTIONRESPONSE, usbStartEndedResponseEnded);
 			onActionQueueChanged();
 		}
 		
-		private function onActionQueueChanged():void {
+		private function onActionQueueChanged(startCommand:Boolean = false):void {
 			var usbAction:UsbAction = currentDevice.actionsShift();
-			currentDevice.androidUsbAction.requestAction(usbAction);
+			currentDevice.androidUsbAction.requestAction(usbAction, startCommand);
 		}
 		
 		private function get(socket:Socket, data:String, fileExtension:String, range:Array=null):void
@@ -240,27 +240,22 @@ package webServer
 			returnData=new ByteArray();
 			returnData.writeUTFBytes(data);
 			
-			if(fileExtension == "text/html") {	
-				returnHeader="HTTP/1.1 200 Response\n";
-				returnHeader+="Content-Type: "+fileExtension+"\n\n";
-				returnHeader+=data;
-				socket.writeUTFBytes(returnHeader);
-				socket.flush();
-				socket.close();
-			} else {
-				returnHeader="HTTP/1.1 200\r\n";
-				returnHeader+="Date:"+new Date()+"\r\n";
-				returnHeader+="Content-Type: "+fileExtension+"\r\n";
-				returnHeader+="Content-Length: "+returnData.length+"\r\n\r\n";
-				
-				var headerBytes:ByteArray =new ByteArray();
-				headerBytes.writeUTFBytes(returnHeader);
-				
-				socket.writeBytes(headerBytes);
-				socket.writeBytes(returnData);
-				socket.flush();
-				socket.close();
-			}
+			returnHeader="HTTP/1.1 200 OK\r\n";
+			returnHeader+="Server: AtsDroid Driver\r\n";
+			returnHeader+="Date:"+new Date()+"\r\n";
+			returnHeader+="Content-Type: "+fileExtension+"\r\n";
+			returnHeader+="Content-Length: "+returnData.length+"\r\n\r\n";
+			
+			/*var returnHeaderBytes:ByteArray = new ByteArray();
+			returnHeaderBytes.writeUTFBytes(returnHeader);
+			
+			socket.writeBytes(returnHeaderBytes,0,returnHeaderBytes.length);
+			socket.writeBytes(returnData,0,returnData.length);*/
+			socket.writeUTF(returnHeader);
+			socket.writeUTF(data);
+			socket.flush();
+			socket.close();
+			
 		}
 	}
 }

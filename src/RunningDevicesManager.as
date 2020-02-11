@@ -38,6 +38,7 @@ package
 		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
 		private const jsonPattern:RegExp = /\{[^]*\}/;
 		private const newlineTabPattern:RegExp = /[\n\t]/g;
+		public static const responseSplitter:String = "<$atsDroid_ResponseSPLIITER$>";
 				
 		private var adbFile:File;
 		

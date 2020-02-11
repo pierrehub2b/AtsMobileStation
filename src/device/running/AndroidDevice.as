@@ -34,7 +34,7 @@ package device.running
 		private var actionQueue:Vector.<UsbAction> = new Vector.<UsbAction>();
 		public var androidUsbAction:UsbActionProcess;
 		public var androidUsbScreenshot:UsbScreenshotProcess;
-		public static const UDPSERVER:Boolean = false;
+		public static const UDPSERVER:Boolean = true;
 				
 		public function AndroidDevice(adbFile:File, port:String, id:String)
 		{
@@ -67,9 +67,12 @@ package device.running
 			if(usbMode) {
 				webServActions = new WebServer(this);
 				udpServScreenshot = new ScreenshotServer();
-				this.port = webServActions.initServerSocket(parseInt(this.port), portAutomatic, httpServerError);
 				this.androidUsbAction = new UsbActionProcess(this.id);
 				this.androidUsbScreenshot = new UsbScreenshotProcess(this.id);
+				
+				
+				this.port = webServActions.initServerSocket(parseInt(this.port), portAutomatic, httpServerError);
+				
 			}
 			
 			process = new AndroidProcess(adbFile, atsdroidFilePath, id, this.port, usbMode);
@@ -84,9 +87,9 @@ package device.running
 		
 		public function httpServerError(error:String):void {
 			errorMessage = error;
-			if(androidUsbAction != null) {
-				androidUsbAction.closeProcess();
-			}
+			webServActions = null;
+			androidUsbAction.stopProcess();
+			androidUsbScreenshot.stopProcess();
 		}
 		
 		public function get getCurrentAdbFile():File {
@@ -133,7 +136,7 @@ package device.running
 		
 		private function runningTestHandler(ev:Event):void{
 			process.removeEventListener(AndroidProcess.RUNNING, runningTestHandler);
-			if(this.usbMode && this.webServActions == null) {
+			if(usbMode && errorMessage != "") {
 				status = FAIL;
 				tooltip = "ths usb WebServer is not running";
 				failed();
