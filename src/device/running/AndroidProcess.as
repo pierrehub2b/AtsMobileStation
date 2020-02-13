@@ -98,16 +98,22 @@ package device.running
 			if(error != null){
 				dispatchEvent(new Event(ERROR_EVENT));
 			}else{
-				//get device ip @
-				var ipRouteDataUdp:Array = output.split(/\s+/g);
-				var idxUdp:int = ipRouteDataUdp.indexOf("dev");
-				if(idxUdp > -1 && ipRouteDataUdp[idxUdp+1] == "wlan0"){
-					idxUdp = ipRouteDataUdp.indexOf("src");
-					if(idxUdp > -1){
-						this.deviceIp = ipRouteDataUdp[idxUdp+1];
-						this.ipAddress = ipRouteDataUdp[idxUdp+1];
+				var ipFounded:Boolean = false;
+				var ipRouteDataUdp:Array = output.split("\r\r\n");
+				for(var i:int=0;i<ipRouteDataUdp.length;i++) {
+					if(ipRouteDataUdp[i].indexOf("dev") > -1 && ipRouteDataUdp[i].indexOf("wlan0") > -1) {
+						var splittedString:Array = ipRouteDataUdp[i].split(/\s+/g);
+						var idxUdp:int = splittedString.indexOf("src");
+						if(idxUdp > -1){
+							this.deviceIp = splittedString[idxUdp+1];
+							this.ipAddress = splittedString[idxUdp+1];
+							ipFounded = true;
+							continue;
+						}
 					}
-				} else if(!usbMode) {
+				}
+				
+				if(!ipFounded && !usbMode) {
 					error = " - WIFI not connected !";
 					dispatchEvent(new Event(ERROR_EVENT));
 					return;
