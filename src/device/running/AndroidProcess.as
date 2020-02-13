@@ -1,5 +1,7 @@
 package device.running
 {
+	import device.Device;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -7,8 +9,6 @@ package device.running
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
-	
-	import device.Device;
 	
 	public class AndroidProcess extends EventDispatcher
 	{
@@ -155,7 +155,7 @@ package device.running
 			processIp.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataWin);
 			var pattern:RegExp = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/;
 			var output:String = processIp.standardOutput.readUTFBytes(processIp.standardOutput.bytesAvailable);
-			 var arrayAddresses:Array = output.match(pattern);
+			var arrayAddresses:Array = output.match(pattern);
 			if(arrayAddresses != null && arrayAddresses.length > 0) {
 				this.ipAddress = arrayAddresses[0];
 				dispatchEvent(new Event(IP_ADDRESS));
@@ -237,12 +237,15 @@ package device.running
 				dispatchEvent(new Event(DEVICE_INFO));
 				
 				process = new NativeProcess();
+				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData, false, 0, true);
 				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError, false, 0, true);
 				process.addEventListener(NativeProcessExitEvent.EXIT, onExecuteExit, false, 0, true);
-				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData, false, 0, true);
-			
-				procInfo.arguments = new <String>["-s", id, "shell", "am", "instrument", "-w", "-r", "-e", "ipAddress", ipAddress, "-e", "atsPort", port, "-e", "usbMode", usbMode.toString(), "-e", "debug", "false", "-e", "class", ANDROIDDRIVER + ".AtsRunner", ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner"];
+				
+				procInfo.arguments = new <String>["-s", id, "shell"];
 				process.start(procInfo);
+				
+				process.standardInput.writeUTFBytes("am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode.toString() + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunner " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n");
+				
 			} else {
 				process.exit(true);
 				process = null;
@@ -262,11 +265,32 @@ package device.running
 		
 		protected function onExecuteError(event:ProgressEvent):void
 		{
-			error = new String(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
+			var data:String = process.standardError.readUTFBytes(process.standardError.bytesAvailable);
+			trace("err -> " + data);
+			error = data;
 		}
 		
 		protected function onExecuteData(event:ProgressEvent):void{
-			dispatchEvent(new Event(RUNNING));
+			var data:String = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
+			
+			if(data.indexOf("Process crashed") > -1){
+				process.standardInput.writeUTFBytes("am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode.toString() + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunner " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner\r\n");
+			}else{
+				
+				if(data.indexOf("ATS_DRIVER_RUNNING") > -1){
+					dispatchEvent(new Event(RUNNING));
+				}else if(data.indexOf("ATS_DRIVER_START") > -1){
+					trace("driver start -> " + data);
+				}else if(data.indexOf("ATS_DRIVER_STOP") > -1){
+					trace("driver stop");
+				}
+			}
+			
+
+		}
+		
+		public function screenshot():void{
+			process.standardInput.writeUTFBytes("screenshot\r\n");
 		}
 		
 		protected function onExecuteExit(event:NativeProcessExitEvent):void{
