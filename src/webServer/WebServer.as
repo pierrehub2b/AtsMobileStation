@@ -4,6 +4,8 @@ package webServer
 	import device.running.AndroidDevice;
 	import device.running.AndroidProcess;
 	
+	import events.AndroidUsbChannelEvent;
+	
 	import flash.events.Event;
 	import flash.events.OutputProgressEvent;
 	import flash.events.ProgressEvent;
@@ -35,9 +37,8 @@ package webServer
 	{	
 		private static const MAX_PACKET:int=1048576;
 		private var server:ServerSocket;
-		private var mimeType:MimeType;
 		
-		private var returnData:ByteArray;
+		//private var returnData:ByteArray;
 		private var returnPos:int;
 		
 		private var rex:RegExp = /[\s\r\n]+/gim;
@@ -51,8 +52,8 @@ package webServer
 		 */		
 		public function WebServer(device:AndroidDevice)
 		{
-			this.currentDevice = device
-			this.mimeType=new MimeType(["html", "htm", "png", "jpg", "jpeg", "png", "gif", "mp4"]);
+			currentDevice = device
+			currentDevice.addEventListener(AndroidUsbChannelEvent.BAD_COMMAND_ERROR, usbActionResponseError, false, 0, true);
 		}
 		
 		public function initServerSocket(port:int, automaticPort:Boolean, errorCallback:Function):String {
@@ -76,18 +77,7 @@ package webServer
 			}
 			return port.toString();
 		}
-		
-		/**
-		 * You can setup which mimetypes the server will support.
-		 *  
-		 * @param mimeTypes This is contain which mimetypes this server will support
-		 * 
-		 */		
-		public function setMimeTypes(mimeTypes:MimeType):void
-		{
-			this.mimeType=mimeTypes;
-		}
-		
+				
 		/**
 		 * This function will close and kill the web server. 
 		 * 
@@ -145,6 +135,7 @@ package webServer
 					var data:Array = new Array();
 					data.push("dumpsys", "activity", AndroidProcess.ANDROIDDRIVER);
 					data.push(url);
+					
 					if(url == "screenshot") {
 						data.push("hires");
 						currentDevice.androidUsbAction.addEventListener(AndroidProcess.USBACTIONRESPONSE, usbActionScreenshotResponseEnded, false, 0, true);
@@ -198,6 +189,10 @@ package webServer
 			server.close();
 		}
 		
+		private function usbActionResponseError(ev:AndroidUsbChannelEvent):void{
+			get(socket, ev.jsonData, "application/json");
+		}
+		
 		private function usbStartResponseEnded(ev:Event):void {
 			currentDevice.androidUsbAction.removeEventListener(AndroidProcess.USBSTARTRESPONSE, usbStartResponseEnded);
 			currentDevice.androidUsbAction.addEventListener(AndroidProcess.USBSTARTENDEDRESPONSE, usbStartEndedResponseEnded, false, 0, true);
@@ -237,22 +232,21 @@ package webServer
 		private function get(socket:Socket, data:String, fileExtension:String, range:Array=null):void
 		{		
 			var returnHeader:String;
-			returnData=new ByteArray();
+			var returnData:ByteArray=new ByteArray();
 			returnData.writeUTFBytes(data);
 			
 			returnHeader="HTTP/1.1 200 OK\r\n";
 			returnHeader+="Server: AtsDroid Driver\r\n";
 			returnHeader+="Date:"+new Date()+"\r\n";
-			returnHeader+="Content-Type: "+fileExtension+"\r\n";
-			returnHeader+="Content-Length: "+returnData.length+"\r\n\r\n";
+			returnHeader+="Content-Type: " + fileExtension + "\r\n";
+			returnHeader+="Content-Length: " + returnData.length + "\r\n\r\n";
 			
-			/*var returnHeaderBytes:ByteArray = new ByteArray();
+			var returnHeaderBytes:ByteArray = new ByteArray();
 			returnHeaderBytes.writeUTFBytes(returnHeader);
 			
 			socket.writeBytes(returnHeaderBytes,0,returnHeaderBytes.length);
-			socket.writeBytes(returnData,0,returnData.length);*/
-			socket.writeUTF(returnHeader);
-			socket.writeUTF(data);
+			socket.writeBytes(returnData,0,returnData.length);
+
 			socket.flush();
 			socket.close();
 			
