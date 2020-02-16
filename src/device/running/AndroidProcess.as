@@ -13,6 +13,7 @@ package device.running
 	public class AndroidProcess extends EventDispatcher
 	{
 		public static const ERROR_EVENT:String = "errorEvent";
+		public static const WIFI_ERROR_EVENT:String = "wifiErrorEvent";
 		public static const IP_ADDRESS:String = "ipAddress";
 		public static const SCREENSHOTRESPONSE:String = "screenshotResponse";
 		public static const USBACTIONRESPONSE:String = "usbResponse";
@@ -46,6 +47,8 @@ package device.running
 		private static var _wmicFile:File = null;
 		private var currentAdbFile:File;
 		
+		private var instrumentCommandLine:String;
+		
 		public function AndroidProcess(adbFile:File, atsdroid:String, id:String, port:String, usbMode:Boolean)
 		{
 			this.currentAdbFile = adbFile;
@@ -54,6 +57,8 @@ package device.running
 			this.atsdroidFilePath = atsdroid;
 			this.deviceInfo = new Device(id);
 			this.usbMode = usbMode;
+			
+			this.instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunner " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";
 			
 			process = new NativeProcess();
 			procInfo = new NativeProcessStartupInfo()
@@ -115,7 +120,7 @@ package device.running
 				
 				if(!ipFounded && !usbMode) {
 					error = " - WIFI not connected !";
-					dispatchEvent(new Event(ERROR_EVENT));
+					dispatchEvent(new Event(WIFI_ERROR_EVENT));
 					return;
 				}
 				
@@ -152,8 +157,6 @@ package device.running
 			procInfoIp.workingDirectory = file.parent;
 			procInfoIp.arguments = processArgs;
 			processIp.start(procInfoIp);
-			
-			
 		}
 		
 		public function onOutputDataWin(event:ProgressEvent):void
@@ -280,7 +283,7 @@ package device.running
 			var data:String = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
 			
 			if(data.indexOf("Process crashed") > -1){
-				process.standardInput.writeUTFBytes("am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode.toString() + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunner " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner\r\n");
+				process.standardInput.writeUTFBytes("am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode.toString() + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunner " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n");
 			}else{
 				
 				if(data.indexOf("ATS_DRIVER_RUNNING") > -1){

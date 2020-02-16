@@ -77,6 +77,7 @@ package device.running
 			
 			process = new AndroidProcess(adbFile, atsdroidFilePath, id, this.port, usbMode);
 			process.addEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler, false, 0, true);
+			process.addEventListener(AndroidProcess.WIFI_ERROR_EVENT, processWifiErrorHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.RUNNING, runningTestHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.STOPPED, stoppedTestHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.DEVICE_INFO, deviceInfoHandler, false, 0, true);
@@ -117,9 +118,25 @@ package device.running
 		
 		private function processErrorHandler(ev:Event):void{
 			process.removeEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler);
+			process.removeEventListener(AndroidProcess.WIFI_ERROR_EVENT, processWifiErrorHandler);
+			process.removeEventListener(AndroidProcess.RUNNING, runningTestHandler);
+			process.removeEventListener(AndroidProcess.STOPPED, stoppedTestHandler);
+			process.removeEventListener(AndroidProcess.DEVICE_INFO, deviceInfoHandler);
+			process.removeEventListener(AndroidProcess.IP_ADDRESS, ipAdressHandler);
 			status = FAIL
 		}
 		
+		
+		private function processWifiErrorHandler(ev:Event):void{
+			process.removeEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler);
+			process.removeEventListener(AndroidProcess.WIFI_ERROR_EVENT, processWifiErrorHandler);
+			process.removeEventListener(AndroidProcess.RUNNING, runningTestHandler);
+			process.removeEventListener(AndroidProcess.STOPPED, stoppedTestHandler);
+			process.removeEventListener(AndroidProcess.DEVICE_INFO, deviceInfoHandler);
+			process.removeEventListener(AndroidProcess.IP_ADDRESS, ipAdressHandler);
+			status = WIFI_ERROR
+		}
+				
 		public function get getProcess():AndroidProcess
 		{
 			return this.process;

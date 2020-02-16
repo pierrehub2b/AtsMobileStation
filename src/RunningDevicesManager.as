@@ -150,18 +150,15 @@ package
 					const runningId:String = info[0];
 					
 					runingIds.push(runningId);
-					
-					
-					
+										
 					if(info.length >= 2 && runningId.length > 0){
 						dev = findDevice(runningId);
 						
-						if(dev != null && dev.status == Device.FAIL) {
-							dev.close();
-						}
-						
-						if(dev == null){
-							
+						if(dev != null){
+							if(dev.status == Device.FAIL) {
+								dev.close();
+							}
+						}else{
 							dev = new AndroidDevice(adbFile, port, runningId);
 							dev.addEventListener(Device.STOPPED_EVENT, deviceStoppedHandler, false, 0, true);
 							dev.start();

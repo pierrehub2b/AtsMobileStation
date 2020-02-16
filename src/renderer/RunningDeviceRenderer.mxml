@@ -9,6 +9,10 @@
 		<![CDATA[
 			import com.greensock.TweenLite;
 			
+			import device.Device;
+			import device.RunningDevice;
+			import device.running.IosDevice;
+			
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.core.DragSource;
@@ -16,10 +20,6 @@
 			import mx.managers.PopUpManager;
 			
 			import spark.filters.DropShadowFilter;
-			
-			import device.Device;
-			import device.RunningDevice;
-			import device.running.IosDevice;
 			
 			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
@@ -95,14 +95,17 @@
 			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
 				<s:Label visible="{(data as RunningDevice).ip==null}" includeInLayout="{(data as RunningDevice).ip==null}" 
 						 text="Unable to get local ip !" fontStyle="italic" color="0x8a844a"/>
+								
 				<s:HGroup visible="{(data as RunningDevice).ip!=null}" includeInLayout="{(data as RunningDevice).ip!=null}" gap="0">
 					<s:Label text="{(data as RunningDevice).ip}" fontWeight="bold" color="0x113b55"/>
 					<s:Label text=":{(data as RunningDevice).port}" color="0x113b55"/>
 					<s:Label text=" {(data as RunningDevice).errorMessage}" fontSize="11" fontStyle="italic" color="#FF0000"/>
 				</s:HGroup>
 				
-				<s:Label text="{(data as RunningDevice).manufacturer}{(data as RunningDevice).simulator?' (Simulator)':''} - {(data as RunningDevice).modelName}" fontSize="11" fontStyle="italic" color="#758696"/>
-				
+				<s:Label visible="{(data as RunningDevice).status!=Device.WIFI_ERROR}" includeInLayout="{(data as RunningDevice).status!=Device.WIFI_ERROR}"
+					text="{(data as RunningDevice).manufacturer}{(data as RunningDevice).simulator?' (Simulator)':''} - {(data as RunningDevice).modelName}" fontSize="11" fontStyle="italic" color="#758696"/>
+				<s:Label visible="{(data as RunningDevice).status==Device.WIFI_ERROR}" includeInLayout="{(data as RunningDevice).status==Device.WIFI_ERROR}" 
+						 text="The device is not connected to local network" fontStyle="italic" color="0xbc0000" fontSize="11"/>
 			</s:VGroup>
 		</s:HGroup>
 		<s:HGroup right="7" verticalAlign="middle" verticalCenter="0">

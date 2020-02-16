@@ -11,6 +11,7 @@ package device
 		public static const START:String = "start";
 		public static const READY:String = "ready";
 		public static const FAIL:String = "fail";
+		public static const WIFI_ERROR:String = "wifiError";
 		
 		public var id:String = "";
 		public var manufacturer:String = "";
