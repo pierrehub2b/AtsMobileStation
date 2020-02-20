@@ -9,6 +9,8 @@ package device.running
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
+	import flash.filesystem.FileMode;
+	import flash.filesystem.FileStream;
 	
 	public class AndroidProcess extends EventDispatcher
 	{
@@ -120,6 +122,7 @@ package device.running
 				
 				if(!ipFounded && !usbMode) {
 					error = " - WIFI not connected !";
+					writeIntoLogFile("WIFI note connected");
 					dispatchEvent(new Event(WIFI_ERROR_EVENT));
 					return;
 				}
@@ -167,6 +170,7 @@ package device.running
 			var arrayAddresses:Array = output.match(pattern);
 			if(arrayAddresses != null && arrayAddresses.length > 0) {
 				this.ipAddress = arrayAddresses[0];
+				writeIntoLogFile("getting ip Addresse from MS " + this.ipAddress);
 				dispatchEvent(new Event(IP_ADDRESS));
 			}
 		}
@@ -262,6 +266,7 @@ package device.running
 				
 				if(error != null){
 					dispatchEvent(new Event(ERROR_EVENT));
+					AndroidProcess.writeIntoLogFile(error);
 				}else{
 					dispatchEvent(new Event(STOPPED));
 				}
@@ -276,12 +281,22 @@ package device.running
 		{
 			var data:String = process.standardError.readUTFBytes(process.standardError.bytesAvailable);
 			trace("err -> " + data);
+			writeIntoLogFile(data);
 			error = data;
+		}
+		
+		public static function writeIntoLogFile(data:String):void {
+			var file:File = File.userDirectory; 
+			file = file.resolvePath(".agilitest/log/atsDroid_error.txt"); 
+			var stream:FileStream = new FileStream();
+			stream.open(file, FileMode.APPEND);
+			stream.writeUTFBytes(data);
+			stream.close();
 		}
 		
 		protected function onExecuteData(event:ProgressEvent):void{
 			var data:String = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
-			
+			writeIntoLogFile(data);
 			if(data.indexOf("Process crashed") > -1){
 				process.standardInput.writeUTFBytes("am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode.toString() + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunner " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n");
 			}else{
