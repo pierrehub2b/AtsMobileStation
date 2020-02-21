@@ -73,8 +73,10 @@ package device.running
 				
 				this.port = webServActions.initServerSocket(parseInt(this.port), portAutomatic, httpServerError);
 				
+				AndroidProcess.writeIntoLogFile("USB MODE > set port: " + this.port);
+				
 			}
-			
+			AndroidProcess.writeIntoLogFile("USB MODE = " + usbMode + " > set port: " + this.port);
 			process = new AndroidProcess(adbFile, atsdroidFilePath, id, this.port, usbMode);
 			process.addEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.WIFI_ERROR_EVENT, processWifiErrorHandler, false, 0, true);
@@ -124,6 +126,7 @@ package device.running
 			process.removeEventListener(AndroidProcess.DEVICE_INFO, deviceInfoHandler);
 			process.removeEventListener(AndroidProcess.IP_ADDRESS, ipAdressHandler);
 			status = FAIL
+			AndroidProcess.writeIntoLogFile("Faillure on android process");
 		}
 		
 		
@@ -135,6 +138,7 @@ package device.running
 			process.removeEventListener(AndroidProcess.DEVICE_INFO, deviceInfoHandler);
 			process.removeEventListener(AndroidProcess.IP_ADDRESS, ipAdressHandler);
 			status = WIFI_ERROR
+			AndroidProcess.writeIntoLogFile("WIFI_ERROR on device " + this.id);
 		}
 				
 		public function get getProcess():AndroidProcess
