@@ -307,6 +307,8 @@ package device.running
 					trace("driver start -> " + data);
 				}else if(data.indexOf("ATS_DRIVER_STOP") > -1){
 					trace("driver stop");
+				} else if(data.indexOf("ATS_WIFI_STOP") > -1) {
+					dispatchEvent(new Event(WIFI_ERROR_EVENT));
 				}
 			}
 			
