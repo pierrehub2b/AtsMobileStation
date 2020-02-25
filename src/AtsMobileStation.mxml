@@ -45,7 +45,10 @@
 			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
-				logsFolder.deleteDirectory(true);
+				try{
+					logsFolder.deleteDirectory(true);
+				}catch(err:IOError){}
+
 				cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
 				simulators = new AvailableSimulatorsManager();
 				devices = new RunningDevicesManager(port, isMacOs);
