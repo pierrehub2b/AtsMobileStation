@@ -9,19 +9,20 @@
 	<fx:Script>
 		<![CDATA[
 			import com.greensock.TweenMax;
-			import flash.filters.BitmapFilterQuality;
-			
-			import mx.events.FlexEvent;
-			import mx.managers.PopUpManager;
-			
-			import spark.filters.DropShadowFilter;
 			
 			import device.Device;
 			import device.RunningDevice;
 			import device.running.IosDevice;
 			
+			import flash.filters.BitmapFilterQuality;
+			
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
 			import renderer.PhysicialDeviceSettingsWindow;
 			import renderer.RunningDeviceRenderer;
+			
+			import spark.filters.DropShadowFilter;
 			
 			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
@@ -38,10 +39,13 @@
 			[Bindable]
 			public var simulators:AvailableSimulatorsManager;
 			
-			
+			public function get logsFolder():File{
+				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/logs");
+			}
 			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
+				logsFolder.deleteDirectory(true);
 				cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
 				simulators = new AvailableSimulatorsManager();
 				devices = new RunningDevicesManager(port, isMacOs);

@@ -11,6 +11,12 @@ package device.running
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
+	import flash.globalization.DateTimeFormatter;
+	import flash.globalization.DateTimeStyle;
+	import flash.globalization.LocaleID;
+	
+	import mx.core.FlexGlobals;
+	
 	
 	public class AndroidProcess extends EventDispatcher
 	{
@@ -49,6 +55,9 @@ package device.running
 		private static var _wmicFile:File = null;
 		private var currentAdbFile:File;
 		
+		private var logStream:FileStream;
+		private var dateFormatter:DateTimeFormatter = new DateTimeFormatter("en-US");
+		
 		private var instrumentCommandLine:String;
 		
 		public function AndroidProcess(adbFile:File, atsdroid:String, id:String, port:String, usbMode:Boolean)
@@ -60,7 +69,13 @@ package device.running
 			this.deviceInfo = new Device(id);
 			this.usbMode = usbMode;
 			
-			this.instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunner " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";
+			instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunner " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";
+		
+			//---------------------------------------------------------------------------------------
+			logStream = new FileStream();
+			logStream.open(FlexGlobals.topLevelApplication.logsFolder.resolvePath("android_" + id + ".log"), FileMode.APPEND);
+			dateFormatter.setDateTimePattern("yyyy-MM-dd hh:mm:ss");
+			//---------------------------------------------------------------------------------------
 			
 			process = new NativeProcess();
 			procInfo = new NativeProcessStartupInfo()
@@ -76,15 +91,34 @@ package device.running
 		}
 		
 		public function start():void{
+			writeInfoLogFile("Start Android process");
 			process.start(procInfo);
 		}
 		
 		public function terminate():Boolean{
 			if(process != null && process.running){
 				process.exit();
+				logStream.close();
 				return true;
 			}
 			return false;
+		}
+		
+		public function writeErrorLogFile(data:String):void {
+			writeLogs("ERROR", data);
+		}
+		
+		public function writeInfoLogFile(data:String):void {
+			writeLogs("INFO", data);
+		}
+		
+		private function writeLogs(type:String, data:String):void{
+			data = data.replace("INSTRUMENTATION_STATUS: atsLogs=", "");
+			data = data.replace("INSTRUMENTATION_STATUS_CODE: 0", "");
+			data = data.replace(/[\u000d\u000a\u0008]+/g, "");
+			if(data.length > 0){
+				logStream.writeUTFBytes("[" + dateFormatter.format(new Date()) + "][" + type + "]" + data + "\n");
+			}
 		}
 		
 		protected function onOutputErrorShell(event:ProgressEvent):void
@@ -122,7 +156,7 @@ package device.running
 				
 				if(!ipFounded && !usbMode) {
 					error = " - WIFI not connected !";
-					writeIntoLogFile("WIFI note connected");
+					writeErrorLogFile("WIFI not connected");
 					dispatchEvent(new Event(WIFI_ERROR_EVENT));
 					return;
 				}
@@ -170,7 +204,7 @@ package device.running
 			var arrayAddresses:Array = output.match(pattern);
 			if(arrayAddresses != null && arrayAddresses.length > 0) {
 				this.ipAddress = arrayAddresses[0];
-				writeIntoLogFile("getting ip Addresse from MS " + this.ipAddress);
+				writeInfoLogFile("getting ip Addresse from MS " + this.ipAddress);
 				dispatchEvent(new Event(IP_ADDRESS));
 			}
 		}
@@ -257,7 +291,7 @@ package device.running
 				procInfo.arguments = new <String>["-s", id, "shell"];
 				process.start(procInfo);
 				
-				process.standardInput.writeUTFBytes("am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode.toString() + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunner " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n");
+				process.standardInput.writeUTFBytes(instrumentCommandLine);
 				
 			} else {
 				process.exit(true);
@@ -266,7 +300,7 @@ package device.running
 				
 				if(error != null){
 					dispatchEvent(new Event(ERROR_EVENT));
-					AndroidProcess.writeIntoLogFile(error);
+					writeErrorLogFile(error);
 				}else{
 					dispatchEvent(new Event(STOPPED));
 				}
@@ -281,26 +315,19 @@ package device.running
 		{
 			var data:String = process.standardError.readUTFBytes(process.standardError.bytesAvailable);
 			trace("err -> " + data);
-			writeIntoLogFile(data);
+			writeErrorLogFile(data);
 			error = data;
 		}
-		
-		public static function writeIntoLogFile(data:String):void {
-			var file:File = File.userDirectory; 
-			file = file.resolvePath(".agilitest/log/atsDroid_error.txt"); 
-			var stream:FileStream = new FileStream();
-			stream.open(file, FileMode.APPEND);
-			stream.writeUTFBytes(data);
-			stream.close();
-		}
-		
+				
 		protected function onExecuteData(event:ProgressEvent):void{
 			var data:String = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
-			writeIntoLogFile(data);
+			
+			
 			if(data.indexOf("Process crashed") > -1){
-				process.standardInput.writeUTFBytes("am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode.toString() + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunner " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n");
+				writeErrorLogFile(data);
+				process.standardInput.writeUTFBytes(instrumentCommandLine);
 			}else{
-				
+				writeInfoLogFile(data);
 				if(data.indexOf("ATS_DRIVER_RUNNING") > -1){
 					dispatchEvent(new Event(RUNNING));
 				}else if(data.indexOf("ATS_DRIVER_START") > -1){
@@ -311,8 +338,6 @@ package device.running
 					dispatchEvent(new Event(WIFI_ERROR_EVENT));
 				}
 			}
-			
-
 		}
 		
 		public function screenshot():void{
