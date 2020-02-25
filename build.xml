@@ -17,6 +17,9 @@
 		<property name="package.type" value="normal"/>
 	</target>
 	
+	<target name="copy.tools" description="Copy adb tools OS dependent">
+	</target>
+	
 	<target name="compile.project" description="" depends="init.sdk">
 		
 		<echo message="Application type -> '${package.type}'"/>
@@ -75,7 +78,7 @@
 
 	</target>
 		
-	<target name="package" depends="init.sdk, compile.project"> 
+	<target name="package" depends="init.sdk, compile.project, copy.tools"> 
 		
 		<delete file="../release/${APP_NAME}.exe"/>
 		
@@ -95,7 +98,7 @@
 	    </java> 
 	</target>
 	
-	<target name="package-bundle" depends="init.sdk, compile.project"> 
+	<target name="package-bundle" depends="init.sdk, compile.project, copy.tools"> 
 
 		<delete failonerror="false">
 			<fileset dir="release">
