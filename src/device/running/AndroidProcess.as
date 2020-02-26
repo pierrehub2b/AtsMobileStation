@@ -73,8 +73,9 @@ package device.running
 		
 			//---------------------------------------------------------------------------------------
 			logStream = new FileStream();
-			logStream.open(FlexGlobals.topLevelApplication.logsFolder.resolvePath("android_" + id + ".log"), FileMode.APPEND);
 			dateFormatter.setDateTimePattern("yyyy-MM-dd hh:mm:ss");
+			logStream.open(FlexGlobals.topLevelApplication.logsFolder.resolvePath("android_" + id + "_" + new Date().time + ".log"), FileMode.APPEND);
+			
 			//---------------------------------------------------------------------------------------
 			
 			process = new NativeProcess();
