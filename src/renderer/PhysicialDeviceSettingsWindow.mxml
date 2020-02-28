@@ -8,13 +8,14 @@
 			   initialize="settings_initializeHandler(event)">
 	<fx:Script>
 		<![CDATA[
+			import device.RunningDevice;
+			
 			import flash.net.navigateToURL;
 			
+			import mx.core.FlexGlobals;
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
-			
-			import device.RunningDevice;
 			
 			[Embed(source="/assets/icons/16/apple_site.png")]
 			private const AppleIcon:Class
@@ -30,7 +31,7 @@
 			public var devices:Array = new Array();
 			
 			protected function settings_initializeHandler(event:FlexEvent):void {
-				var fileDevTeam:File = File.userDirectory.resolvePath("actiontestscript/settings.txt");
+				var fileDevTeam:File = FlexGlobals.topLevelApplication.settingsFile;
 				if(fileDevTeam.exists) {
 					var fileStreamSettings:FileStream = new FileStream();
 					fileStreamSettings.open(fileDevTeam, FileMode.READ);
@@ -57,7 +58,7 @@
 			
 			protected function save_clickHandler(event:MouseEvent):void
 			{			
-				var file:File = File.userDirectory.resolvePath("actiontestscript/settings.txt");
+				var file:File = FlexGlobals.topLevelApplication.settingsFile;
 				var fileStream:FileStream = new FileStream();
 				fileStream.open(file, FileMode.WRITE);
 				fileStream.writeUTFBytes("development_team==" + devTeamId.text + "\n");

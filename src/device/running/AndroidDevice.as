@@ -10,7 +10,7 @@ package device.running
 	
 	import mx.collections.ArrayList;
 	import mx.events.CollectionEvent;
-	
+	import mx.core.FlexGlobals;
 	import udpServer.ScreenshotServer;
 	
 	import usb.UsbAction;
@@ -45,7 +45,7 @@ package device.running
 			var portAutomatic:Boolean = false;
 			
 			var fileStream:FileStream = new FileStream();
-			var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
+			var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
 			if(file.exists) {
 				fileStream.open(file, FileMode.READ);
 				var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
@@ -71,6 +71,20 @@ package device.running
 				this.androidUsbScreenshot = new UsbScreenshotProcess(this.id);
 								
 				this.port = webServActions.initServerSocket(parseInt(this.port), portAutomatic, httpServerError);
+			}
+
+			if(!portAutomatic && this.usbMode == "") {
+				this.port = "8080";
+				fileStream.open(file, FileMode.WRITE);
+				
+				for each(var str:String in arrayString) {
+					var arrayLineId:Array = str.split("==");
+					if(arrayLineId[0].toString().toLowerCase() != id) {
+						fileStream.writeUTFBytes(str + "\n");
+					}
+				}
+				fileStream.writeUTFBytes(id + "==true;;false");
+				fileStream.close();
 			}
 
 			process = new AndroidProcess(adbFile, atsdroidFilePath, id, this.port, usbMode);

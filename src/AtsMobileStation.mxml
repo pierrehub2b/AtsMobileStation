@@ -43,6 +43,14 @@
 				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/logs");
 			}
 			
+			public function get devicesSettingsFile():File {
+				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/devicesSettings.txt");
+			}
+			
+			public function get settingsFile():File {
+				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/settings.txt");
+			}
+			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
 				try{
