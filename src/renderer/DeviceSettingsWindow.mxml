@@ -32,7 +32,7 @@
 						installAppButton.visible = false;
 					}
 					
-					var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
+					var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
 					if(file.exists) {
 						var fileStream:FileStream = new FileStream();
 						fileStream.open(file, FileMode.READ);
@@ -97,7 +97,7 @@
 					dev.automaticPort = portAutomatic.selected;
 					dev.usbMode = androidUsb.selected;
 					//save profile
-					var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
+					var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
 					var fileStream:FileStream = new FileStream();
 					fileStream.open(file, FileMode.WRITE);
 					

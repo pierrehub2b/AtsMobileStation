@@ -8,7 +8,7 @@ package device.running
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
-	
+	import mx.core.FlexGlobals;
 	import device.Device;
 	import device.RunningDevice;
 	import device.simulator.Simulator;
@@ -42,7 +42,7 @@ package device.running
 			this.simulator = simulator;
 			
 			var fileStream:FileStream = new FileStream();
-			var file:File = File.userDirectory.resolvePath("actiontestscript/devicesPortsSettings.txt");
+			var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
 			if(file.exists) {
 				fileStream.open(file, FileMode.READ);
 				var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
@@ -62,7 +62,7 @@ package device.running
 			
 			var teamId:String = "";
 			var lastBuildString:String = "";
-			file = File.userDirectory.resolvePath("actiontestscript/settings.txt");
+			file = FlexGlobals.topLevelApplication.settingsFile;
 			if(file.exists) {
 				
 				fileStream = new FileStream();
@@ -149,7 +149,7 @@ package device.running
 				alreadyCopied = !(modificationDate > oldDate);
 			}
 			
-			var fileSettings:File = File.userDirectory.resolvePath("actiontestscript/settings.txt");
+			var fileSettings:File = FlexGlobals.topLevelApplication.settingsFile;
 			var fileStreamSettings:FileStream = new FileStream();
 			fileStreamSettings.open(fileSettings, FileMode.WRITE);
 			fileStreamSettings.writeUTFBytes("development_team==" + teamId + "\n");

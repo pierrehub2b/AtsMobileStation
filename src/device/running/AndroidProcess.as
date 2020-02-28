@@ -4,6 +4,7 @@ package device.running
 	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
+	import flash.display.Stage;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.NativeProcessExitEvent;
@@ -14,6 +15,7 @@ package device.running
 	import flash.globalization.DateTimeFormatter;
 	import flash.globalization.DateTimeStyle;
 	import flash.globalization.LocaleID;
+	import flash.system.Capabilities;
 	
 	import mx.core.FlexGlobals;
 	
@@ -69,7 +71,9 @@ package device.running
 			this.deviceInfo = new Device(id);
 			this.usbMode = usbMode;
 			
-			instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunner " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";
+			var resolution:String = Capabilities.screenResolutionX + "x" + Capabilities.screenResolutionY
+			
+			instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e debug false -e screenResolution "+ resolution +" -e class " + ANDROIDDRIVER + ".AtsRunner " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";
 		
 			//---------------------------------------------------------------------------------------
 			logStream = new FileStream();
