@@ -1,5 +1,9 @@
 package device.running
 {
+	import device.Device;
+	import device.RunningDevice;
+	import device.simulator.Simulator;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -8,10 +12,9 @@ package device.running
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
+	import flash.system.Capabilities;
+	
 	import mx.core.FlexGlobals;
-	import device.Device;
-	import device.RunningDevice;
-	import device.simulator.Simulator;
 	
 	public class IosDevice extends RunningDevice
 	{
@@ -121,13 +124,16 @@ package device.running
 				arrayString = content.split("\n");
 				
 				for each(var lineSettings:String in arrayString) {
-					if(lineSettings.indexOf("CFCustomPort") > 0) {
+					if(lineSettings.indexOf("CFCustomPort") > -1) {
 						if(!automaticPort) {
 							arrayString[index+1] = "\t<string>"+ settingsPort +"</string>";
 						} else {
 							arrayString[index+1] = "\t<string></string>";
 						}
-						break
+					}
+					
+					if(lineSettings.indexOf("CFComputerResolution") > -1) {
+						arrayString[index+1] = "\t<string>"+ Capabilities.screenResolutionX + "x" + Capabilities.screenResolutionY +"</string>";
 					}
 					index++;
 				}				
