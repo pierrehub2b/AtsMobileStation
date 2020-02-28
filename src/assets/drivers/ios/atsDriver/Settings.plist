@@ -22,5 +22,7 @@
 	<string></string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>CFComputerResolution</key>
+	<string>1920x1080</string>
 </dict>
 </plist>
