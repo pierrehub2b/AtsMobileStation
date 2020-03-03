@@ -78,7 +78,7 @@ package device.running
 				fileStream.open(file, FileMode.WRITE);
 				
 				for each(var str:String in arrayString) {
-					var arrayLineId:Array = str.split("==");
+					arrayLineId = str.split("==");
 					if(arrayLineId[0].toString().toLowerCase() != id) {
 						fileStream.writeUTFBytes(str + "\n");
 					}
