@@ -73,7 +73,7 @@ package device.running
 				this.port = webServActions.initServerSocket(parseInt(this.port), portAutomatic, httpServerError);
 			}
 
-			if(!portAutomatic && this.usbMode == "") {
+			if(!portAutomatic && this.port == "") {
 				this.port = "8080";
 				fileStream.open(file, FileMode.WRITE);
 				
