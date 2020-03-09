@@ -9,8 +9,9 @@ package device.running
 	import flash.filesystem.FileStream;
 	
 	import mx.collections.ArrayList;
-	import mx.events.CollectionEvent;
 	import mx.core.FlexGlobals;
+	import mx.events.CollectionEvent;
+	
 	import udpServer.ScreenshotServer;
 	
 	import usb.UsbAction;
@@ -64,14 +65,40 @@ package device.running
 				fileStream.close();
 			}
 			errorMessage = "";
-			if(usbMode) {
-				webServActions = new WebServer(this);
-				udpServScreenshot = new ScreenshotServer();
-				this.androidUsbAction = new UsbActionProcess(this.id);
-				this.androidUsbScreenshot = new UsbScreenshotProcess(this.id);
+			
+			var forwardPort:String = "";
+			
+			if (usbMode) {
+				// webServActions = new WebServer(this.port == "" ? 0 : parseInt(this.port));
+				webServActions = new WebServer(0);
+
+				this.port = webServActions.getPort().toString();
+				forwardPort = webServActions.getDevicePort().toString();
+				
+				// udpServScreenshot = new ScreenshotServer();
+				// this.androidUsbAction = new UsbActionProcess(this.id);
+				// this.androidUsbScreenshot = new UsbScreenshotProcess(this.id);
 								
-				this.port = webServActions.initServerSocket(parseInt(this.port), portAutomatic, httpServerError);
+				/* this.port = webServActions.initServerSocket(parseInt(this.port), portAutomatic, httpServerError);
+				var a:int =  WebServer.getAvailablePort()
+				forwardPort = a.toString();
+				webServActions.setRemoteport(a); */
+				
+				// TODO Anthony : à refacto
+				/* if (portAutomatic) {
+					fileStream.open(file, FileMode.WRITE);
+					
+					for each(var str:String in arrayString) {
+						arrayLineId = str.split("==");
+						if(arrayLineId[0].toString().toLowerCase() != id) {
+							fileStream.writeUTFBytes(str + "\n");
+						}
+					}
+					fileStream.writeUTFBytes(id + "==true;" + port + ";false");
+					fileStream.close();
+				} */
 			}
+			
 
 			if(!portAutomatic && this.port == "") {
 				this.port = "8080";
@@ -87,7 +114,7 @@ package device.running
 				fileStream.close();
 			}
 
-			process = new AndroidProcess(adbFile, atsdroidFilePath, id, this.port, usbMode);
+			process = new AndroidProcess(adbFile, atsdroidFilePath, id, this.port, forwardPort, usbMode);
 			process.addEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.WIFI_ERROR_EVENT, processWifiErrorHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.RUNNING, runningTestHandler, false, 0, true);
