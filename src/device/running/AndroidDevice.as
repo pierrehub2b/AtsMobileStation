@@ -142,7 +142,15 @@ package device.running
 			if(process != null) {
 				process.start();
 			}
+		}
+		
+		public override function close():void {
+			if(webServActions != null) {
+				webServActions.close();
+				webServActions = null;
+			}
 			
+			super.close()
 		}
 		
 		public function actionsInsertAt(pos:int, act:UsbAction):void {
@@ -212,7 +220,7 @@ package device.running
 		
 		private function stoppedTestHandler(ev:Event):void{
 			process.removeEventListener(AndroidProcess.STOPPED, stoppedTestHandler);
-			dispatchEvent(new Event(STOPPED_EVENT));
+			close();
 		}
 		
 		private function deviceInfoHandler(ev:Event):void{
