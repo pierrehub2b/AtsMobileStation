@@ -69,8 +69,7 @@ package device.running
 			var forwardPort:String = "";
 			
 			if (usbMode) {
-				// webServActions = new WebServer(this.port == "" ? 0 : parseInt(this.port));
-				webServActions = new WebServer(0);
+				webServActions = new WebServer(this.port == "" ? 0 : parseInt(this.port));
 
 				this.port = webServActions.getPort().toString();
 				forwardPort = webServActions.getDevicePort().toString();
