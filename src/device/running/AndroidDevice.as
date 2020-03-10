@@ -73,46 +73,23 @@ package device.running
 
 				this.port = webServActions.getPort().toString();
 				forwardPort = webServActions.getDevicePort().toString();
-				
-				// udpServScreenshot = new ScreenshotServer();
-				// this.androidUsbAction = new UsbActionProcess(this.id);
-				// this.androidUsbScreenshot = new UsbScreenshotProcess(this.id);
-								
-				/* this.port = webServActions.initServerSocket(parseInt(this.port), portAutomatic, httpServerError);
-				var a:int =  WebServer.getAvailablePort()
-				forwardPort = a.toString();
-				webServActions.setRemoteport(a); */
-				
-				// TODO Anthony : à refacto
-				/* if (portAutomatic) {
-					fileStream.open(file, FileMode.WRITE);
-					
-					for each(var str:String in arrayString) {
-						arrayLineId = str.split("==");
-						if(arrayLineId[0].toString().toLowerCase() != id) {
-							fileStream.writeUTFBytes(str + "\n");
-						}
-					}
-					fileStream.writeUTFBytes(id + "==true;" + port + ";false");
-					fileStream.close();
-				} */
 			}
 			
-
 			if(!portAutomatic && this.port == "") {
 				this.port = "8080";
-				fileStream.open(file, FileMode.WRITE);
-				
-				for each(var str:String in arrayString) {
-					arrayLineId = str.split("==");
-					if(arrayLineId[0].toString().toLowerCase() != id) {
-						fileStream.writeUTFBytes(str + "\n");
-					}
-				}
-				fileStream.writeUTFBytes(id + "==true;;false");
-				fileStream.close();
 			}
-
+			
+			fileStream.open(file, FileMode.WRITE);
+			for each(var str:String in arrayString) {
+				arrayLineId = str.split("==");
+				if(arrayLineId[0].toString().toLowerCase() != id) {
+					fileStream.writeUTFBytes(str + "\n");
+				}
+			}
+			
+			fileStream.writeUTFBytes(id + "==" + automaticPort + ";" + this.port + ";" + usbMode);
+			fileStream.close();
+			
 			process = new AndroidProcess(adbFile, atsdroidFilePath, id, this.port, forwardPort, usbMode);
 			process.addEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.WIFI_ERROR_EVENT, processWifiErrorHandler, false, 0, true);

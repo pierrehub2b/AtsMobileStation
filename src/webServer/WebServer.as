@@ -116,10 +116,18 @@ package webServer
 				serverSocket = new ServerSocket();
 			}
 			
-			serverSocket.bind(port);
+			try {
+				serverSocket.bind(port);
+				
+			} catch (e: Error) {
+				setup(0);
+
+				trace("error !!!");
+				trace(e.message);
+			}
+
 			serverSocket.addEventListener(ServerSocketConnectEvent.CONNECT, onConnect);
 			serverSocket.listen();
-			
 			this.devicePort = getAvailablePort();			
 		}
 			
