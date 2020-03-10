@@ -202,8 +202,8 @@
 			</s:HGroup>
 		</s:HGroup>
 		
-		<s:HGroup width="100%" gap="3" verticalAlign="middle" verticalCenter="0" visible="false" height="0">
-			<s:HGroup id="androidUsbGroup" width="100%" horizontalAlign="left" verticalAlign="baseline" visible="false">
+		<s:HGroup width="100%" gap="3" verticalAlign="middle" verticalCenter="0" visible="true">
+			<s:HGroup id="androidUsbGroup" width="100%" horizontalAlign="left" verticalAlign="baseline" visible="true">
 				<s:Label fontSize="11" fontWeight="bold" paddingRight="5" text="USB mode :"/>
 				<s:CheckBox id="androidUsb"
 							change="portAutomatic_changeHandler(event)" fontSize="11"

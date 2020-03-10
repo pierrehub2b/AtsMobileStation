@@ -1,5 +1,7 @@
 package device.running
 {
+	import device.Device;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -12,8 +14,6 @@ package device.running
 	import flash.globalization.DateTimeFormatter;
 	
 	import mx.core.FlexGlobals;
-	
-	import device.Device;
 	
 	
 	public class AndroidProcess extends EventDispatcher
@@ -36,6 +36,7 @@ package device.running
 		private const androidPropValueRegex:RegExp = /.*:.*\[(.*)\]/;
 		
 		private var port:String;
+		private var forwardPort:String;
 		private var id:String;
 		private var atsdroidFilePath:String;
 		private var usbMode:Boolean;
@@ -58,7 +59,7 @@ package device.running
 		
 		private var instrumentCommandLine:String;
 		
-		public function AndroidProcess(adbFile:File, atsdroid:String, id:String, port:String, usbMode:Boolean)
+		public function AndroidProcess(adbFile:File, atsdroid:String, id:String, port:String, forwardPort:String, usbMode:Boolean)
 		{
 			this.currentAdbFile = adbFile;
 			this.id = id;
@@ -66,9 +67,8 @@ package device.running
 			this.atsdroidFilePath = atsdroid;
 			this.deviceInfo = new Device(id);
 			this.usbMode = usbMode;
-			
-			instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunner " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";
-		
+			this.forwardPort = forwardPort;
+					
 			//---------------------------------------------------------------------------------------
 			logStream = new FileStream();
 			dateFormatter.setDateTimePattern("yyyy-MM-dd hh:mm:ss");
@@ -82,11 +82,16 @@ package device.running
 			procInfo.executable = currentAdbFile;
 			procInfo.workingDirectory = currentAdbFile.parent;
 			
-			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
-			process.addEventListener(NativeProcessExitEvent.EXIT, onReadLanExit, false, 0, true);
-			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData, false, 0, true);
-			
-			procInfo.arguments = new <String>["-s", id, "shell", "ip", "route"];
+			if (usbMode) {
+				process.addEventListener(NativeProcessExitEvent.EXIT, onForwardPortExit, false, 0, true);
+				procInfo.arguments = new <String>["-s", id, "forward", "tcp:" + forwardPort, "tcp:" + forwardPort];
+			} else {
+				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
+				process.addEventListener(NativeProcessExitEvent.EXIT, onReadLanExit, false, 0, true);
+				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData, false, 0, true);
+				
+				procInfo.arguments = new <String>["-s", id, "shell", "ip", "route"];
+			}
 		}
 		
 		public function start():void{
@@ -123,6 +128,19 @@ package device.running
 		protected function onOutputErrorShell(event:ProgressEvent):void
 		{
 			error = new String(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
+		}
+		
+		// Anthony: Listen adb forward tcp: tcp: exit
+		protected function onForwardPortExit(event:NativeProcessExitEvent):void{
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onForwardPortExit);
+			
+			process = new NativeProcess();
+			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
+			process.addEventListener(NativeProcessExitEvent.EXIT, onReadLanExit, false, 0, true);
+			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData, false, 0, true);
+			
+			procInfo.arguments = new <String>["-s", id, "shell", "ip", "route"];
+			process.start(procInfo);
 		}
 		
 		protected function onReadLanData(event:ProgressEvent):void{
@@ -290,6 +308,7 @@ package device.running
 				procInfo.arguments = new <String>["-s", id, "shell"];
 				process.start(procInfo);
 				
+				instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + forwardPort + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunner " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";
 				process.standardInput.writeUTFBytes(instrumentCommandLine);
 				
 			} else {
