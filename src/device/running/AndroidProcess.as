@@ -144,7 +144,7 @@ package device.running
 					if(ipRouteDataUdp[i].indexOf("dev") > -1 && ipRouteDataUdp[i].indexOf("wlan0") > -1) {
 						var splittedString:Array = ipRouteDataUdp[i].split(/\s+/g);
 						var idxUdp:int = splittedString.indexOf("src");
-						if(idxUdp > -1){
+						if(idxUdp > -1 && (splittedString[idxUdp+1].toString().indexOf("192") == 0 || splittedString[idxUdp+1].toString().indexOf("172") == 0)){
 							this.deviceIp = splittedString[idxUdp+1];
 							this.ipAddress = splittedString[idxUdp+1];
 							ipFounded = true;
