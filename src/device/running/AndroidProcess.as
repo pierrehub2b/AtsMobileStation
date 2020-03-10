@@ -308,9 +308,8 @@ package device.running
 				procInfo.arguments = new <String>["-s", id, "shell"];
 				process.start(procInfo);
 				
-				instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + forwardPort + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunner " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";
+				instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + (usbMode == true ? forwardPort : this.port) + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunner " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";				
 				process.standardInput.writeUTFBytes(instrumentCommandLine);
-				
 			} else {
 				process.exit(true);
 				process = null;
@@ -340,11 +339,10 @@ package device.running
 		protected function onExecuteData(event:ProgressEvent):void{
 			var data:String = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
 			
-			
 			if(data.indexOf("Process crashed") > -1){
 				writeErrorLogFile(data);
 				process.standardInput.writeUTFBytes(instrumentCommandLine);
-			}else{
+			} else {
 				writeInfoLogFile(data);
 				if(data.indexOf("ATS_DRIVER_RUNNING") > -1){
 					dispatchEvent(new Event(RUNNING));
