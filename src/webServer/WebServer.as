@@ -98,7 +98,6 @@ package webServer
 			else if (event.message.type === WebSocketMessage.TYPE_BINARY) {
 				var buffer:ByteArray = event.message.binaryData
 				clientSocket.writeBytes(buffer, 0, buffer.length);
-
 				clientSocket.flush();
 			}
 		}
@@ -129,7 +128,7 @@ package webServer
 			// read data
 			clientData = new ByteArray();
 			clientSocket.readBytes(clientData, 0, clientSocket.bytesAvailable);
-			var text:String = clientData.toString();
+
 			// forward data
 			if (webSocket.connected == true) {
 				webSocket.sendBytes(clientData);
