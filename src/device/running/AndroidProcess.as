@@ -308,7 +308,12 @@ package device.running
 				procInfo.arguments = new <String>["-s", id, "shell"];
 				process.start(procInfo);
 				
-				instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + (usbMode == true ? forwardPort : this.port) + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunner " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";				
+				if (usbMode) {
+					instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + forwardPort + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerUsb " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";				
+				} else {
+					instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerWifi " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";				
+				}
+
 				process.standardInput.writeUTFBytes(instrumentCommandLine);
 			} else {
 				process.exit(true);

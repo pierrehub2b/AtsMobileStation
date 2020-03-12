@@ -1,5 +1,10 @@
 package webServer
 {
+	import com.worlize.websocket.WebSocket;
+	import com.worlize.websocket.WebSocketErrorEvent;
+	import com.worlize.websocket.WebSocketEvent;
+	import com.worlize.websocket.WebSocketMessage;
+	
 	import device.Device;
 	import device.running.AndroidDevice;
 	import device.running.AndroidProcess;
@@ -24,68 +29,16 @@ package webServer
 	import flash.utils.clearInterval;
 	import flash.utils.setInterval;
 	
-	// import usb.UsbAction;
-	
-	// import webServer.mimetype.MimeType;
-	
 	public class WebServer
 	{	
-		// private static const MAX_PACKET:int=1048576;
 		private var serverSocket:ServerSocket = new ServerSocket();
 		private var clientSocket:Socket;
 		private var clientData:ByteArray;
+		private var webSocket:WebSocket;
 
-		private var proxySocket:Socket;
-		// private var proxyData:ByteArray;
-		
-		//private var returnData:ByteArray;
-		// private var returnPos:int;
-		
-		// private var rex:RegExp = /[\s\r\n]+/gim;
-		// private var currentDevice:AndroidDevice;
-		private var errorCallback:Function = null;
-		// private var socket:Socket;
-		
-		// private var port:int;
+		private var proxySocket:Socket = new Socket();
+
 		private var devicePort:int;
-		
-		// private var ipAdress:String;
-		
-		// private var socketSender:Socket;
-		// private var remoteRequest:String;
-					
-		/*public function WebServer(device:AndroidDevice)
-		{			
-			currentDevice = device
-			// currentDevice.addEventListener(AndroidUsbChannelEvent.BAD_COMMAND_ERROR, usbActionResponseError, false, 0, true);
-		}*/
-				
-		/* public function initServerSocket(port:int, automaticPort:Boolean, errorCallback:Function):String {
-			try {
-				server=new ServerSocket();
-				server.addEventListener(ServerSocketConnectEvent.CONNECT, onConnect);
-				
-				if (automaticPort) {
-					server.bind();
-				} else {
-					server.bind(port);
-
-				}
-				server.listen();
-
-				return server.localPort.toString();
-			} catch (error:Error) {
-				if(automaticPort) {
-					return initServerSocket(port+1,automaticPort,errorCallback);
-				} else {
-					errorCallback("Port "+ port +" is in use. Retrying...");
-					if(server.bound) {
-						server.close();
-					}
-				}
-			}
-			return port.toString();
-		} */
 			
 		public function getPort():int 
 		{
@@ -121,20 +74,49 @@ package webServer
 				
 			} catch (e: Error) {
 				setup(0);
-
-				trace("error !!!");
-				trace(e.message);
+				// TODO return error if automaticPort == false
 			}
 
 			serverSocket.addEventListener(ServerSocketConnectEvent.CONNECT, onConnect);
+			
 			serverSocket.listen();
-			this.devicePort = getAvailablePort();			
+			this.devicePort = getAvailablePort();
+			
+			webSocket = new WebSocket("ws://localhost:" + devicePort.toString(), "*");
+			webSocket.addEventListener(WebSocketEvent.OPEN, webSocketOpenHandler);
+			webSocket.addEventListener(WebSocketEvent.MESSAGE, webSocketOnMessageHandler);
+			webSocket.addEventListener(WebSocketErrorEvent.CONNECTION_FAIL, webSocketConnectionFailHandler);
+			webSocket.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
 		}
 			
+		private function webSocketOnMessageHandler(event:WebSocketEvent):void
+		{
+			if(event.message.type === WebSocketMessage.TYPE_UTF8) {
+			
+			} 
+			
+			else if (event.message.type === WebSocketMessage.TYPE_BINARY) {
+				var buffer:ByteArray = event.message.binaryData
+				clientSocket.writeBytes(buffer, 0, buffer.length);
+
+				clientSocket.flush();
+			}
+		}
+		
+		private function webSocketConnectionFailHandler(event:WebSocketErrorEvent):void 
+		{
+			trace("WebSocket ERROR : " + event.text);
+		}
+		
+		private function webSocketOpenHandler(event:WebSocketEvent):void 
+		{
+			trace("Connected to websocket");
+			webSocket.sendBytes(clientData);
+		}
+		
 		// Une connexion entrante est arrivée sur le serveur
 		private function onConnect(event:ServerSocketConnectEvent):void
 		{
-			trace("récupération socket");
 			clientSocket = event.socket;
 
 			clientSocket.addEventListener(ProgressEvent.SOCKET_DATA, onClientSocketData);
@@ -147,9 +129,13 @@ package webServer
 			// read data
 			clientData = new ByteArray();
 			clientSocket.readBytes(clientData, 0, clientSocket.bytesAvailable);
-			
+			var text:String = clientData.toString();
 			// forward data
-			openSocketRemote();
+			if (webSocket.connected == true) {
+				webSocket.sendBytes(clientData);
+			} else {
+				webSocket.connect();
+			}
 		}
 		
 		// 2. back to client
@@ -158,7 +144,7 @@ package webServer
 			// read data
 			var buffer:ByteArray = new ByteArray();
 			proxySocket.readBytes(buffer, 0, proxySocket.bytesAvailable);
-			
+
 			// return data
 			clientSocket.writeBytes(buffer, 0, buffer.length);
 			clientSocket.flush()
@@ -171,7 +157,6 @@ package webServer
 		
 		private function openSocketRemote():void 
 		{
-			proxySocket = new Socket();
 			configureListeners(proxySocket);
 			proxySocket.connect("localhost", devicePort);
 		}		
@@ -188,10 +173,13 @@ package webServer
 		private function closeHandler(event:Event):void
 		{
 			trace("closeHandler: " + event);
+			trace("Socket open ? " + proxySocket.connected);
+			trace("Client socket open ? " + clientSocket.connected);
+
 		}
 		
 		private function connectHandler(event:Event):void
-		{
+		{			
 			proxySocket.writeBytes(clientData, 0, clientData.length);
 			proxySocket.flush();
 		}
