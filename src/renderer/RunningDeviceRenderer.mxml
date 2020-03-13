@@ -92,6 +92,7 @@
 		<s:HGroup id="firstGroup" verticalAlign="middle" mouseDown="mouseDownHandler(event)" gap="0"
 				  toolTip="{(data as RunningDevice).tooltip}" left="2">
 			<s:BitmapImage  id="mobile" source="assets/icons/32/{(data is IosDevice)?'ios':'android'}.png" smooth="true" smoothingQuality="high"/>
+			<s:Spacer width="18"/>
 			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
 				<s:Label visible="{(data as RunningDevice).ip==null}" includeInLayout="{(data as RunningDevice).ip==null}" 
 						 text="Unable to get local ip !" fontStyle="italic" color="0x8a844a"/>
@@ -108,6 +109,7 @@
 						 text="The device is not connected to local network" fontStyle="italic" color="0xbc0000" fontSize="11"/>
 			</s:VGroup>
 		</s:HGroup>
+		<s:BitmapImage source="assets/icons/20/{(data as RunningDevice).usbMode?'usb':'wifi'}.png" top="{(data as RunningDevice).usbMode?NaN:0}" bottom="{(data as RunningDevice).usbMode?2:NaN}" left="28"/>
 		<s:HGroup right="7" verticalAlign="middle" verticalCenter="0">
 			<s:Group id="homeButton" buttonMode="true" click="goHome(event, (data as RunningDevice))"
 					 toolTip="Device home button" visible="{(data as RunningDevice).status==Device.READY}" alpha="0.0">
