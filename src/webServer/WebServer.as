@@ -91,7 +91,7 @@ package webServer
 			
 		private function webSocketOnMessageHandler(event:WebSocketEvent):void
 		{
-			if(event.message.type === WebSocketMessage.TYPE_UTF8) {
+			if (event.message.type === WebSocketMessage.TYPE_UTF8) {
 			
 			} 
 			
@@ -149,50 +149,15 @@ package webServer
 			clientSocket.flush()
 		}
 				
-		private function onSocketClose(ev:Event):void 
-		{
-			trace("socket fermée");
-		}
-		
-		private function openSocketRemote():void 
-		{
-			configureListeners(proxySocket);
-			proxySocket.connect("localhost", devicePort);
-		}		
+		private function onSocketClose(ev:Event):void {}
+						
+		private function closeHandler(event:Event):void {}
 				
-		private function configureListeners(socket:Socket):void 
-		{
-			socket.addEventListener(Event.CLOSE, closeHandler);
-			socket.addEventListener(Event.CONNECT, connectHandler);
-			socket.addEventListener(ProgressEvent.SOCKET_DATA, onProxySocketData);
-			socket.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
-			socket.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
-		}
-				
-		private function closeHandler(event:Event):void
-		{
-			trace("closeHandler: " + event);
-			trace("Socket open ? " + proxySocket.connected);
-			trace("Client socket open ? " + clientSocket.connected);
-
-		}
-		
-		private function connectHandler(event:Event):void
-		{			
-			proxySocket.writeBytes(clientData, 0, clientData.length);
-			proxySocket.flush();
-		}
-		
 		private function ioErrorHandler(event:IOErrorEvent):void
 		{
 			trace("ioErrorHandler: " + event);
 		}
-		
-		private function securityErrorHandler(event:SecurityErrorEvent):void
-		{
-			trace("securityErrorHandler: " + event);
-		}
-		
+				
 		// TO.DO Anthony: A refactorer
 		private static function getAvailablePort():int 
 		{
