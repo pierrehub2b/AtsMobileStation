@@ -30,6 +30,25 @@ extension UIDevice {
     }
 }
 
+extension UIImage {
+    func resized(withPercentage percentage: CGFloat, isOpaque: Bool = true) -> UIImage? {
+        let canvas = CGSize(width: size.width * percentage, height: size.height * percentage)
+        let format = imageRendererFormat
+        format.opaque = isOpaque
+        return UIGraphicsImageRenderer(size: canvas, format: format).image {
+            _ in draw(in: CGRect(origin: .zero, size: canvas))
+        }
+    }
+    func resized(toWidth width: CGFloat, isOpaque: Bool = true) -> UIImage? {
+        let canvas = CGSize(width: width, height: CGFloat(ceil(width/size.width * size.height)))
+        let format = imageRendererFormat
+        format.opaque = isOpaque
+        return UIGraphicsImageRenderer(size: canvas, format: format).image {
+            _ in draw(in: CGRect(origin: .zero, size: canvas))
+        }
+    }
+}
+
 class atsDriver: XCTestCase {
     
     let driverVersion:String = "1.0.0"
@@ -85,7 +104,6 @@ class atsDriver: XCTestCase {
         udpThread.async {
             self.udpStart()
         }
-        
         
         var customPort = "";
         
@@ -311,9 +329,10 @@ class atsDriver: XCTestCase {
                     
                 }
             }else if(action == ActionsEnum.SCREENSHOT.rawValue){
-                startResponse("200 OK", [("Content-Type", "application/octet-stream")])
                 let screenshot = XCUIScreen.main.screenshot()
-                let bytes = self.getArrayOfBytesFromImage(imageData: screenshot.pngRepresentation)
+                //let img = screenshot.image.resized(withPercentage: UIScreen.main.scale)
+                let bytes = self.getArrayOfBytesFromImage(imageData: UIImagePNGRepresentation(screenshot.image)!)
+                startResponse("200 OK", [("Content-Type", "application/octet-stream"),("Content-length", bytes.count.description)])
                 sendBody(Data(bytes: bytes))
                 sendBody(Data())
             }else if(action == ActionsEnum.INFO.rawValue){
@@ -724,15 +743,7 @@ class atsDriver: XCTestCase {
         self.channelHeight = Double(screenShotHeight) //Double(screenSize.height)
         
         var ratio:Double = 1.0
-        let resolution = computerResolution.split(separator: "x")
-        let computerHeight = Double(resolution[1])!
-        let computerWidth = Double(resolution[0])!
-        
-        if(computerHeight < Double(channelHeight)) {
-            ratio = Double(channelHeight) / (computerHeight - 200);
-        } else if(computerWidth < Double(channelWidth)) {
-            ratio = Double(channelHeight) / (computerWidth - 200);
-        }
+        ratio = channelHeight / Double(screenNativeBounds.height);
         	
         self.deviceWidth = Double(channelWidth / ratio)
         self.deviceHeight = Double(channelHeight / ratio)
@@ -843,7 +854,6 @@ class atsDriver: XCTestCase {
     
     func testExecuteCommand() {
         while continueExecution {
-            
         }
     }
 }
