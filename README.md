@@ -2,7 +2,7 @@
 PC and Mac OS application to start and install mobile drivers used by ATS test framework
 
 ## iOS Devices
-**This procedure is not usefull if you're using iOS Simulators**
+**This procedure is useless if you're using iOS Simulators**
 ### Apple Developer settings
 To execute automated tests on physical iPhone devices, you need to create an Apple developer account and suscribe to a developer licence
 
