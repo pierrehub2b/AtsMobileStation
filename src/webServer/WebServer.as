@@ -128,7 +128,7 @@ package webServer
 			// read data
 			clientData = new ByteArray();
 			clientSocket.readBytes(clientData, 0, clientSocket.bytesAvailable);
-
+						
 			// forward data
 			if (webSocket.connected == true) {
 				webSocket.sendBytes(clientData);
@@ -143,7 +143,7 @@ package webServer
 			// read data
 			var buffer:ByteArray = new ByteArray();
 			proxySocket.readBytes(buffer, 0, proxySocket.bytesAvailable);
-
+			
 			// return data
 			clientSocket.writeBytes(buffer, 0, buffer.length);
 			clientSocket.flush()
