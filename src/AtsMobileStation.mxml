@@ -2,7 +2,7 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
-					   width="340" height="466" showStatusBar="false"
+					   width="360" height="480" showStatusBar="false"
 					   right="0" bottom="0" frameRate="24"
 					   creationComplete="creationCompleteHandler(event)"
 					   close="closeHandler(event)" backgroundColor="0xefefef">
@@ -10,19 +10,19 @@
 		<![CDATA[
 			import com.greensock.TweenMax;
 			
-			import device.Device;
-			import device.RunningDevice;
-			import device.running.IosDevice;
-			
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
 			
+			import spark.filters.DropShadowFilter;
+			
+			import device.Device;
+			import device.RunningDevice;
+			import device.running.IosDevice;
+			
 			import renderer.PhysicialDeviceSettingsWindow;
 			import renderer.RunningDeviceRenderer;
-			
-			import spark.filters.DropShadowFilter;
 			
 			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
@@ -57,7 +57,10 @@
 					logsFolder.deleteDirectory(true);
 				}catch(err:IOError){}
 
-				cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
+				if(!Capabilities.isDebugger) {
+					cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
+				}
+				
 				simulators = new AvailableSimulatorsManager();
 				devices = new RunningDevicesManager(port, isMacOs);
 				

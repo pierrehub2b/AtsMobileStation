@@ -81,7 +81,6 @@ class atsDriver: XCTestCase {
     var forceCapture = false;
     var applications:[[String: Any]] = []
     var emptyImg:String = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
-    var computerResolution:String = "1920x1080"
     
     var continueExecution = true
     
@@ -111,7 +110,6 @@ class atsDriver: XCTestCase {
         if let url = testBundle.url(forResource: "Settings", withExtension: "plist"),
             let myDict = NSDictionary(contentsOf: url) as? [String:Any] {
             customPort = myDict["CFCustomPort"].unsafelyUnwrapped as! String;
-            computerResolution = myDict["CFComputerResolution"] as! String;
             for itm in myDict {
                 if(itm.key.contains("CFAppBundleID")) {
                     self.appsInstalled.append(itm.value as! String)
@@ -124,6 +122,11 @@ class atsDriver: XCTestCase {
             if let url = bundleMain.url(forResource: "../../../../../Library/SpringBoard/IconState", withExtension: "plist"),
                 let myDict = NSDictionary(contentsOf: url) as? [String:Any] {
                 self.appsInstalled = getAllAppIds(from: myDict)
+                for itm in myDict {
+                    if(itm.key.contains("CFAppBundleID")) {
+                        self.appsInstalled.append(itm.value as! String)
+                    }
+                }
             }
         }
         
@@ -188,6 +191,7 @@ class atsDriver: XCTestCase {
     
     func setupInstalledApp(){
         print("les apps installed : \(self.appsInstalled)")
+        applications  = []
         for app in self.appsInstalled {
             //TODO retrieve right bundle Name
             let name = "CFBundleName"
@@ -330,12 +334,23 @@ class atsDriver: XCTestCase {
                 }
             }else if(action == ActionsEnum.SCREENSHOT.rawValue){
                 let screenshot = XCUIScreen.main.screenshot()
-                //let img = screenshot.image.resized(withPercentage: UIScreen.main.scale)
-                let bytes = self.getArrayOfBytesFromImage(imageData: UIImagePNGRepresentation(screenshot.image)!)
+                let img = screenshot.image.resized(withPercentage: UIScreen.main.scale)
+                let bytes = self.getArrayOfBytesFromImage(imageData: UIImagePNGRepresentation(img!)!)
                 startResponse("200 OK", [("Content-Type", "application/octet-stream"),("Content-length", bytes.count.description)])
                 sendBody(Data(bytes: bytes))
                 sendBody(Data())
             }else if(action == ActionsEnum.INFO.rawValue){
+                let testBundle = Bundle(for: atsDriver.self)
+                if let url = testBundle.url(forResource: "Settings", withExtension: "plist"),
+                    let myDict = NSDictionary(contentsOf: url) as? [String:Any] {
+                    for itm in myDict {
+                        if(itm.key.contains("CFAppBundleID")) {
+                            self.appsInstalled.append(itm.value as! String)
+                        }
+                    }
+                }
+                self.setupInstalledApp();
+                
                 self.driverInfoBase()
                 self.resultElement["message"] = "device capabilities"
                 self.resultElement["status"] = 0
@@ -533,12 +548,9 @@ class atsDriver: XCTestCase {
     }
     
     func getArrayOfBytesFromImage(imageData:Data) ->[UInt8]{
-
-        let count = imageData.count / MemoryLayout<UInt8>.size
-        var byteArray = [UInt8](repeating: 0, count: count)
-        imageData.copyBytes(to: &byteArray, count:count)
-        return byteArray
-
+        return imageData.withUnsafeBytes {
+            [UInt8](UnsafeBufferPointer(start: $0, count: imageData.count))
+        }
     }
     
     func matchingStrings(input: String, regex: String) -> [[String]] {

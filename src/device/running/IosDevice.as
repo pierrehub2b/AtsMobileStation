@@ -1,9 +1,5 @@
 package device.running
 {
-	import device.Device;
-	import device.RunningDevice;
-	import device.simulator.Simulator;
-	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -16,6 +12,12 @@ package device.running
 	
 	import mx.core.FlexGlobals;
 	
+	import device.Device;
+	import device.RunningDevice;
+	import device.simulator.Simulator;
+	
+	import net.tautausan.plist.Plist;
+	
 	public class IosDevice extends RunningDevice
 	{
 		private var output:String = "";
@@ -26,6 +28,8 @@ package device.running
 		private static const startInfoLocked:RegExp = /isPasscodeLocked:(\s*)YES/
 		private static const noProvisionningProfileError:RegExp = /Xcode couldn't find any iOS App Development provisioning profiles matching(\s*)/
 		private static const noCertificatesError:RegExp = /signing certificate matching team ID(\s*)/	
+		private static const noXcodeInstalled:RegExp = /requires Xcode(\s*)/
+		private static const wrongVersionofxCode:RegExp = /which may not be supported by this version of Xcode(\s*)/
 
 		private var testingProcess:NativeProcess
 		public var procInfo:NativeProcessStartupInfo;
@@ -85,11 +89,11 @@ package device.running
 								break;
 							}
 								
-							case "last_build":
+							/*case "last_build":
 							{
 								lastBuildString = setting.split("==")[1];
 								break;
-							}
+							}*/
 						}
 					}
 				}
@@ -132,9 +136,9 @@ package device.running
 						}
 					}
 					
-					if(lineSettings.indexOf("CFComputerResolution") > -1) {
+					/*if(lineSettings.indexOf("CFComputerResolution") > -1) {
 						arrayString[index+1] = "\t<string>"+ Capabilities.screenResolutionX + "x" + Capabilities.screenResolutionY +"</string>";
-					}
+					}*/
 					index++;
 				}				
 				fileStream.close();
@@ -147,19 +151,19 @@ package device.running
 				writeFileStream.close();
 			}
 			
-			if(lastBuildString != "") {
+			/*if(lastBuildString != "") {
 				var d:Date = new Date();
 				d.setTime(Date.parse(lastBuildString));
 				var modificationDate:int = (xcworkspaceFile.modificationDate.time/1000);
 				var oldDate:int = (d.time/1000);
 				alreadyCopied = !(modificationDate > oldDate);
-			}
+			}*/
 			
 			var fileSettings:File = FlexGlobals.topLevelApplication.settingsFile;
 			var fileStreamSettings:FileStream = new FileStream();
 			fileStreamSettings.open(fileSettings, FileMode.WRITE);
 			fileStreamSettings.writeUTFBytes("development_team==" + teamId + "\n");
-			fileStreamSettings.writeUTFBytes("last_build==" + xcworkspaceFile.modificationDate.toString());
+			//fileStreamSettings.writeUTFBytes("last_build==" + xcworkspaceFile.modificationDate.toString());
 			fileStreamSettings.close();
 			
 			procInfo = new NativeProcessStartupInfo();
@@ -171,15 +175,16 @@ package device.running
 				args.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + teamId);
 			}
 			
-			if(!AtsMobileStation.alreadyBuilded) {
+			if(alreadyCopied) {
 				AtsMobileStation.alreadyBuilded = true;
 				args.push("test-without-building");
+				trace("test without building on device with id:" + id)
 			} else {
 				args.push("test");
+				trace("build and test on device with id:" + id)
 			}
-			
-			procInfo.arguments = args;
 			getBundleIds(id);
+			procInfo.arguments = args;
 		}
 		
 		protected function addLineToLogs(log: String):void {
@@ -207,22 +212,40 @@ package device.running
 				var arrayStringPList:Array = pListContent.split("\n");				
 				fileStreamMobileDevice.close();
 				
-				var writeFileStream:FileStream = new FileStream();
-				writeFileStream.open(pListFile, FileMode.UPDATE);
+				var newArray:Array = new Array();
+				var removeNextIndex:Boolean = false;
+				for each(var str:String in arrayStringPList) {
+					if(str.indexOf("CFAppBundleID") == -1 && !removeNextIndex) {
+						newArray.push(str);
+					}
+					
+					removeNextIndex = false;
+					if(str.indexOf("CFAppBundleID") > -1) {
+						removeNextIndex = true;
+					}
+				}
 				
 				var indexApp: int = 0;
 				for each (var a:String in apps) 
 				{
 					if(a != "") {
-						arrayStringPList.insertAt(4, "\t<key>CFAppBundleID" + indexApp +"</key>\n\t<string>"+a+"</string>");
+						newArray.insertAt(4, "\t<key>CFAppBundleID" + indexApp +"</key>\n\t<string>"+a+"</string>");
 						indexApp++;
 					}
 				}
-
-				for each(var str:String in arrayStringPList) {
-					writeFileStream.writeUTFBytes(str + "\n");
+				
+				pListFile.deleteFile();
+				var file:File = resultDir.resolvePath("atsDriver/Settings.plist");
+				var stream:FileStream = new FileStream();
+				stream.open(file, FileMode.WRITE);
+				for each(var strArray:String in newArray) {
+					stream.writeUTFBytes(strArray + "\n");
 				}
-				writeFileStream.close();
+				stream.close();
+			} else {
+				trace("Erreur à la génération du fichier settings.plist");
+				resultDir.deleteDirectory(true);
+				testingProcess.exit();
 			}
 			
 			proc.exit();
@@ -307,22 +330,37 @@ package device.running
 		protected function onTestingError(event:ProgressEvent):void
 		{
 			const data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
-			trace("test error -> " + data);
+			//trace(data);
 			addLineToLogs(data);
 			
 			if(noProvisionningProfileError.test(data)){
-				errorMessage = " - No provisioning profiles !";
+				errorMessage = "No provisioning profiles\nMore informations in our Github page";
 				testingProcess.exit();
+				return;
 			}
 			
 			if(noCertificatesError.test(data)){
-				errorMessage = " - Certificate error !";
+				errorMessage = "Certificate error\nMore informations in our Github page";
 				testingProcess.exit();
+				return;
 			}
 			
 			if(startInfoLocked.test(data)){
-				errorMessage = " - Locked with passcode !";
+				errorMessage = "Locked with passcode. Please disable code\n and auto-lock in device settings";
 				testingProcess.exit();
+				return;
+			}
+			
+			if(noXcodeInstalled.test(data)){
+				errorMessage = "No XCode founded on this computer\nGo to AppStore for download it";
+				testingProcess.exit();
+				return;
+			}
+			
+			if(wrongVersionofxCode.test(data)){
+				errorMessage = "Your device need a more recent version\n of xCode. Go to AppStore for download it";
+				testingProcess.exit();
+				return;
 			}
 		}
 	}

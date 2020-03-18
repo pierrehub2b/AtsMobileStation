@@ -30,6 +30,9 @@
 					if(dev is AndroidDevice){
 						androidUsbGroup.visible = true;
 						installAppButton.visible = false;
+					} else {
+						androidUsbGroup.visible = false;
+						androidUsbGroup.height = 0;
 					}
 					
 					var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
@@ -52,6 +55,8 @@
 						fileStream.close();
 					}
 				}
+				
+				portAutomatic.selected = portAutomatic.selected == false && portSelection.text == "";
 				portSelection.enabled = !portAutomatic.selected;
 			}
 			
