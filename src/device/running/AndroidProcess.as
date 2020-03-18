@@ -37,6 +37,8 @@ package device.running
 		
 		private var port:String;
 		private var forwardPort:String;
+		private var udpPort:String;
+		
 		private var id:String;
 		private var atsdroidFilePath:String;
 		private var usbMode:Boolean;
@@ -60,7 +62,7 @@ package device.running
 		
 		private var instrumentCommandLine:String;
 		
-		public function AndroidProcess(adbFile:File, atsdroid:String, id:String, port:String, forwardPort:String, usbMode:Boolean)
+		public function AndroidProcess(adbFile:File, atsdroid:String, id:String, port:String, forwardPort:String, udpPort:String, usbMode:Boolean)
 		{
 			this.currentAdbFile = adbFile;
 			this.id = id;
@@ -69,6 +71,7 @@ package device.running
 			this.deviceInfo = new Device(id);
 			this.usbMode = usbMode;
 			this.forwardPort = forwardPort;
+			this.udpPort = udpPort;
 					
 			//---------------------------------------------------------------------------------------
 
@@ -314,7 +317,7 @@ package device.running
 				process.start(procInfo);
 				
 				if (usbMode) {
-					instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + forwardPort + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerUsb " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";				
+					instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + forwardPort + " -e udpPort " + udpPort + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerUsb " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";				
 				} else {
 					instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerWifi " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";				
 				}
