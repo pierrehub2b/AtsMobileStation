@@ -123,9 +123,9 @@ package udpServer
 			buffer.writeInt(dataLength);
 			
 			if (dataLength > 0) {
-				buffer.writeBytes(screen, buffer.length, packetSize);
+				buffer.writeBytes(screen, currentPos, packetSize);
 			}
-			
+						
 			try {
 				_datagramSocket.send(buffer, 0, buffer.length, srcAddress, srcPort);
 			} catch ( error:Error ){
