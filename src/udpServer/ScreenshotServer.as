@@ -1,8 +1,13 @@
 package udpServer
 {
+	import com.worlize.websocket.WebSocket;
+	import com.worlize.websocket.WebSocketErrorEvent;
+	import com.worlize.websocket.WebSocketEvent;
+	import com.worlize.websocket.WebSocketMessage;
+	
 	import device.running.AndroidDevice;
 	import device.running.AndroidProcess;
-	import mx.utils.Base64Decoder;
+	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Loader;
@@ -18,6 +23,8 @@ package udpServer
 	import flash.text.TextField;
 	import flash.utils.ByteArray;
 	
+	import mx.utils.Base64Decoder;
+	
 	import usb.UsbAction;
 	
 	public class ScreenshotServer
@@ -28,44 +35,113 @@ package udpServer
 		private var _sourcePort:String;
 		private var _message:TextField;
 		private var currentDevice:AndroidDevice;
-		private static const PACKET_SIZE:int = 1024;
+		private static const PACKET_SIZE:int = 2000;
 		private var baImage:ByteArray = new ByteArray();
 		private var usrDir:File = File.userDirectory;
 		private var _load:Loader = new Loader();
 		private var decode:Base64Decoder = new Base64Decoder();
+		private var webSocket:WebSocket;
 		
+		private var srcPort:int;
+		private var srcAddress:String;
+
 		public function ScreenshotServer(){
 			_datagramSocket = new DatagramSocket();
 		}
 		
-		public function bind(ip:String, device:AndroidDevice):void
+		// ScreenShotServerManager.register(device, port)
+		// WebServerManager.register(device); -> associate web server whith device ID. Device get port ? Or server ?
+		
+		public function bind(/*ip:String, device:AndroidDevice, */port:int):int
 		{
-			this.currentDevice = device;
+			// this.currentDevice = device;
 			if(_datagramSocket.bound) 
 			{
 				_datagramSocket.close();
 				_datagramSocket = new DatagramSocket();
 			}
-			_datagramSocket.bind(0,ip);
+			_datagramSocket.bind();
 			_datagramSocket.addEventListener(DatagramSocketDataEvent.DATA, dataReceived);
 			_datagramSocket.addEventListener(IOErrorEvent.IO_ERROR, errorSocket);
 			_datagramSocket.receive();
+			
+			webSocket = new WebSocket("ws://localhost:" + port.toString(), "*");
+			webSocket.addEventListener(WebSocketEvent.OPEN, webSocketOpenHandler);
+			webSocket.addEventListener(WebSocketEvent.MESSAGE, webSocketOnMessageHandler);
+			webSocket.addEventListener(WebSocketErrorEvent.CONNECTION_FAIL, webSocketConnectionFailHandler);
+			webSocket.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+			
+			return _datagramSocket.localPort;
 		}
 		
 		private function dataReceived(event:DatagramSocketDataEvent):void
 		{
-			var data:Array = new Array();
-			data.push("dumpsys", "activity", AndroidProcess.ANDROIDDRIVER, "screenshot", "hires");
-			currentDevice.androidUsbScreenshot.addEventListener(AndroidProcess.SCREENSHOTRESPONSE, sendBackData, false, 0, true);
-						
-			currentDevice.actionsInsertAt(0, new UsbAction(data));
-			var usbAction:UsbAction = currentDevice.actionsShift();
-			currentDevice.androidUsbScreenshot.requestScreenshot(usbAction);
+			srcAddress = event.srcAddress;
+			srcPort = event.srcPort;
+			
+			if (webSocket.connected) {
+				webSocket.sendUTF("ok");
+			} else {
+				webSocket.connect();
+			}
 		}
 		
 		private function errorSocket(event:IOErrorEvent):void
 		{
 			var error:String = event.text;
+		}
+		
+		private function webSocketOnMessageHandler(event:WebSocketEvent):void
+		{
+			if (event.message.type === WebSocketMessage.TYPE_BINARY) {
+				var buffer:ByteArray = event.message.binaryData
+				
+				try {
+					var dataLength:int = buffer.length;
+					var packetSize:int = PACKET_SIZE;
+					var currentPos:int = 0;
+					
+					sendData(buffer, currentPos, dataLength, packetSize);
+										
+					while (dataLength > 0) {
+						currentPos += packetSize;
+						dataLength -= packetSize;
+						if (dataLength < packetSize) {
+							packetSize = dataLength;
+						}
+						sendData(buffer, currentPos, dataLength, packetSize);
+					}
+				} catch ( error:Error ){
+					var errorStr:String = error.message;
+				}
+			}
+		}
+		
+		public function sendData(screen:ByteArray, currentPos:int, dataLength:int, packetSize:int):void {
+			var buffer: ByteArray = new ByteArray();
+			buffer.writeInt(currentPos);
+			buffer.writeInt(dataLength);
+			
+			if (dataLength > 0) {
+				buffer.writeBytes(screen, currentPos, packetSize);
+			}
+						
+			try {
+				_datagramSocket.send(buffer, 0, buffer.length, srcAddress, srcPort);
+			} catch ( error:Error ){
+				var errorStr:String = error.message;
+			}	
+		}
+		
+		private function webSocketConnectionFailHandler(event:WebSocketErrorEvent):void 
+		{
+			trace("WebSocket ERROR : " + event.text);
+		}
+		
+		private function webSocketOpenHandler(event:WebSocketEvent):void 
+		{
+			trace("Connected to websocket");
+			webSocket.sendUTF("ok");
 		}
 		
 		/*public function getImage(ev:Event):void {
@@ -207,18 +283,8 @@ package udpServer
 			loader.loadBytes(ba);*/
 		}
 		
-		public function sendData(screen:ByteArray, currentPos:int, dataLength:int, packetSize:int):void {
-			var bytes:ByteArray = new ByteArray();
-			for(var i:int=0; i < packetSize; i++) {
-				bytes[i] = screen[currentPos + i];
-			}
-			
-			try {
-				_datagramSocket.send(bytes, 0, bytes.length, _datagramSocket.localAddress, _datagramSocket.localPort);
-			} catch ( error:Error ){
-				var errorStr:String = error.message;
-			}
-			
+		private function ioErrorHandler(event:IOErrorEvent):void {
+			trace("ioErrorHandler: " + event);
 		}
 	}
 }

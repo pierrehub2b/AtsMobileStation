@@ -1,7 +1,5 @@
 package device.running
 {
-	import device.Device;
-	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -14,6 +12,8 @@ package device.running
 	import flash.globalization.DateTimeFormatter;
 	
 	import mx.core.FlexGlobals;
+	
+	import device.Device;
 	
 	
 	public class AndroidProcess extends EventDispatcher
@@ -37,6 +37,8 @@ package device.running
 		
 		private var port:String;
 		private var forwardPort:String;
+		private var udpPort:String;
+		
 		private var id:String;
 		private var atsdroidFilePath:String;
 		private var usbMode:Boolean;
@@ -54,12 +56,13 @@ package device.running
 		private static var _wmicFile:File = null;
 		private var currentAdbFile:File;
 		
-		private var logStream:FileStream;
+		private var logFile:File;
+		private var logStream:FileStream = new FileStream();
 		private var dateFormatter:DateTimeFormatter = new DateTimeFormatter("en-US");
 		
 		private var instrumentCommandLine:String;
 		
-		public function AndroidProcess(adbFile:File, atsdroid:String, id:String, port:String, forwardPort:String, usbMode:Boolean)
+		public function AndroidProcess(adbFile:File, atsdroid:String, id:String, port:String, forwardPort:String, udpPort:String, usbMode:Boolean)
 		{
 			this.currentAdbFile = adbFile;
 			this.id = id;
@@ -68,11 +71,16 @@ package device.running
 			this.deviceInfo = new Device(id);
 			this.usbMode = usbMode;
 			this.forwardPort = forwardPort;
+			this.udpPort = udpPort;
 					
 			//---------------------------------------------------------------------------------------
-			logStream = new FileStream();
+
 			dateFormatter.setDateTimePattern("yyyy-MM-dd hh:mm:ss");
-			logStream.open(FlexGlobals.topLevelApplication.logsFolder.resolvePath("android_" + id + "_" + new Date().time + ".log"), FileMode.APPEND);
+			logFile = FlexGlobals.topLevelApplication.logsFolder.resolvePath("android_" + id + "_" + new Date().time + ".log");
+			
+			logStream.open(logFile, FileMode.WRITE);
+			logStream.writeUTFBytes("Start Android process");
+			logStream.close();
 			
 			//---------------------------------------------------------------------------------------
 			
@@ -95,14 +103,12 @@ package device.running
 		}
 		
 		public function start():void{
-			writeInfoLogFile("Start Android process");
 			process.start(procInfo);
 		}
 		
 		public function terminate():Boolean{
 			if(process != null && process.running){
 				process.exit();
-				logStream.close();
 				return true;
 			}
 			return false;
@@ -121,7 +127,9 @@ package device.running
 			data = data.replace("INSTRUMENTATION_STATUS_CODE: 0", "");
 			data = data.replace(/[\u000d\u000a\u0008]+/g, "");
 			if(data.length > 0){
+				logStream.open(logFile, FileMode.APPEND);
 				logStream.writeUTFBytes("[" + dateFormatter.format(new Date()) + "][" + type + "]" + data + "\n");
+				logStream.close();
 			}
 		}
 		
@@ -309,7 +317,7 @@ package device.running
 				process.start(procInfo);
 				
 				if (usbMode) {
-					instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + forwardPort + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerUsb " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";				
+					instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + forwardPort + " -e udpPort " + udpPort + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerUsb " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";				
 				} else {
 					instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerWifi " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";				
 				}

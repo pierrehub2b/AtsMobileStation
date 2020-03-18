@@ -67,12 +67,17 @@ package device.running
 			errorMessage = "";
 			
 			var forwardPort:String = "";
+			var udpPort:String = "";
 			
 			if (usbMode) {
 				webServActions = new WebServer(this.port == "" ? 0 : parseInt(this.port));
-
+				udpServScreenshot = new ScreenshotServer();
+				
 				this.port = webServActions.getPort().toString();
 				forwardPort = webServActions.getDevicePort().toString();
+				
+				// un autre port pour l'udp
+				udpPort = udpServScreenshot.bind(webServActions.getDevicePort()).toString();
 			}
 			
 			if(!portAutomatic && this.port == "") {
@@ -90,7 +95,7 @@ package device.running
 			fileStream.writeUTFBytes(id + "==" + automaticPort + ";" + this.port + ";" + usbMode);
 			fileStream.close();
 			
-			process = new AndroidProcess(adbFile, atsdroidFilePath, id, this.port, forwardPort, usbMode);
+			process = new AndroidProcess(adbFile, atsdroidFilePath, id, this.port, forwardPort, udpPort, usbMode);
 			process.addEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.WIFI_ERROR_EVENT, processWifiErrorHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.RUNNING, runningTestHandler, false, 0, true);
@@ -177,7 +182,7 @@ package device.running
 		}
 		
 		public function startScreenshotServer():int {
-			udpServScreenshot.bind(ip, this);
+			// udpServScreenshot.bind(ip, this);
 			return this.udpServScreenshot._datagramSocket.localPort;
 		}
 		
