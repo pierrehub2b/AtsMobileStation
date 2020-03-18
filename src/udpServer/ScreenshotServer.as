@@ -98,14 +98,11 @@ package udpServer
 				
 				try {
 					var dataLength:int = buffer.length;
-					
 					var packetSize:int = PACKET_SIZE;
 					var currentPos:int = 0;
 					
 					sendData(buffer, currentPos, dataLength, packetSize);
-					
-					// _datagramSocket.send(buffer, currentPos, packetSize, srcAddress, srcPort);
-					
+										
 					while (dataLength > 0) {
 						currentPos += packetSize;
 						dataLength -= packetSize;
@@ -113,31 +110,27 @@ package udpServer
 							packetSize = dataLength;
 						}
 						sendData(buffer, currentPos, dataLength, packetSize);
-
-						// _datagramSocket.send(buffer, currentPos, packetSize, srcAddress, srcPort);
 					}
 				} catch ( error:Error ){
 					var errorStr:String = error.message;
 				}
 			}
-				
-				
-				/*	
-				var dataLength:int = buffer.length;
-				
-				var packetSize:int = PACKET_SIZE;
-				var currentPos:int = 0;
-				
-				sendData(buffer, 0, buffer.length, PACKET_SIZE);
-				
-				while (dataLength > 0) {
-					currentPos += packetSize;
-					dataLength -= packetSize;
-					if (dataLength < packetSize) {
-						packetSize = dataLength;
-					}
-					sendData(buffer, currentPos, dataLength, packetSize);
-				}	*/			
+		}
+		
+		public function sendData(screen:ByteArray, currentPos:int, dataLength:int, packetSize:int):void {
+			var buffer: ByteArray = new ByteArray();
+			buffer.writeInt(currentPos);
+			buffer.writeInt(dataLength);
+			
+			if (dataLength > 0) {
+				buffer.writeBytes(screen, buffer.length, packetSize);
+			}
+			
+			try {
+				_datagramSocket.send(buffer, 0, buffer.length, srcAddress, srcPort);
+			} catch ( error:Error ){
+				var errorStr:String = error.message;
+			}	
 		}
 		
 		private function webSocketConnectionFailHandler(event:WebSocketErrorEvent):void 
@@ -288,24 +281,6 @@ package udpServer
 			}
 			});
 			loader.loadBytes(ba);*/
-		}
-				
-		public function sendData(screen:ByteArray, currentPos:int, dataLength:int, packetSize:int):void {
-			var buffer: ByteArray = new ByteArray();
-			buffer.writeInt(currentPos);
-			buffer.writeInt(dataLength);
-			buffer.writeBytes(screen, 8, packetSize);
-			
-			/* var bytes:ByteArray = new ByteArray();
-			for(var i:int=0; i < packetSize; i++) {
-				bytes[i] = screen[currentPos + i];
-			} */
-			
-			try {
-				_datagramSocket.send(buffer, 0, buffer.length, srcAddress, srcPort);
-			} catch ( error:Error ){
-				var errorStr:String = error.message;
-			}	
 		}
 		
 		private function ioErrorHandler(event:IOErrorEvent):void {

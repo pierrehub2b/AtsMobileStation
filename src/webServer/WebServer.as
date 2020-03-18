@@ -136,19 +136,7 @@ package webServer
 				webSocket.connect();
 			}
 		}
-		
-		// 2. back to client
-		private function onProxySocketData(event:ProgressEvent):void 
-		{
-			// read data
-			var buffer:ByteArray = new ByteArray();
-			proxySocket.readBytes(buffer, 0, proxySocket.bytesAvailable);
-			
-			// return data
-			clientSocket.writeBytes(buffer, 0, buffer.length);
-			clientSocket.flush()
-		}
-				
+						
 		private function onSocketClose(ev:Event):void {}
 						
 		private function closeHandler(event:Event):void {}
