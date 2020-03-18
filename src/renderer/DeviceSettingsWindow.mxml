@@ -7,14 +7,13 @@
 			   initialize="settings_initializeHandler(event)">
 	<fx:Script>
 		<![CDATA[
-			import device.RunningDevice;
-			import device.running.AndroidDevice;
-			import device.running.IosDevice;
-			
 			import mx.core.FlexGlobals;
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
+			
+			import device.RunningDevice;
+			import device.running.AndroidDevice;
 			
 			public var dev:RunningDevice;
 			public var arrayString:Array;
@@ -29,7 +28,12 @@
 					
 					if(dev is AndroidDevice){
 						androidUsbGroup.visible = true;
+						androidUsbGroup.includeInLayout = true;
 						installAppButton.visible = false;
+					}else{
+						androidUsbGroup.visible = false;
+						androidUsbGroup.includeInLayout = false;
+						installAppButton.visible = true;
 					}
 					
 					var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
