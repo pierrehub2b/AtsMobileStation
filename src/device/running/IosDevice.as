@@ -8,15 +8,12 @@ package device.running
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
-	import flash.system.Capabilities;
 	
 	import mx.core.FlexGlobals;
 	
 	import device.Device;
 	import device.RunningDevice;
 	import device.simulator.Simulator;
-	
-	import net.tautausan.plist.Plist;
 	
 	public class IosDevice extends RunningDevice
 	{
