@@ -2,8 +2,7 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
-					   width="360" height="480" showStatusBar="false"
-					   right="0" bottom="0" frameRate="24"
+					   showStatusBar="false" frameRate="60"
 					   creationComplete="creationCompleteHandler(event)"
 					   close="closeHandler(event)" backgroundColor="0xefefef">
 	<fx:Script>
@@ -99,7 +98,7 @@
 			protected function clickGroup_clickHandler(event:MouseEvent):void
 			{
 				if(simulatorsGroup.height == 26){
-					TweenMax.to(simulatorsGroup, 0.3, {height:426})
+					TweenMax.to(simulatorsGroup, 0.3, {height:height-38})
 				}else{
 					TweenMax.to(simulatorsGroup, 0.3, {height:26})
 				}
