@@ -94,6 +94,7 @@ class atsDriver: XCTestCase {
     ]
     
     override func setUp() {
+        self.appsInstalled = []
         super.setUp()
         continueAfterFailure = true
         
@@ -190,10 +191,8 @@ class atsDriver: XCTestCase {
     }
     
     func setupInstalledApp(){
-        print("les apps installed : \(self.appsInstalled)")
         applications  = []
         for app in self.appsInstalled {
-            //TODO retrieve right bundle Name
             let name = "CFBundleName"
             self.addInstalledApp(label: name, packageName: String(app), version: "", icon:DefaultAppIcon())
         }
@@ -206,8 +205,6 @@ class atsDriver: XCTestCase {
         app["version"] = ""
         app["icon"] = icon
         applications.append(app)
-        print("Les apps :")
-        print(applications)
     }
     
     func udpStart(){
@@ -334,22 +331,25 @@ class atsDriver: XCTestCase {
                 }
             }else if(action == ActionsEnum.SCREENSHOT.rawValue){
                 let screenshot = XCUIScreen.main.screenshot()
-                let img = screenshot.image.resized(withPercentage: UIScreen.main.scale)
-                let bytes = self.getArrayOfBytesFromImage(imageData: UIImagePNGRepresentation(img!)!)
+                //let img = screenshot.image.resized(withPercentage: UIScreen.main.scale)
+                let bytes = self.getArrayOfBytesFromImage(imageData: UIImagePNGRepresentation(screenshot.image)!)
                 startResponse("200 OK", [("Content-Type", "application/octet-stream"),("Content-length", bytes.count.description)])
                 sendBody(Data(bytes: bytes))
                 sendBody(Data())
             }else if(action == ActionsEnum.INFO.rawValue){
                 let testBundle = Bundle(for: atsDriver.self)
-                if let url = testBundle.url(forResource: "Settings", withExtension: "plist"),
-                    let myDict = NSDictionary(contentsOf: url) as? [String:Any] {
-                    for itm in myDict {
-                        if(itm.key.contains("CFAppBundleID")) {
-                            self.appsInstalled.append(itm.value as! String)
+                if(!UIDevice.isSimulator) {
+                    self.appsInstalled = []
+                    if let url = testBundle.url(forResource: "Settings", withExtension: "plist"),
+                        let myDict = NSDictionary(contentsOf: url) as? [String:Any] {
+                        for itm in myDict {
+                            if(itm.key.contains("CFAppBundleID")) {
+                                self.appsInstalled.append(itm.value as! String)
+                            }
                         }
                     }
+                    self.setupInstalledApp();
                 }
-                self.setupInstalledApp();
                 
                 self.driverInfoBase()
                 self.resultElement["message"] = "device capabilities"
