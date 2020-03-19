@@ -1,6 +1,5 @@
 package device.running
 {
-	import device.Device;
 	import device.RunningDevice;
 	
 	import flash.events.Event;
@@ -8,34 +7,29 @@ package device.running
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	
-	import mx.collections.ArrayList;
 	import mx.core.FlexGlobals;
-	import mx.events.CollectionEvent;
 	
-	import udpServer.ScreenshotServer;
-	
-	import usb.UsbAction;
-	import usb.UsbActionProcess;
-	import usb.UsbScreenshotProcess;
-	
-	import webServer.WebServer;
+	import servers.PortManager;
+	import servers.tcp.WebServer;
+	import servers.udp.CaptureServer;
 	
 	public class AndroidDevice extends RunningDevice
-	{
-		private static const atsdroidFilePath:String = File.applicationDirectory.resolvePath("assets/drivers/atsdroid.apk").nativePath;
-		
+	{		
 		public var androidVersion:String = "";
 		public var androidSdk:String = "";
 
 		private var process:AndroidProcess;
 		private var webServActions:WebServer;
-		private var udpServScreenshot:ScreenshotServer;
+		private var udpServScreenshot:CaptureServer;
 		private var currentAdbFile:File;
 		
-		private var actionQueue:Vector.<UsbAction> = new Vector.<UsbAction>();
+		/* private var actionQueue:Vector.<UsbAction> = new Vector.<UsbAction>();
 		public var androidUsbAction:UsbActionProcess;
 		public var androidUsbScreenshot:UsbScreenshotProcess;
-		public static const UDPSERVER:Boolean = true;
+		public static const UDPSERVER:Boolean = true; */
+		
+		public var forwardPort:int;
+		public var udpPort:int;
 				
 		public function AndroidDevice(adbFile:File, port:String, id:String)
 		{
@@ -43,6 +37,22 @@ package device.running
 			this.status = INSTALL;
 			this.currentAdbFile = adbFile;
 			
+			configure();
+			
+			process = new AndroidProcess(adbFile, id, this.port, forwardPort.toString(), udpPort.toString(), usbMode);
+			process.addEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler, false, 0, true);
+			process.addEventListener(AndroidProcess.WIFI_ERROR_EVENT, processWifiErrorHandler, false, 0, true);
+			process.addEventListener(AndroidProcess.RUNNING, runningTestHandler, false, 0, true);
+			process.addEventListener(AndroidProcess.STOPPED, stoppedTestHandler, false, 0, true);
+			process.addEventListener(AndroidProcess.DEVICE_INFO, deviceInfoHandler, false, 0, true);
+			process.addEventListener(AndroidProcess.IP_ADDRESS, ipAdressHandler, false, 0, true);
+			
+			process.writeInfoLogFile("USB MODE = " + usbMode + " > set port: " + this.port);
+			
+			installing();
+		}
+		
+		private function configure():void {
 			var portAutomatic:Boolean = false;
 			
 			var fileStream:FileStream = new FileStream();
@@ -66,21 +76,12 @@ package device.running
 			}
 			errorMessage = "";
 			
-			var forwardPort:String = "";
-			var udpPort:String = "";
-			
 			if (usbMode) {
-				webServActions = new WebServer(this.port == "" ? 0 : parseInt(this.port));
-				udpServScreenshot = new ScreenshotServer();
-				
-				this.port = webServActions.getPort().toString();
-				forwardPort = webServActions.getDevicePort().toString();
-				
-				// un autre port pour l'udp
-				udpPort = udpServScreenshot.bind(webServActions.getDevicePort()).toString();
+				forwardPort = PortManager.getAvailableLocalPort()
+				udpPort = PortManager.getAvailableLocalPort();
 			}
 			
-			if(!portAutomatic && this.port == "") {
+			if(/*!portAutomatic && */this.port == "") {
 				this.port = "8080";
 			}
 			
@@ -92,28 +93,16 @@ package device.running
 				}
 			}
 			
-			fileStream.writeUTFBytes(id + "==" + automaticPort + ";" + this.port + ";" + usbMode);
+			fileStream.writeUTFBytes(id + "==" + portAutomatic + ";" + this.port + ";" + usbMode);
 			fileStream.close();
-			
-			process = new AndroidProcess(adbFile, atsdroidFilePath, id, this.port, forwardPort, udpPort, usbMode);
-			process.addEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler, false, 0, true);
-			process.addEventListener(AndroidProcess.WIFI_ERROR_EVENT, processWifiErrorHandler, false, 0, true);
-			process.addEventListener(AndroidProcess.RUNNING, runningTestHandler, false, 0, true);
-			process.addEventListener(AndroidProcess.STOPPED, stoppedTestHandler, false, 0, true);
-			process.addEventListener(AndroidProcess.DEVICE_INFO, deviceInfoHandler, false, 0, true);
-			process.addEventListener(AndroidProcess.IP_ADDRESS, ipAdressHandler, false, 0, true);
-			
-			process.writeInfoLogFile("USB MODE = " + usbMode + " > set port: " + this.port);
-			
-			installing();
 		}
 		
-		public function httpServerError(error:String):void {
+		/* public function httpServerError(error:String):void {
 			errorMessage = error;
 			webServActions = null;
 			androidUsbAction.stopProcess();
 			androidUsbScreenshot.stopProcess();
-		}
+		} */
 		
 		public function get getCurrentAdbFile():File {
 			return this.currentAdbFile;
@@ -128,13 +117,16 @@ package device.running
 		public override function close():void {
 			if(webServActions != null) {
 				webServActions.close();
-				webServActions = null;
 			}
 			
+			if (udpServScreenshot != null) {
+				udpServScreenshot.close();
+			}
+						
 			super.close()
 		}
 		
-		public function actionsInsertAt(pos:int, act:UsbAction):void {
+		/* public function actionsInsertAt(pos:int, act:UsbAction):void {
 			this.actionQueue.insertAt(pos, act);
 		}
 		
@@ -144,10 +136,9 @@ package device.running
 		
 		public function actionsShift():UsbAction {
 			return this.actionQueue.shift();
-		}
+		} */
 		
 		private function processErrorHandler(ev:Event):void{
-		
 			process.removeEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler);
 			process.removeEventListener(AndroidProcess.WIFI_ERROR_EVENT, processWifiErrorHandler);
 			process.removeEventListener(AndroidProcess.RUNNING, runningTestHandler);
@@ -177,15 +168,6 @@ package device.running
 			return this.process;
 		}
 		
-		public function stopScreenshotServer():void {
-			this.udpServScreenshot = new ScreenshotServer();
-		}
-		
-		public function startScreenshotServer():int {
-			// udpServScreenshot.bind(ip, this);
-			return this.udpServScreenshot._datagramSocket.localPort;
-		}
-		
 		private function runningTestHandler(ev:Event):void{
 			process.removeEventListener(AndroidProcess.RUNNING, runningTestHandler);
 			if(usbMode && errorMessage != "") {
@@ -196,6 +178,17 @@ package device.running
 				status = READY;
 				tooltip = "Android " + androidVersion + ", API " + androidSdk + " [" + id + "]\nready and waiting testing actions";
 				started();
+			}
+		}
+		
+		protected override function started():void{
+			super.started();
+			
+			if (usbMode) {
+				webServActions = new WebServer(this.port == "" ? 0 : parseInt(this.port), forwardPort);
+				
+				udpServScreenshot = new CaptureServer();
+				udpServScreenshot.bind(udpPort, forwardPort);
 			}
 		}
 		

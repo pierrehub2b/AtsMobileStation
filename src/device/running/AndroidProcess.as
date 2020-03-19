@@ -1,5 +1,7 @@
 package device.running
 {
+	import device.Device;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -13,11 +15,10 @@ package device.running
 	
 	import mx.core.FlexGlobals;
 	
-	import device.Device;
-	
-	
 	public class AndroidProcess extends EventDispatcher
 	{
+		private static const atsdroidFilePath:String = File.applicationDirectory.resolvePath("assets/drivers/atsdroid.apk").nativePath;
+		
 		public static const ERROR_EVENT:String = "errorEvent";
 		public static const WIFI_ERROR_EVENT:String = "wifiErrorEvent";
 		public static const IP_ADDRESS:String = "ipAddress";
@@ -40,7 +41,6 @@ package device.running
 		private var udpPort:String;
 		
 		private var id:String;
-		private var atsdroidFilePath:String;
 		private var usbMode:Boolean;
 		
 		private var output:String = "";
@@ -62,12 +62,11 @@ package device.running
 		
 		private var instrumentCommandLine:String;
 		
-		public function AndroidProcess(adbFile:File, atsdroid:String, id:String, port:String, forwardPort:String, udpPort:String, usbMode:Boolean)
+		public function AndroidProcess(adbFile:File, id:String, port:String, forwardPort:String, udpPort:String, usbMode:Boolean)
 		{
 			this.currentAdbFile = adbFile;
 			this.id = id;
 			this.port = port;
-			this.atsdroidFilePath = atsdroid;
 			this.deviceInfo = new Device(id);
 			this.usbMode = usbMode;
 			this.forwardPort = forwardPort;
@@ -138,7 +137,6 @@ package device.running
 			error = new String(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
 		}
 		
-		// Anthony: Listen adb forward tcp: tcp: exit
 		protected function onForwardPortExit(event:NativeProcessExitEvent):void{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onForwardPortExit);
 			

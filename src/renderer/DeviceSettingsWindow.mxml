@@ -57,7 +57,7 @@
 					}
 				}
 				
-				portAutomatic.selected = portAutomatic.selected == false && portSelection.text == "";
+				// portAutomatic.selected = portAutomatic.selected; //== false && portSelection.text == "";
 				portSelection.enabled = !portAutomatic.selected;
 			}
 			

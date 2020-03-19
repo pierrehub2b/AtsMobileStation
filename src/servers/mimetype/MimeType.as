@@ -1,4 +1,4 @@
-package webServer.mimetype
+package servers.mimetype
 {
 	import org.osmf.net.StreamingURLResource;
 	
