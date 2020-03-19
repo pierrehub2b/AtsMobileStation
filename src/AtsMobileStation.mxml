@@ -2,8 +2,7 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
-					   width="360" height="480" showStatusBar="false"
-					   right="0" bottom="0" frameRate="24"
+					   showStatusBar="false" frameRate="60"
 					   creationComplete="creationCompleteHandler(event)"
 					   close="closeHandler(event)" backgroundColor="0xefefef">
 	<fx:Script>
@@ -12,6 +11,7 @@
 			
 			import flash.filters.BitmapFilterQuality;
 			
+			import mx.core.FlexGlobals;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
 			
@@ -39,6 +39,8 @@
 			[Bindable]
 			public var simulators:AvailableSimulatorsManager;
 			
+			public var teamId:String;
+			
 			public function get logsFolder():File{
 				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/logs");
 			}
@@ -51,24 +53,62 @@
 				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/settings.txt");
 			}
 			
+			public function getTeamId():String {
+				return teamId;
+			}
+			
+			public function setTeamId(value:String):void {
+				teamId = value;
+			}
+			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
 				try{
 					logsFolder.deleteDirectory(true);
 				}catch(err:IOError){}
 
-				if(!Capabilities.isDebugger) {
+				//if(!Capabilities.isDebugger) {
 					cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
-				}
+				//}
 				
 				simulators = new AvailableSimulatorsManager();
 				devices = new RunningDevicesManager(port, isMacOs);
 				
 				settingsButton.visible = isMacOs;
+				if(isMacOs) {
+					var file:File = FlexGlobals.topLevelApplication.settingsFile;
+					if(file.exists) {
+						
+						var fileStream:FileStream = new FileStream();
+						fileStream.open(file, FileMode.READ);
+						
+						var settingsContent:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
+						var settingsContentArray: Array = settingsContent.split("\n");
+						
+						for each(var setting:String in settingsContentArray) {
+							if(setting != "") {
+								var key:String = setting.split("==")[0];
+								if(key == "development_team") {
+									teamId = setting.split("==")[1];
+									break;
+								}
+							}
+						}
+						fileStream.close();
+					}
+				}
 			}
 			
 			public function restartDevice(dev:Device):void{
 				devices.restartDev(dev);
+			}
+			
+			public function restartIosDevices():void {
+				for each(var dv:RunningDevice in devices.collection) {
+					if(!dv.simulator && dv is IosDevice && dv.status != Device.READY) {
+						devices.restartDev(dv);
+					}
+				}
 			}
 			
 			protected function closeHandler(event:Event):void
@@ -99,7 +139,7 @@
 			protected function clickGroup_clickHandler(event:MouseEvent):void
 			{
 				if(simulatorsGroup.height == 26){
-					TweenMax.to(simulatorsGroup, 0.3, {height:426})
+					TweenMax.to(simulatorsGroup, 0.3, {height:height-38})
 				}else{
 					TweenMax.to(simulatorsGroup, 0.3, {height:26})
 				}

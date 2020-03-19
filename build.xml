@@ -42,7 +42,7 @@
         	strict="true"
         	use-gpu="false"
         	warnings="false"
-        	default-frame-rate="30">
+        	default-frame-rate="60">
         	<source-path path-element="src"/>
             <external-library-path file="${FLEX_HOME}/frameworks/libs/air/airglobal.swc" append="true"/>
             <library-path dir="libs" includes="*.swc" append="true"/>

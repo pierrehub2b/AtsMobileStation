@@ -8,15 +8,12 @@ package device.running
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
-	import flash.system.Capabilities;
 	
 	import mx.core.FlexGlobals;
 	
 	import device.Device;
 	import device.RunningDevice;
 	import device.simulator.Simulator;
-	
-	import net.tautausan.plist.Plist;
 	
 	public class IosDevice extends RunningDevice
 	{
@@ -50,6 +47,8 @@ package device.running
 			
 			var fileStream:FileStream = new FileStream();
 			var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
+			
+			trace("Getting settings configuration for device:" + id)
 			if(file.exists) {
 				fileStream.open(file, FileMode.READ);
 				var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
@@ -67,61 +66,31 @@ package device.running
 				fileStream.close();
 			}
 			
-			var teamId:String = "";
-			var lastBuildString:String = "";
-			file = FlexGlobals.topLevelApplication.settingsFile;
-			if(file.exists) {
-				
-				fileStream = new FileStream();
-				fileStream.open(file, FileMode.READ);
-				
-				var settingsContent:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
-				var settingsContentArray: Array = settingsContent.split("\n");
-				
-				for each(var setting:String in settingsContentArray) {
-					if(setting != "") {
-						var key:String = setting.split("==")[0];
-						switch(key)
-						{
-							case "development_team":
-							{
-								teamId = setting.split("==")[1];
-								break;
-							}
-								
-							/*case "last_build":
-							{
-								lastBuildString = setting.split("==")[1];
-								break;
-							}*/
-						}
-					}
-				}
-				fileStream.close();
-			}
-			
-			if(teamId == "" && !simulator) {
+			if(FlexGlobals.topLevelApplication.getTeamId() == "" && !simulator) {
 				status = Device.FAIL;
 				errorMessage = " - No development team id set";
 				return;
 			}
 			
 			installing()
+			trace("installing the driver")
 			testingProcess = new NativeProcess();
 			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 			
+			trace("Copy files into temp directory")
 			resultDir = File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id);
 			var alreadyCopied:Boolean = resultDir.exists;
 			if(!alreadyCopied) {
 				iosDriverProjectFolder.copyTo(resultDir, true);
 			}
 
+			trace("Managing plist file");
 			var index:int = 0;
 			file = resultDir.resolvePath("atsDriver/Settings.plist");
 			var xcworkspaceFile:File = resultDir.resolvePath("atsios.xcworkspace");
-			if(file.exists) {
+			if(file.exists && settingsPort != "") {
 				fileStream = new FileStream();
 				fileStream.open(file, FileMode.READ);
 				content = fileStream.readUTFBytes(fileStream.bytesAvailable);
@@ -134,11 +103,8 @@ package device.running
 						} else {
 							arrayString[index+1] = "\t<string></string>";
 						}
+						break;
 					}
-					
-					/*if(lineSettings.indexOf("CFComputerResolution") > -1) {
-						arrayString[index+1] = "\t<string>"+ Capabilities.screenResolutionX + "x" + Capabilities.screenResolutionY +"</string>";
-					}*/
 					index++;
 				}				
 				fileStream.close();
@@ -151,37 +117,22 @@ package device.running
 				writeFileStream.close();
 			}
 			
-			/*if(lastBuildString != "") {
-				var d:Date = new Date();
-				d.setTime(Date.parse(lastBuildString));
-				var modificationDate:int = (xcworkspaceFile.modificationDate.time/1000);
-				var oldDate:int = (d.time/1000);
-				alreadyCopied = !(modificationDate > oldDate);
-			}*/
-			
-			var fileSettings:File = FlexGlobals.topLevelApplication.settingsFile;
-			var fileStreamSettings:FileStream = new FileStream();
-			fileStreamSettings.open(fileSettings, FileMode.WRITE);
-			fileStreamSettings.writeUTFBytes("development_team==" + teamId + "\n");
-			//fileStreamSettings.writeUTFBytes("last_build==" + xcworkspaceFile.modificationDate.toString());
-			fileStreamSettings.close();
-			
 			procInfo = new NativeProcessStartupInfo();
 			procInfo.executable = xcodeBuildExec;
 			procInfo.workingDirectory = resultDir;
 			
 			var args: Vector.<String> = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id];
 			if(!simulator) {
-				args.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + teamId);
+				args.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + FlexGlobals.topLevelApplication.getTeamId());
 			}
 			
 			if(alreadyCopied) {
 				AtsMobileStation.alreadyBuilded = true;
 				args.push("test-without-building");
-				trace("test without building on device with id:" + id)
+				trace("test without building on device with id:" + id + " at " + new Date())
 			} else {
 				args.push("test");
-				trace("build and test on device with id:" + id)
+				trace("build and test on device with id:" + id + " at " + new Date())
 			}
 			getBundleIds(id);
 			procInfo.arguments = args;
