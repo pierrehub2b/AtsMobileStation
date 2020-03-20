@@ -5,29 +5,13 @@ package webServer
 	import com.worlize.websocket.WebSocketEvent;
 	import com.worlize.websocket.WebSocketMessage;
 	
-	import device.Device;
-	import device.running.AndroidDevice;
-	import device.running.AndroidProcess;
-	
-	import events.AndroidUsbChannelEvent;
-	
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
-	import flash.events.OutputProgressEvent;
 	import flash.events.ProgressEvent;
-	import flash.events.SecurityErrorEvent;
 	import flash.events.ServerSocketConnectEvent;
-	import flash.filesystem.File;
-	import flash.filesystem.FileMode;
-	import flash.filesystem.FileStream;
 	import flash.net.ServerSocket;
 	import flash.net.Socket;
-	import flash.net.URLRequest;
-	import flash.net.URLRequestHeader;
 	import flash.utils.ByteArray;
-	import flash.utils.Dictionary;
-	import flash.utils.clearInterval;
-	import flash.utils.setInterval;
 	
 	public class WebServer
 	{	
@@ -118,7 +102,7 @@ package webServer
 		{
 			clientSocket = event.socket;
 
-			clientSocket.addEventListener(ProgressEvent.SOCKET_DATA, onClientSocketData);
+			clientSocket.addEventListener(ProgressEvent.SOCKET_DATA, onClientSocketData, false, 0, true);
 			clientSocket.addEventListener(Event.CLOSE, onSocketClose);
 		}
 		
@@ -137,7 +121,10 @@ package webServer
 			}
 		}
 						
-		private function onSocketClose(ev:Event):void {}
+		private function onSocketClose(ev:Event):void {
+		
+			ev.currentTarget as Socket
+		}
 						
 		private function closeHandler(event:Event):void {}
 				
