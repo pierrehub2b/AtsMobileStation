@@ -8,14 +8,14 @@
 			   initialize="settings_initializeHandler(event)">
 	<fx:Script>
 		<![CDATA[
-			import device.RunningDevice;
-			
 			import flash.net.navigateToURL;
 			
 			import mx.core.FlexGlobals;
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
+			
+			import device.RunningDevice;
 			
 			[Embed(source="/assets/icons/16/apple_site.png")]
 			private const AppleIcon:Class
@@ -26,12 +26,11 @@
 			public var dev:RunningDevice;
 			public var arrayString:Array;
 			public var arrayStringDevTeam:Array;
-			public var lastbuild:String = "";
 			
 			public var devices:Array = new Array();
 			
 			protected function settings_initializeHandler(event:FlexEvent):void {
-				var fileDevTeam:File = FlexGlobals.topLevelApplication.settingsFile;
+				/*var fileDevTeam:File = FlexGlobals.topLevelApplication.settingsFile;
 				if(fileDevTeam.exists) {
 					var fileStreamSettings:FileStream = new FileStream();
 					fileStreamSettings.open(fileDevTeam, FileMode.READ);
@@ -42,14 +41,13 @@
 							var key:String = setting.split("==")[0];
 							if(key == "development_team") {
 								devTeamId.text = setting.split("==")[1];
-							}
-							if(key == "last_build") {
-								lastbuild = setting.split("==")[1];
+								break;
 							}
 						}
 					}
 					fileStreamSettings.close();
-				}
+				}*/
+				devTeamId.text = FlexGlobals.topLevelApplication.getTeamId();
 			}
 			
 			private function closeHandler(event:CloseEvent):void{
@@ -62,8 +60,10 @@
 				var fileStream:FileStream = new FileStream();
 				fileStream.open(file, FileMode.WRITE);
 				fileStream.writeUTFBytes("development_team==" + devTeamId.text + "\n");
-				fileStream.writeUTFBytes("last_build==" + lastbuild);
 				fileStream.close();
+				FlexGlobals.topLevelApplication.setTeamId(devTeamId.text);
+				
+				FlexGlobals.topLevelApplication.restartIosDevices();
 				PopUpManager.removePopUp(this);
 			}			
 			

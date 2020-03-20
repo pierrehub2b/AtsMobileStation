@@ -1,4 +1,4 @@
-package udpServer
+package servers.udp
 {
 	import com.worlize.websocket.WebSocket;
 	import com.worlize.websocket.WebSocketErrorEvent;
@@ -6,72 +6,59 @@ package udpServer
 	import com.worlize.websocket.WebSocketMessage;
 	
 	import device.running.AndroidDevice;
-	import device.running.AndroidProcess;
 	
-	import flash.display.Bitmap;
-	import flash.display.BitmapData;
 	import flash.display.Loader;
-	import flash.display.StageQuality;
 	import flash.events.DatagramSocketDataEvent;
-	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.filesystem.File;
-	import flash.filesystem.FileMode;
-	import flash.filesystem.FileStream;
-	import flash.geom.Rectangle;
 	import flash.net.DatagramSocket;
 	import flash.text.TextField;
 	import flash.utils.ByteArray;
 	
-	import mx.utils.Base64Decoder;
-	
-	import usb.UsbAction;
-	
-	public class ScreenshotServer
+	public class CaptureServer
 	{
-		public var _datagramSocket:DatagramSocket = new DatagramSocket();;
-		
-		private var _sourceIp:String;
-		private var _sourcePort:String;
-		private var _message:TextField;
-		private var currentDevice:AndroidDevice;
 		private static const PACKET_SIZE:int = 2000;
-		private var baImage:ByteArray = new ByteArray();
-		private var usrDir:File = File.userDirectory;
-		private var _load:Loader = new Loader();
-		private var decode:Base64Decoder = new Base64Decoder();
+		
+		public var datagramSocket:DatagramSocket = new DatagramSocket();
 		private var webSocket:WebSocket;
 		
 		private var srcPort:int;
 		private var srcAddress:String;
 
-		public function ScreenshotServer(){
-			_datagramSocket = new DatagramSocket();
+		public function CaptureServer(){
+			datagramSocket = new DatagramSocket();
 		}
 		
-		// ScreenShotServerManager.register(device, port)
-		// WebServerManager.register(device); -> associate web server whith device ID. Device get port ? Or server ?
+		public function close():void {
+			if(datagramSocket.bound) {
+				datagramSocket.close();
+			}
+			
+			if (webSocket.connected) {
+				webSocket.close(false);
+			}
+		}
 		
-		public function bind(/*ip:String, device:AndroidDevice, */port:int):int
+		public function bind(/*ip:String, device:AndroidDevice, */port:int, devicePort:int):int
 		{
 			// this.currentDevice = device;
-			if(_datagramSocket.bound) 
+			if(datagramSocket.bound) 
 			{
-				_datagramSocket.close();
-				_datagramSocket = new DatagramSocket();
+				datagramSocket.close();
+				datagramSocket = new DatagramSocket();
 			}
-			_datagramSocket.bind();
-			_datagramSocket.addEventListener(DatagramSocketDataEvent.DATA, dataReceived);
-			_datagramSocket.addEventListener(IOErrorEvent.IO_ERROR, errorSocket);
-			_datagramSocket.receive();
+			datagramSocket.bind(port);
+			datagramSocket.addEventListener(DatagramSocketDataEvent.DATA, dataReceived);
+			datagramSocket.addEventListener(IOErrorEvent.IO_ERROR, errorSocket);
+			datagramSocket.receive();
 			
-			webSocket = new WebSocket("ws://localhost:" + port.toString(), "*");
+			webSocket = new WebSocket("ws://localhost:" + devicePort.toString(), "*");
 			webSocket.addEventListener(WebSocketEvent.OPEN, webSocketOpenHandler);
 			webSocket.addEventListener(WebSocketEvent.MESSAGE, webSocketOnMessageHandler);
 			webSocket.addEventListener(WebSocketErrorEvent.CONNECTION_FAIL, webSocketConnectionFailHandler);
 			webSocket.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
 			
-			return _datagramSocket.localPort;
+			return datagramSocket.localPort;
 		}
 		
 		private function dataReceived(event:DatagramSocketDataEvent):void
@@ -127,7 +114,7 @@ package udpServer
 			}
 						
 			try {
-				_datagramSocket.send(buffer, 0, buffer.length, srcAddress, srcPort);
+				datagramSocket.send(buffer, 0, buffer.length, srcAddress, srcPort);
 			} catch ( error:Error ){
 				var errorStr:String = error.message;
 			}	
@@ -142,6 +129,11 @@ package udpServer
 		{
 			trace("Connected to websocket");
 			webSocket.sendUTF("ok");
+		}
+		
+		private function ioErrorHandler(event:IOErrorEvent):void 
+		{
+			trace("ioErrorHandler: " + event);
 		}
 		
 		/*public function getImage(ev:Event):void {
@@ -159,7 +151,7 @@ package udpServer
 			
 			_load.contentLoaderInfo.addEventListener( Event.COMPLETE, loadbytesComplete);
 			_load.loadBytes(bytes);
-		}*/
+		}
 		
 		private function loadbytesComplete( event:Event ):void {
 			var bit:Bitmap = _load.content as Bitmap;
@@ -208,7 +200,7 @@ package udpServer
 				sendData(ba, currentPos, dataLength, packetSize);
 			}
 			
-			/*if(currentDevice.androidUsb.getResponse().toLocaleLowerCase().indexOf("error") == -1) {
+			if(currentDevice.androidUsb.getResponse().toLocaleLowerCase().indexOf("error") == -1) {
 				var data:Array = new Array();
 				data.push("pull", currentDevice.androidUsb.getResponse(), "screenCapture.png");
 				currentDevice.androidUsb.addEventListener(AndroidProcess.SCREENSHOTRESPONSE, getImage, false, 0, true);
@@ -280,11 +272,9 @@ package udpServer
 			var errorStr:String = error.message;
 			}
 			});
-			loader.loadBytes(ba);*/
-		}
+			loader.loadBytes(ba);
+		} */
 		
-		private function ioErrorHandler(event:IOErrorEvent):void {
-			trace("ioErrorHandler: " + event);
-		}
+		
 	}
 }
