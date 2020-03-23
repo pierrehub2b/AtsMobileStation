@@ -311,8 +311,8 @@ package
 			
 			var dv:RunningDevice = ev.currentTarget as RunningDevice;
 			dv.removeEventListener(Device.STOPPED_EVENT, deviceStoppedHandler);
-			
-			collection.removeItem(dv);
+			var index:int = collection.getItemIndex(dv);
+			collection.removeItemAt(index);
 			collection.refresh();
 		}
 		
