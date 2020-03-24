@@ -82,7 +82,7 @@ package device.simulator
 					}
 				}
 			}
-			runningDevice = new IosDevice(id, modelName + " (" + osVersion +")", true, ipAddress);;
+			runningDevice = new IosDevice(id, modelName + " (" + osVersion +")", true, ipAddress);
 			return runningDevice;
 		}
 		

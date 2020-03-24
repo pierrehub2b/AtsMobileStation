@@ -81,7 +81,7 @@ package servers.udp
 		private function webSocketOnMessageHandler(event:WebSocketEvent):void
 		{
 			if (event.message.type === WebSocketMessage.TYPE_BINARY) {
-				var buffer:ByteArray = event.message.binaryData
+				var buffer:ByteArray = event.message.binaryData;
 				
 				try {
 					var dataLength:int = buffer.length;

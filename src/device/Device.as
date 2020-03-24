@@ -12,7 +12,8 @@ package device
 		public static const READY:String = "ready";
 		public static const FAIL:String = "fail";
 		public static const WIFI_ERROR:String = "wifiError";
-		
+		public static const PORT_NOT_AVAILABLE:String = "portNotAvailable";
+
 		public var id:String = "";
 		public var manufacturer:String = "";
 		public var modelId:String = "";

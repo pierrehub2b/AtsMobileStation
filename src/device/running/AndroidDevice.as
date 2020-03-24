@@ -1,15 +1,22 @@
 package device.running
 {
 	import device.RunningDevice;
-	
-	import flash.events.Event;
+
+import flash.desktop.NativeProcess;
+
+import flash.events.Event;
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	
 	import mx.core.FlexGlobals;
-	
-	import servers.PortManager;
+
+import helpers.DeviceSettings;
+import helpers.DeviceSettingsHelper;
+import helpers.NetworkEvent;
+import helpers.NetworkUtils;
+
+import helpers.PortSwitcher;
 	import servers.tcp.WebServer;
 	import servers.udp.CaptureServer;
 	
@@ -36,30 +43,75 @@ package device.running
 			this.id = id;
 			this.status = INSTALL;
 			this.currentAdbFile = adbFile;
-			
-			configure();
-			
-			process = new AndroidProcess(adbFile, id, this.port, forwardPort.toString(), udpPort.toString(), usbMode);
+
+			fetchConfiguration();
+
+			if (this.errorMessage != "") {
+				this.status = PORT_NOT_AVAILABLE;
+				return
+			}
+
+			// check ip address for usbmode <- a refacto
+			if (usbMode) {
+				fetchIpAddress()
+			} else {
+				setupAdbProcess();
+			}
+		}
+
+		private function setupAdbProcess():void {
+			process = new AndroidProcess(currentAdbFile, id, this.port, forwardPort.toString(), udpPort.toString(), usbMode);
 			process.addEventListener(AndroidProcess.ERROR_EVENT, processErrorHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.WIFI_ERROR_EVENT, processWifiErrorHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.RUNNING, runningTestHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.STOPPED, stoppedTestHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.DEVICE_INFO, deviceInfoHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.IP_ADDRESS, ipAdressHandler, false, 0, true);
-			
+
 			process.writeInfoLogFile("USB MODE = " + usbMode + " > set port: " + this.port);
-			
+
 			installing();
 		}
-		
-		private function configure():void {
-			var portAutomatic:Boolean = false;
-			
-			var fileStream:FileStream = new FileStream();
+
+		private function fetchIpAddress():void {
+			var networkUtils:NetworkUtils = new NetworkUtils();
+			networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_FOUND, onIpAddressHandler, false, 0, true);
+			networkUtils.getClientIPAddress()
+		}
+
+		private function fetchConfiguration():void {
+			var deviceSettingsHelper:DeviceSettingsHelper = DeviceSettingsHelper.shared;
+			var deviceSettings:DeviceSettings = deviceSettingsHelper.getSettingsForDevice(id);
+			if (deviceSettings == null) {
+				deviceSettings = new DeviceSettings(id);
+			}
+
+			var automaticPort:Boolean = deviceSettings.automaticPort;
+			this.usbMode = deviceSettings.usbMode;
+
+			if (usbMode) {
+				var portSwitcher:PortSwitcher = new PortSwitcher();
+				portSwitcher.addEventListener(PortSwitcher.PORT_NOT_AVAILABLE_EVENT, portSwitcherErrorHandler, false, 0, true);
+
+				deviceSettings.port = portSwitcher.getLocalPort(this.id, automaticPort);
+				this.port = deviceSettings.port.toString();
+
+				this.forwardPort = PortSwitcher.getAvailableLocalPort();
+				this.udpPort = PortSwitcher.getAvailableLocalPort();
+			} else {
+				this.port = deviceSettings.port.toString();
+			}
+
+			deviceSettingsHelper.save(deviceSettings);
+
+			// get config from file if exists
+			/* var fileStream:FileStream = new FileStream();
 			var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
 			if(file.exists) {
 				fileStream.open(file, FileMode.READ);
 				var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
+				fileStream.close();
+
 				var arrayString: Array = content.split("\n");
 				for each(var line:String in arrayString) {
 					if(line != "") {
@@ -72,19 +124,10 @@ package device.running
 						}
 					}
 				}
-				fileStream.close();
-			}
-			errorMessage = "";
-			
-			if (usbMode) {
-				forwardPort = PortManager.getAvailableLocalPort()
-				udpPort = PortManager.getAvailableLocalPort();
-			}
-			
-			if(/*!portAutomatic && */this.port == "") {
-				this.port = "8080";
-			}
-			
+			} */
+
+			/*
+			// save device settings
 			fileStream.open(file, FileMode.WRITE);
 			for each(var str:String in arrayString) {
 				arrayLineId = str.split("==");
@@ -95,6 +138,21 @@ package device.running
 			
 			fileStream.writeUTFBytes(id + "==" + portAutomatic + ";" + this.port + ";" + usbMode);
 			fileStream.close();
+			*/
+		}
+
+		private function onIpAddressHandler(event:NetworkEvent):void {
+			var process:NetworkUtils = event.currentTarget as NetworkUtils;
+			process.removeEventListener(NetworkEvent.IP_ADDRESS_FOUND, onIpAddressHandler);
+			this.ip = event.ipAddress;
+
+			setupAdbProcess();
+			start();
+		}
+
+		private function portSwitcherErrorHandler(event:Event):void {
+			(event.currentTarget as PortSwitcher).removeEventListener(PortSwitcher.PORT_NOT_AVAILABLE_EVENT, portSwitcherErrorHandler);
+			errorMessage = "Port unavailable";
 		}
 		
 		/* public function httpServerError(error:String):void {
@@ -199,10 +257,10 @@ package device.running
 		
 		private function deviceInfoHandler(ev:Event):void{
 			process.removeEventListener(AndroidProcess.DEVICE_INFO, deviceInfoHandler);
-			manufacturer = process.deviceInfo.manufacturer
-			modelId = process.deviceInfo.modelId
-			modelName = process.deviceInfo.modelName
-			androidVersion = process.deviceInfo.osVersion
+			manufacturer = process.deviceInfo.manufacturer;
+			modelId = process.deviceInfo.modelId;
+			modelName = process.deviceInfo.modelName;
+			androidVersion = process.deviceInfo.osVersion;
 			androidSdk = process.deviceInfo.sdkVersion
 		}
 		
@@ -212,8 +270,12 @@ package device.running
 			udpIpAdresse = process.deviceIp;
 		}
 				
-		override public function dispose():Boolean{
-			return process.terminate();
+		override public function dispose():Boolean {
+			if (process != null) {
+				return process.terminate();
+			} else {
+				return false;
+			}
 		}
 	}
 }

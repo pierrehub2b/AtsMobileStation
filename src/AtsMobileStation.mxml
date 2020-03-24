@@ -120,7 +120,7 @@
 			{
 				if (directory.isDirectory) 
 				{
-					var dirArray: Array = new Array();
+					var dirArray: Array = [];
 					var files:Array = directory.getDirectoryListing();
 					for (var i:int = 0; i < files.length; i++)
 					{

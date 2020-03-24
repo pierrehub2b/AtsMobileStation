@@ -36,7 +36,7 @@ package device
 		
 		public function RunningDevice(id:String=""){
 			super(id);
-			tooltip = "Starting driver ..."
+			tooltip = "Starting driver ...";
 			trace("Starting driver -> " + getQualifiedClassName(this));
 		}
 		
@@ -49,13 +49,13 @@ package device
 		}
 		
 		protected function started():void{
-			status = READY
+			status = READY;
 			tooltip = "Driver started and ready";
 			trace("Driver started -> " + getQualifiedClassName(this));
 		}
 		
 		protected function failed():void{
-			status = FAIL
+			status = FAIL;
 			tooltip = "Driver can not be started";
 			trace("Driver error" + getQualifiedClassName(this));
 		}

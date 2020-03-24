@@ -32,7 +32,7 @@
 	 */	
 	public class Plist10 extends Plist
 	{
-		protected var data:Object = new Object();
+		protected var data:Object = {};
 		
 		public function Plist10(xml:String)
 		{
@@ -52,7 +52,7 @@
 			}
 			else
 			{
-				data = new Object();
+				data = {};
 				var node:XML;
 				var key:XML;
 				

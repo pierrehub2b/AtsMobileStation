@@ -2,7 +2,7 @@ package usb
 {
 	public class UsbAction
 	{
-		private var args:Array = new Array();		
+		private var args:Array = [];
 		public function UsbAction(args:Array)
 		{
 			this.args = args;

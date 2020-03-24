@@ -26,7 +26,7 @@ package device.running
 		public static const USBACTIONRESPONSE:String = "usbResponse";
 		public static const USBSTARTRESPONSE:String = "usbResponseStart";
 		public static const USBACTIONERROR:String = "usbActionError";
-		public static const USBSTARTENDEDRESPONSE:String = "usbResponseStartEnded"
+		public static const USBSTARTENDEDRESPONSE:String = "usbResponseStartEnded";
 		
 		public static const DEVICE_INFO:String = "deviceInfo";
 		
@@ -51,9 +51,7 @@ package device.running
 		public var deviceInfo:Device;
 		
 		private var process:NativeProcess;
-		private var procInfo:NativeProcessStartupInfo
-		public var processIp:NativeProcess;
-		private static var _wmicFile:File = null;
+		private var procInfo:NativeProcessStartupInfo;
 		private var currentAdbFile:File;
 		
 		private var logFile:File;
@@ -84,7 +82,7 @@ package device.running
 			//---------------------------------------------------------------------------------------
 			
 			process = new NativeProcess();
-			procInfo = new NativeProcessStartupInfo()
+			procInfo = new NativeProcessStartupInfo();
 			
 			procInfo.executable = currentAdbFile;
 			procInfo.workingDirectory = currentAdbFile.parent;
@@ -134,18 +132,16 @@ package device.running
 		
 		protected function onOutputErrorShell(event:ProgressEvent):void
 		{
-			error = new String(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
+			error = String(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
 		}
 		
-		protected function onForwardPortExit(event:NativeProcessExitEvent):void{
+		protected function onForwardPortExit(event:NativeProcessExitEvent):void
+		{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onForwardPortExit);
-			
+
 			process = new NativeProcess();
-			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
-			process.addEventListener(NativeProcessExitEvent.EXIT, onReadLanExit, false, 0, true);
-			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData, false, 0, true);
-			
-			procInfo.arguments = new <String>["-s", id, "shell", "ip", "route"];
+			process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit, false, 0, true);
+			procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", ANDROIDDRIVER];
 			process.start(procInfo);
 		}
 		
@@ -159,9 +155,9 @@ package device.running
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onReadLanExit);
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData);
 			
-			if(error != null){
+			if (error != null) {
 				dispatchEvent(new Event(ERROR_EVENT));
-			}else{
+			} else {
 				var ipFounded:Boolean = false;
 				var ipRouteDataUdp:Array = output.split("\r\r\n");
 				for(var i:int=0;i<ipRouteDataUdp.length;i++) {
@@ -172,74 +168,27 @@ package device.running
 							this.deviceIp = splittedString[idxUdp+1];
 							this.ipAddress = splittedString[idxUdp+1];
 							ipFounded = true;
-							continue;
+
 						}
 					}
 				}
 				
-				if(!ipFounded && !usbMode) {
+				if(!ipFounded) {
 					error = " - WIFI not connected !";
 					writeErrorLogFile("WIFI not connected");
 					dispatchEvent(new Event(WIFI_ERROR_EVENT));
 					return;
-				}
-				
-				if(usbMode) {
-					getClientIPAddress();
 				} else {
 					dispatchEvent(new Event(IP_ADDRESS));
 				}
-				
+
 				process = new NativeProcess();
 				process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit, false, 0, true);
 				procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", ANDROIDDRIVER];
 				process.start(procInfo);
-				return;
 			}
 		}
-		
-		private function getClientIPAddress ():void {
-			processIp = new NativeProcess();
-			var file:File;
-			var processArgs:Vector.<String> = new Vector.<String>(); 
-			if(!AtsMobileStation.isMacOs) {
-				file = wmicFile;
-				processArgs.push("nicconfig", "where", "(IPEnabled=TRUE and DHCPEnabled=TRUE)", "get", "IPAddress", "/format:list");
-				processIp.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataWin);
-			} else {
-				file = new File("/usr/bin/env");
-				processArgs.push("ipconfig","getifaddr","en1");
-				processIp.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataMac);
-			}
-			
-			var procInfoIp:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			procInfoIp.executable = file;
-			procInfoIp.workingDirectory = file.parent;
-			procInfoIp.arguments = processArgs;
-			processIp.start(procInfoIp);
-		}
-		
-		public function onOutputDataWin(event:ProgressEvent):void
-		{
-			processIp.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataWin);
-			var pattern:RegExp = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/;
-			var output:String = processIp.standardOutput.readUTFBytes(processIp.standardOutput.bytesAvailable);
-			var arrayAddresses:Array = output.match(pattern);
-			if(arrayAddresses != null && arrayAddresses.length > 0) {
-				this.ipAddress = arrayAddresses[0];
-				writeInfoLogFile("getting ip Addresse from MS " + this.ipAddress);
-				dispatchEvent(new Event(IP_ADDRESS));
-			}
-		}
-		
-		public function onOutputDataMac(event:ProgressEvent):void
-		{
-			processIp.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataMac);
-			var rex:RegExp = /[\s\r\n]+/gim;
-			this.ipAddress = processIp.standardOutput.readUTFBytes(processIp.standardOutput.bytesAvailable).replace(rex,"");
-			dispatchEvent(new Event(IP_ADDRESS));
-		}
-		
+
 		protected function onUninstallExit(event:NativeProcessExitEvent):void{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
 			
@@ -248,21 +197,6 @@ package device.running
 			procInfo.arguments = new <String>["-s", id, "install", "-r", atsdroidFilePath];
 			
 			process.start(procInfo);
-		}
-		
-		private static function get wmicFile():File{
-			if(_wmicFile == null){
-				var rootPath:Array = File.getRootDirectories();
-				for each(var file:File in rootPath){
-					_wmicFile = file.resolvePath("Windows/System32/wbem/WMIC.exe");
-					if(_wmicFile.exists){
-						break;
-					}else{
-						_wmicFile = null;
-					}
-				}
-			}
-			return _wmicFile;
 		}
 		
 		protected function onInstallExit(event:NativeProcessExitEvent):void{

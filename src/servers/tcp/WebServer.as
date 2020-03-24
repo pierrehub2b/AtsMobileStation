@@ -15,7 +15,7 @@ package servers.tcp
 	
 	public class WebServer
 	{	
-		private var serverSocket:ServerSocket = new ServerSocket();;
+		private var serverSocket:ServerSocket = new ServerSocket();
 		private var activeSocket:Socket;
 		private var clientData:ByteArray;
 		private var webSocket:WebSocket;
@@ -33,7 +33,7 @@ package servers.tcp
 			
 			if (serverSocket.bound) {
 				try {
-					serverSocket.close()
+					serverSocket.close();
 					serverSocket.removeEventListener(ServerSocketConnectEvent.CONNECT, onConnect);
 					serverSocket.removeEventListener(Event.CLOSE, onClose);
 				} catch (e:Error){
@@ -85,7 +85,7 @@ package servers.tcp
 		private function webSocketOnMessageHandler(event:WebSocketEvent):void
 		{
 			if (event.message.type === WebSocketMessage.TYPE_BINARY) {
-				var buffer:ByteArray = event.message.binaryData
+				var buffer:ByteArray = event.message.binaryData;
 				activeSocket.writeBytes(buffer, 0, buffer.length);
 				activeSocket.flush();
 				activeSocket.close();

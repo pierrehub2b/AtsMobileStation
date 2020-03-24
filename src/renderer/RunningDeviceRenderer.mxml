@@ -94,7 +94,7 @@
 			<s:BitmapImage  id="mobile" source="assets/icons/32/{(data is IosDevice)?'ios':'android'}.png" smooth="true" smoothingQuality="high"/>
 			<s:Spacer width="18"/>
 			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
-				<s:Label visible="{(data as RunningDevice).ip==null}" includeInLayout="{(data as RunningDevice).ip==null}" 
+				<s:Label visible="{(data as RunningDevice).ip==null}" includeInLayout="{(data as RunningDevice).ip==null}"
 						 text="Unable to get local ip !" fontStyle="italic" color="0x8a844a"/>
 								
 				<s:HGroup visible="{(data as RunningDevice).ip!=null}" includeInLayout="{(data as RunningDevice).ip!=null}" gap="0">
@@ -107,6 +107,8 @@
 					text="{(data as RunningDevice).manufacturer}{(data as RunningDevice).simulator?' (Simulator)':''} - {(data as RunningDevice).modelName}" fontSize="11" fontStyle="italic" color="#758696"/>
 				<s:Label visible="{(data as RunningDevice).status==Device.WIFI_ERROR}" includeInLayout="{(data as RunningDevice).status==Device.WIFI_ERROR}" 
 						 text="The device is not connected to local network" fontStyle="italic" color="0xbc0000" fontSize="11"/>
+				<s:Label visible="{(data as RunningDevice).status==Device.PORT_NOT_AVAILABLE}" includeInLayout="{(data as RunningDevice).status==Device.PORT_NOT_AVAILABLE}"
+						 text="{(data as RunningDevice).errorMessage}" fontStyle="italic" color="0xbc0000" fontSize="11"/>
 			</s:VGroup>
 		</s:HGroup>
 		<s:BitmapImage source="assets/icons/20/{(data as RunningDevice).usbMode?'usb':'wifi'}.png" top="{(data as RunningDevice).usbMode?NaN:0}" bottom="{(data as RunningDevice).usbMode?2:NaN}" left="{(data as RunningDevice).usbMode?28:27}"/>
