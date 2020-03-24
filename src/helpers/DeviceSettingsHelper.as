@@ -51,7 +51,9 @@ public class DeviceSettingsHelper {
         var lines:Array = contentString.split("\n");
         for each(var text:String in lines) {
             var deviceSettings:DeviceSettings = DeviceSettings.initFromDeviceSettingsString(text);
-            if (deviceSettings != null) settings.push(deviceSettings);
+            if (deviceSettings != null) {
+                settings.push(deviceSettings);
+            }
         }
 
         return settings;
@@ -61,7 +63,7 @@ public class DeviceSettingsHelper {
         var fileStream:FileStream = new FileStream();
         fileStream.open(deviceSettingsFile, FileMode.WRITE);
         for each(var deviceSettings:DeviceSettings in settings) {
-            fileStream.writeUTF(deviceSettings.toString() + "\n");
+            fileStream.writeUTFBytes(deviceSettings.toString() + "\n");
         }
         fileStream.close();
     }

@@ -84,18 +84,25 @@
 
 		protected function portAutomatic_changeHandler(event:Event):void {
 			portSelection.enabled = !portAutomatic.selected;
+			portSelection.text = portAutomatic.selected == true ? "" : deviceSettings.port.toString();
+
+			if (portSelection.text != "") {
+				var port:int = parseInt(portSelection.text);
+				validatePort(port)
+			}
 
 			var port:int = parseInt(portSelection.text);
 			validatePort(port);
-
-			portSelection.text = portAutomatic.selected == true ? "" : deviceSettings.port.toString();
 		}
 
 		protected function portSelection_changeHandler(event:Event):void {
 			var target:TextInput = event.currentTarget as TextInput;
 			if (!target) return;
-			var port:int = parseInt(target.text);
-			validatePort(port)
+
+			if (target.text != "") {
+				var port:int = parseInt(target.text);
+				validatePort(port)
+			}
 
 			portAutomatic.selected = portSelection.text == "";
 		}
@@ -276,9 +283,7 @@
 		<s:HGroup width="100%" gap="3" verticalAlign="middle" verticalCenter="0" visible="true">
 			<s:HGroup id="androidUsbGroup" width="100%" horizontalAlign="left" verticalAlign="baseline" visible="true">
 				<s:Label fontSize="11" fontWeight="bold" paddingRight="5" text="USB mode :"/>
-				<s:CheckBox id="androidUsb"
-							change="portAutomatic_changeHandler(event)" fontSize="11"
-							fontStyle="normal" textDecoration="none"/>
+				<s:CheckBox id="androidUsb" fontSize="11" fontStyle="normal" textDecoration="none"/>
 			</s:HGroup>
 		</s:HGroup>
 

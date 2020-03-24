@@ -32,7 +32,7 @@ public class DeviceSettings {
 
         var parametersString:String = array[1];
         var parameters:Array = parametersString.split(";");
-        if (array.length != 3) {
+        if (parameters.length != 3) {
             return null;
         }
 

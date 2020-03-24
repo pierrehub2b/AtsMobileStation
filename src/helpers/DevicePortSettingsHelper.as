@@ -125,24 +125,9 @@ public class DevicePortSettingsHelper {
     }
 
     private function updateDeviceSettings(portSettings:DevicePortSettings):void {
-        var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
-        var fileStream:FileStream = new FileStream();
-        fileStream.open(file, FileMode.READ);
-        var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
-        fileStream.close()
-        var contentArray:Array = content.split("\n");
-
-        fileStream.open(file, FileMode.WRITE);
-        for each(var line:String in contentArray) {
-            var arrayLineId:Array = line.split("==");
-            if (arrayLineId[0].toString().toLowerCase() != portSettings.deviceId.toLowerCase()) {
-                fileStream.writeUTFBytes(line + "\n");
-            } else {
-                var parametersArray:Array = arrayLineId[1].split(";");
-                fileStream.writeUTFBytes(portSettings.deviceId.toLowerCase() + "==" + parametersArray[0] + ";" + portSettings.port + ";" + parametersArray[2] + "\n");
-            }
-        }
-        fileStream.close();
+        var deviceSettings:DeviceSettings = DeviceSettingsHelper.shared.getSettingsForDevice(portSettings.deviceId);
+        deviceSettings.port = portSettings.port;
+        DeviceSettingsHelper.shared.save(deviceSettings);
     }
 
     public function addSettings(setting:DevicePortSettings):void {
