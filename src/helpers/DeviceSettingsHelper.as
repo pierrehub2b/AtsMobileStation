@@ -7,9 +7,6 @@ import flash.filesystem.FileStream;
 public class DeviceSettingsHelper {
 
     private const deviceSettingsFile:File = File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/devicesSettings.txt");
-
-    private var settings:Vector.<DeviceSettings>;
-
     public static var shared:DeviceSettingsHelper = new DeviceSettingsHelper();
 
     public function DeviceSettingsHelper() {
@@ -19,6 +16,8 @@ public class DeviceSettingsHelper {
             this.settings = new Vector.<DeviceSettings>();
         }
     }
+
+    private var settings:Vector.<DeviceSettings>;
 
     public function getSettingsForDevice(deviceId:String):DeviceSettings {
         for each(var deviceSettings:DeviceSettings in settings) {
