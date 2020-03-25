@@ -66,7 +66,7 @@ public class NetworkUtils extends EventDispatcher {
 
     private static function get wmicFile():File
     {
-        var file:File;
+        var file:File = null;
         var rootPath:Array = File.getRootDirectories();
         for each(var file:File in rootPath) {
             file = file.resolvePath("Windows/System32/wbem/WMIC.exe");
@@ -77,7 +77,7 @@ public class NetworkUtils extends EventDispatcher {
             }
         }
 
-        return null;
+        return file;
     }
 }
 }
