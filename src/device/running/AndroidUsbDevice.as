@@ -171,7 +171,7 @@ public class AndroidUsbDevice extends AndroidDevice {
     // --
 
     protected function setupAdbProcess():void {
-        process = new AndroidProcess(currentAdbFile, id, webServerPort.toString(), true, captureServerPort.toString());
+        process = new AndroidProcess(currentAdbFile, id, webSocketServerPort.toString(), true, captureServerPort.toString());
 
         addAndroidProcessEventListeners();
 
