@@ -82,7 +82,6 @@ public class WebServer extends EventDispatcher
 		}
 		
 		private function webSocketOnCloseHandler(event:WebSocketEvent):void {
-			trace("webSocket closed");
 			webSocket.removeEventListener(WebSocketEvent.MESSAGE, webSocketOnMessageHandler);
 			webSocket.removeEventListener(WebSocketEvent.CLOSED, webSocketOnCloseHandler);
 			webSocket.removeEventListener(WebSocketErrorEvent.CONNECTION_FAIL, webSocketConnectionFailHandler);

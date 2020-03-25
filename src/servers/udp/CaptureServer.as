@@ -53,7 +53,7 @@ public class CaptureServer extends EventDispatcher
 				datagramSocket.close();
 			}
 			
-			if (webSocket.connected) {
+			if (webSocket != null && webSocket.connected) {
 				webSocket.close(false);
 			}
 		}

@@ -62,7 +62,7 @@ package device.running
 
 		public var webSocketServerPort:int;
 		
-		public function AndroidProcess(adbFile:File, id:String, port:String, usbMode:Boolean, udpPort:String = null)
+		public function AndroidProcess(adbFile:File, id:String, port:String, usbMode:Boolean, ipAddress:String = null, udpPort:String = null)
 		{
 			this.currentAdbFile = adbFile;
 			this.id = id;
@@ -70,6 +70,7 @@ package device.running
 			this.deviceInfo = new Device(id);
 			this.usbMode = usbMode;
 			this.udpPort = udpPort;
+			this.ipAddress = ipAddress;
 					
 			//---------------------------------------------------------------------------------------
 
@@ -212,54 +213,41 @@ package device.running
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadPropertyData);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onGetPropExit);
 
-			if(port != "") {
-				var propArray:Array = output.split("\n");
-				for each (var line:String in propArray){
-					if(line.indexOf("[ro.product.brand]") == 0){
-						deviceInfo.manufacturer = getPropValue(line)
-					}else if(line.indexOf("[ro.product.model]") == 0){
-						deviceInfo.modelId = getPropValue(line)
-					}else if(line.indexOf("[ro.semc.product.name]") == 0){
-						deviceInfo.modelName = getPropValue(line)
-					}else if(line.indexOf("[def.tctfw.brandMode.name]") == 0){
-						deviceInfo.modelName = getPropValue(line)
-					}else if(line.indexOf("[ro.build.version.release]") == 0){
-						deviceInfo.osVersion = getPropValue(line)
-					}else if(line.indexOf("[ro.build.version.sdk]") == 0){
-						deviceInfo.sdkVersion = getPropValue(line)
-					}
-				}
-				
-				deviceInfo.checkName();
-				dispatchEvent(new Event(DEVICE_INFO));
-				
-				process = new NativeProcess();
-				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData, false, 0, true);
-				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError, false, 0, true);
-				process.addEventListener(NativeProcessExitEvent.EXIT, onExecuteExit, false, 0, true);
-				
-				procInfo.arguments = new <String>["-s", id, "shell"];
-				process.start(procInfo);
-				
-				if (usbMode) {
-					instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerUsb " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";
-				} else {
-					instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerWifi " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";				
-				}
-
-				process.standardInput.writeUTFBytes(instrumentCommandLine);
-			} else {
-				process.exit(true);
-				process = null;
-				procInfo = null;
-				
-				if (error != null) {
-					dispatchEvent(new Event(ERROR_EVENT));
-					writeErrorLogFile(error);
-				} else {
-					dispatchEvent(new Event(STOPPED));
+			var propArray:Array = output.split("\n");
+			for each (var line:String in propArray){
+				if(line.indexOf("[ro.product.brand]") == 0){
+					deviceInfo.manufacturer = getPropValue(line)
+				}else if(line.indexOf("[ro.product.model]") == 0){
+					deviceInfo.modelId = getPropValue(line)
+				}else if(line.indexOf("[ro.semc.product.name]") == 0){
+					deviceInfo.modelName = getPropValue(line)
+				}else if(line.indexOf("[def.tctfw.brandMode.name]") == 0){
+					deviceInfo.modelName = getPropValue(line)
+				}else if(line.indexOf("[ro.build.version.release]") == 0){
+					deviceInfo.osVersion = getPropValue(line)
+				}else if(line.indexOf("[ro.build.version.sdk]") == 0){
+					deviceInfo.sdkVersion = getPropValue(line)
 				}
 			}
+
+			deviceInfo.checkName();
+			dispatchEvent(new Event(DEVICE_INFO));
+				
+			process = new NativeProcess();
+			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData, false, 0, true);
+			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError, false, 0, true);
+			process.addEventListener(NativeProcessExitEvent.EXIT, onExecuteExit, false, 0, true);
+				
+			procInfo.arguments = new <String>["-s", id, "shell"];
+			process.start(procInfo);
+				
+			if (usbMode) {
+				instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e udpPort " + udpPort + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerUsb " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";
+			} else {
+				instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerWifi " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";
+			}
+
+			process.standardInput.writeUTFBytes(instrumentCommandLine);
 		}
 		
 		private function getPropValue(value:String):String
