@@ -101,11 +101,6 @@ package device.running
 			}
 		}
 
-		public function forwardPort(port:int,port2:int):void {
-			process.addEventListener(NativeProcessExitEvent.EXIT, onForwardPortExit, false, 0, true);
-			procInfo.arguments = new <String>["-s", id, "forward", "tcp:" + forwardPort, "tcp:" + forwardPort];
-		}
-		
 		public function start():void{
 			process.start(procInfo);
 		}
@@ -141,17 +136,7 @@ package device.running
 		{
 			error = String(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
 		}
-		
-		protected function onForwardPortExit(event:NativeProcessExitEvent):void
-		{
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onForwardPortExit);
 
-			process = new NativeProcess();
-			process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit, false, 0, true);
-			procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", ANDROIDDRIVER];
-			process.start(procInfo);
-		}
-		
 		protected function onReadLanData(event:ProgressEvent):void{
 			output = output.concat(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
 		}
@@ -257,7 +242,7 @@ package device.running
 				process.start(procInfo);
 				
 				if (usbMode) {
-					instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e udpPort " + udpPort + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerUsb " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";
+					instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerUsb " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";
 				} else {
 					instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerWifi " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";				
 				}

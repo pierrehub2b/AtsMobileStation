@@ -65,7 +65,7 @@ public class AndroidUsbDevice extends AndroidDevice {
         (event.currentTarget as NetworkUtils).removeEventListener(NetworkEvent.IP_ADDRESS_FOUND, localAddressFoundHandler);
 
         this.ip = event.ipAddress;
-        fetchPort();
+        setupCaptureServer();
     }
 
     // ----
@@ -109,7 +109,7 @@ public class AndroidUsbDevice extends AndroidDevice {
         webServer.removeEventListener(WebServer.WEB_SERVER_INITIALIZED, webServerInitializedHandler);
 
         this.webServerPort = webServer.getLocalPort();
-        setupCaptureServer();
+        setupPortForwarding();
     }
 
     private function webServerStartedHandler(event:Event):void
@@ -171,7 +171,7 @@ public class AndroidUsbDevice extends AndroidDevice {
     // --
 
     protected function setupAdbProcess():void {
-        process = new AndroidProcess(currentAdbFile, id, webServerPort.toString(), true, captureServerPort.toString());
+        process = new AndroidProcess(currentAdbFile, id, webSocketServerPort.toString(), true, captureServerPort.toString());
 
         addAndroidProcessEventListeners();
 
@@ -201,7 +201,7 @@ public class AndroidUsbDevice extends AndroidDevice {
         process.removeEventListener(AndroidProcess.WEBSOCKET_SERVER_START, webSocketServerStartedHandler);
 
         webSocketServerPort = process.webSocketServerPort;
-        setupPortForwarding()
+        fetchPort();
     }
 
     private function webSocketServerStoppedHandler(event:Event):void
