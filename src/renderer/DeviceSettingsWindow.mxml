@@ -182,7 +182,7 @@
 					var portSettings:DevicePortSettings = new DevicePortSettings(dev.id, deviceSettings.port);
 					DevicePortSettingsHelper.shared.addSettings(portSettings);
 				} else {
-					var portSettings:DevicePortSettings = DevicePortSettingsHelper.shared.getPortSetting(dev.id);
+					portSettings = DevicePortSettingsHelper.shared.getPortSetting(dev.id);
 					if (portSettings != null) {
 						DevicePortSettingsHelper.shared.removeSettings(portSettings);
 					}

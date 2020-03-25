@@ -88,7 +88,7 @@ public class AndroidDevice extends RunningDevice
 			}
 
 			var automaticPort:Boolean = deviceSettings.automaticPort;
-			var usbMode = deviceSettings.usbMode;
+			var usbMode:Boolean = deviceSettings.usbMode;
 
 			if (usbMode) {
 				return new AndroidUsbDevice(id, adbFile, deviceSettings);

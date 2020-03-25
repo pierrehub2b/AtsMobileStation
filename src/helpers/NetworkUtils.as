@@ -66,10 +66,10 @@ public class NetworkUtils extends EventDispatcher {
 
     private static function get wmicFile():File
     {
-        var file:File = null;
+        var file:File;
         var rootPath:Array = File.getRootDirectories();
-        for each(var file:File in rootPath) {
-            file = file.resolvePath("Windows/System32/wbem/WMIC.exe");
+        for each(var f:File in rootPath) {
+            file = f.resolvePath("Windows/System32/wbem/WMIC.exe");
             if (file.exists) {
                 break;
             } else {
