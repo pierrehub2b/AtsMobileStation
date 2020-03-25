@@ -211,8 +211,8 @@ public class AndroidUsbDevice extends AndroidDevice {
 
     private function setupPortForwarding():void
     {
-        var process = new NativeProcess();
-        var procInfo = new NativeProcessStartupInfo();
+        var process:NativeProcess = new NativeProcess();
+        var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 
         procInfo.executable = currentAdbFile;
         procInfo.workingDirectory = currentAdbFile.parent;
