@@ -59,5 +59,12 @@ package device
 			tooltip = "Driver can not be started";
 			trace("Driver error" + getQualifiedClassName(this));
 		}
+
+		protected function usbError(error:String):void {
+			status = INSTALL;
+			errorMessage = error;
+			tooltip = "Problem when installing driver ...";
+			trace("USB install error" + getQualifiedClassName(this));
+		}
 	}
 }

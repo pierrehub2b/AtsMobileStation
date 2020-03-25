@@ -90,9 +90,6 @@
 				var port:int = parseInt(portSelection.text);
 				validatePort(port)
 			}
-
-			var port:int = parseInt(portSelection.text);
-			validatePort(port);
 		}
 
 		protected function portSelection_changeHandler(event:Event):void {

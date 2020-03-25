@@ -6,25 +6,49 @@ import com.worlize.websocket.WebSocketEvent;
 import com.worlize.websocket.WebSocketMessage;
 
 import flash.events.DatagramSocketDataEvent;
+import flash.events.Event;
+import flash.events.EventDispatcher;
 import flash.events.IOErrorEvent;
 import flash.net.DatagramSocket;
 import flash.utils.ByteArray;
 
-public class CaptureServer
+public class CaptureServer extends EventDispatcher
 	{
+		public static const CAPTURE_SERVER_INITIALIZED:String = "captureServerInitialized";
+		public static const CAPTURE_SERVER_STARTED:String = "captureServerStarted";
+		public static const CAPTURE_SERVER_ERROR:String = "captureServerError";
+
 		private static const PACKET_SIZE:int = 2000;
 		
-		public var datagramSocket:DatagramSocket = new DatagramSocket();
+		private var datagramSocket:DatagramSocket = new DatagramSocket();
 		private var webSocket:WebSocket;
 		
 		private var srcPort:int;
 		private var srcAddress:String;
 
-		public function CaptureServer(){
-			datagramSocket = new DatagramSocket();
+		public function CaptureServer() {}
+
+		public function bind():void
+		{
+			try {
+				datagramSocket.bind();
+
+				datagramSocket.addEventListener(DatagramSocketDataEvent.DATA, dataReceived);
+				datagramSocket.addEventListener(IOErrorEvent.IO_ERROR, errorSocket);
+
+				dispatchEvent(new Event(CAPTURE_SERVER_INITIALIZED));
+			} catch (e:Error) {
+				dispatchEvent(new Event(CAPTURE_SERVER_ERROR));
+			}
+		}
+
+		public function getLocalPort():int
+		{
+			return datagramSocket.localPort;
 		}
 		
-		public function close():void {
+		public function close():void
+		{
 			if(datagramSocket.bound) {
 				datagramSocket.close();
 			}
@@ -34,25 +58,17 @@ public class CaptureServer
 			}
 		}
 		
-		public function bind(port:int, devicePort:int):int
+		public function setupWebSocket(port:int):void
 		{
-			if(datagramSocket.bound) {
-				datagramSocket.close();
-			}
-
-			datagramSocket = new DatagramSocket();
-			datagramSocket.bind(port);
-			datagramSocket.addEventListener(DatagramSocketDataEvent.DATA, dataReceived);
-			datagramSocket.addEventListener(IOErrorEvent.IO_ERROR, errorSocket);
 			datagramSocket.receive();
 			
-			webSocket = new WebSocket("ws://localhost:" + devicePort.toString(), "*");
+			webSocket = new WebSocket("ws://localhost:" + port.toString(), "*");
 			webSocket.addEventListener(WebSocketEvent.OPEN, webSocketOpenHandler);
 			webSocket.addEventListener(WebSocketEvent.MESSAGE, webSocketOnMessageHandler);
 			webSocket.addEventListener(WebSocketErrorEvent.CONNECTION_FAIL, webSocketConnectionFailHandler);
 			webSocket.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
-			
-			return datagramSocket.localPort;
+
+			dispatchEvent(new Event(CaptureServer.CAPTURE_SERVER_STARTED));
 		}
 		
 		private function dataReceived(event:DatagramSocketDataEvent):void

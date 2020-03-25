@@ -159,7 +159,7 @@ package
 								dev.close();
 							}
 						}else{
-							dev = new AndroidDevice(adbFile, port, runningId);
+							dev = AndroidDevice.setup(runningId, adbFile); //new AndroidDevice(adbFile, runningId);
 							dev.addEventListener(Device.STOPPED_EVENT, deviceStoppedHandler, false, 0, true);
 							dev.start();
 							

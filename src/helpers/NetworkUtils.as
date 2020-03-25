@@ -8,17 +8,21 @@ import flash.filesystem.File;
 
 public class NetworkUtils extends EventDispatcher {
 
-    public  function getClientIPAddress():void {
+    private var networkInterface:String = "en0";
+
+    public function getClientIPAddress():void
+    {
         var processIp:NativeProcess = new NativeProcess();
         var file:File;
         var processArgs:Vector.<String> = new Vector.<String>();
+
         if(!AtsMobileStation.isMacOs) {
             file = wmicFile;
             processArgs.push("nicconfig", "where", "(IPEnabled=TRUE and DHCPEnabled=TRUE)", "get", "IPAddress", "/format:list");
             processIp.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataWin);
         } else {
             file = new File("/usr/bin/env");
-            processArgs.push("ipconfig","getifaddr","en0");
+            processArgs.push("ipconfig","getifaddr", networkInterface);
             processIp.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataMac);
         }
 
@@ -51,17 +55,24 @@ public class NetworkUtils extends EventDispatcher {
 
         var ev:NetworkEvent = new NetworkEvent(NetworkEvent.IP_ADDRESS_FOUND);
         ev.ipAddress = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable).replace(rex,"");
-        dispatchEvent(ev);
+
+        if (ev.ipAddress == "" && networkInterface != "en1") {
+            networkInterface = "en1";
+            getClientIPAddress();
+        } else {
+            dispatchEvent(ev);
+        }
     }
 
-    private static function get wmicFile():File{
+    private static function get wmicFile():File
+    {
         var file:File;
         var rootPath:Array = File.getRootDirectories();
-        for each(var file:File in rootPath){
+        for each(var file:File in rootPath) {
             file = file.resolvePath("Windows/System32/wbem/WMIC.exe");
-            if(file.exists){
+            if (file.exists) {
                 break;
-            }else{
+            } else {
                 file = null;
             }
         }
