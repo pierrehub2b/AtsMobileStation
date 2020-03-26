@@ -1,0 +1,25 @@
+{
+	"compilerOptions": {
+		"output": "bin/AtsMobileStation.swf",
+		"source-path": [
+			"src"
+		],
+		"library-path": [
+			"libs"
+		]
+	},
+	"files": [
+		"src/AtsMobileStation.mxml"
+	],
+	"application": "src/AtsMobileStation-app.xml",
+	"copySourcePathAssets": true,
+	"additionalOptions": "-locale en_US",
+	"airOptions": {
+		"output": "AtsMobileStation.air",
+		"signingOptions": {
+			"keystore": "C:/Users/agilitest/GitHub/AtsMobileStation/cert_ats.p12",
+			"storetype": "pkcs12"
+		}
+	},
+	"config": "air"
+}

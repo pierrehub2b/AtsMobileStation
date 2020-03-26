@@ -1,39 +1,41 @@
 package servers.tcp
 {
-	import com.worlize.websocket.WebSocket;
-	import com.worlize.websocket.WebSocketErrorEvent;
-	import com.worlize.websocket.WebSocketEvent;
-	import com.worlize.websocket.WebSocketMessage;
-	
-	import flash.events.Event;
-	import flash.events.IOErrorEvent;
-	import flash.events.ProgressEvent;
-	import flash.events.ServerSocketConnectEvent;
-	import flash.net.ServerSocket;
-	import flash.net.Socket;
-	import flash.utils.ByteArray;
-	
-	public class WebServer
-	{	
-		private var serverSocket:ServerSocket = new ServerSocket();;
+import com.worlize.websocket.WebSocket;
+import com.worlize.websocket.WebSocketErrorEvent;
+import com.worlize.websocket.WebSocketEvent;
+import com.worlize.websocket.WebSocketMessage;
+
+import flash.events.Event;
+import flash.events.EventDispatcher;
+import flash.events.IOErrorEvent;
+import flash.events.ProgressEvent;
+import flash.events.ServerSocketConnectEvent;
+import flash.net.ServerSocket;
+import flash.net.Socket;
+import flash.utils.ByteArray;
+
+public class WebServer extends EventDispatcher
+	{
+		public static const WEB_SERVER_INITIALIZED:String = "webServerInitialized";
+		public static const WEB_SERVER_STARTED:String = "webServerStarted";
+		public static const WEB_SERVER_ERROR:String = "webServerError";
+
+		private var serverSocket:ServerSocket = new ServerSocket();
 		private var activeSocket:Socket;
 		private var clientData:ByteArray;
 		private var webSocket:WebSocket;
-							
-		public function getPort():int 
-		{
-			return serverSocket.localPort;
-		}
-				
+
 		public function close():void 
-		{					
-			webSocket.close(false);
-			
+		{
+			if (webSocket != null) {
+				webSocket.close(false);
+			}
+
 			closeSocket();
 			
 			if (serverSocket.bound) {
 				try {
-					serverSocket.close()
+					serverSocket.close();
 					serverSocket.removeEventListener(ServerSocketConnectEvent.CONNECT, onConnect);
 					serverSocket.removeEventListener(Event.CLOSE, onClose);
 				} catch (e:Error){
@@ -41,33 +43,38 @@ package servers.tcp
 				}
 			}
 		}
-		
-		public function WebServer(port:int, devicePort:int):void {
-			setup(port, devicePort);
+
+		public function getLocalPort():int
+		{
+			return serverSocket.localPort;
 		}
 		
-		public function setup(port:int, devicePort:int):void 
+		public function WebServer():void {}
+		
+		public function bind(port:int):void
 		{						
 			try {
 				serverSocket.bind(port);
 				serverSocket.addEventListener(ServerSocketConnectEvent.CONNECT, onConnect, false, 0, true);
 				serverSocket.addEventListener(Event.CLOSE, onClose, false, 0, true);
-				serverSocket.listen();	
-				trace(serverSocket.localPort);
-				
-				webSocket = new WebSocket("ws://localhost:" + devicePort.toString(), "*");
-				webSocket.addEventListener(WebSocketEvent.OPEN, webSocketOpenHandler, false, 0, true);
-				webSocket.addEventListener(WebSocketEvent.MESSAGE, webSocketOnMessageHandler, false, 0, true);
-				webSocket.addEventListener(WebSocketEvent.CLOSED, webSocketOnCloseHandler, false, 0, true);
-				webSocket.addEventListener(WebSocketErrorEvent.CONNECTION_FAIL, webSocketConnectionFailHandler, false, 0, true);
-				webSocket.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler, false, 0, true);
-				
+
+				dispatchEvent(new Event(WebServer.WEB_SERVER_INITIALIZED));
 			} catch (e: Error) {
-				trace("Erreur server socket init : " + e.message);
-				setup(0, devicePort);
-				// TODO return error if automaticPort == false
+				dispatchEvent(new Event(WebServer.WEB_SERVER_ERROR));
 			}
-			
+		}
+
+		public function setupWebSocket(port:int):void {
+			webSocket = new WebSocket("ws://localhost:" + port.toString(), "*");
+			webSocket.addEventListener(WebSocketEvent.OPEN, webSocketOpenHandler, false, 0, true);
+			webSocket.addEventListener(WebSocketEvent.MESSAGE, webSocketOnMessageHandler, false, 0, true);
+			webSocket.addEventListener(WebSocketEvent.CLOSED, webSocketOnCloseHandler, false, 0, true);
+			webSocket.addEventListener(WebSocketErrorEvent.CONNECTION_FAIL, webSocketConnectionFailHandler, false, 0, true);
+			webSocket.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler, false, 0, true);
+
+			serverSocket.listen();
+
+			dispatchEvent(new Event(WebServer.WEB_SERVER_STARTED));
 		}
 		
 		private function onClose(e:Event):void {
@@ -75,7 +82,6 @@ package servers.tcp
 		}
 		
 		private function webSocketOnCloseHandler(event:WebSocketEvent):void {
-			trace("webSocket closed");
 			webSocket.removeEventListener(WebSocketEvent.MESSAGE, webSocketOnMessageHandler);
 			webSocket.removeEventListener(WebSocketEvent.CLOSED, webSocketOnCloseHandler);
 			webSocket.removeEventListener(WebSocketErrorEvent.CONNECTION_FAIL, webSocketConnectionFailHandler);
@@ -85,7 +91,7 @@ package servers.tcp
 		private function webSocketOnMessageHandler(event:WebSocketEvent):void
 		{
 			if (event.message.type === WebSocketMessage.TYPE_BINARY) {
-				var buffer:ByteArray = event.message.binaryData
+				var buffer:ByteArray = event.message.binaryData;
 				activeSocket.writeBytes(buffer, 0, buffer.length);
 				activeSocket.flush();
 				activeSocket.close();
@@ -156,17 +162,6 @@ package servers.tcp
 		private function ioErrorHandler(event:IOErrorEvent):void
 		{
 			trace("ioErrorHandler: " + event);
-		}
-				
-		// TO.DO Anthony: A refactorer
-		private static function getAvailablePort():int 
-		{
-			var server:ServerSocket = new ServerSocket();
-			server.bind();
-			server.listen();
-			var availablePort:int = server.localPort;
-			server.close();
-			return availablePort;
 		}
 	}
 }

@@ -56,7 +56,7 @@ package net.tautausan.plist
 			data.endian=Endian.BIG_ENDIAN;
 			data.position=0;
 			
-			var xml:XML=<plist></plist>
+			var xml:XML=<plist></plist>;
 			xml.@version="1.0";
 			
 			var bpli:int=data.readInt();
@@ -295,7 +295,7 @@ package net.tautausan.plist
 		{
 			
 			
-			var retval:XML=<array></array>
+			var retval:XML=<array></array>;
 			var arr:Array=[];
 			var buf:ByteArray;
 			var obj:*;
@@ -331,8 +331,8 @@ package net.tautausan.plist
 		private function readDic(data:ByteArray, len:int):*
 		{
 			
-			var retval:XML=<dict></dict>
-			var dic:Object=new Object();
+			var retval:XML=<dict></dict>;
+			var dic:Object={};
 			var buf:ByteArray;
 			var keys:Array=[];
 			var key:*;

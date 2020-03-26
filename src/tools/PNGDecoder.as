@@ -27,7 +27,7 @@ package tools
 			
 			//recieves the bytearray and returns a bitmapdata
 			public function decode(ba:ByteArray):BitmapData {
-				chunks = new Array();
+				chunks = [];
 				input = new ByteArray();
 				output = new ByteArray();
 				

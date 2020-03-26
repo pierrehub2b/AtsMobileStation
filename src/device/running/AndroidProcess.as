@@ -25,9 +25,10 @@ package device.running
 		public static const SCREENSHOTRESPONSE:String = "screenshotResponse";
 		public static const USBACTIONRESPONSE:String = "usbResponse";
 		public static const USBSTARTRESPONSE:String = "usbResponseStart";
-		public static const USBACTIONERROR:String = "usbActionError";
-		public static const USBSTARTENDEDRESPONSE:String = "usbResponseStartEnded"
-		
+		public static const USBSTARTENDEDRESPONSE:String = "usbResponseStartEnded";
+		public static const WEBSOCKET_SERVER_START:String = "webSocketServerStart";
+		public static const WEBSOCKET_SERVER_STOP:String = "webSocketServerStop";
+
 		public static const DEVICE_INFO:String = "deviceInfo";
 		
 		public static const RUNNING:String = "running";
@@ -37,7 +38,6 @@ package device.running
 		private const androidPropValueRegex:RegExp = /.*:.*\[(.*)\]/;
 		
 		private var port:String;
-		private var forwardPort:String;
 		private var udpPort:String;
 		
 		private var id:String;
@@ -51,9 +51,7 @@ package device.running
 		public var deviceInfo:Device;
 		
 		private var process:NativeProcess;
-		private var procInfo:NativeProcessStartupInfo
-		public var processIp:NativeProcess;
-		private static var _wmicFile:File = null;
+		private var procInfo:NativeProcessStartupInfo;
 		private var currentAdbFile:File;
 		
 		private var logFile:File;
@@ -61,16 +59,18 @@ package device.running
 		private var dateFormatter:DateTimeFormatter = new DateTimeFormatter("en-US");
 		
 		private var instrumentCommandLine:String;
+
+		public var webSocketServerPort:int;
 		
-		public function AndroidProcess(adbFile:File, id:String, port:String, forwardPort:String, udpPort:String, usbMode:Boolean)
+		public function AndroidProcess(adbFile:File, id:String, port:String, usbMode:Boolean, ipAddress:String = null, udpPort:String = null)
 		{
 			this.currentAdbFile = adbFile;
 			this.id = id;
 			this.port = port;
 			this.deviceInfo = new Device(id);
 			this.usbMode = usbMode;
-			this.forwardPort = forwardPort;
 			this.udpPort = udpPort;
+			this.ipAddress = ipAddress;
 					
 			//---------------------------------------------------------------------------------------
 
@@ -84,14 +84,15 @@ package device.running
 			//---------------------------------------------------------------------------------------
 			
 			process = new NativeProcess();
-			procInfo = new NativeProcessStartupInfo()
+			procInfo = new NativeProcessStartupInfo();
 			
 			procInfo.executable = currentAdbFile;
 			procInfo.workingDirectory = currentAdbFile.parent;
-			
+
 			if (usbMode) {
-				process.addEventListener(NativeProcessExitEvent.EXIT, onForwardPortExit, false, 0, true);
-				procInfo.arguments = new <String>["-s", id, "forward", "tcp:" + forwardPort, "tcp:" + forwardPort];
+				process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit, false, 0, true);
+
+				procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", ANDROIDDRIVER];
 			} else {
 				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
 				process.addEventListener(NativeProcessExitEvent.EXIT, onReadLanExit, false, 0, true);
@@ -100,7 +101,7 @@ package device.running
 				procInfo.arguments = new <String>["-s", id, "shell", "ip", "route"];
 			}
 		}
-		
+
 		public function start():void{
 			process.start(procInfo);
 		}
@@ -134,21 +135,9 @@ package device.running
 		
 		protected function onOutputErrorShell(event:ProgressEvent):void
 		{
-			error = new String(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
+			error = String(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
 		}
-		
-		protected function onForwardPortExit(event:NativeProcessExitEvent):void{
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onForwardPortExit);
-			
-			process = new NativeProcess();
-			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
-			process.addEventListener(NativeProcessExitEvent.EXIT, onReadLanExit, false, 0, true);
-			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData, false, 0, true);
-			
-			procInfo.arguments = new <String>["-s", id, "shell", "ip", "route"];
-			process.start(procInfo);
-		}
-		
+
 		protected function onReadLanData(event:ProgressEvent):void{
 			output = output.concat(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
 		}
@@ -159,9 +148,9 @@ package device.running
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onReadLanExit);
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData);
 			
-			if(error != null){
+			if (error != null) {
 				dispatchEvent(new Event(ERROR_EVENT));
-			}else{
+			} else {
 				var ipFounded:Boolean = false;
 				var ipRouteDataUdp:Array = output.split("\r\r\n");
 				for(var i:int=0;i<ipRouteDataUdp.length;i++) {
@@ -172,75 +161,28 @@ package device.running
 							this.deviceIp = splittedString[idxUdp+1];
 							this.ipAddress = splittedString[idxUdp+1];
 							ipFounded = true;
-							continue;
 						}
 					}
 				}
 				
-				if(!ipFounded && !usbMode) {
+				if(!ipFounded) {
 					error = " - WIFI not connected !";
 					writeErrorLogFile("WIFI not connected");
 					dispatchEvent(new Event(WIFI_ERROR_EVENT));
 					return;
-				}
-				
-				if(usbMode) {
-					getClientIPAddress();
 				} else {
 					dispatchEvent(new Event(IP_ADDRESS));
 				}
-				
+
 				process = new NativeProcess();
 				process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit, false, 0, true);
 				procInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", ANDROIDDRIVER];
 				process.start(procInfo);
-				return;
 			}
 		}
-		
-		private function getClientIPAddress ():void {
-			processIp = new NativeProcess();
-			var file:File;
-			var processArgs:Vector.<String> = new Vector.<String>(); 
-			if(!AtsMobileStation.isMacOs) {
-				file = wmicFile;
-				processArgs.push("nicconfig", "where", "(IPEnabled=TRUE and DHCPEnabled=TRUE)", "get", "IPAddress", "/format:list");
-				processIp.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataWin);
-			} else {
-				file = new File("/usr/bin/env");
-				processArgs.push("ipconfig","getifaddr","en1");
-				processIp.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataMac);
-			}
-			
-			var procInfoIp:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			procInfoIp.executable = file;
-			procInfoIp.workingDirectory = file.parent;
-			procInfoIp.arguments = processArgs;
-			processIp.start(procInfoIp);
-		}
-		
-		public function onOutputDataWin(event:ProgressEvent):void
+
+		protected function onUninstallExit(event:NativeProcessExitEvent):void
 		{
-			processIp.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataWin);
-			var pattern:RegExp = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/;
-			var output:String = processIp.standardOutput.readUTFBytes(processIp.standardOutput.bytesAvailable);
-			var arrayAddresses:Array = output.match(pattern);
-			if(arrayAddresses != null && arrayAddresses.length > 0) {
-				this.ipAddress = arrayAddresses[0];
-				writeInfoLogFile("getting ip Addresse from MS " + this.ipAddress);
-				dispatchEvent(new Event(IP_ADDRESS));
-			}
-		}
-		
-		public function onOutputDataMac(event:ProgressEvent):void
-		{
-			processIp.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputDataMac);
-			var rex:RegExp = /[\s\r\n]+/gim;
-			this.ipAddress = processIp.standardOutput.readUTFBytes(processIp.standardOutput.bytesAvailable).replace(rex,"");
-			dispatchEvent(new Event(IP_ADDRESS));
-		}
-		
-		protected function onUninstallExit(event:NativeProcessExitEvent):void{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
 			
 			process = new NativeProcess();
@@ -250,23 +192,8 @@ package device.running
 			process.start(procInfo);
 		}
 		
-		private static function get wmicFile():File{
-			if(_wmicFile == null){
-				var rootPath:Array = File.getRootDirectories();
-				for each(var file:File in rootPath){
-					_wmicFile = file.resolvePath("Windows/System32/wbem/WMIC.exe");
-					if(_wmicFile.exists){
-						break;
-					}else{
-						_wmicFile = null;
-					}
-				}
-			}
-			return _wmicFile;
-		}
-		
-		protected function onInstallExit(event:NativeProcessExitEvent):void{
-			
+		protected function onInstallExit(event:NativeProcessExitEvent):void
+		{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallExit);
 			
 			output = "";
@@ -285,57 +212,46 @@ package device.running
 		protected function onGetPropExit(event:NativeProcessExitEvent):void{
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadPropertyData);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onGetPropExit);
-			if(port != "") {
-				var propArray:Array = output.split("\n");
-				for each (var line:String in propArray){
-					if(line.indexOf("[ro.product.brand]") == 0){
-						deviceInfo.manufacturer = getPropValue(line)
-					}else if(line.indexOf("[ro.product.model]") == 0){
-						deviceInfo.modelId = getPropValue(line)
-					}else if(line.indexOf("[ro.semc.product.name]") == 0){
-						deviceInfo.modelName = getPropValue(line)
-					}else if(line.indexOf("[def.tctfw.brandMode.name]") == 0){
-						deviceInfo.modelName = getPropValue(line)
-					}else if(line.indexOf("[ro.build.version.release]") == 0){
-						deviceInfo.osVersion = getPropValue(line)
-					}else if(line.indexOf("[ro.build.version.sdk]") == 0){
-						deviceInfo.sdkVersion = getPropValue(line)
-					}
-				}
-				
-				deviceInfo.checkName();
-				dispatchEvent(new Event(DEVICE_INFO));
-				
-				process = new NativeProcess();
-				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData, false, 0, true);
-				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError, false, 0, true);
-				process.addEventListener(NativeProcessExitEvent.EXIT, onExecuteExit, false, 0, true);
-				
-				procInfo.arguments = new <String>["-s", id, "shell"];
-				process.start(procInfo);
-				
-				if (usbMode) {
-					instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + forwardPort + " -e udpPort " + udpPort + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerUsb " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";				
-				} else {
-					instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerWifi " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";				
-				}
 
-				process.standardInput.writeUTFBytes(instrumentCommandLine);
-			} else {
-				process.exit(true);
-				process = null;
-				procInfo = null;
-				
-				if(error != null){
-					dispatchEvent(new Event(ERROR_EVENT));
-					writeErrorLogFile(error);
-				}else{
-					dispatchEvent(new Event(STOPPED));
+			var propArray:Array = output.split("\n");
+			for each (var line:String in propArray){
+				if(line.indexOf("[ro.product.brand]") == 0){
+					deviceInfo.manufacturer = getPropValue(line)
+				}else if(line.indexOf("[ro.product.model]") == 0){
+					deviceInfo.modelId = getPropValue(line)
+				}else if(line.indexOf("[ro.semc.product.name]") == 0){
+					deviceInfo.modelName = getPropValue(line)
+				}else if(line.indexOf("[def.tctfw.brandMode.name]") == 0){
+					deviceInfo.modelName = getPropValue(line)
+				}else if(line.indexOf("[ro.build.version.release]") == 0){
+					deviceInfo.osVersion = getPropValue(line)
+				}else if(line.indexOf("[ro.build.version.sdk]") == 0){
+					deviceInfo.sdkVersion = getPropValue(line)
 				}
 			}
+
+			deviceInfo.checkName();
+			dispatchEvent(new Event(DEVICE_INFO));
+				
+			process = new NativeProcess();
+			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData, false, 0, true);
+			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError, false, 0, true);
+			process.addEventListener(NativeProcessExitEvent.EXIT, onExecuteExit, false, 0, true);
+				
+			procInfo.arguments = new <String>["-s", id, "shell"];
+			process.start(procInfo);
+				
+			if (usbMode) {
+				instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e udpPort " + udpPort + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerUsb " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";
+			} else {
+				instrumentCommandLine = "am instrument -w -e ipAddress " + ipAddress + " -e atsPort " + port + " -e usbMode " + usbMode + " -e debug false -e class " + ANDROIDDRIVER + ".AtsRunnerWifi " + ANDROIDDRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n";
+			}
+
+			process.standardInput.writeUTFBytes(instrumentCommandLine);
 		}
 		
-		private function getPropValue(value:String):String{
+		private function getPropValue(value:String):String
+		{
 			return androidPropValueRegex.exec(value)[1];
 		}
 		
@@ -357,22 +273,43 @@ package device.running
 				writeInfoLogFile(data);
 				if(data.indexOf("ATS_DRIVER_RUNNING") > -1){
 					dispatchEvent(new Event(RUNNING));
-				}else if(data.indexOf("ATS_DRIVER_START") > -1){
+				} else if(data.indexOf("ATS_DRIVER_START") > -1){
 					trace("driver start -> " + data);
-				}else if(data.indexOf("ATS_DRIVER_STOP") > -1){
+				} else if(data.indexOf("ATS_DRIVER_STOP") > -1){
 					trace("driver stop");
 				} else if(data.indexOf("ATS_WIFI_STOP") > -1) {
 					dispatchEvent(new Event(WIFI_ERROR_EVENT));
+				} else if(data.indexOf("ATS_WEB_SOCKET_SERVER_START:") > -1) {
+					webSocketServerPort = getWebSocketServerPort(data);
+					dispatchEvent(new Event(WEBSOCKET_SERVER_START));
+					// attach process tcp forward
+				} else if(data.indexOf("ATS_WEB_SOCKET_SERVER_STOP") > -1) {
+					dispatchEvent(new Event(WEBSOCKET_SERVER_STOP));
 				}
 			}
 		}
+
+		private function getWebSocketServerPort(data:String):int
+		{
+			var array:Array = data.split("\n");
+			for each(var line:String in array) {
+				if (line.indexOf("ATS_WEB_SOCKET_SERVER_START") > -1) {
+					var parameters:Array = line.split("=");
+					var subparameters:Array = (parameters[1] as String).split(":");
+					return parseInt(subparameters[1]);
+				}
+			}
+
+			return -1;
+		}
 		
-		public function screenshot():void{
+		public function screenshot():void
+		{
 			process.standardInput.writeUTFBytes("screenshot\r\n");
 		}
 		
-		protected function onExecuteExit(event:NativeProcessExitEvent):void{
-			
+		protected function onExecuteExit(event:NativeProcessExitEvent):void
+		{
 			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onExecuteExit);
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteData);
@@ -381,9 +318,9 @@ package device.running
 			process = null;
 			procInfo = null;
 			
-			if(error != null){
+			if (error != null) {
 				dispatchEvent(new Event(ERROR_EVENT));
-			}else{
+			} else {
 				dispatchEvent(new Event(STOPPED));
 			}
 		}

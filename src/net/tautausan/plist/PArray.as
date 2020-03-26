@@ -42,7 +42,7 @@
 			{
 				var i:uint;
 				var length:uint=x.*.length();
-				var arr:Array=new Array();
+				var arr:Array=[];
 	
 				for(i=0;i<length;i++)
 				{

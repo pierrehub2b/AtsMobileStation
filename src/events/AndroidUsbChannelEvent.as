@@ -15,7 +15,7 @@ package events
 		}
 		
 		public function get jsonData():String{
-			var data:Object = new Object();
+			var data:Object = {};
 			data.type = type;
 			data.message = message;
 			

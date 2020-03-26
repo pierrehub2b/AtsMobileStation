@@ -42,7 +42,7 @@ package net.tautausan.plist
 		{
 			if(!data)
 			{
-				var dic:Object = new Object();
+				var dic:Object = {};
 				var key:XML;
 				var node:XML;
 				

@@ -7,177 +7,246 @@
 			   initialize="settings_initializeHandler(event)">
 	<fx:Script>
 		<![CDATA[
-			import mx.core.FlexGlobals;
-			import mx.events.CloseEvent;
-			import mx.events.FlexEvent;
-			import mx.managers.PopUpManager;
-			
-			import device.RunningDevice;
-			import device.running.AndroidDevice;
-			
-			public var dev:RunningDevice;
-			public var arrayString:Array;
-			public var arrayStringDevTeam:Array;
-			
-			protected function settings_initializeHandler(event:FlexEvent):void {
-				
-				if(dev != null) {
-										
-					deviceId.text = dev.id;
-					deviceName.text = dev.modelName;
-					
-					if(dev is AndroidDevice){
-						androidUsbGroup.visible = true;
-						androidUsbGroup.includeInLayout = true;
-						installAppButton.visible = false;
-					}else{
-						androidUsbGroup.visible = false;
-						androidUsbGroup.includeInLayout = false;
-						installAppButton.visible = true;
-					}
-					
-					var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
-					if(file.exists) {
-						var fileStream:FileStream = new FileStream();
-						fileStream.open(file, FileMode.READ);
-						var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
-						arrayString = content.split("\n");
-						for each(var line:String in arrayString) {
-							if(line != "") {
-								var arrayLineId: Array = line.split("==");
-								if(arrayLineId[0].toString().toLowerCase() == dev.id.toString().toLowerCase()) {
-									var arrayLineAttributes: Array = arrayLineId[1].split(";");
-									portAutomatic.selected = arrayLineAttributes.length > 0 ? arrayLineAttributes[0].toString().toLocaleLowerCase() == "true" : false;
-									portSelection.text = arrayLineAttributes.length > 1 ? arrayLineAttributes[1] : "";
-									androidUsb.selected = arrayLineAttributes.length > 2 ? arrayLineAttributes[2].toString().toLocaleLowerCase() == "true" : false;
-								}
+		import mx.core.FlexGlobals;
+		import mx.events.CloseEvent;
+		import mx.events.FlexEvent;
+		import mx.managers.PopUpManager;
+
+		import device.RunningDevice;
+		import device.running.AndroidDevice;
+
+		import helpers.DeviceSettings;
+		import helpers.DeviceSettingsHelper;
+
+		import helpers.DevicePortSettings;
+
+		import helpers.DevicePortSettingsHelper;
+
+		import helpers.PortSwitcher;
+
+		public var dev:RunningDevice;
+		public var arrayString:Array;
+		public var arrayStringDevTeam:Array;
+
+		private var portSwitcher:PortSwitcher = new PortSwitcher();
+
+		private var deviceSettingsHelper:DeviceSettingsHelper = DeviceSettingsHelper.shared;
+		private var deviceSettings:DeviceSettings;
+
+		protected function settings_initializeHandler(event:FlexEvent):void {
+
+			if (dev != null) {
+
+				deviceId.text = dev.id;
+				deviceName.text = dev.modelName;
+
+				if (dev is AndroidDevice) {
+					androidUsbGroup.visible = true;
+					androidUsbGroup.includeInLayout = true;
+					installAppButton.visible = false;
+				} else {
+					androidUsbGroup.visible = false;
+					androidUsbGroup.includeInLayout = false;
+					installAppButton.visible = true;
+				}
+
+				/* var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
+				if (file.exists) {
+					var fileStream:FileStream = new FileStream();
+					fileStream.open(file, FileMode.READ);
+					var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
+					arrayString = content.split("\n");
+					for each(var line:String in arrayString) {
+						if (line != "") {
+							var arrayLineId:Array = line.split("==");
+							if (arrayLineId[0].toString().toLowerCase() == dev.id.toString().toLowerCase()) {
+								var arrayLineAttributes:Array = arrayLineId[1].split(";");
+								portAutomatic.selected = arrayLineAttributes.length > 0 ? arrayLineAttributes[0].toString().toLocaleLowerCase() == "true" : false;
+								portSelection.text = arrayLineAttributes.length > 1 ? arrayLineAttributes[1] : "";
+								androidUsb.selected = arrayLineAttributes.length > 2 ? arrayLineAttributes[2].toString().toLocaleLowerCase() == "true" : false;
 							}
 						}
-						fileStream.close();
 					}
-				}
-				
-				// portAutomatic.selected = portAutomatic.selected; //== false && portSelection.text == "";
-				portSelection.enabled = !portAutomatic.selected;
-			}
-			
-			private function closeHandler(event:CloseEvent):void{
-				PopUpManager.removePopUp(this);
-			}		
-			
-			protected function portAutomatic_changeHandler(event:Event):void
-			{
-				portSelection.enabled = !portAutomatic.selected;
-				if(portSelection.enabled && (parseInt(portSelection.text) >= 64999 || parseInt(portSelection.text) <= 1024)) {
-					portErrorMessage.visible = true;
-					saveButton.enabled = false;
-					portErrorMessageGroup.height = 10;
-				} else {
-					portErrorMessage.visible = false;
-					saveButton.enabled = true;
-					portErrorMessageGroup.height = 0;
-				}
-			}
-			
-			protected function portSelection_changeHandler(event:Event):void
-			{
-				var target:TextInput = event.currentTarget as TextInput;
-				if(!target) return;
-				if(parseInt(target.text) > 64999 || parseInt(target.text) <= 1024){
-					portErrorMessage.visible = true;
-					saveButton.enabled = false;
-					portErrorMessageGroup.height = 10;
-				} else {
-					portErrorMessage.visible = false;
-					saveButton.enabled = true;
-					portErrorMessageGroup.height = 0;
-				}
-				portAutomatic.selected = portSelection.text == "";
-			}
-			
-			protected function save_clickHandler(event:MouseEvent):void
-			{
-				var hasToRestart:Boolean = dev.settingsPort != portSelection.text || dev.automaticPort != portAutomatic.selected || dev.usbMode != androidUsb.selected;
-				if(dev != null){ 
-					dev.settingsPort = portSelection.text;
-					dev.automaticPort = portAutomatic.selected;
-					dev.usbMode = androidUsb.selected;
-					//save profile
-					var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
-					var fileStream:FileStream = new FileStream();
-					fileStream.open(file, FileMode.WRITE);
-					
-					for each(var str:String in arrayString) {
-						var arrayLineId: Array = str.split("==");
-						if(arrayLineId[0].toString().toLowerCase() != dev.id.toString().toLowerCase()) {
-							fileStream.writeUTFBytes(str + "\n");
-						}
-					}
-					fileStream.writeUTFBytes(dev.id.toString().toLowerCase() + "==" + dev.automaticPort + ";" + dev.settingsPort + ";" + dev.usbMode);
 					fileStream.close();
-				}
-				
-				if(hasToRestart) {
-					FlexGlobals.topLevelApplication.restartDevice(dev);
-				}
-				PopUpManager.removePopUp(this);
-			}			
-			
-			private var userDir:File;
-			protected function install_clickHandler(event:MouseEvent):void
-			{
-				userDir = File.userDirectory;
-				var typeFilter:FileFilter = new FileFilter("App file","*.apk; *.app");
-				
-				userDir.addEventListener(Event.SELECT, fileSelected, false, 0, true);
-				userDir.browse([typeFilter]);
-			}
-			
-			private function fileSelected(ev:Event):void{
-				userDir.removeEventListener(Event.SELECT, fileSelected);
-				
-				process = new NativeProcess();
-				procInfo = new NativeProcessStartupInfo()
-				
-				procInfo.executable = new File("/usr/bin/xcrun");
-				procInfo.workingDirectory = File.userDirectory;
-				
-				process.addEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
-				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputError, false, 0, true);
-				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutput, false, 0, true);
-				
-				procInfo.arguments = new <String>["simctl", "install", dev.id, userDir.nativePath];
-				process.start(procInfo);
-				
-				enabled = false;
-			}
-			
-			protected function onOutputError(event:ProgressEvent):void
-			{
-				trace(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
-			}
-			
-			protected function onOutput(event:ProgressEvent):void{
-				trace(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
-			}
-			
-			protected function onInstallExit(event:NativeProcessExitEvent):void{
-				process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallExit);
-				process = null;
-				procInfo = null;
-				userDir = null;
+				} */
 
-				enabled = true;
+				deviceSettings = deviceSettingsHelper.getSettingsForDevice(dev.id);
+				portAutomatic.selected = deviceSettings.automaticPort;
+				androidUsb.selected = deviceSettings.usbMode;
+				portSelection.text = portAutomatic.selected == true ? "" : deviceSettings.port.toString();
+				portSelection.enabled = !portAutomatic.selected;
 			}
-			
-			private var process:NativeProcess;
-			private var procInfo:NativeProcessStartupInfo;
-			
-			protected function copyId_clickHandler(event:MouseEvent):void
-			{
-				Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, dev.id);
+		}
+
+		private function closeHandler(event:CloseEvent):void {
+			PopUpManager.removePopUp(this);
+		}
+
+		protected function portAutomatic_changeHandler(event:Event):void {
+			portSelection.enabled = !portAutomatic.selected;
+			portSelection.text = portAutomatic.selected == true ? "" : deviceSettings.port.toString();
+
+			if (portSelection.text != "") {
+				var port:int = parseInt(portSelection.text);
+				validatePort(port)
 			}
-			
+		}
+
+		protected function portSelection_changeHandler(event:Event):void {
+			var target:TextInput = event.currentTarget as TextInput;
+			if (!target) return;
+
+			if (target.text != "") {
+				var port:int = parseInt(target.text);
+				validatePort(port)
+			}
+
+			portAutomatic.selected = portSelection.text == "";
+		}
+
+		private function validatePort(port:int):void {
+			if (port > 64999 || port <= 1024) {
+				portErrorMessage.visible = true;
+				portErrorMessage.text = "Port value must be between 1025 and 64999";
+				saveButton.enabled = false;
+				portErrorMessageGroup.height = 10;
+				return;
+			}
+
+			if (deviceIsLocalhost() == true) {
+				if (portSwitcher.checkSocketPortAvailability(port) == false) {
+					portErrorMessage.visible = true;
+					portErrorMessage.text = "Port is unavailable";
+					saveButton.enabled = false;
+					portErrorMessageGroup.height = 10;
+					return;
+				}
+
+				var registeredDevice:String = DevicePortSettingsHelper.shared.deviceForRegisteredPort(port);
+				if (registeredDevice != null && registeredDevice != dev.id) {
+					portErrorMessage.visible = true;
+					portErrorMessage.text = "WARNING : port already assigned by " + registeredDevice;
+					saveButton.enabled = true;
+					portErrorMessageGroup.height = 10;
+					return
+				}
+			}
+
+			portErrorMessage.visible = false;
+			saveButton.enabled = true;
+			portErrorMessageGroup.height = 0;
+		}
+
+		private function deviceIsLocalhost():Boolean {
+			return androidUsb.selected == true || dev.simulator == true;
+		}
+
+		protected function save_clickHandler(event:MouseEvent):void {
+			var hasToRestart:Boolean = dev.settingsPort != portSelection.text || dev.automaticPort != portAutomatic.selected || dev.usbMode != androidUsb.selected;
+			if (dev != null) {
+				dev.settingsPort = portAutomatic.selected == true ? dev.port : portSelection.text;
+				dev.automaticPort = portAutomatic.selected;
+				dev.usbMode = androidUsb.selected;
+
+				//save profile
+				/* var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
+				var fileStream:FileStream = new FileStream();
+				fileStream.open(file, FileMode.WRITE);
+
+				for each(var str:String in arrayString) {
+					var arrayLineId:Array = str.split("==");
+					if (arrayLineId[0].toString().toLowerCase() != dev.id.toString().toLowerCase()) {
+						fileStream.writeUTFBytes(str + "\n");
+					}
+				}
+				fileStream.writeUTFBytes(dev.id.toString().toLowerCase() + "==" + dev.automaticPort + ";" + dev.settingsPort + ";" + dev.usbMode);
+				fileStream.close(); */
+
+				deviceSettings.usbMode = dev.usbMode;
+				deviceSettings.automaticPort = dev.automaticPort;
+
+				if (dev.automaticPort == false) {
+					deviceSettings.port = parseInt(portSelection.text);
+				} else {
+					// localhost
+					var existingDevicePort:int = DevicePortSettingsHelper.shared.getPortOfDevice(dev.id);
+					deviceSettings.port = existingDevicePort == -1 ? 8080 : existingDevicePort;
+
+					// wifi
+					deviceSettings.port = 8080;
+				}
+
+				deviceSettingsHelper.save(deviceSettings);
+
+				if (dev.simulator == true || dev.usbMode == true) {
+					var portSettings:DevicePortSettings = new DevicePortSettings(dev.id, deviceSettings.port);
+					DevicePortSettingsHelper.shared.addSettings(portSettings);
+				} else {
+					portSettings = DevicePortSettingsHelper.shared.getPortSetting(dev.id);
+					if (portSettings != null) {
+						DevicePortSettingsHelper.shared.removeSettings(portSettings);
+					}
+				}
+			}
+
+			if (hasToRestart) {
+				FlexGlobals.topLevelApplication.restartDevice(dev);
+			}
+			PopUpManager.removePopUp(this);
+		}
+
+		private var userDir:File;
+
+		protected function install_clickHandler(event:MouseEvent):void {
+			userDir = File.userDirectory;
+			var typeFilter:FileFilter = new FileFilter("App file", "*.apk; *.app");
+
+			userDir.addEventListener(Event.SELECT, fileSelected, false, 0, true);
+			userDir.browse([typeFilter]);
+		}
+
+		private function fileSelected(ev:Event):void {
+			userDir.removeEventListener(Event.SELECT, fileSelected);
+
+			process = new NativeProcess();
+			procInfo = new NativeProcessStartupInfo();
+
+			procInfo.executable = new File("/usr/bin/xcrun");
+			procInfo.workingDirectory = File.userDirectory;
+
+			process.addEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
+			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputError, false, 0, true);
+			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutput, false, 0, true);
+
+			procInfo.arguments = new <String>["simctl", "install", dev.id, userDir.nativePath];
+			process.start(procInfo);
+
+			enabled = false;
+		}
+
+		protected function onOutputError(event:ProgressEvent):void {
+			trace(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
+		}
+
+		protected function onOutput(event:ProgressEvent):void {
+			trace(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
+		}
+
+		protected function onInstallExit(event:NativeProcessExitEvent):void {
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallExit);
+			process = null;
+			procInfo = null;
+			userDir = null;
+
+			enabled = true;
+		}
+
+		private var process:NativeProcess;
+		private var procInfo:NativeProcessStartupInfo;
+
+		protected function copyId_clickHandler(event:MouseEvent):void {
+			Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, dev.id);
+		}
 		]]>
 	</fx:Script>
 	
@@ -211,9 +280,7 @@
 		<s:HGroup width="100%" gap="3" verticalAlign="middle" verticalCenter="0" visible="true">
 			<s:HGroup id="androidUsbGroup" width="100%" horizontalAlign="left" verticalAlign="baseline" visible="true">
 				<s:Label fontSize="11" fontWeight="bold" paddingRight="5" text="USB mode :"/>
-				<s:CheckBox id="androidUsb"
-							change="portAutomatic_changeHandler(event)" fontSize="11"
-							fontStyle="normal" textDecoration="none"/>
+				<s:CheckBox id="androidUsb" fontSize="11" fontStyle="normal" textDecoration="none"/>
 			</s:HGroup>
 		</s:HGroup>
 

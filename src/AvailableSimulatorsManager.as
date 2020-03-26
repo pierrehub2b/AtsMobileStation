@@ -16,7 +16,7 @@ package
 	{
 		public static const COLLECTION_CHANGED:String = "collectionChanged";
 		
-		private const regex:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
+		private const regex:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/;
 		private const jsonPattern:RegExp = /\{[^]*\}/;
 		private const iosVersionReplacmentPattern:RegExp = /-/g; 
 		
@@ -114,9 +114,9 @@ package
 				}
 				
 				if(collection.length == 0){
-					info = new String("No simulators found !\n(Xcode may not be installed on this station !)");
+					info = String("No simulators found !\n(Xcode may not be installed on this station !)");
 				}else{
-					info = new String();
+					info = String("");
 				}
 			}			
 		}

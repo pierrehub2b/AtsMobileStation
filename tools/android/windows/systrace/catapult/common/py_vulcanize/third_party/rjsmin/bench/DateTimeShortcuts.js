@@ -113,7 +113,7 @@ var DateTimeShortcuts = {
             );
         }
         else {
-            timezoneOffset *= -1
+            timezoneOffset *= -1;
             message = ngettext(
                 'Note: You are %s hour behind server time.',
                 'Note: You are %s hours behind server time.',
@@ -194,8 +194,8 @@ var DateTimeShortcuts = {
         });
     },
     openClock: function(num) {
-        var clock_box = document.getElementById(DateTimeShortcuts.clockDivName+num)
-        var clock_link = document.getElementById(DateTimeShortcuts.clockLinkName+num)
+        var clock_box = document.getElementById(DateTimeShortcuts.clockDivName+num);
+        var clock_link = document.getElementById(DateTimeShortcuts.clockLinkName+num);
 
         // Recalculate the clockbox position
         // is it left-to-right or right-to-left layout ?
@@ -314,8 +314,8 @@ var DateTimeShortcuts = {
         });
     },
     openCalendar: function(num) {
-        var cal_box = document.getElementById(DateTimeShortcuts.calendarDivName1+num)
-        var cal_link = document.getElementById(DateTimeShortcuts.calendarLinkName+num)
+        var cal_box = document.getElementById(DateTimeShortcuts.calendarDivName1+num);
+        var cal_link = document.getElementById(DateTimeShortcuts.calendarLinkName+num);
         var inp = DateTimeShortcuts.calendarInputs[num];
 
         // Determine if the current value in the input has a valid date.
@@ -325,7 +325,7 @@ var DateTimeShortcuts = {
             var selected = inp.value.strptime(format);
             var year = selected.getFullYear();
             var month = selected.getMonth() + 1;
-            var re = /\d{4}/
+            var re = /\d{4}/;
             if (re.test(year.toString()) && month >= 1 && month <= 12) {
                 DateTimeShortcuts.calendars[num].drawDate(month, year, selected);
             }
@@ -378,11 +378,11 @@ var DateTimeShortcuts = {
     },
     handleCalendarQuickLink: function(num, offset) {
        var d = DateTimeShortcuts.now();
-       d.setDate(d.getDate() + offset)
+       d.setDate(d.getDate() + offset);
        DateTimeShortcuts.calendarInputs[num].value = d.strftime(get_format('DATE_INPUT_FORMATS')[0]);
        DateTimeShortcuts.calendarInputs[num].focus();
        DateTimeShortcuts.dismissCalendar(num);
     }
-}
+};
 
 addEvent(window, 'load', DateTimeShortcuts.init);
