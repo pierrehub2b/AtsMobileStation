@@ -60,13 +60,14 @@ public class CaptureServer extends EventDispatcher
 		
 		public function setupWebSocket(port:int):void
 		{
-			datagramSocket.receive();
-			
 			webSocket = new WebSocket("ws://localhost:" + port.toString(), "*");
 			webSocket.addEventListener(WebSocketEvent.OPEN, webSocketOpenHandler);
 			webSocket.addEventListener(WebSocketEvent.MESSAGE, webSocketOnMessageHandler);
+			webSocket.addEventListener(WebSocketEvent.CLOSED, webSocketOnCloseHandler, false, 0, true);
 			webSocket.addEventListener(WebSocketErrorEvent.CONNECTION_FAIL, webSocketConnectionFailHandler);
 			webSocket.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+
+			datagramSocket.receive();
 
 			dispatchEvent(new Event(CaptureServer.CAPTURE_SERVER_STARTED));
 		}
@@ -112,6 +113,13 @@ public class CaptureServer extends EventDispatcher
 					var errorStr:String = error.message;
 				}
 			}
+		}
+
+		private function webSocketOnCloseHandler(event:WebSocketEvent):void {
+			webSocket.removeEventListener(WebSocketEvent.MESSAGE, webSocketOnMessageHandler);
+			webSocket.removeEventListener(WebSocketEvent.CLOSED, webSocketOnCloseHandler);
+			webSocket.removeEventListener(WebSocketErrorEvent.CONNECTION_FAIL, webSocketConnectionFailHandler);
+			webSocket.removeEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
 		}
 		
 		public function sendData(screen:ByteArray, currentPos:int, dataLength:int, packetSize:int):void {

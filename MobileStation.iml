@@ -9,7 +9,7 @@
               <dependency linkage="Merged" />
             </entry>
           </entries>
-          <sdk name="apache-flex-sdk-4.16.1" />
+          <sdk name="FlexSdk" />
         </dependencies>
         <compiler-options>
           <map>
@@ -51,7 +51,7 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="apache-flex-sdk-4.16.1" jdkType="Flex SDK Type (new)" />
+    <orderEntry type="jdk" jdkName="FlexSdk" jdkType="Flex SDK Type (new)" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library" exported="">
       <library type="flex">

@@ -116,14 +116,14 @@ public class AndroidUsbDevice extends AndroidDevice {
     {
         webServer.removeEventListener(WebServer.WEB_SERVER_STARTED, webServerInitializedHandler);
 
-        captureServer.setupWebSocket(webSocketServerPort);
+        captureServer.setupWebSocket(webSocketClientPort);
     }
 
     private function webServerErrorHandler(event:Event):void
     {
         webServer.removeEventListener(WebServer.WEB_SERVER_INITIALIZED, webServerInitializedHandler);
-        webServer.removeEventListener(WebServer.WEB_SERVER_STARTED, webServerInitializedHandler);
-        webServer.removeEventListener(WebServer.WEB_SERVER_ERROR, webServerInitializedHandler);
+        webServer.removeEventListener(WebServer.WEB_SERVER_STARTED, webServerStartedHandler);
+        webServer.removeEventListener(WebServer.WEB_SERVER_ERROR, webServerErrorHandler);
 
         usbError("Web server error");
     }
