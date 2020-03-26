@@ -94,7 +94,7 @@
 			<s:BitmapImage  id="mobile" source="assets/icons/32/{(data is IosDevice)?'ios':'android'}.png" smooth="true" smoothingQuality="high"/>
 			<s:Spacer width="18"/>
 			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
-				<s:Label visible="{(data as RunningDevice).ip==null}" includeInLayout="{(data as RunningDevice).ip==null}" 
+				<s:Label visible="{(data as RunningDevice).ip==null}" includeInLayout="{(data as RunningDevice).ip==null}"
 						 text="Unable to get local ip !" fontStyle="italic" color="0x8a844a"/>
 								
 				<s:HGroup visible="{(data as RunningDevice).ip!=null}" includeInLayout="{(data as RunningDevice).ip!=null}" gap="0">

@@ -8,30 +8,31 @@ package device.running
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
-	import flash.system.Capabilities;
 	
 	import mx.core.FlexGlobals;
 	
 	import device.Device;
 	import device.RunningDevice;
 	import device.simulator.Simulator;
-	
-	import net.tautausan.plist.Plist;
-	
-	public class IosDevice extends RunningDevice
+
+import helpers.DeviceSettings;
+
+import helpers.DeviceSettingsHelper;
+
+import helpers.PortSwitcher;
+
+public class IosDevice extends RunningDevice
 	{
-		private var output:String = "";
-		
 		private static const ATSDRIVER_DRIVER_HOST:String = "ATSDRIVER_DRIVER_HOST";
 		
 		private static const startInfo:RegExp = new RegExp(ATSDRIVER_DRIVER_HOST + "=(.*):(\\d+)");
-		private static const startInfoLocked:RegExp = /isPasscodeLocked:(\s*)YES/
-		private static const noProvisionningProfileError:RegExp = /Xcode couldn't find any iOS App Development provisioning profiles matching(\s*)/
-		private static const noCertificatesError:RegExp = /signing certificate matching team ID(\s*)/	
-		private static const noXcodeInstalled:RegExp = /requires Xcode(\s*)/
-		private static const wrongVersionofxCode:RegExp = /which may not be supported by this version of Xcode(\s*)/
+		private static const startInfoLocked:RegExp = /isPasscodeLocked:(\s*)YES/;
+		private static const noProvisionningProfileError:RegExp = /Xcode couldn't find any iOS App Development provisioning profiles matching(\s*)/;
+		private static const noCertificatesError:RegExp = /signing certificate matching team ID(\s*)/;
+		private static const noXcodeInstalled:RegExp = /requires Xcode(\s*)/;
+		private static const wrongVersionofxCode:RegExp = /which may not be supported by this version of Xcode(\s*)/;
 
-		private var testingProcess:NativeProcess
+		private var testingProcess:NativeProcess;
 		public var procInfo:NativeProcessStartupInfo;
 		
 		private static const iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
@@ -47,10 +48,12 @@ package device.running
 			this.modelName = name;
 			this.manufacturer = "Apple";
 			this.simulator = simulator;
-			
+
 			var fileStream:FileStream = new FileStream();
 			var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
-			if(file.exists) {
+
+			trace("Getting settings configuration for device:" + id);
+			/* if(file.exists) {
 				fileStream.open(file, FileMode.READ);
 				var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
 				var arrayString: Array = content.split("\n");
@@ -60,72 +63,65 @@ package device.running
 						if(arrayLineId[0].toString().toLowerCase() == id.toString().toLowerCase()) {
 							var arrayLineAttributes: Array = arrayLineId[1].split(";");
 							automaticPort = (arrayLineAttributes[0] == "true");
-							settingsPort = arrayLineAttributes[1];
-						}
-					}
-				}
-				fileStream.close();
-			}
-			
-			var teamId:String = "";
-			var lastBuildString:String = "";
-			file = FlexGlobals.topLevelApplication.settingsFile;
-			if(file.exists) {
-				
-				fileStream = new FileStream();
-				fileStream.open(file, FileMode.READ);
-				
-				var settingsContent:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
-				var settingsContentArray: Array = settingsContent.split("\n");
-				
-				for each(var setting:String in settingsContentArray) {
-					if(setting != "") {
-						var key:String = setting.split("==")[0];
-						switch(key)
-						{
-							case "development_team":
-							{
-								teamId = setting.split("==")[1];
-								break;
+
+							if (simulator == false) {
+								settingsPort = arrayLineAttributes[1];
 							}
-								
-							/*case "last_build":
-							{
-								lastBuildString = setting.split("==")[1];
-								break;
-							}*/
 						}
 					}
 				}
 				fileStream.close();
 			}
-			
-			if(teamId == "" && !simulator) {
+			 */
+
+			var deviceSettingsHelper:DeviceSettingsHelper = DeviceSettingsHelper.shared;
+			var deviceSettings:DeviceSettings = deviceSettingsHelper.getSettingsForDevice(id);
+			if (deviceSettings == null) {
+				deviceSettings = new DeviceSettings(id);
+				deviceSettingsHelper.save(deviceSettings);
+			}
+
+			automaticPort = deviceSettings.automaticPort;
+
+			if (simulator == true) {
+				var portSwitcher:PortSwitcher = new PortSwitcher();
+				settingsPort = portSwitcher.getLocalPort(id, automaticPort).toString();
+			} else {
+				settingsPort = deviceSettings.port.toString();
+			}
+
+			deviceSettings.port = parseInt(settingsPort);
+			deviceSettingsHelper.save(deviceSettings);
+
+			if(FlexGlobals.topLevelApplication.getTeamId() == "" && !simulator) {
 				status = Device.FAIL;
 				errorMessage = " - No development team id set";
 				return;
 			}
 			
-			installing()
+			installing();
+			trace("installing the driver");
 			testingProcess = new NativeProcess();
 			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 			
+			trace("Copy files into temp directory");
 			resultDir = File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id);
 			var alreadyCopied:Boolean = resultDir.exists;
 			if(!alreadyCopied) {
 				iosDriverProjectFolder.copyTo(resultDir, true);
 			}
 
+			trace("Managing plist file");
 			var index:int = 0;
 			file = resultDir.resolvePath("atsDriver/Settings.plist");
 			var xcworkspaceFile:File = resultDir.resolvePath("atsios.xcworkspace");
-			if(file.exists) {
+			if(file.exists && settingsPort != "") {
 				fileStream = new FileStream();
 				fileStream.open(file, FileMode.READ);
-				content = fileStream.readUTFBytes(fileStream.bytesAvailable);
-				arrayString = content.split("\n");
+				var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
+				var arrayString:Array = content.split("\n");
 				
 				for each(var lineSettings:String in arrayString) {
 					if(lineSettings.indexOf("CFCustomPort") > -1) {
@@ -134,11 +130,8 @@ package device.running
 						} else {
 							arrayString[index+1] = "\t<string></string>";
 						}
+						break;
 					}
-					
-					/*if(lineSettings.indexOf("CFComputerResolution") > -1) {
-						arrayString[index+1] = "\t<string>"+ Capabilities.screenResolutionX + "x" + Capabilities.screenResolutionY +"</string>";
-					}*/
 					index++;
 				}				
 				fileStream.close();
@@ -151,42 +144,27 @@ package device.running
 				writeFileStream.close();
 			}
 			
-			/*if(lastBuildString != "") {
-				var d:Date = new Date();
-				d.setTime(Date.parse(lastBuildString));
-				var modificationDate:int = (xcworkspaceFile.modificationDate.time/1000);
-				var oldDate:int = (d.time/1000);
-				alreadyCopied = !(modificationDate > oldDate);
-			}*/
-			
-			var fileSettings:File = FlexGlobals.topLevelApplication.settingsFile;
-			var fileStreamSettings:FileStream = new FileStream();
-			fileStreamSettings.open(fileSettings, FileMode.WRITE);
-			fileStreamSettings.writeUTFBytes("development_team==" + teamId + "\n");
-			//fileStreamSettings.writeUTFBytes("last_build==" + xcworkspaceFile.modificationDate.toString());
-			fileStreamSettings.close();
-			
 			procInfo = new NativeProcessStartupInfo();
 			procInfo.executable = xcodeBuildExec;
 			procInfo.workingDirectory = resultDir;
 			
 			var args: Vector.<String> = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id];
 			if(!simulator) {
-				args.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + teamId);
+				args.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + FlexGlobals.topLevelApplication.getTeamId());
 			}
 			
 			if(alreadyCopied) {
 				AtsMobileStation.alreadyBuilded = true;
 				args.push("test-without-building");
-				trace("test without building on device with id:" + id)
+				trace("test without building on device with id:" + id + " at " + new Date())
 			} else {
 				args.push("test");
-				trace("build and test on device with id:" + id)
+				trace("build and test on device with id:" + id + " at " + new Date())
 			}
 			getBundleIds(id);
 			procInfo.arguments = args;
 		}
-		
+
 		protected function addLineToLogs(log: String):void {
 			var file:File = resultDir.resolvePath("logs.txt");
 			var fileStream:FileStream = new FileStream();
@@ -212,7 +190,7 @@ package device.running
 				var arrayStringPList:Array = pListContent.split("\n");				
 				fileStreamMobileDevice.close();
 				
-				var newArray:Array = new Array();
+				var newArray:Array = [];
 				var removeNextIndex:Boolean = false;
 				for each(var str:String in arrayStringPList) {
 					if(str.indexOf("CFAppBundleID") == -1 && !removeNextIndex) {
@@ -323,6 +301,8 @@ package device.running
 				const find:Array = startInfo.exec(data);
 				ip = find[1];
 				port = find[2];
+
+
 				started();
 			}
 		}
@@ -360,7 +340,7 @@ package device.running
 			if(wrongVersionofxCode.test(data)){
 				errorMessage = "Your device need a more recent version\n of xCode. Go to AppStore for download it";
 				testingProcess.exit();
-				return;
+
 			}
 		}
 	}

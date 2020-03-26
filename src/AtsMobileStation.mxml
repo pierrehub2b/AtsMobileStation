@@ -11,6 +11,7 @@
 			
 			import flash.filters.BitmapFilterQuality;
 			
+			import mx.core.FlexGlobals;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
 			
@@ -38,6 +39,8 @@
 			[Bindable]
 			public var simulators:AvailableSimulatorsManager;
 			
+			public var teamId:String;
+			
 			public function get logsFolder():File{
 				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/logs");
 			}
@@ -50,24 +53,62 @@
 				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/settings.txt");
 			}
 			
+			public function getTeamId():String {
+				return teamId;
+			}
+			
+			public function setTeamId(value:String):void {
+				teamId = value;
+			}
+			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
 				try{
 					logsFolder.deleteDirectory(true);
 				}catch(err:IOError){}
 
-				if(!Capabilities.isDebugger) {
+				//if(!Capabilities.isDebugger) {
 					cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
-				}
+				//}
 				
 				simulators = new AvailableSimulatorsManager();
 				devices = new RunningDevicesManager(port, isMacOs);
 				
 				settingsButton.visible = isMacOs;
+				if(isMacOs) {
+					var file:File = FlexGlobals.topLevelApplication.settingsFile;
+					if(file.exists) {
+						
+						var fileStream:FileStream = new FileStream();
+						fileStream.open(file, FileMode.READ);
+						
+						var settingsContent:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
+						var settingsContentArray: Array = settingsContent.split("\n");
+						
+						for each(var setting:String in settingsContentArray) {
+							if(setting != "") {
+								var key:String = setting.split("==")[0];
+								if(key == "development_team") {
+									teamId = setting.split("==")[1];
+									break;
+								}
+							}
+						}
+						fileStream.close();
+					}
+				}
 			}
 			
 			public function restartDevice(dev:Device):void{
 				devices.restartDev(dev);
+			}
+			
+			public function restartIosDevices():void {
+				for each(var dv:RunningDevice in devices.collection) {
+					if(!dv.simulator && dv is IosDevice && dv.status != Device.READY) {
+						devices.restartDev(dv);
+					}
+				}
 			}
 			
 			protected function closeHandler(event:Event):void
@@ -79,7 +120,7 @@
 			{
 				if (directory.isDirectory) 
 				{
-					var dirArray: Array = new Array();
+					var dirArray: Array = [];
 					var files:Array = directory.getDirectoryListing();
 					for (var i:int = 0; i < files.length; i++)
 					{

@@ -35,7 +35,7 @@ package
 						
 		public static const adbPath:String = "assets/tools/android/adb";
 		public static const endOfMessage:String = "<$ATSDROID_endOfMessage$>";
-		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/
+		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/;
 		private const jsonPattern:RegExp = /\{[^]*\}/;
 		private const newlineTabPattern:RegExp = /[\n\t]/g;
 		public static const responseSplitter:String = "<$atsDroid_ResponseSPLIITER$>";
@@ -106,7 +106,7 @@ package
 		
 		private function launchAdbProcess():void{
 			
-			androidOutput = new String();
+			androidOutput = String("");
 			
 			var proc:NativeProcess = new NativeProcess();
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
@@ -123,7 +123,7 @@ package
 		protected function onReadAndroidDevicesData(ev:ProgressEvent):void{
 			const len:int = ev.target.standardOutput.bytesAvailable;
 			const data:String = ev.target.standardOutput.readUTFBytes(len);
-			androidOutput = new String(androidOutput.concat(data));
+			androidOutput = String(androidOutput.concat(data));
 		}
 		
 		protected function onReadAndroidDevicesExit(ev:NativeProcessExitEvent):void
@@ -159,7 +159,7 @@ package
 								dev.close();
 							}
 						}else{
-							dev = new AndroidDevice(adbFile, port, runningId);
+							dev = AndroidDevice.setup(runningId, adbFile); //new AndroidDevice(adbFile, runningId);
 							dev.addEventListener(Device.STOPPED_EVENT, deviceStoppedHandler, false, 0, true);
 							dev.start();
 							
@@ -184,7 +184,7 @@ package
 		//---------------------------------------------------------------------------------------------------------
 		
 		private function launchIosProcess():void{
-			iosOutput = new String();
+			iosOutput = String("");
 			
 			var proc:NativeProcess = new NativeProcess();
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
@@ -201,7 +201,7 @@ package
 		private function onReadIosDevicesData(ev:ProgressEvent):void{
 			const len:int = ev.target.standardOutput.bytesAvailable;
 			const data:String = ev.target.standardOutput.readUTFBytes(len);
-			iosOutput = new String(iosOutput.concat(data));
+			iosOutput = String(iosOutput.concat(data));
 		}
 		
 		private function onUsbDeviceExit(ev:NativeProcessExitEvent):void{
@@ -212,7 +212,7 @@ package
 			
 			//------------------------------------------------------------------------------------------
 			
-			var output:String = new String(iosOutput.replace(newlineTabPattern, ""));
+			var output:String = String(iosOutput.replace(newlineTabPattern, ""));
 			const plistNodeIndex:int = output.indexOf("<plist version=\"1.0\">");
 			
 			if(plistNodeIndex > -1){

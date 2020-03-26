@@ -501,7 +501,7 @@ package com.worlize.websocket
 								event.message = new WebSocketMessage();
 								event.message.type = WebSocketMessage.TYPE_BINARY;
 								if(frame.rsv1)
-									inflate(frame.binaryPayload)
+									inflate(frame.binaryPayload);
 								event.message.binaryData = frame.binaryPayload;
 								dispatchEvent(event);
 							}
@@ -526,7 +526,7 @@ package com.worlize.websocket
 								event.message = new WebSocketMessage();
 								event.message.type = WebSocketMessage.TYPE_UTF8;
 								if(frame.rsv1)
-									inflate(frame.binaryPayload)
+									inflate(frame.binaryPayload);
 								event.message.utf8Data = frame.binaryPayload.readMultiByte(frame.binaryPayload.length, 'utf-8');
 								dispatchEvent(event);
 							}
@@ -764,7 +764,7 @@ package com.worlize.websocket
 			fatalError = true;
 			var logText:String = "WebSocket: Dropping Connection. Code: " + closeReason.toString(10);
 			if (reasonText) {
-				logText += (" - " + reasonText);;
+				logText += (" - " + reasonText);
 			}
 			logger(logText);
 			
@@ -928,7 +928,7 @@ package com.worlize.websocket
 			
 			// Start reading data
 			handleSocketData();
-			return;
+
 		}
 		
 		private function handleHandshakeTimer(event:TimerEvent):void {
