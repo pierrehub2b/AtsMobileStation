@@ -65,14 +65,14 @@ public class WebServer extends EventDispatcher
 		}
 
 		public function setupWebSocket(port:int):void {
-			serverSocket.listen();
-
 			webSocket = new WebSocket("ws://localhost:" + port.toString(), "*");
 			webSocket.addEventListener(WebSocketEvent.OPEN, webSocketOpenHandler, false, 0, true);
 			webSocket.addEventListener(WebSocketEvent.MESSAGE, webSocketOnMessageHandler, false, 0, true);
 			webSocket.addEventListener(WebSocketEvent.CLOSED, webSocketOnCloseHandler, false, 0, true);
 			webSocket.addEventListener(WebSocketErrorEvent.CONNECTION_FAIL, webSocketConnectionFailHandler, false, 0, true);
 			webSocket.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler, false, 0, true);
+
+			serverSocket.listen();
 
 			dispatchEvent(new Event(WebServer.WEB_SERVER_STARTED));
 		}
