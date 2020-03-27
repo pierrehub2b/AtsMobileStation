@@ -309,6 +309,10 @@ public class IosDevice extends RunningDevice
 		
 		protected function onTestingError(event:ProgressEvent):void
 		{
+			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
+			testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput);
+			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
+
 			const data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
 			//trace(data);
 			addLineToLogs(data);
