@@ -27,7 +27,7 @@ public class AndroidWirelessDevice extends AndroidDevice {
 
     override protected function addAndroidProcessEventListeners():void
     {
-        super.addAndroidProcessEventListeners()
+        super.addAndroidProcessEventListeners();
         process.addEventListener(AndroidProcess.IP_ADDRESS, ipAddressHandler, false, 0, true);
         process.addEventListener(AndroidProcess.WIFI_ERROR_EVENT, processWifiErrorHandler, false, 0, true);
     }

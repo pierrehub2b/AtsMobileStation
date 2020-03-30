@@ -196,7 +196,7 @@ public class AndroidUsbDevice extends AndroidDevice {
 
     override protected function addAndroidProcessEventListeners():void
     {
-        super.addAndroidProcessEventListeners()
+        super.addAndroidProcessEventListeners();
         process.addEventListener(AndroidProcess.WEBSOCKET_SERVER_START, webSocketServerStartedHandler, false, 0, true);
         process.addEventListener(AndroidProcess.WEBSOCKET_SERVER_STOP, webSocketServerStoppedHandler, false, 0, true);
     }

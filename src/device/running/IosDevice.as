@@ -116,7 +116,6 @@ public class IosDevice extends RunningDevice
 			trace("Managing plist file");
 			var index:int = 0;
 			file = resultDir.resolvePath("atsDriver/Settings.plist");
-			var xcworkspaceFile:File = resultDir.resolvePath("atsios.xcworkspace");
 			if(file.exists && settingsPort != "") {
 				fileStream = new FileStream();
 				fileStream.open(file, FileMode.READ);
@@ -126,7 +125,7 @@ public class IosDevice extends RunningDevice
 				for each(var lineSettings:String in arrayString) {
 					if(lineSettings.indexOf("CFCustomPort") > -1) {
 						if(!automaticPort) {
-							arrayString[index+1] = "\t<string>"+ settingsPort +"</string>";
+							arrayString[index+1] = "\t<string>" + settingsPort + "</string>";
 						} else {
 							arrayString[index+1] = "\t<string></string>";
 						}
@@ -256,11 +255,9 @@ public class IosDevice extends RunningDevice
 		
 		override public function dispose():Boolean
 		{
-			if(testingProcess != null && testingProcess.running){
-				
+			if (testingProcess != null && testingProcess.running) {
 				testingProcess.closeInput();
 				testingProcess.exit();
-
 				return true;
 			}
 			return false;

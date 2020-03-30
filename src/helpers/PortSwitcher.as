@@ -13,7 +13,7 @@ import flash.net.ServerSocket;
 		// public static function getAvailablePort():int
 		public function getLocalPort(deviceId:String, automatic:Boolean):int
 		{
-			var port:int = portSettings.getPortOfDevice(deviceId)
+			var port:int = portSettings.getPortOfDevice(deviceId);
 
 			// unknown device
 			if (port == -1) {
@@ -22,7 +22,7 @@ import flash.net.ServerSocket;
 				portSettings.addSettings(porta);
 				return newPort;
 			} else {
-				var portIsAvailable:Boolean = checkPortAvailability(port)
+				var portIsAvailable:Boolean = checkPortAvailability(port);
 				if (portIsAvailable == false) {
 					if (automatic == true) {
 						var newPortb:int = generateAvailablePort();
