@@ -314,37 +314,26 @@ public class IosDevice extends RunningDevice
 			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
 
 			const data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
-			//trace(data);
 			addLineToLogs(data);
 			
-			if(noProvisionningProfileError.test(data)){
+			if (noProvisionningProfileError.test(data)) {
 				errorMessage = "No provisioning profiles\nMore informations in our Github page";
 				testingProcess.exit();
-				return;
-			}
-			
-			if(noCertificatesError.test(data)){
+			} else if (noCertificatesError.test(data)) {
 				errorMessage = "Certificate error\nMore informations in our Github page";
 				testingProcess.exit();
-				return;
-			}
-			
-			if(startInfoLocked.test(data)){
+			} else if (startInfoLocked.test(data)) {
 				errorMessage = "Locked with passcode. Please disable code\n and auto-lock in device settings";
 				testingProcess.exit();
-				return;
-			}
-			
-			if(noXcodeInstalled.test(data)){
+			} else if (noXcodeInstalled.test(data)) {
 				errorMessage = "No XCode founded on this computer\nGo to AppStore for download it";
 				testingProcess.exit();
-				return;
-			}
-			
-			if(wrongVersionofxCode.test(data)){
+			} else if (wrongVersionofxCode.test(data)) {
 				errorMessage = "Your device need a more recent version\n of xCode. Go to AppStore for download it";
 				testingProcess.exit();
-
+			} else {
+				errorMessage = "Unknow error";
+				testingProcess.exit();
 			}
 		}
 	}
