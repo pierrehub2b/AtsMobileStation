@@ -25,11 +25,13 @@ public class AndroidUsbDevice extends AndroidDevice {
 
     private var webSocketClientPort:int;
 
+    var networkUtils:NetworkUtils = new NetworkUtils();
+
     public function AndroidUsbDevice(id:String, adbFile:File, settings:DeviceSettings) {
         super(adbFile, id);
 
         this.settings = settings;
-        this.usbMode = true
+        this.usbMode = true;
         this.automaticPort = settings.automaticPort;
     }
 
@@ -53,8 +55,9 @@ public class AndroidUsbDevice extends AndroidDevice {
 
     private function fetchLocalAddress():void
     {
-        var networkUtils:NetworkUtils = new NetworkUtils();
         networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_FOUND, localAddressFoundHandler, false, 0, true);
+        networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, localAddressNotFoundHandler, false, 0, true);
+
         networkUtils.getClientIPAddress();
     }
 
@@ -62,10 +65,21 @@ public class AndroidUsbDevice extends AndroidDevice {
 
     private function localAddressFoundHandler(event:NetworkEvent):void
     {
-        (event.currentTarget as NetworkUtils).removeEventListener(NetworkEvent.IP_ADDRESS_FOUND, localAddressFoundHandler);
+        networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_FOUND, localAddressFoundHandler);
+        networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, localAddressNotFoundHandler);
+        networkUtils = null;
 
         this.ip = event.ipAddress;
         setupCaptureServer();
+    }
+
+    private function localAddressNotFoundHandler(event:NetworkEvent):void
+    {
+        networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_FOUND, localAddressFoundHandler);
+        networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, localAddressNotFoundHandler);
+        networkUtils = null;
+
+        usbError("Retrieve local address error");
     }
 
     // ----
