@@ -141,7 +141,7 @@ class atsDriver: XCTestCase {
             if(isFree == true) {
                 self.port = Int(customPort)!
             } else {
-                
+                print("Display => ** Port unavailable **")
                 return;
             }
         } else {
@@ -149,7 +149,7 @@ class atsDriver: XCTestCase {
                 let (isFree, _) = checkTcpPortForListen(port: UInt16(i))
                 if (isFree == true && i != self.udpPort) {
                     self.port = i
-                    break;
+                    break
                 }
             }
         }

@@ -102,7 +102,7 @@ public class IosDevice extends RunningDevice
 			installing();
 			trace("installing the driver");
 			testingProcess = new NativeProcess();
-			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
+			// testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 			
@@ -336,7 +336,10 @@ public class IosDevice extends RunningDevice
 			if(wrongVersionofxCode.test(data)){
 				errorMessage = "Your device need a more recent version\n of xCode. Go to AppStore for download it";
 				testingProcess.exit();
+				return;
 			}
+
+			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
 		}
 	}
 }
