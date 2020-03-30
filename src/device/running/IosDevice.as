@@ -309,30 +309,35 @@ public class IosDevice extends RunningDevice
 		
 		protected function onTestingError(event:ProgressEvent):void
 		{
-			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
-			testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput);
-			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
-
 			const data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
 			addLineToLogs(data);
 			
-			if (noProvisionningProfileError.test(data)) {
+			if(noProvisionningProfileError.test(data)){
 				errorMessage = "No provisioning profiles\nMore informations in our Github page";
 				testingProcess.exit();
-			} else if (noCertificatesError.test(data)) {
+				return;
+			}
+
+			if(noCertificatesError.test(data)){
 				errorMessage = "Certificate error\nMore informations in our Github page";
 				testingProcess.exit();
-			} else if (startInfoLocked.test(data)) {
+				return;
+			}
+
+			if(startInfoLocked.test(data)){
 				errorMessage = "Locked with passcode. Please disable code\n and auto-lock in device settings";
 				testingProcess.exit();
-			} else if (noXcodeInstalled.test(data)) {
+				return;
+			}
+
+			if(noXcodeInstalled.test(data)){
 				errorMessage = "No XCode founded on this computer\nGo to AppStore for download it";
 				testingProcess.exit();
-			} else if (wrongVersionofxCode.test(data)) {
+				return;
+			}
+
+			if(wrongVersionofxCode.test(data)){
 				errorMessage = "Your device need a more recent version\n of xCode. Go to AppStore for download it";
-				testingProcess.exit();
-			} else {
-				errorMessage = "Unknow error";
 				testingProcess.exit();
 			}
 		}
