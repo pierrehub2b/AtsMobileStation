@@ -291,18 +291,15 @@ public class IosDevice extends RunningDevice
 			const data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
 
 			if(data.indexOf("** WIFI NOT CONNECTED **") > -1) {
-				
 				errorMessage = " - WIFI not connected !";
 				testingProcess.exit();
-			}else if(data.indexOf(ATSDRIVER_DRIVER_HOST) > -1){
-				
-				testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput);
-				
+			} else if (data.indexOf("** Port unavailable **") > -1) {
+				errorMessage = " - Unavailable port !";
+				testingProcess.exit();
+			} else if(data.indexOf(ATSDRIVER_DRIVER_HOST) > -1) {
 				const find:Array = startInfo.exec(data);
 				ip = find[1];
 				port = find[2];
-
-
 				started();
 			}
 		}
