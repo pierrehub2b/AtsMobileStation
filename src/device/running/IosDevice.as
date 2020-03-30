@@ -279,9 +279,9 @@ public class IosDevice extends RunningDevice
 			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
 			
 			trace("testing exit");
-			if(errorMessage == "" || status == Simulator.SHUTDOWN){
+			if (errorMessage == "" || status == Simulator.SHUTDOWN) {
 				dispatchEvent(new Event(STOPPED_EVENT));
-			}else{
+			} else {
 				failed();
 			}
 		}
@@ -290,7 +290,7 @@ public class IosDevice extends RunningDevice
 		{
 			const data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
 
-			if(data.indexOf("** WIFI NOT CONNECTED **") > -1) {
+			if (data.indexOf("** WIFI NOT CONNECTED **") > -1) {
 				errorMessage = " - WIFI not connected !";
 				testingProcess.exit();
 			} else if (data.indexOf("** Port unavailable **") > -1) {
@@ -309,31 +309,31 @@ public class IosDevice extends RunningDevice
 			const data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
 			addLineToLogs(data);
 			
-			if(noProvisionningProfileError.test(data)){
+			if (noProvisionningProfileError.test(data)) {
 				errorMessage = "No provisioning profiles\nMore informations in our Github page";
 				testingProcess.exit();
 				return;
 			}
 
-			if(noCertificatesError.test(data)){
+			if (noCertificatesError.test(data)) {
 				errorMessage = "Certificate error\nMore informations in our Github page";
 				testingProcess.exit();
 				return;
 			}
 
-			if(startInfoLocked.test(data)){
+			if (startInfoLocked.test(data)) {
 				errorMessage = "Locked with passcode. Please disable code\n and auto-lock in device settings";
 				testingProcess.exit();
 				return;
 			}
 
-			if(noXcodeInstalled.test(data)){
+			if (noXcodeInstalled.test(data)) {
 				errorMessage = "No XCode founded on this computer\nGo to AppStore for download it";
 				testingProcess.exit();
 				return;
 			}
 
-			if(wrongVersionofxCode.test(data)){
+			if (wrongVersionofxCode.test(data)) {
 				errorMessage = "Your device need a more recent version\n of xCode. Go to AppStore for download it";
 				testingProcess.exit();
 				return;
