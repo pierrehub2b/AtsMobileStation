@@ -27,7 +27,7 @@
         public var arrayString:Array;
         public var arrayStringDevTeam:Array;
 
-        public var devices:Array = new Array();
+        public var devices:Array = [];
 
         protected function settings_initializeHandler(event:FlexEvent):void {
             /*var fileDevTeam:File = FlexGlobals.topLevelApplication.settingsFile;

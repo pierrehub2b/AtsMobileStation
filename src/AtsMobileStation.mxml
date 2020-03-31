@@ -27,8 +27,6 @@
 			
 			public static const isMacOs:Boolean = Capabilities.os.indexOf("Mac") > -1;
 			
-			public static var alreadyBuilded:Boolean = false;
-			
 			[Bindable]
 			private var port:String = "8080";
 			

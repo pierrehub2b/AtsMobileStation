@@ -102,7 +102,7 @@ public class IosDevice extends RunningDevice
 			installing();
 			trace("installing the driver");
 			testingProcess = new NativeProcess();
-			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
+			// testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 			
@@ -116,7 +116,6 @@ public class IosDevice extends RunningDevice
 			trace("Managing plist file");
 			var index:int = 0;
 			file = resultDir.resolvePath("atsDriver/Settings.plist");
-			var xcworkspaceFile:File = resultDir.resolvePath("atsios.xcworkspace");
 			if(file.exists && settingsPort != "") {
 				fileStream = new FileStream();
 				fileStream.open(file, FileMode.READ);
@@ -126,7 +125,7 @@ public class IosDevice extends RunningDevice
 				for each(var lineSettings:String in arrayString) {
 					if(lineSettings.indexOf("CFCustomPort") > -1) {
 						if(!automaticPort) {
-							arrayString[index+1] = "\t<string>"+ settingsPort +"</string>";
+							arrayString[index+1] = "\t<string>" + settingsPort + "</string>";
 						} else {
 							arrayString[index+1] = "\t<string></string>";
 						}
@@ -256,11 +255,9 @@ public class IosDevice extends RunningDevice
 		
 		override public function dispose():Boolean
 		{
-			if(testingProcess != null && testingProcess.running){
-				
+			if (testingProcess != null && testingProcess.running) {
 				testingProcess.closeInput();
 				testingProcess.exit();
-
 				return true;
 			}
 			return false;
@@ -279,9 +276,9 @@ public class IosDevice extends RunningDevice
 			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
 			
 			trace("testing exit");
-			if(errorMessage == "" || status == Simulator.SHUTDOWN){
+			if (errorMessage == "" || status == Simulator.SHUTDOWN) {
 				dispatchEvent(new Event(STOPPED_EVENT));
-			}else{
+			} else {
 				failed();
 			}
 		}
@@ -290,62 +287,56 @@ public class IosDevice extends RunningDevice
 		{
 			const data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
 
-			if(data.indexOf("** WIFI NOT CONNECTED **") > -1) {
-				
+			if (data.indexOf("** WIFI NOT CONNECTED **") > -1) {
 				errorMessage = " - WIFI not connected !";
 				testingProcess.exit();
-			}else if(data.indexOf(ATSDRIVER_DRIVER_HOST) > -1){
-				
-				testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput);
-				
+			} else if (data.indexOf("** Port unavailable **") > -1) {
+				errorMessage = " - Unavailable port !";
+				testingProcess.exit();
+			} else if(data.indexOf(ATSDRIVER_DRIVER_HOST) > -1) {
 				const find:Array = startInfo.exec(data);
 				ip = find[1];
 				port = find[2];
-
-
 				started();
 			}
 		}
 		
 		protected function onTestingError(event:ProgressEvent):void
 		{
-			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
-			testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput);
-			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
-
 			const data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
-			//trace(data);
 			addLineToLogs(data);
 			
-			if(noProvisionningProfileError.test(data)){
+			if (noProvisionningProfileError.test(data)) {
 				errorMessage = "No provisioning profiles\nMore informations in our Github page";
 				testingProcess.exit();
 				return;
 			}
-			
-			if(noCertificatesError.test(data)){
+
+			if (noCertificatesError.test(data)) {
 				errorMessage = "Certificate error\nMore informations in our Github page";
 				testingProcess.exit();
 				return;
 			}
-			
-			if(startInfoLocked.test(data)){
+
+			if (startInfoLocked.test(data)) {
 				errorMessage = "Locked with passcode. Please disable code\n and auto-lock in device settings";
 				testingProcess.exit();
 				return;
 			}
-			
-			if(noXcodeInstalled.test(data)){
+
+			if (noXcodeInstalled.test(data)) {
 				errorMessage = "No XCode founded on this computer\nGo to AppStore for download it";
 				testingProcess.exit();
 				return;
 			}
-			
-			if(wrongVersionofxCode.test(data)){
+
+			if (wrongVersionofxCode.test(data)) {
 				errorMessage = "Your device need a more recent version\n of xCode. Go to AppStore for download it";
 				testingProcess.exit();
-
+				return;
 			}
+
+			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
 		}
 	}
 }
