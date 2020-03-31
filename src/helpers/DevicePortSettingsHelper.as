@@ -41,7 +41,7 @@ public class DevicePortSettingsHelper {
 
     public function getPortSetting(deviceId:String):DevicePortSettings {
         for each(var devicePortSettings:DevicePortSettings in settings) {
-            if (devicePortSettings.deviceId == deviceId) {
+            if (devicePortSettings.deviceId == deviceId.toLowerCase()) {
                 return devicePortSettings;
             }
         }
@@ -98,7 +98,19 @@ public class DevicePortSettingsHelper {
 
     private function generatePortSettingsFile():void {
         // read device settings and generate port settings
-        var deviceSettingsFile:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
+        var deviceSettings:Vector.<DeviceSettings> = DeviceSettingsHelper.shared.settings;
+        for each(var dSettings:DeviceSettings in deviceSettings) {
+            var devicePortSettings:DevicePortSettings = DevicePortSettings.initWithDeviceSettings(dSettings);
+            if (devicePortSettings != null) {
+                settings.push(devicePortSettings);
+            }
+        }
+
+        // write port settings
+        save();
+
+
+        /* var deviceSettingsFile:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
 
         var fileStream:FileStream = new FileStream();
         fileStream.open(deviceSettingsFile, FileMode.READ);
@@ -114,7 +126,7 @@ public class DevicePortSettingsHelper {
         }
 
         // write port settings
-        save();
+        save(); */
     }
 
     private function fetchPortSettings():Vector.<DevicePortSettings> {

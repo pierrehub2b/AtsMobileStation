@@ -32,7 +32,7 @@ package device
 		public var usbMode:Boolean = false;
 		
 		[Bindable]
-		public var udpIpAdresse:String;
+		public var udpIpAddress:String;
 		
 		public function RunningDevice(id:String=""){
 			super(id);
@@ -61,8 +61,8 @@ package device
 		}
 
 		protected function usbError(error:String):void {
-			status = INSTALL;
-			errorMessage = error;
+			status = FAIL;
+			errorMessage = "- " + error;
 			tooltip = "Problem when installing driver ...";
 			trace("USB install error" + getQualifiedClassName(this));
 		}

@@ -155,7 +155,7 @@ package
 						dev = findDevice(runningId);
 						
 						if(dev != null){
-							if(dev.status == Device.FAIL) {
+							if(dev.status == Device.FAIL && dev.usbMode == false) {
 								dev.close();
 							}
 						}else{

@@ -8,7 +8,7 @@ public class DeviceSettings {
     public var port:int; // -1 == null
 
     public function DeviceSettings(deviceId:String, automaticPort:Boolean = true, usbMode:Boolean = false, port:int = 8080) {
-        this.deviceId = deviceId;
+        this.deviceId = deviceId.toLowerCase();
         this.automaticPort = automaticPort;
         this.usbMode = usbMode;
         this.port = port;

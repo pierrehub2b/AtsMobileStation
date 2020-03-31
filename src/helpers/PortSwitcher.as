@@ -31,7 +31,7 @@ import flash.net.ServerSocket;
 						return newPortb;
 					} else {
 						dispatchEvent(new Event(PORT_NOT_AVAILABLE_EVENT));
-						return -1;
+						return port;
 					}
 				} else {
 					return port;

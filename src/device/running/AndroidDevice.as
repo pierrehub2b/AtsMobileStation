@@ -85,6 +85,7 @@ public class AndroidDevice extends RunningDevice
 			var deviceSettings:DeviceSettings = deviceSettingsHelper.getSettingsForDevice(id);
 			if (deviceSettings == null) {
 				deviceSettings = new DeviceSettings(id);
+				deviceSettingsHelper.save(deviceSettings);
 			}
 
 			var automaticPort:Boolean = deviceSettings.automaticPort;

@@ -148,20 +148,6 @@
 				dev.automaticPort = portAutomatic.selected;
 				dev.usbMode = androidUsb.selected;
 
-				//save profile
-				/* var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
-				var fileStream:FileStream = new FileStream();
-				fileStream.open(file, FileMode.WRITE);
-
-				for each(var str:String in arrayString) {
-					var arrayLineId:Array = str.split("==");
-					if (arrayLineId[0].toString().toLowerCase() != dev.id.toString().toLowerCase()) {
-						fileStream.writeUTFBytes(str + "\n");
-					}
-				}
-				fileStream.writeUTFBytes(dev.id.toString().toLowerCase() + "==" + dev.automaticPort + ";" + dev.settingsPort + ";" + dev.usbMode);
-				fileStream.close(); */
-
 				deviceSettings.usbMode = dev.usbMode;
 				deviceSettings.automaticPort = dev.automaticPort;
 
@@ -181,17 +167,13 @@
 				if (dev.simulator == true || dev.usbMode == true) {
 					var portSettings:DevicePortSettings = new DevicePortSettings(dev.id, deviceSettings.port);
 					DevicePortSettingsHelper.shared.addSettings(portSettings);
-				} else {
-					portSettings = DevicePortSettingsHelper.shared.getPortSetting(dev.id);
-					if (portSettings != null) {
-						DevicePortSettingsHelper.shared.removeSettings(portSettings);
-					}
 				}
 			}
 
 			if (hasToRestart) {
 				FlexGlobals.topLevelApplication.restartDevice(dev);
 			}
+
 			PopUpManager.removePopUp(this);
 		}
 

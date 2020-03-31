@@ -42,7 +42,7 @@ public class AndroidWirelessDevice extends AndroidDevice {
     private function ipAddressHandler(ev:Event):void{
         process.removeEventListener(AndroidProcess.IP_ADDRESS, ipAddressHandler);
         ip = process.ipAddress;
-        udpIpAdresse = process.deviceIp;
+        udpIpAddress = process.deviceIp;
     }
 
     override public function runningTestHandler(ev:Event):void
