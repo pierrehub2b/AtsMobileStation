@@ -6,7 +6,8 @@
 		],
 		"library-path": [
 			"libs"
-		]
+		],
+		"advanced-telemetry": false
 	},
 	"files": [
 		"src/AtsMobileStation.mxml"

@@ -53,26 +53,6 @@ public class IosDevice extends RunningDevice
 			var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
 
 			trace("Getting settings configuration for device:" + id);
-			/* if(file.exists) {
-				fileStream.open(file, FileMode.READ);
-				var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
-				var arrayString: Array = content.split("\n");
-				for each(var line:String in arrayString) {
-					if(line != "") {
-						var arrayLineId: Array = line.split("==");
-						if(arrayLineId[0].toString().toLowerCase() == id.toString().toLowerCase()) {
-							var arrayLineAttributes: Array = arrayLineId[1].split(";");
-							automaticPort = (arrayLineAttributes[0] == "true");
-
-							if (simulator == false) {
-								settingsPort = arrayLineAttributes[1];
-							}
-						}
-					}
-				}
-				fileStream.close();
-			}
-			 */
 
 			var deviceSettingsHelper:DeviceSettingsHelper = DeviceSettingsHelper.shared;
 			var deviceSettings:DeviceSettings = deviceSettingsHelper.getSettingsForDevice(id);
@@ -102,7 +82,7 @@ public class IosDevice extends RunningDevice
 			installing();
 			trace("installing the driver");
 			testingProcess = new NativeProcess();
-			// testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
+			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 			
@@ -153,7 +133,6 @@ public class IosDevice extends RunningDevice
 			}
 			
 			if(alreadyCopied) {
-				AtsMobileStation.alreadyBuilded = true;
 				args.push("test-without-building");
 				trace("test without building on device with id:" + id + " at " + new Date())
 			} else {
@@ -271,10 +250,7 @@ public class IosDevice extends RunningDevice
 		
 		protected function onTestingExit(ev:NativeProcessExitEvent):void
 		{
-			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
-			testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput);
-			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
-			
+			removeReceivers();
 			trace("testing exit");
 			if (errorMessage == "" || status == Simulator.SHUTDOWN) {
 				dispatchEvent(new Event(STOPPED_EVENT));
@@ -287,18 +263,29 @@ public class IosDevice extends RunningDevice
 		{
 			const data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
 
+			var blockingMsg:Boolean = false;
 			if (data.indexOf("** WIFI NOT CONNECTED **") > -1) {
 				errorMessage = " - WIFI not connected !";
+				removeReceivers();
 				testingProcess.exit();
 			} else if (data.indexOf("** Port unavailable **") > -1) {
 				errorMessage = " - Unavailable port !";
+				removeReceivers();
 				testingProcess.exit();
 			} else if(data.indexOf(ATSDRIVER_DRIVER_HOST) > -1) {
 				const find:Array = startInfo.exec(data);
 				ip = find[1];
 				port = find[2];
+				removeReceivers();
+				testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 				started();
 			}
+		}
+
+		protected function removeReceivers():void {
+			testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput);
+			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
+			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
 		}
 		
 		protected function onTestingError(event:ProgressEvent):void
@@ -309,34 +296,37 @@ public class IosDevice extends RunningDevice
 			if (noProvisionningProfileError.test(data)) {
 				errorMessage = "No provisioning profiles\nMore informations in our Github page";
 				testingProcess.exit();
+				removeReceivers();
 				return;
 			}
 
 			if (noCertificatesError.test(data)) {
 				errorMessage = "Certificate error\nMore informations in our Github page";
 				testingProcess.exit();
+				removeReceivers();
 				return;
 			}
 
 			if (startInfoLocked.test(data)) {
 				errorMessage = "Locked with passcode. Please disable code\n and auto-lock in device settings";
 				testingProcess.exit();
+				removeReceivers();
 				return;
 			}
 
 			if (noXcodeInstalled.test(data)) {
 				errorMessage = "No XCode founded on this computer\nGo to AppStore for download it";
 				testingProcess.exit();
+				removeReceivers();
 				return;
 			}
 
 			if (wrongVersionofxCode.test(data)) {
 				errorMessage = "Your device need a more recent version\n of xCode. Go to AppStore for download it";
 				testingProcess.exit();
+				removeReceivers();
 				return;
 			}
-
-			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
 		}
 	}
 }
