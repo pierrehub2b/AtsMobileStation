@@ -276,7 +276,7 @@ public class IosDevice extends RunningDevice
 				const find:Array = startInfo.exec(data);
 				ip = find[1];
 				port = find[2];
-				removeReceivers();
+				//removeReceivers();
 				testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 				started();
 			}
