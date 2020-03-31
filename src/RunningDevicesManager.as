@@ -154,11 +154,11 @@ package
 					if(info.length >= 2 && runningId.length > 0){
 						dev = findDevice(runningId);
 						
-						if(dev != null){
-							if(dev.status == Device.FAIL && dev.usbMode == false) {
+						if (dev != null) {
+							if (dev.status == Device.FAIL) {
 								dev.close();
 							}
-						}else{
+						} else {
 							dev = AndroidDevice.setup(runningId, adbFile); //new AndroidDevice(adbFile, runningId);
 							dev.addEventListener(Device.STOPPED_EVENT, deviceStoppedHandler, false, 0, true);
 							dev.start();

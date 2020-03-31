@@ -61,8 +61,8 @@ package device
 		}
 
 		protected function usbError(error:String):void {
-			status = FAIL;
-			errorMessage = "- " + error;
+			status = USB_ERROR;
+			errorMessage = " - " + error;
 			tooltip = "Problem when installing driver ...";
 			trace("USB install error" + getQualifiedClassName(this));
 		}
