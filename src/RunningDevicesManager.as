@@ -321,7 +321,7 @@ package
 				if(sim.started){
 					var dev:IosDevice = findDevice(sim.id) as IosDevice;
 					if(dev == null){
-						dev = sim.device;	
+						dev = sim.GetDevice;	
 						dev.start();
 						dev.addEventListener(Device.STOPPED_EVENT, deviceStoppedHandler, false, 0, true);
 						

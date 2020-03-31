@@ -25,7 +25,17 @@ public class AndroidUsbDevice extends AndroidDevice {
 
     private var webSocketClientPort:int;
 
-    var networkUtils:NetworkUtils = new NetworkUtils();
+    private var _networkUtils:NetworkUtils = new NetworkUtils();
+
+    internal function get networkUtils():NetworkUtils
+    {
+    	return _networkUtils;
+    }
+
+    internal function set networkUtils(value:NetworkUtils):void
+    {
+    	_networkUtils = value;
+    }
 
     public function AndroidUsbDevice(id:String, adbFile:File, settings:DeviceSettings) {
         super(adbFile, id);

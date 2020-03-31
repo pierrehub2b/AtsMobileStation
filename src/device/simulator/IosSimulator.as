@@ -68,7 +68,7 @@ package device.simulator
 			statusOn();
 		}
 		
-		public function get device():IosDevice{
+		public function get GetDevice():IosDevice{
 			var ipAddress:String = "---";
 			var netInterfaces:Vector.<NetworkInterface> = NetworkInfo.networkInfo.findInterfaces();
 			if(netInterfaces.length > 1)
