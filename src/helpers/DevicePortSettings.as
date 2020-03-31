@@ -6,7 +6,7 @@ public class DevicePortSettings {
     public var port:int;
 
     public function DevicePortSettings(deviceId:String, port:int) {
-        this.deviceId = deviceId;
+        this.deviceId = deviceId.toLowerCase();
         this.port = port;
     }
 
@@ -62,6 +62,14 @@ public class DevicePortSettings {
         var port:int = parseInt(portString);
 
         return new DevicePortSettings(deviceId, port);
+    }
+
+    public static function initWithDeviceSettings(deviceSettings:DeviceSettings):DevicePortSettings {
+        if (deviceSettings.usbMode == false) {
+            return null;
+        }
+
+        return new DevicePortSettings(deviceSettings.deviceId, deviceSettings.port);
     }
 }
 

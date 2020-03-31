@@ -14,14 +14,15 @@ public class DeviceSettingsHelper {
             this.settings = fetchSettings();
         } else {
             this.settings = new Vector.<DeviceSettings>();
+            saveAll();
         }
     }
 
-    private var settings:Vector.<DeviceSettings>;
+    public var settings:Vector.<DeviceSettings>;
 
     public function getSettingsForDevice(deviceId:String):DeviceSettings {
         for each(var deviceSettings:DeviceSettings in settings) {
-            if (deviceSettings.deviceId == deviceId) {
+            if (deviceSettings.deviceId == deviceId.toLowerCase()) {
                 return deviceSettings;
             }
         }
