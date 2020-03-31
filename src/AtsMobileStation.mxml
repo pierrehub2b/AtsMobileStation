@@ -45,6 +45,10 @@
 			public function get devicesSettingsFile():File {
 				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/devicesSettings.txt");
 			}
+
+			public function get devicePortSettingsFile():File {
+				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/portSettings.txt");
+			}
 			
 			public function get settingsFile():File {
 				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/settings.txt");
@@ -63,6 +67,19 @@
 				try{
 					logsFolder.deleteDirectory(true);
 				}catch(err:IOError){}
+
+				/* *** */
+				// files corrupted
+				var date:Date = new Date(2020, 2, 31, 18, 30, 0, 0);
+				if (devicePortSettingsFile.exists && devicePortSettingsFile.modificationDate < date) {
+					devicePortSettingsFile.deleteFile();
+				}
+
+				if (devicesSettingsFile.exists && devicesSettingsFile.modificationDate < date) {
+					devicesSettingsFile.deleteFile();
+				}
+				/* *** */
+
 
 				//if(!Capabilities.isDebugger) {
 					cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));

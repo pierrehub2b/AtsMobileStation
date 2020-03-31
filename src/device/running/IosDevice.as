@@ -8,8 +8,11 @@ package device.running
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
-	
-	import mx.core.FlexGlobals;
+
+import helpers.DevicePortSettings;
+import helpers.DevicePortSettingsHelper;
+
+import mx.core.FlexGlobals;
 	
 	import device.Device;
 	import device.RunningDevice;
@@ -40,7 +43,7 @@ public class IosDevice extends RunningDevice
 		private static const iosMobileDeviceTools:File = File.applicationDirectory.resolvePath("assets/tools/ios");
 		
 		private var resultDir: File;
-		
+
 		public function IosDevice(id:String, name:String, simulator:Boolean, ip:String)
 		{
 			this.id = id;
@@ -70,8 +73,11 @@ public class IosDevice extends RunningDevice
 				settingsPort = deviceSettings.port.toString();
 			}
 
-			deviceSettings.port = parseInt(settingsPort);
-			deviceSettingsHelper.save(deviceSettings);
+			if (simulator) {
+				var devicePortSettings:DevicePortSettings = DevicePortSettingsHelper.shared.getPortSetting(id);
+				devicePortSettings.port = parseInt(settingsPort);
+				DevicePortSettingsHelper.shared.addSettings(devicePortSettings);
+			}
 
 			if(FlexGlobals.topLevelApplication.getTeamId() == "" && !simulator) {
 				status = Device.FAIL;
@@ -104,10 +110,10 @@ public class IosDevice extends RunningDevice
 				
 				for each(var lineSettings:String in arrayString) {
 					if(lineSettings.indexOf("CFCustomPort") > -1) {
-						if(!automaticPort) {
-							arrayString[index+1] = "\t<string>" + settingsPort + "</string>";
-						} else {
+						if (automaticPort) {
 							arrayString[index+1] = "\t<string></string>";
+						} else {
+							arrayString[index+1] = "\t<string>" + settingsPort + "</string>";
 						}
 						break;
 					}
@@ -263,7 +269,6 @@ public class IosDevice extends RunningDevice
 		{
 			const data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
 
-			var blockingMsg:Boolean = false;
 			if (data.indexOf("** WIFI NOT CONNECTED **") > -1) {
 				errorMessage = " - WIFI not connected !";
 				removeReceivers();
@@ -276,6 +281,13 @@ public class IosDevice extends RunningDevice
 				const find:Array = startInfo.exec(data);
 				ip = find[1];
 				port = find[2];
+
+				if (simulator) {
+					var devicePortSettings:DevicePortSettings = DevicePortSettingsHelper.shared.getPortSetting(id);
+					devicePortSettings.port = parseInt(port);
+					DevicePortSettingsHelper.shared.addSettings(devicePortSettings);
+				}
+				
 				removeReceivers();
 				testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 				started();

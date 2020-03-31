@@ -82,18 +82,15 @@ public class DevicePortSettingsHelper {
             settings.removeAt(index);
         }
 
+        /* for each(var devicePortSettings:DevicePortSettings in settings) {
+            if (devicePortSettings.port == setting.port) {
+                settings.removeAt(settings.indexOf(devicePortSettings));
+            }
+        } */
+
         settings.push(setting);
         updateDeviceSettings(setting);
         save();
-    }
-
-    public function removeSettings(setting:DevicePortSettings):void {
-        var existingDevice:DevicePortSettings = getPortSetting(setting.deviceId);
-        if (existingDevice != null) {
-            var index:int = settings.indexOf(existingDevice);
-            settings.removeAt(index);
-            save();
-        }
     }
 
     private function generatePortSettingsFile():void {

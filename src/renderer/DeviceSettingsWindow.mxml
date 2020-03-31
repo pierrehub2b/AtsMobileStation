@@ -33,10 +33,11 @@
 		private var deviceSettingsHelper:DeviceSettingsHelper = DeviceSettingsHelper.shared;
 		private var deviceSettings:DeviceSettings;
 
+		private var devicePortSettingsHelper:DevicePortSettingsHelper = DevicePortSettingsHelper.shared;
+		private var devicePortSettings:DevicePortSettings;
+
 		protected function settings_initializeHandler(event:FlexEvent):void {
-
 			if (dev != null) {
-
 				deviceId.text = dev.id;
 				deviceName.text = dev.modelName;
 
@@ -50,27 +51,9 @@
 					installAppButton.visible = true;
 				}
 
-				/* var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
-				if (file.exists) {
-					var fileStream:FileStream = new FileStream();
-					fileStream.open(file, FileMode.READ);
-					var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
-					arrayString = content.split("\n");
-					for each(var line:String in arrayString) {
-						if (line != "") {
-							var arrayLineId:Array = line.split("==");
-							if (arrayLineId[0].toString().toLowerCase() == dev.id.toString().toLowerCase()) {
-								var arrayLineAttributes:Array = arrayLineId[1].split(";");
-								portAutomatic.selected = arrayLineAttributes.length > 0 ? arrayLineAttributes[0].toString().toLocaleLowerCase() == "true" : false;
-								portSelection.text = arrayLineAttributes.length > 1 ? arrayLineAttributes[1] : "";
-								androidUsb.selected = arrayLineAttributes.length > 2 ? arrayLineAttributes[2].toString().toLocaleLowerCase() == "true" : false;
-							}
-						}
-					}
-					fileStream.close();
-				} */
-
 				deviceSettings = deviceSettingsHelper.getSettingsForDevice(dev.id);
+				devicePortSettings = devicePortSettingsHelper.getPortSetting(dev.id);
+
 				portAutomatic.selected = deviceSettings.automaticPort;
 				androidUsb.selected = deviceSettings.usbMode;
 				portSelection.text = portAutomatic.selected == true ? "" : deviceSettings.port.toString();
@@ -89,6 +72,10 @@
 			if (portSelection.text != "") {
 				var port:int = parseInt(portSelection.text);
 				validatePort(port)
+			} else {
+				portErrorMessage.visible = false;
+				saveButton.enabled = true;
+				portErrorMessageGroup.height = 0;
 			}
 		}
 
@@ -99,6 +86,10 @@
 			if (target.text != "") {
 				var port:int = parseInt(target.text);
 				validatePort(port)
+			} else {
+				portErrorMessage.visible = false;
+				saveButton.enabled = true;
+				portErrorMessageGroup.height = 0;
 			}
 
 			portAutomatic.selected = portSelection.text == "";
@@ -114,7 +105,8 @@
 			}
 
 			if (deviceIsLocalhost() == true) {
-				if (portSwitcher.checkSocketPortAvailability(port) == false) {
+				var currentLocalPort:int = devicePortSettings == null ? -1 : devicePortSettings.port;
+				if (portSwitcher.checkSocketPortAvailability(port) == false && port != currentLocalPort) {
 					portErrorMessage.visible = true;
 					portErrorMessage.text = "Port is unavailable";
 					saveButton.enabled = false;
@@ -123,11 +115,11 @@
 				}
 
 				var registeredDevice:String = DevicePortSettingsHelper.shared.deviceForRegisteredPort(port);
-				if (registeredDevice != null && registeredDevice != dev.id) {
+				if (registeredDevice != null && registeredDevice.toLowerCase() != dev.id.toLowerCase()) {
 					portErrorMessage.visible = true;
-					portErrorMessage.text = "WARNING : port already assigned by " + registeredDevice;
+					portErrorMessage.text = "Port already assigned on device\n" + registeredDevice;
 					saveButton.enabled = true;
-					portErrorMessageGroup.height = 10;
+					portErrorMessageGroup.height = 20;
 					return
 				}
 			}
@@ -166,7 +158,7 @@
 
 				if (dev.simulator == true || dev.usbMode == true) {
 					var portSettings:DevicePortSettings = new DevicePortSettings(dev.id, deviceSettings.port);
-					DevicePortSettingsHelper.shared.addSettings(portSettings);
+					devicePortSettingsHelper.addSettings(portSettings);
 				}
 			}
 
