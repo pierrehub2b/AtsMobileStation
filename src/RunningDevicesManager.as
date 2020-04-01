@@ -294,7 +294,7 @@ package
 		}
 		
 		public function restartDev(dev:Device):void {
-			dev.dispose();
+			// dev.dispose();
 			dev.close();
 		}
 				

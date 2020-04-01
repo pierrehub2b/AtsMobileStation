@@ -28,6 +28,7 @@ package device.running
 		public static const USBSTARTENDEDRESPONSE:String = "usbResponseStartEnded";
 		public static const WEBSOCKET_SERVER_START:String = "webSocketServerStart";
 		public static const WEBSOCKET_SERVER_STOP:String = "webSocketServerStop";
+		public static const UNINSTALL_EXIT:String = "uninstallExit";
 
 		public static const DEVICE_INFO:String = "deviceInfo";
 		
@@ -36,10 +37,10 @@ package device.running
 		
 		public static const ANDROIDDRIVER:String = "com.ats.atsdroid";
 		private const androidPropValueRegex:RegExp = /.*:.*\[(.*)\]/;
-		
-		private var port:String;
+
 		private var udpPort:String;
-		
+		private var port:String;
+
 		private var id:String;
 		private var usbMode:Boolean;
 		
@@ -62,16 +63,14 @@ package device.running
 
 		public var webSocketServerPort:int;
 		
-		public function AndroidProcess(adbFile:File, id:String, port:String, usbMode:Boolean, ipAddress:String = null, udpPort:String = null)
+		public function AndroidProcess(adbFile:File, id:String, port:String, usbMode:Boolean)
 		{
 			this.currentAdbFile = adbFile;
 			this.id = id;
 			this.port = port;
 			this.deviceInfo = new Device(id);
 			this.usbMode = usbMode;
-			this.udpPort = udpPort;
-			this.ipAddress = ipAddress;
-					
+
 			//---------------------------------------------------------------------------------------
 
 			dateFormatter.setDateTimePattern("yyyy-MM-dd hh:mm:ss");
@@ -184,14 +183,22 @@ package device.running
 		protected function onUninstallExit(event:NativeProcessExitEvent):void
 		{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
-			
+
+			if (this.usbMode) {
+				dispatchEvent(new Event(UNINSTALL_EXIT));
+			} else {
+				startInstall();
+			}
+		}
+
+		protected function startInstall():void
+		{
 			process = new NativeProcess();
 			process.addEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
 			procInfo.arguments = new <String>["-s", id, "install", "-r", atsdroidFilePath];
-			
 			process.start(procInfo);
 		}
-		
+
 		protected function onInstallExit(event:NativeProcessExitEvent):void
 		{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallExit);
@@ -248,6 +255,15 @@ package device.running
 			}
 
 			process.standardInput.writeUTFBytes(instrumentCommandLine);
+		}
+
+		function executeUsb(ipAddress:String, port:int, udpPort:int):void
+		{
+			this.ipAddress = ipAddress;
+			this.port = port.toString();
+			this.udpPort = udpPort.toString();
+
+			startInstall();
 		}
 		
 		private function getPropValue(value:String):String

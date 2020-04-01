@@ -49,7 +49,7 @@ public class CaptureServer extends EventDispatcher
 		
 		public function close():void
 		{
-			if(datagramSocket.bound) {
+			if (datagramSocket.bound) {
 				datagramSocket.close();
 			}
 			

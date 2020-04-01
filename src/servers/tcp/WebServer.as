@@ -34,10 +34,11 @@ public class WebServer extends EventDispatcher
 			closeSocket();
 			
 			if (serverSocket.bound) {
+				serverSocket.removeEventListener(ServerSocketConnectEvent.CONNECT, onConnect);
+				serverSocket.removeEventListener(Event.CLOSE, onClose);
+				
 				try {
 					serverSocket.close();
-					serverSocket.removeEventListener(ServerSocketConnectEvent.CONNECT, onConnect);
-					serverSocket.removeEventListener(Event.CLOSE, onClose);
 				} catch (e:Error){
 					trace("Erreur close server : " + e.message);
 				}

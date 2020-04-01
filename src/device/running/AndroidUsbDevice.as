@@ -49,10 +49,12 @@ public class AndroidUsbDevice extends AndroidDevice {
     {
         if (webServer != null) {
             webServer.close();
+            webServer = null;
         }
 
         if (captureServer != null) {
             captureServer.close();
+            captureServer = null;
         }
 
         super.close();
@@ -61,6 +63,55 @@ public class AndroidUsbDevice extends AndroidDevice {
     public override function start():void
     {
         fetchLocalAddress();
+    }
+
+    // --
+
+    protected function setupAdbProcess():void {
+        process = new AndroidProcess(currentAdbFile, id, "0", true);
+
+        addAndroidProcessEventListeners();
+
+        process.writeInfoLogFile("USB MODE = " + usbMode + " > set port: " + this.port);
+
+        installing();
+    }
+
+    override protected function addAndroidProcessEventListeners():void
+    {
+        super.addAndroidProcessEventListeners();
+        process.addEventListener(AndroidProcess.WEBSOCKET_SERVER_START, webSocketServerStartedHandler, false, 0, true);
+        process.addEventListener(AndroidProcess.WEBSOCKET_SERVER_STOP, webSocketServerStoppedHandler, false, 0, true);
+        process.addEventListener(AndroidProcess.UNINSTALL_EXIT, onUninstallExitHandler, false, 0, true);
+    }
+
+    override protected function removeAndroidProcessEventListeners():void
+    {
+        super.removeAndroidProcessEventListeners();
+        process.removeEventListener(AndroidProcess.WEBSOCKET_SERVER_START, webSocketServerStartedHandler);
+        process.removeEventListener(AndroidProcess.WEBSOCKET_SERVER_STOP, webSocketServerStoppedHandler);
+        process.removeEventListener(AndroidProcess.UNINSTALL_EXIT, onUninstallExitHandler);
+    }
+
+    // -- Android Process Events
+
+    private function webSocketServerStartedHandler(event:Event):void
+    {
+        process.removeEventListener(AndroidProcess.WEBSOCKET_SERVER_START, webSocketServerStartedHandler);
+
+        webSocketServerPort = process.webSocketServerPort;
+        setupPortForwarding();
+    }
+
+    private function webSocketServerStoppedHandler(event:Event):void
+    {
+        usbError("Device server unavailable")
+    }
+
+    private function onUninstallExitHandler(event:Event):void
+    {
+        process.removeEventListener(AndroidProcess.UNINSTALL_EXIT, onUninstallExitHandler);
+        fetchLocalPort();
     }
 
     private function fetchLocalAddress():void
@@ -80,7 +131,9 @@ public class AndroidUsbDevice extends AndroidDevice {
         networkUtils = null;
 
         this.ip = event.ipAddress;
-        setupCaptureServer();
+
+        setupAdbProcess();
+        super.start()
     }
 
     private function localAddressNotFoundHandler(event:NetworkEvent):void
@@ -94,7 +147,7 @@ public class AndroidUsbDevice extends AndroidDevice {
 
     // ----
 
-    private function fetchPort():void
+    private function fetchLocalPort():void
     {
         var portSwitcher:PortSwitcher = new PortSwitcher();
         portSwitcher.addEventListener(PortSwitcher.PORT_NOT_AVAILABLE_EVENT, portSwitcherErrorHandler, false, 0, true);
@@ -133,7 +186,8 @@ public class AndroidUsbDevice extends AndroidDevice {
         webServer.removeEventListener(WebServer.WEB_SERVER_INITIALIZED, webServerInitializedHandler);
 
         this.webServerPort = webServer.getLocalPort();
-        setupPortForwarding();
+
+        setupCaptureServer();
     }
 
     private function webServerStartedHandler(event:Event):void
@@ -171,9 +225,7 @@ public class AndroidUsbDevice extends AndroidDevice {
 
         this.captureServerPort = captureServer.getLocalPort();
 
-        // start adb process
-        setupAdbProcess();
-        super.start()
+        process.executeUsb(ip, webServerPort, captureServerPort);
     }
 
     private function captureServerStartedHandler(event:Event):void
@@ -190,47 +242,6 @@ public class AndroidUsbDevice extends AndroidDevice {
         captureServer.removeEventListener(WebServer.WEB_SERVER_ERROR, webServerInitializedHandler);
 
         usbError("Capture server initialization error");
-    }
-
-    // --
-
-    protected function setupAdbProcess():void {
-        process = new AndroidProcess(currentAdbFile, id, "0", true, ip, captureServerPort.toString());
-
-        addAndroidProcessEventListeners();
-
-        process.writeInfoLogFile("USB MODE = " + usbMode + " > set port: " + this.port);
-
-        installing();
-    }
-
-    override protected function addAndroidProcessEventListeners():void
-    {
-        super.addAndroidProcessEventListeners();
-        process.addEventListener(AndroidProcess.WEBSOCKET_SERVER_START, webSocketServerStartedHandler, false, 0, true);
-        process.addEventListener(AndroidProcess.WEBSOCKET_SERVER_STOP, webSocketServerStoppedHandler, false, 0, true);
-    }
-
-    override protected function removeAndroidProcessEventListeners():void
-    {
-        super.removeAndroidProcessEventListeners();
-        process.removeEventListener(AndroidProcess.WEBSOCKET_SERVER_START, webSocketServerStartedHandler);
-        process.removeEventListener(AndroidProcess.WEBSOCKET_SERVER_STOP, webSocketServerStoppedHandler);
-    }
-
-    // -- Android Process Events
-
-    private function webSocketServerStartedHandler(event:Event):void
-    {
-        process.removeEventListener(AndroidProcess.WEBSOCKET_SERVER_START, webSocketServerStartedHandler);
-
-        webSocketServerPort = process.webSocketServerPort;
-        fetchPort();
-    }
-
-    private function webSocketServerStoppedHandler(event:Event):void
-    {
-        usbError("Device server unavailable")
     }
 
     private function setupPortForwarding():void
