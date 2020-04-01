@@ -54,7 +54,7 @@ class atsDriver: XCTestCase {
     let driverVersion:String = "1.0.0"
     
     let udpThread = DispatchQueue(label: "udpQueue" + UUID().uuidString, qos: .userInitiated)
-    var domThread = DispatchQueue(label: "domQueue" + UUID().uuidString, qos: .userInitiated)
+    var screenShotThread = DispatchQueue(label: "screenshotQueue" + UUID().uuidString, qos: .userInitiated)
     var port = 0
     var currentAppIdentifier: String = ""
     var resultElement: [String: Any] = [:]
@@ -332,8 +332,14 @@ class atsDriver: XCTestCase {
                 //let img = screenshot.image.resized(withPercentage: UIScreen.main.scale)
                 let bytes = self.getArrayOfBytesFromImage(imageData: UIImagePNGRepresentation(screenshot.image)!)
                 startResponse("200 OK", [("Content-Type", "application/octet-stream"),("Content-length", bytes.count.description)])
-                sendBody(Data(bytes: bytes))
-                sendBody(Data())
+                
+                self.screenShotThread.sync {
+                    sendBody(Data(bytes: bytes))
+                    usleep(1000000)
+                }
+                self.screenShotThread.sync {
+                    sendBody(Data())
+                }
             }else if(action == ActionsEnum.INFO.rawValue){
                 let testBundle = Bundle(for: atsDriver.self)
                 if(!UIDevice.isSimulator) {
@@ -519,23 +525,25 @@ class atsDriver: XCTestCase {
                     self.resultElement["status"] = "-41"
                 }
             }
-            // Start HTTP response
-            startResponse("200 OK", [("Content-Type", "application/json")])
-            if let theJSONData = try?  JSONSerialization.data(
-                withJSONObject: self.resultElement,
-                options: []
-                ),
-                let theJSONText = String(data: theJSONData,
-                                         encoding: String.Encoding.utf8) {
-                sendBody(Data(theJSONText.utf8))
+            if(action != ActionsEnum.SCREENSHOT.rawValue) {
+                // Start HTTP response
+                startResponse("200 OK", [("Content-Type", "application/json")])
+                if let theJSONData = try?  JSONSerialization.data(
+                    withJSONObject: self.resultElement,
+                    options: []
+                    ),
+                    let theJSONText = String(data: theJSONData,
+                                             encoding: String.Encoding.utf8) {
+                    sendBody(Data(theJSONText.utf8))
+                }
+                sendBody(Data())
             }
-            sendBody(Data())
+            
         }
         
+        let wifiAdress = getWiFiAddress()
         // Start HTTP server to listen on the port
         try! server.start()
-        
-        let wifiAdress = getWiFiAddress()
         if(wifiAdress != nil) {
             let endPoint = wifiAdress! + ":" + String(self.port)
             fputs("Display => ATSDRIVER_DRIVER_HOST=" + endPoint + "\n", stderr)
