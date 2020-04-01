@@ -281,7 +281,7 @@ public class IosDevice extends RunningDevice
 				const find:Array = startInfo.exec(data);
 				ip = find[1];
 				port = find[2];
-
+				removeReceivers();
 				if (simulator) {
 					var devicePortSettings:DevicePortSettings = DevicePortSettingsHelper.shared.getPortSetting(id);
 					devicePortSettings.port = parseInt(port);
