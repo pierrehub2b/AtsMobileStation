@@ -99,7 +99,7 @@ class atsDriver: XCTestCase {
         continueAfterFailure = true
         
         self.udpPort = Int.random(in: 32000..<64000)
-        print("Display => UDP PORT for " + self.bluetoothName + " = " + String(self.udpPort))
+        sendLogs(type: logType.STATUS, message: "UDP PORT for " + self.bluetoothName + " = " + String(self.udpPort))
         
         udpThread.async {
             self.udpStart()
@@ -141,7 +141,7 @@ class atsDriver: XCTestCase {
             if(isFree == true) {
                 self.port = Int(customPort)!
             } else {
-                print("Display => ** Port unavailable **")
+                sendLogs(type: logType.STATUS, message: "** Port unavailable **")
                 return;
             }
         } else {
@@ -218,10 +218,10 @@ class atsDriver: XCTestCase {
             } while true
         } catch let error {
             guard let socketError = error as? Socket.Error else {
-                print("Unexpected error...")
+                sendLogs(type: logType.ERROR, message: "Unexpected error...")
                 return
             }
-            print("Display => Error on socket instance creation: \(socketError.description)")
+            sendLogs(type: logType.ERROR, message: "Error on socket instance creation: \(socketError.description)")
         }
     }
     
@@ -258,11 +258,11 @@ class atsDriver: XCTestCase {
         }
         catch let error {
             guard let socketError = error as? Socket.Error else {
-                print("Unexpected error by connection at \(socket.remoteHostname):\(socket.remotePort)...")
+                sendLogs(type: logType.ERROR, message: "Unexpected error by connection at \(socket.remoteHostname):\(socket.remotePort)...")
                 return
             }
             if self.continueExecution {
-                print("Error reported by connection at \(socket.remoteHostname):\(socket.remotePort):\n \(socketError.description)")
+                sendLogs(type: logType.ERROR, message: "Error reported by connection at \(socket.remoteHostname):\(socket.remotePort):\n \(socketError.description)")
             }
         }
         
@@ -546,10 +546,10 @@ class atsDriver: XCTestCase {
         try! server.start()
         if(wifiAdress != nil) {
             let endPoint = wifiAdress! + ":" + String(self.port)
-            fputs("Display => ATSDRIVER_DRIVER_HOST=" + endPoint + "\n", stderr)
+            sendLogs(type: logType.STATUS, message: "ATSDRIVER_DRIVER_HOST=" + endPoint)
             loop.runForever()
         } else {
-            print("Display => ** WIFI NOT CONNECTED **")
+            sendLogs(type: logType.STATUS, message: "** WIFI NOT CONNECTED **")
         }
     }
     
@@ -688,7 +688,7 @@ class atsDriver: XCTestCase {
             let json = String(data: jsonData, encoding: String.Encoding.utf8) ?? "no values"
             return json
         } catch let error as NSError {
-            print("Array convertIntoJSON - \(error.description)")
+            sendLogs(type: logType.ERROR, message: "Array convertIntoJSON - \(error.description)")
         }
         return ""
     }
@@ -700,7 +700,7 @@ class atsDriver: XCTestCase {
             let json = String(data: jsonData, encoding: String.Encoding.utf8) ?? "no values"
             return json
         } catch let error as NSError {
-            print("Array convertIntoJSON - \(error.description)")
+            sendLogs(type: logType.ERROR, message: "Array convertIntoJSON - \(error.description)")
         }
         return ""
     }
@@ -717,7 +717,7 @@ class atsDriver: XCTestCase {
                 return string
             }
         } catch {
-            print(error)
+            sendLogs(type: logType.ERROR, message: error)
         }
         
         return ""
@@ -749,13 +749,6 @@ class atsDriver: XCTestCase {
         let screenNativeBounds = XCUIScreen.main.screenshot().image.size
         let screenShotWidth = screenNativeBounds.width * screenScale
         let screenShotHeight = screenNativeBounds.height * screenScale
-
-        /* print(screenNativeBounds)
-        // Device size
-        let screenBounds = UIScreen.main.applicationFrame
-        print(UIScreen.screens)
-        let screenScale = UIScreen.main.nativeScale
-        let screenSize = CGSize(width: screenBounds.size.width * screenScale, height: screenBounds.size.height * screenScale) */
         
         self.channelWidth = Double(screenShotWidth)  //Double(screenSize.width)
         self.channelHeight = Double(screenShotHeight) //Double(screenSize.height)
@@ -780,7 +773,7 @@ class atsDriver: XCTestCase {
     func closeSocket() {
         Darwin.shutdown(self.tcpSocket, SHUT_RDWR)
         close(self.tcpSocket)
-        print("close socket")
+        sendLogs(type: logType.INFO, message: "Close socket")
     }
     
     func checkTcpPortForListen(port: in_port_t) -> (Bool, descr: String) {
