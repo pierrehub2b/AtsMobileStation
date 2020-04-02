@@ -91,13 +91,13 @@ public class WebServer extends EventDispatcher
 			
 		private function webSocketOnMessageHandler(event:WebSocketEvent):void
 		{
-			if (event.message.type === WebSocketMessage.TYPE_BINARY) {
+			// if (event.message.type === WebSocketMessage.TYPE_BINARY) {
 				var buffer:ByteArray = event.message.binaryData;
 
 				activeSocket.writeBytes(buffer, 0, buffer.length);
 				activeSocket.flush();
 				// activeSocket.close();
-			}
+			// }
 		}
 		
 		private function closeSocket():void {
@@ -127,13 +127,13 @@ public class WebServer extends EventDispatcher
 		
 		private function onConnect(event:ServerSocketConnectEvent):void
 		{	
-			if (activeSocket != null && activeSocket.connected) {
+			// if (activeSocket != null && activeSocket.connected) {
 				
-			} else {
+			// } else {
 				activeSocket = event.socket;
 				activeSocket.addEventListener(ProgressEvent.SOCKET_DATA, onClientSocketData, false, 0, true);
 				activeSocket.addEventListener(Event.CLOSE, onSocketClose, false, 0, true);
-			}
+			// }
 		}
 		
 		// 1. get from client
