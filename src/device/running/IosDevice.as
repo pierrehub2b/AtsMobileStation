@@ -23,6 +23,7 @@ import helpers.DeviceSettings;
 import helpers.DeviceSettingsHelper;
 
 import helpers.PortSwitcher;
+import flash.globalization.DateTimeFormatter;
 
 public class IosDevice extends RunningDevice
 	{
@@ -34,6 +35,10 @@ public class IosDevice extends RunningDevice
 		private static const noCertificatesError:RegExp = /signing certificate matching team ID(\s*)/;
 		private static const noXcodeInstalled:RegExp = /requires Xcode(\s*)/;
 		private static const wrongVersionofxCode:RegExp = /which may not be supported by this version of Xcode(\s*)/;
+
+		private var logFile:File;
+		private var logStream:FileStream = new FileStream();
+		private var dateFormatter:DateTimeFormatter = new DateTimeFormatter("en-US");
 
 		private var testingProcess:NativeProcess;
 		public var procInfo:NativeProcessStartupInfo;
@@ -52,10 +57,22 @@ public class IosDevice extends RunningDevice
 			this.manufacturer = "Apple";
 			this.simulator = simulator;
 
+			//---------------------------------------------------------------------------------------
+
+			dateFormatter.setDateTimePattern("yyyy-MM-dd hh:mm:ss");
+			logFile = FlexGlobals.topLevelApplication.logsFolder.resolvePath("ios_" + id + "_" + new Date().time + ".log");
+			
+			logStream.open(logFile, FileMode.WRITE);
+			logStream.writeUTFBytes("Start iOS process");
+			logStream.writeUTFBytes("Getting settings configuration for device:" + id);
+			logStream.close();
+			
+			//---------------------------------------------------------------------------------------
+
 			var fileStream:FileStream = new FileStream();
 			var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
 
-			trace("Getting settings configuration for device:" + id);
+			
 
 			var deviceSettingsHelper:DeviceSettingsHelper = DeviceSettingsHelper.shared;
 			var deviceSettings:DeviceSettings = deviceSettingsHelper.getSettingsForDevice(id);
@@ -86,20 +103,18 @@ public class IosDevice extends RunningDevice
 			}
 			
 			installing();
-			trace("installing the driver");
+			writeTypedLogs("installing the driver", "info");
 			testingProcess = new NativeProcess();
 			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
 			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
-			
-			trace("Copy files into temp directory");
+			writeTypedLogs("Copy files into temp directory", "info");
 			resultDir = File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id);
 			var alreadyCopied:Boolean = resultDir.exists;
 			if(!alreadyCopied) {
 				iosDriverProjectFolder.copyTo(resultDir, true);
 			}
-
-			trace("Managing plist file");
+			writeTypedLogs("Managing plist file", "info");
 			var index:int = 0;
 			file = resultDir.resolvePath("atsDriver/Settings.plist");
 			if(file.exists && settingsPort != "") {
@@ -140,10 +155,10 @@ public class IosDevice extends RunningDevice
 			
 			if(alreadyCopied) {
 				args.push("test-without-building");
-				trace("test without building on device with id:" + id + " at " + new Date())
+				writeTypedLogs("test without building on device with id:" + id, "info");
 			} else {
 				args.push("test");
-				trace("build and test on device with id:" + id + " at " + new Date())
+				writeTypedLogs("build and test on device with id:" + id, "info");
 			}
 			getBundleIds(id);
 			procInfo.arguments = args;
@@ -161,6 +176,22 @@ public class IosDevice extends RunningDevice
 			}
 			
 			fileStream.close();
+		}
+
+		private function writeLogs(data:String):void{
+			if(data.length > 0){
+				logStream.open(logFile, FileMode.APPEND);
+				logStream.writeUTFBytes("[" + dateFormatter.format(new Date()) + "]" + data);
+				logStream.close();
+			}
+		}
+
+		private function writeTypedLogs(data:String, type:String):void{
+			if(data.length > 0){
+				logStream.open(logFile, FileMode.APPEND);
+				logStream.writeUTFBytes("[" + dateFormatter.format(new Date()) + "][" + type.toUpperCase() + "] " + data + "\n");
+				logStream.close();
+			}
 		}
 		
 		protected function onGettingBundlesOutput(ev:ProgressEvent):void{
@@ -205,7 +236,7 @@ public class IosDevice extends RunningDevice
 				}
 				stream.close();
 			} else {
-				trace("Erreur à la génération du fichier settings.plist");
+				writeTypedLogs("Erreur à la génération du fichier settings.plist", "error")
 				resultDir.deleteDirectory(true);
 				testingProcess.exit();
 			}
@@ -257,7 +288,7 @@ public class IosDevice extends RunningDevice
 		protected function onTestingExit(ev:NativeProcessExitEvent):void
 		{
 			removeReceivers();
-			trace("testing exit");
+			writeTypedLogs("test exit", "error");
 			if (errorMessage == "" || status == Simulator.SHUTDOWN) {
 				dispatchEvent(new Event(STOPPED_EVENT));
 			} else {
@@ -291,11 +322,12 @@ public class IosDevice extends RunningDevice
 				removeReceivers();
 				testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 				started();
+			} else {
+				writeLogs(data);
 			}
 		}
 
 		protected function removeReceivers():void {
-			testingProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput);
 			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
 			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
 		}
