@@ -30,25 +30,6 @@ extension UIDevice {
     }
 }
 
-extension UIImage {
-    func resized(withPercentage percentage: CGFloat, isOpaque: Bool = true) -> UIImage? {
-        let canvas = CGSize(width: size.width * percentage, height: size.height * percentage)
-        let format = imageRendererFormat
-        format.opaque = isOpaque
-        return UIGraphicsImageRenderer(size: canvas, format: format).image {
-            _ in draw(in: CGRect(origin: .zero, size: canvas))
-        }
-    }
-    func resized(toWidth width: CGFloat, isOpaque: Bool = true) -> UIImage? {
-        let canvas = CGSize(width: width, height: CGFloat(ceil(width/size.width * size.height)))
-        let format = imageRendererFormat
-        format.opaque = isOpaque
-        return UIGraphicsImageRenderer(size: canvas, format: format).image {
-            _ in draw(in: CGRect(origin: .zero, size: canvas))
-        }
-    }
-}
-
 class atsDriver: XCTestCase {
     
     let driverVersion:String = "1.0.0"
@@ -102,6 +83,7 @@ class atsDriver: XCTestCase {
         sendLogs(type: logType.STATUS, message: "UDP PORT for " + self.bluetoothName + " = " + String(self.udpPort))
         
         udpThread.async {
+            sendLogs(type: logType.INFO, message: "Starting UDP server on port: \(self.udpPort)")
             self.udpStart()
         }
         
@@ -111,6 +93,7 @@ class atsDriver: XCTestCase {
         if let url = testBundle.url(forResource: "Settings", withExtension: "plist"),
             let myDict = NSDictionary(contentsOf: url) as? [String:Any] {
             customPort = myDict["CFCustomPort"].unsafelyUnwrapped as! String;
+            sendLogs(type: logType.INFO, message: "Fixed port defined: \(customPort)")
             for itm in myDict {
                 if(itm.key.contains("CFAppBundleID")) {
                     self.appsInstalled.append(itm.value as! String)
@@ -153,7 +136,7 @@ class atsDriver: XCTestCase {
                 }
             }
         }
-        
+        sendLogs(type: logType.INFO, message: "Start HTTP server : \(customPort)")
         self.setupInstalledApp()
         self.setupWebApp()
         self.setupApp()
@@ -226,7 +209,7 @@ class atsDriver: XCTestCase {
     }
     
     func addNewConnection(socket: Socket, currentConnection: (bytesRead: Int, address: Socket.Address?)) {
-        let bufferSize = 4000
+        let bufferSize = 1450
         var offset = 0
         
         do {
@@ -269,7 +252,7 @@ class atsDriver: XCTestCase {
     }
     
     func refreshView() {
-        UIGraphicsBeginImageContextWithOptions(CGSize(width: self.channelWidth, height: self.channelHeight), true, 0.85)
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: self.channelWidth, height: self.channelHeight), true, 0.60)
         XCUIScreen.main.screenshot().image.draw(in: CGRect(x: 0, y: 0, width: self.channelWidth, height: self.channelHeight))
         let newImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
@@ -329,16 +312,17 @@ class atsDriver: XCTestCase {
                 }
             }else if(action == ActionsEnum.SCREENSHOT.rawValue){
                 let screenshot = XCUIScreen.main.screenshot()
-                //let img = screenshot.image.resized(withPercentage: UIScreen.main.scale)
                 let bytes = self.getArrayOfBytesFromImage(imageData: UIImagePNGRepresentation(screenshot.image)!)
                 startResponse("200 OK", [("Content-Type", "application/octet-stream"),("Content-length", bytes.count.description)])
-                
+                sendLogs(type: logType.INFO, message: "Get screenshot informations")
                 self.screenShotThread.sync {
                     sendBody(Data(bytes: bytes))
+                    sendLogs(type: logType.INFO, message: "Screenshot sended with \(bytes.count) bytes")
                     usleep(1000000)
                 }
                 self.screenShotThread.sync {
                     sendBody(Data())
+                    sendLogs(type: logType.INFO, message: "Flush screenshot thread")
                 }
             }else if(action == ActionsEnum.INFO.rawValue){
                 let testBundle = Bundle(for: atsDriver.self)
@@ -379,6 +363,7 @@ class atsDriver: XCTestCase {
                         } else {
                             if(ActionsEnum.STOP.rawValue == firstParam) {
                                 if(app != nil){
+                                    sendLogs(type: logType.INFO, message: "Terminate app")
                                     app.terminate()
                                     self.continueExecution = false
                                     if !UIDevice.isSimulator {
@@ -389,6 +374,7 @@ class atsDriver: XCTestCase {
                                 }
                             } else {
                                 if(ActionsEnum.QUIT.rawValue == firstParam) {
+                                    sendLogs(type: logType.INFO, message: "Terminate app")
                                     app.terminate()
                                     self.continueExecution = false
                                     if !UIDevice.isSimulator {
@@ -436,6 +422,7 @@ class atsDriver: XCTestCase {
                                     self.resultElement["status"] = "0"
                                     if(app.keyboards.count > 0) {
                                         app.typeText(text)
+                                        sendLogs(type: logType.INFO, message: "Type text: \(text)")
                                         self.resultElement["message"] = "element send keys : " + text
                                     } else {
                                         self.resultElement["message"] = "no keyboard on screen for tap text"
@@ -489,23 +476,28 @@ class atsDriver: XCTestCase {
                             app = XCUIApplication.init(bundleIdentifier: parameters[1])
                             if(self.appsInstalled.contains(parameters[1]) || (self.appsInstalled.count == 0 && self.applications.count == 0)) {
                                  app.launch()
+                                sendLogs(type: logType.INFO, message: "Launching app \(parameters[1])")
                                  self.resultElement["status"] = "0"
                                  self.resultElement["label"] = app.label
                                  self.resultElement["icon"] = self.emptyImg
                                  self.resultElement["version"] = "0.0.0"
                             } else {
+                                sendLogs(type: logType.ERROR, message: "Error on app launching: \(parameters[1])")
                                 self.resultElement["message"] = "app package not found : " + parameters[1]
                                 self.resultElement["status"] = "-51"
                                 app = nil
                             }
                         } else if(ActionsEnum.SWITCH.rawValue == firstParam) {
                             app = XCUIApplication(bundleIdentifier: parameters[1])
+                            sendLogs(type: logType.INFO, message: "Switch app \(parameters[1])")
                             app.activate()
                             self.resultElement["message"] = "switch app " + parameters[1]
                             self.resultElement["status"] = "0"
                         } else if(ActionsEnum.STOP.rawValue == firstParam) {
                             app = XCUIApplication(bundleIdentifier: parameters[1])
                             app.terminate()
+                            app = nil;
+                            sendLogs(type: logType.INFO, message: "Stop app \(parameters[1])")
                             self.resultElement["message"] = "stop app " + parameters[1]
                             self.resultElement["status"] = "0"
                         } else if(ActionsEnum.INFO.rawValue == firstParam) {
@@ -612,18 +604,23 @@ class atsDriver: XCTestCase {
     }
     
     func tapCoordinate(at xCoordinate: Double, and yCoordinate: Double) {
-        if(self.isAlert) {
-            let alertBox = app.windows.alerts.firstMatch
-            let x = Double(alertBox.frame.minX)
-            let y = Double(alertBox.frame.minY)
-            let normalized = alertBox.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
-            let coordinate = normalized.withOffset(CGVector(dx: xCoordinate - x, dy: yCoordinate - y))
-            coordinate.tap()
+        if(app != nil) {
+            if(self.isAlert) {
+                let alertBox = app.windows.alerts.firstMatch
+                let x = Double(alertBox.frame.minX)
+                let y = Double(alertBox.frame.minY)
+                let normalized = alertBox.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+                let coordinate = normalized.withOffset(CGVector(dx: xCoordinate - x, dy: yCoordinate - y))
+                coordinate.tap()
+            } else {
+                let normalized = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+                let coordinate = normalized.withOffset(CGVector(dx: xCoordinate, dy: yCoordinate))
+                coordinate.tap()
+            }
         } else {
-            let normalized = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
-            let coordinate = normalized.withOffset(CGVector(dx: xCoordinate, dy: yCoordinate))
-            coordinate.tap()
+            sendLogs(type: logType.ERROR, message: "App is null")
         }
+        
     }
     
     enum direction : Int {
@@ -631,38 +628,43 @@ class atsDriver: XCTestCase {
     }
     
     func swipeCoordinate(x xCoordinate: Double, y yCoordinate: Double, swipeX xSwipe: Double, swipeY ySwipe: Double) {
-        var direction:direction;
-        var adjustment: CGFloat = 0
-        if(xSwipe > 0) {
-            direction = .horizontal
-            adjustment = 1
-        } else if(xSwipe < 0) {
-            direction = .horizontal
-            adjustment = -1
-        } else if(ySwipe < 0) {
-            direction = .vertical
-            adjustment = -1
+        if(app != nil) {
+            var direction:direction;
+            var adjustment: CGFloat = 0
+            if(xSwipe > 0) {
+                direction = .horizontal
+                adjustment = 1
+            } else if(xSwipe < 0) {
+                direction = .horizontal
+                adjustment = -1
+            } else if(ySwipe < 0) {
+                direction = .vertical
+                adjustment = -1
+            } else {
+                direction = .vertical
+                adjustment = 1
+            }
+            
+            let halfX : CGFloat = CGFloat(xCoordinate / self.channelWidth)
+            let halfY : CGFloat = CGFloat(yCoordinate / self.channelHeight)
+            let pressDuration : TimeInterval = 0.1
+            
+            let centre = app.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY))
+            let ySwipe = app.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY + adjustment))
+            let xSwipe = app.coordinate(withNormalizedOffset: CGVector(dx: halfX + adjustment, dy: halfY))
+            
+            switch direction {
+                case .vertical:
+                    centre.press(forDuration: pressDuration, thenDragTo: ySwipe)
+                    break
+                case .horizontal:
+                    centre.press(forDuration: pressDuration, thenDragTo: xSwipe)
+                    break
+            }
         } else {
-            direction = .vertical
-            adjustment = 1
+            sendLogs(type: logType.ERROR, message: "App is null")
         }
         
-        let halfX : CGFloat = CGFloat(xCoordinate / self.channelWidth)
-        let halfY : CGFloat = CGFloat(yCoordinate / self.channelHeight)
-        let pressDuration : TimeInterval = 0.1
-        
-        let centre = app.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY))
-        let ySwipe = app.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY + adjustment))
-        let xSwipe = app.coordinate(withNormalizedOffset: CGVector(dx: halfX + adjustment, dy: halfY))
-        
-        switch direction {
-            case .vertical:
-                centre.press(forDuration: pressDuration, thenDragTo: ySwipe)
-                break
-            case .horizontal:
-                centre.press(forDuration: pressDuration, thenDragTo: xSwipe)
-                break
-        }
     }
     
     func retrieveElement(parameter: String, field: String) -> XCUIElement? {
@@ -717,7 +719,7 @@ class atsDriver: XCTestCase {
                 return string
             }
         } catch {
-            sendLogs(type: logType.ERROR, message: error)
+            sendLogs(type: logType.ERROR, message: "Cannot Stringify JSON")
         }
         
         return ""
