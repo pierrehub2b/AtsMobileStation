@@ -21,9 +21,10 @@ public class WebServer extends EventDispatcher
 		public static const WEB_SERVER_ERROR:String = "webServerError";
 
 		private var serverSocket:ServerSocket = new ServerSocket();
-		private var activeSocket:Socket;
-		private var clientData:ByteArray;
 		private var webSocket:WebSocket;
+		private var count:int = 0
+
+		private var proxySockets:Vector.<ProxySocket> = new Vector.<ProxySocket>();
 
 		public function close():void 
 		{
@@ -91,17 +92,19 @@ public class WebServer extends EventDispatcher
 			
 		private function webSocketOnMessageHandler(event:WebSocketEvent):void
 		{
-			// if (event.message.type === WebSocketMessage.TYPE_BINARY) {
-				var buffer:ByteArray = event.message.binaryData;
+			var buffer:ByteArray = event.message.binaryData;
 
-				activeSocket.writeBytes(buffer, 0, buffer.length);
-				activeSocket.flush();
-				// activeSocket.close();
-			// }
+			var socketID:int = buffer.readInt();
+			var socket:Socket = fetchSocket(socketID);
+			if (socket != null) {
+				socket.writeBytes(buffer, 4, buffer.length - 4);
+				socket.flush();
+				// socket.close();
+			}
 		}
 		
 		private function closeSocket():void {
-			if (activeSocket != null) {
+			/* if (activeSocket != null) {
 				activeSocket.removeEventListener(ProgressEvent.SOCKET_DATA, onClientSocketData);
 				activeSocket.removeEventListener(Event.CLOSE, onSocketClose);
 				
@@ -110,7 +113,7 @@ public class WebServer extends EventDispatcher
 				}
 				
 				activeSocket = null;
-			}
+			} */
 		}
 		
 		private function webSocketConnectionFailHandler(event:WebSocketErrorEvent):void 
@@ -122,27 +125,48 @@ public class WebServer extends EventDispatcher
 		{
 			webSocket.removeEventListener(WebSocketEvent.OPEN, webSocketOpenHandler);
 
-			webSocket.sendBytes(clientData);
+			for each(var proxySocket:ProxySocket in proxySockets) {
+				webSocket.sendBytes(proxySocket.data);
+			}
 		}
 		
 		private function onConnect(event:ServerSocketConnectEvent):void
-		{	
-			// if (activeSocket != null && activeSocket.connected) {
+		{
+			var socket:Socket = event.socket;
+			socket.addEventListener(ProgressEvent.SOCKET_DATA, onClientSocketData, false, 0, true);
+			socket.addEventListener(Event.CLOSE, onSocketClose, false, 0, true);
+
+			// create new
+			var proxySocket:ProxySocket = new ProxySocket();
+			proxySocket.socket = socket;
+			proxySocket.id = count;
+			count++;
+
+			proxySockets.push(proxySocket);
+
+			/* if (activeSocket != null && activeSocket.connected) {
 				
-			// } else {
+			} else {
 				activeSocket = event.socket;
 				activeSocket.addEventListener(ProgressEvent.SOCKET_DATA, onClientSocketData, false, 0, true);
 				activeSocket.addEventListener(Event.CLOSE, onSocketClose, false, 0, true);
-			// }
+			} */
 		}
 		
 		// 1. get from client
 		private function onClientSocketData(event:ProgressEvent):void 
 		{
+			var socket:Socket = event.target as Socket;
+			var proxySocket:ProxySocket = fetchProxySocket(socket);
 			// read data
-			clientData = new ByteArray();
-			activeSocket.readBytes(clientData, 0, activeSocket.bytesAvailable);
-						
+
+			var clientData:ByteArray = new ByteArray();
+			var tempData:ByteArray = new ByteArray();
+			clientData.writeInt(proxySocket.id);
+			socket.readBytes(tempData, 0, socket.bytesAvailable);
+			clientData.writeBytes(tempData, 0, tempData.length);
+			proxySocket.data = clientData;
+
 			// forward data
 			if (webSocket.connected == true) {
 				webSocket.sendBytes(clientData);
@@ -152,7 +176,13 @@ public class WebServer extends EventDispatcher
 		}
 						
 		private function onSocketClose(ev:Event):void {
-			trace(ev);
+			trace("Socket close : " + ev + ev.target);
+
+			var socket:Socket = ev.target as Socket;
+			socket.removeEventListener(ProgressEvent.SOCKET_DATA, onClientSocketData);
+			socket.removeEventListener(Event.CLOSE, onSocketClose);
+
+			removeProxySocket(socket);
 		}
 						
 		private function closeHandler(event:Event):void {
@@ -164,6 +194,41 @@ public class WebServer extends EventDispatcher
 		private function ioErrorHandler(event:IOErrorEvent):void
 		{
 			trace("ioErrorHandler: " + event);
+		}
+
+
+
+		/////
+
+		private function fetchProxySocket(socket:Socket):ProxySocket
+		{
+			for each (var proxySocket in proxySockets) {
+				if (proxySocket.socket === socket) {
+					return proxySocket;
+				}
+			}
+
+			return null;
+		}
+
+		private function fetchSocket(socketID:int):Socket
+		{
+			for each (var proxySocket in proxySockets) {
+				if (proxySocket.id == socketID) {
+					return proxySocket.socket;
+				}
+			}
+
+			return null;
+		}
+
+		private function removeProxySocket(socket:Socket):void
+		{
+			var proxySocket:ProxySocket = fetchProxySocket(socket);
+			if (proxySocket != null) {
+				var index:int = proxySockets.indexOf(proxySocket);
+				proxySockets.removeAt(index);
+			}
 		}
 	}
 }
