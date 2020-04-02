@@ -81,9 +81,9 @@
 				/* *** */
 
 
-				//if(!Capabilities.isDebugger) {
+				if(!Capabilities.isDebugger) {
 					cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
-				//}
+				}
 				
 				simulators = new AvailableSimulatorsManager();
 				devices = new RunningDevicesManager(port, isMacOs);
