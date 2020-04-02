@@ -36,7 +36,7 @@ public class WebServer extends EventDispatcher
 			if (serverSocket.bound) {
 				serverSocket.removeEventListener(ServerSocketConnectEvent.CONNECT, onConnect);
 				serverSocket.removeEventListener(Event.CLOSE, onClose);
-				
+
 				try {
 					serverSocket.close();
 				} catch (e:Error){
@@ -93,9 +93,10 @@ public class WebServer extends EventDispatcher
 		{
 			if (event.message.type === WebSocketMessage.TYPE_BINARY) {
 				var buffer:ByteArray = event.message.binaryData;
+
 				activeSocket.writeBytes(buffer, 0, buffer.length);
 				activeSocket.flush();
-				activeSocket.close();
+				// activeSocket.close();
 			}
 		}
 		
