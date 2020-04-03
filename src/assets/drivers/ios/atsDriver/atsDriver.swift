@@ -58,11 +58,11 @@ class atsDriver: XCTestCase {
     var channelHeight = 1.0
     var deviceWidth = 1.0
     var deviceHeight = 1.0
-    var isAlert = false
     var forceCapture = false;
     var applications:[[String: Any]] = []
     var emptyImg:String = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
-    
+    var asChanged:Bool = true
+    var appDomDesc: String = ""
     var continueExecution = true
     
     var applicationControls =
@@ -83,7 +83,7 @@ class atsDriver: XCTestCase {
         sendLogs(type: logType.STATUS, message: "UDP PORT for " + self.bluetoothName + " = " + String(self.udpPort))
         
         udpThread.async {
-            sendLogs(type: logType.INFO, message: "Starting UDP server on port: \(self.udpPort)")
+            //sendLogs(type: logType.INFO, message: "Starting UDP server on port: \(self.udpPort)")
             self.udpStart()
         }
         
@@ -93,7 +93,7 @@ class atsDriver: XCTestCase {
         if let url = testBundle.url(forResource: "Settings", withExtension: "plist"),
             let myDict = NSDictionary(contentsOf: url) as? [String:Any] {
             customPort = myDict["CFCustomPort"].unsafelyUnwrapped as! String;
-            sendLogs(type: logType.INFO, message: "Fixed port defined: \(customPort)")
+            //sendLogs(type: logType.INFO, message: "Fixed port defined: \(customPort)")
             for itm in myDict {
                 if(itm.key.contains("CFAppBundleID")) {
                     self.appsInstalled.append(itm.value as! String)
@@ -136,7 +136,7 @@ class atsDriver: XCTestCase {
                 }
             }
         }
-        sendLogs(type: logType.INFO, message: "Start HTTP server : \(customPort)")
+        //sendLogs(type: logType.INFO, message: "Start HTTP server : \(customPort)")
         self.setupInstalledApp()
         self.setupWebApp()
         self.setupApp()
@@ -197,7 +197,7 @@ class atsDriver: XCTestCase {
             
             repeat {
                 let currentConnection = try socket.listen(forMessage: &data, on: self.udpPort)
-                _ = try self.addNewConnection(socket: socket, currentConnection: currentConnection)
+                self.addNewConnection(socket: socket, currentConnection: currentConnection)
             } while true
         } catch let error {
             guard let socketError = error as? Socket.Error else {
@@ -208,38 +208,47 @@ class atsDriver: XCTestCase {
         }
     }
     
-    func addNewConnection(socket: Socket, currentConnection: (bytesRead: Int, address: Socket.Address?)) throws -> Void {
-        let bufferSize = 1450
+    func addNewConnection(socket: Socket, currentConnection: (bytesRead: Int, address: Socket.Address?)) {
+        let bufferSize = 2000
         var offset = 0
         
-        let workItem = DispatchWorkItem {
-            self.refreshView()
-        }
-        
-        DispatchQueue.init(label: "getImg").async(execute: workItem)
-        workItem.wait()
-        
-        let img = self.imgView
-        if(img != nil) {
-            repeat {
-                let thisChunkSize = ((img!.count - offset) > bufferSize) ? bufferSize : (img!.count - offset);
-                var chunk = img!.subdata(in: offset..<offset + thisChunkSize)
-                offset += thisChunkSize
-                let uint32Offset = UInt32(offset - thisChunkSize)
-                let uint32RemainingData = UInt32(img!.count - offset)
-                
-                do {
+        do {
+            let workItem = DispatchWorkItem {
+                self.refreshView()
+            }
+            
+            DispatchQueue.init(label: "getImg").async(execute: workItem)
+            workItem.wait()
+            
+            let img = self.imgView
+            if(img != nil) {
+                repeat {
+                    let thisChunkSize = ((img!.count - offset) > bufferSize) ? bufferSize : (img!.count - offset);
+                    var chunk = img!.subdata(in: offset..<offset + thisChunkSize)
+                    offset += thisChunkSize
+                    let uint32Offset = UInt32(offset - thisChunkSize)
+                    let uint32RemainingData = UInt32(img!.count - offset)
+                    
                     let offSetTable = self.toByteArrary(value: uint32Offset)
                     let remainingDataTable = self.toByteArrary(value: uint32RemainingData)
                     
                     chunk.insert(contentsOf: offSetTable + remainingDataTable, at: 0)
                     
                     try socket.write(from: chunk, to: currentConnection.address!)
-                } catch let error {
-                    sendLogs(type: logType.ERROR, message: "Error on byteArray parse \(error)")
-                }
-            } while (offset < img!.count);
+                    
+                } while (offset < img!.count);
+            }
         }
+        catch let error {
+            guard let socketError = error as? Socket.Error else {
+                sendLogs(type: logType.ERROR, message: "Unexpected error by connection at \(socket.remoteHostname):\(socket.remotePort)...")
+                return
+            }
+            if self.continueExecution {
+                sendLogs(type: logType.ERROR, message: "Error reported by connection at \(socket.remoteHostname):\(socket.remotePort):\n \(socketError.description)")
+            }
+        }
+        
     }
     
     func refreshView() {
@@ -298,21 +307,25 @@ class atsDriver: XCTestCase {
                     self.resultElement["status"] = "0"
                     self.resultElement["deviceHeight"] = self.channelHeight
                     self.resultElement["deviceWidth"] = self.channelWidth
-                    self.resultElement["root"] = app.debugDescription
+                    if(self.asChanged) {
+                        self.appDomDesc = app.debugDescription
+                        self.asChanged = false
+                    }
+                    self.resultElement["root"] = self.appDomDesc
                 }
             }else if(action == ActionsEnum.SCREENSHOT.rawValue){
                 let screenshot = XCUIScreen.main.screenshot()
                 let bytes = self.getArrayOfBytesFromImage(imageData: UIImagePNGRepresentation(screenshot.image)!)
                 startResponse("200 OK", [("Content-Type", "application/octet-stream"),("Content-length", bytes.count.description)])
-                sendLogs(type: logType.INFO, message: "Get screenshot informations")
+                //sendLogs(type: logType.INFO, message: "Get screenshot informations")
                 self.screenShotThread.sync {
                     sendBody(Data(bytes: bytes))
-                    sendLogs(type: logType.INFO, message: "Screenshot sended with \(bytes.count) bytes")
+                    //sendLogs(type: logType.INFO, message: "Screenshot sended with \(bytes.count) bytes")
                     usleep(1000000)
                 }
                 self.screenShotThread.sync {
                     sendBody(Data())
-                    sendLogs(type: logType.INFO, message: "Flush screenshot thread")
+                    //sendLogs(type: logType.INFO, message: "Flush screenshot thread")
                 }
             }else if(action == ActionsEnum.INFO.rawValue){
                 let testBundle = Bundle(for: atsDriver.self)
@@ -353,23 +366,24 @@ class atsDriver: XCTestCase {
                         } else {
                             if(ActionsEnum.STOP.rawValue == firstParam) {
                                 if(app != nil){
-                                    sendLogs(type: logType.INFO, message: "Terminate app")
                                     app.terminate()
-                                    self.continueExecution = false
-                                    if !UIDevice.isSimulator {
-                                        XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
-                                    }
-                                    self.resultElement["status"] = "0"
-                                    self.resultElement["message"] = "stop ats driver"
                                 }
+                                //sendLogs(type: logType.INFO, message: "Terminate app")
+                                if !UIDevice.isSimulator {
+                                    XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
+                                }
+                                self.resultElement["status"] = "0"
+                                self.resultElement["message"] = "stop ats driver"
                             } else {
                                 if(ActionsEnum.QUIT.rawValue == firstParam) {
-                                    sendLogs(type: logType.INFO, message: "Terminate app")
-                                    app.terminate()
-                                    self.continueExecution = false
+                                    if(app != nil){
+                                        app.terminate()
+                                    }
+                                    //sendLogs(type: logType.INFO, message: "Terminate app")
                                     if !UIDevice.isSimulator {
                                         XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
                                     }
+                                    self.continueExecution = false
                                     self.resultElement["status"] = "0"
                                     self.resultElement["message"] = "close ats driver"
                                 } else if(ActionsEnum.INFO.rawValue == firstParam) {
@@ -412,7 +426,7 @@ class atsDriver: XCTestCase {
                                     self.resultElement["status"] = "0"
                                     if(app.keyboards.count > 0) {
                                         app.typeText(text)
-                                        sendLogs(type: logType.INFO, message: "Type text: \(text)")
+                                        //sendLogs(type: logType.INFO, message: "Type text: \(text)")
                                         self.resultElement["message"] = "element send keys : " + text
                                     } else {
                                         self.resultElement["message"] = "no keyboard on screen for tap text"
@@ -466,7 +480,7 @@ class atsDriver: XCTestCase {
                             app = XCUIApplication.init(bundleIdentifier: parameters[1])
                             if(self.appsInstalled.contains(parameters[1]) || (self.appsInstalled.count == 0 && self.applications.count == 0)) {
                                  app.launch()
-                                sendLogs(type: logType.INFO, message: "Launching app \(parameters[1])")
+                                //sendLogs(type: logType.INFO, message: "Launching app \(parameters[1])")
                                  self.resultElement["status"] = "0"
                                  self.resultElement["label"] = app.label
                                  self.resultElement["icon"] = self.emptyImg
@@ -479,7 +493,7 @@ class atsDriver: XCTestCase {
                             }
                         } else if(ActionsEnum.SWITCH.rawValue == firstParam) {
                             app = XCUIApplication(bundleIdentifier: parameters[1])
-                            sendLogs(type: logType.INFO, message: "Switch app \(parameters[1])")
+                            //sendLogs(type: logType.INFO, message: "Switch app \(parameters[1])")
                             app.activate()
                             self.resultElement["message"] = "switch app " + parameters[1]
                             self.resultElement["status"] = "0"
@@ -487,7 +501,7 @@ class atsDriver: XCTestCase {
                             app = XCUIApplication(bundleIdentifier: parameters[1])
                             app.terminate()
                             app = nil;
-                            sendLogs(type: logType.INFO, message: "Stop app \(parameters[1])")
+                            //sendLogs(type: logType.INFO, message: "Stop app \(parameters[1])")
                             self.resultElement["message"] = "stop app " + parameters[1]
                             self.resultElement["status"] = "0"
                         } else if(ActionsEnum.INFO.rawValue == firstParam) {
@@ -507,20 +521,19 @@ class atsDriver: XCTestCase {
                     self.resultElement["status"] = "-41"
                 }
             }
-            if(action != ActionsEnum.SCREENSHOT.rawValue) {
-                // Start HTTP response
-                startResponse("200 OK", [("Content-Type", "application/json")])
-                if let theJSONData = try?  JSONSerialization.data(
-                    withJSONObject: self.resultElement,
-                    options: []
-                    ),
-                    let theJSONText = String(data: theJSONData,
-                                             encoding: String.Encoding.utf8) {
-                    sendBody(Data(theJSONText.utf8))
-                }
-                sendBody(Data())
+            if(action != ActionsEnum.CAPTURE.rawValue){
+                self.asChanged = true
             }
-            
+            startResponse("200 OK", [("Content-Type", "application/json")])
+            if let theJSONData = try?  JSONSerialization.data(
+                withJSONObject: self.resultElement,
+                options: []
+                ),
+                let theJSONText = String(data: theJSONData,
+                                         encoding: String.Encoding.utf8) {
+                sendBody(Data(theJSONText.utf8))
+            }
+            sendBody(Data())
         }
         
         let wifiAdress = getWiFiAddress()
@@ -595,18 +608,9 @@ class atsDriver: XCTestCase {
     
     func tapCoordinate(at xCoordinate: Double, and yCoordinate: Double) {
         if(app != nil) {
-            if(self.isAlert) {
-                let alertBox = app.windows.alerts.firstMatch
-                let x = Double(alertBox.frame.minX)
-                let y = Double(alertBox.frame.minY)
-                let normalized = alertBox.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
-                let coordinate = normalized.withOffset(CGVector(dx: xCoordinate - x, dy: yCoordinate - y))
-                coordinate.tap()
-            } else {
-                let normalized = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
-                let coordinate = normalized.withOffset(CGVector(dx: xCoordinate, dy: yCoordinate))
-                coordinate.tap()
-            }
+            let normalized = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+            let coordinate = normalized.withOffset(CGVector(dx: xCoordinate, dy: yCoordinate))
+            coordinate.tap()
         } else {
             sendLogs(type: logType.ERROR, message: "App is null")
         }
@@ -765,7 +769,7 @@ class atsDriver: XCTestCase {
     func closeSocket() {
         Darwin.shutdown(self.tcpSocket, SHUT_RDWR)
         close(self.tcpSocket)
-        sendLogs(type: logType.INFO, message: "Close socket")
+        //sendLogs(type: logType.INFO, message: "Close socket")
     }
     
     func checkTcpPortForListen(port: in_port_t) -> (Bool, descr: String) {
