@@ -197,7 +197,7 @@ class atsDriver: XCTestCase {
             
             repeat {
                 let currentConnection = try socket.listen(forMessage: &data, on: self.udpPort)
-                self.addNewConnection(socket: socket, currentConnection: currentConnection)
+                _ = try self.addNewConnection(socket: socket, currentConnection: currentConnection)
             } while true
         } catch let error {
             guard let socketError = error as? Socket.Error else {
@@ -208,47 +208,38 @@ class atsDriver: XCTestCase {
         }
     }
     
-    func addNewConnection(socket: Socket, currentConnection: (bytesRead: Int, address: Socket.Address?)) {
+    func addNewConnection(socket: Socket, currentConnection: (bytesRead: Int, address: Socket.Address?)) throws -> Void {
         let bufferSize = 1450
         var offset = 0
         
-        do {
-            let workItem = DispatchWorkItem {
-                self.refreshView()
-            }
-            
-            DispatchQueue.init(label: "getImg").async(execute: workItem)
-            workItem.wait()
-            
-            let img = self.imgView
-            if(img != nil) {
-                repeat {
-                    let thisChunkSize = ((img!.count - offset) > bufferSize) ? bufferSize : (img!.count - offset);
-                    var chunk = img!.subdata(in: offset..<offset + thisChunkSize)
-                    offset += thisChunkSize
-                    let uint32Offset = UInt32(offset - thisChunkSize)
-                    let uint32RemainingData = UInt32(img!.count - offset)
-                    
+        let workItem = DispatchWorkItem {
+            self.refreshView()
+        }
+        
+        DispatchQueue.init(label: "getImg").async(execute: workItem)
+        workItem.wait()
+        
+        let img = self.imgView
+        if(img != nil) {
+            repeat {
+                let thisChunkSize = ((img!.count - offset) > bufferSize) ? bufferSize : (img!.count - offset);
+                var chunk = img!.subdata(in: offset..<offset + thisChunkSize)
+                offset += thisChunkSize
+                let uint32Offset = UInt32(offset - thisChunkSize)
+                let uint32RemainingData = UInt32(img!.count - offset)
+                
+                do {
                     let offSetTable = self.toByteArrary(value: uint32Offset)
                     let remainingDataTable = self.toByteArrary(value: uint32RemainingData)
                     
                     chunk.insert(contentsOf: offSetTable + remainingDataTable, at: 0)
                     
                     try socket.write(from: chunk, to: currentConnection.address!)
-                    
-                } while (offset < img!.count);
-            }
+                } catch let error {
+                    sendLogs(type: logType.ERROR, message: "Error on byteArray parse \(error)")
+                }
+            } while (offset < img!.count);
         }
-        catch let error {
-            guard let socketError = error as? Socket.Error else {
-                sendLogs(type: logType.ERROR, message: "Unexpected error by connection at \(socket.remoteHostname):\(socket.remotePort)...")
-                return
-            }
-            if self.continueExecution {
-                sendLogs(type: logType.ERROR, message: "Error reported by connection at \(socket.remoteHostname):\(socket.remotePort):\n \(socketError.description)")
-            }
-        }
-        
     }
     
     func refreshView() {
@@ -308,7 +299,6 @@ class atsDriver: XCTestCase {
                     self.resultElement["deviceHeight"] = self.channelHeight
                     self.resultElement["deviceWidth"] = self.channelWidth
                     self.resultElement["root"] = app.debugDescription
-                    
                 }
             }else if(action == ActionsEnum.SCREENSHOT.rawValue){
                 let screenshot = XCUIScreen.main.screenshot()
