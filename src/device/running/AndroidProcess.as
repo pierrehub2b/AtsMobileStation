@@ -26,9 +26,11 @@ package device.running
 		public static const USBACTIONRESPONSE:String = "usbResponse";
 		public static const USBSTARTRESPONSE:String = "usbResponseStart";
 		public static const USBSTARTENDEDRESPONSE:String = "usbResponseStartEnded";
+		public static const UNINSTALL_EXIT:String = "uninstallExit";
+
 		public static const WEBSOCKET_SERVER_START:String = "webSocketServerStart";
 		public static const WEBSOCKET_SERVER_STOP:String = "webSocketServerStop";
-		public static const UNINSTALL_EXIT:String = "uninstallExit";
+		public static const WEBSOCKET_SERVER_ERROR:String = "webSocketServerError";
 
 		public static const DEVICE_INFO:String = "deviceInfo";
 		
@@ -257,7 +259,7 @@ package device.running
 			process.standardInput.writeUTFBytes(instrumentCommandLine);
 		}
 
-		function executeUsb(ipAddress:String, port:int, udpPort:int):void
+		public function executeUsb(ipAddress:String, port:int, udpPort:int):void
 		{
 			this.ipAddress = ipAddress;
 			this.port = port.toString();
@@ -298,7 +300,8 @@ package device.running
 				} else if(data.indexOf("ATS_WEB_SOCKET_SERVER_START:") > -1) {
 					webSocketServerPort = getWebSocketServerPort(data);
 					dispatchEvent(new Event(WEBSOCKET_SERVER_START));
-					// attach process tcp forward
+				} else if(data.indexOf("ATS_WEB_SOCKET_SERVER_ERROR") > -1) {
+					dispatchEvent(new Event(WEBSOCKET_SERVER_ERROR));
 				} else if(data.indexOf("ATS_WEB_SOCKET_SERVER_STOP") > -1) {
 					dispatchEvent(new Event(WEBSOCKET_SERVER_STOP));
 				}
