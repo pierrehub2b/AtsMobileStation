@@ -1,5 +1,7 @@
 package device.running {
 
+import avmplus.getQualifiedClassName;
+
 import flash.desktop.NativeProcess;
 import flash.desktop.NativeProcessStartupInfo;
 import flash.events.Event;
@@ -82,6 +84,7 @@ public class AndroidUsbDevice extends AndroidDevice {
         super.addAndroidProcessEventListeners();
         process.addEventListener(AndroidProcess.WEBSOCKET_SERVER_START, webSocketServerStartedHandler, false, 0, true);
         process.addEventListener(AndroidProcess.WEBSOCKET_SERVER_STOP, webSocketServerStoppedHandler, false, 0, true);
+        process.addEventListener(AndroidProcess.WEBSOCKET_SERVER_ERROR, webSocketServerErrorHandler, false, 0, true);
         process.addEventListener(AndroidProcess.UNINSTALL_EXIT, onUninstallExitHandler, false, 0, true);
     }
 
@@ -90,6 +93,7 @@ public class AndroidUsbDevice extends AndroidDevice {
         super.removeAndroidProcessEventListeners();
         process.removeEventListener(AndroidProcess.WEBSOCKET_SERVER_START, webSocketServerStartedHandler);
         process.removeEventListener(AndroidProcess.WEBSOCKET_SERVER_STOP, webSocketServerStoppedHandler);
+        process.removeEventListener(AndroidProcess.WEBSOCKET_SERVER_ERROR, webSocketServerErrorHandler);
         process.removeEventListener(AndroidProcess.UNINSTALL_EXIT, onUninstallExitHandler);
     }
 
@@ -99,13 +103,22 @@ public class AndroidUsbDevice extends AndroidDevice {
     {
         process.removeEventListener(AndroidProcess.WEBSOCKET_SERVER_START, webSocketServerStartedHandler);
 
+        trace("WebSocketServer started -> " + getQualifiedClassName(this) + id);
+
         webSocketServerPort = process.webSocketServerPort;
         setupPortForwarding();
     }
 
     private function webSocketServerStoppedHandler(event:Event):void
     {
-        usbError("Device server unavailable")
+        trace("WebSocketServer stopped -> " + getQualifiedClassName(this) + id);
+        // usbError("Device server unavailable")
+    }
+
+    private function webSocketServerErrorHandler(event:Event):void
+    {
+        trace("WebSocketServer error -> " + getQualifiedClassName(this) + id);
+        // usbError("Device server unavailable")
     }
 
     private function onUninstallExitHandler(event:Event):void

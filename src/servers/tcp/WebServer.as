@@ -1,6 +1,7 @@
 package servers.tcp
 {
 import com.worlize.websocket.WebSocket;
+import com.worlize.websocket.WebSocketConfig;
 import com.worlize.websocket.WebSocketErrorEvent;
 import com.worlize.websocket.WebSocketEvent;
 import com.worlize.websocket.WebSocketMessage;
@@ -68,6 +69,12 @@ public class WebServer extends EventDispatcher
 
 		public function setupWebSocket(port:int):void {
 			webSocket = new WebSocket("ws://localhost:" + port.toString(), "*");
+			trace("Web Socket max message size : " + webSocket.config.maxMessageSize);
+			trace("Web Socket max received frame size : " + webSocket.config.maxReceivedFrameSize);
+			var webSocketConfig:WebSocketConfig = new WebSocketConfig();
+			webSocketConfig.maxReceivedFrameSize = 0x200000;
+			webSocket.config = webSocketConfig;
+
 			webSocket.addEventListener(WebSocketEvent.OPEN, webSocketOpenHandler, false, 0, true);
 			webSocket.addEventListener(WebSocketEvent.MESSAGE, webSocketOnMessageHandler, false, 0, true);
 			webSocket.addEventListener(WebSocketEvent.CLOSED, webSocketOnCloseHandler, false, 0, true);
@@ -93,13 +100,13 @@ public class WebServer extends EventDispatcher
 		private function webSocketOnMessageHandler(event:WebSocketEvent):void
 		{
 			var buffer:ByteArray = event.message.binaryData;
+			// trace("Received data : " + buffer.length);
 
 			var socketID:int = buffer.readInt();
 			var socket:Socket = fetchSocket(socketID);
 			if (socket != null) {
 				socket.writeBytes(buffer, 4, buffer.length - 4);
 				socket.flush();
-				// socket.close();
 			}
 		}
 		
@@ -125,7 +132,9 @@ public class WebServer extends EventDispatcher
 		{
 			webSocket.removeEventListener(WebSocketEvent.OPEN, webSocketOpenHandler);
 
+			// trace("Ma socket est connectée : " + proxySockets.length);
 			for each(var proxySocket:ProxySocket in proxySockets) {
+				// trace("Ma socket est connectée : j'envoie " + proxySocket.data.length);
 				webSocket.sendBytes(proxySocket.data);
 			}
 		}
@@ -169,6 +178,7 @@ public class WebServer extends EventDispatcher
 
 			// forward data
 			if (webSocket.connected == true) {
+				// trace("Ma socket est déjà connectée : j'envoie " + clientData.length);
 				webSocket.sendBytes(clientData);
 			} else {
 				webSocket.connect();
@@ -202,7 +212,7 @@ public class WebServer extends EventDispatcher
 
 		private function fetchProxySocket(socket:Socket):ProxySocket
 		{
-			for each (var proxySocket in proxySockets) {
+			for each (var proxySocket:ProxySocket in proxySockets) {
 				if (proxySocket.socket === socket) {
 					return proxySocket;
 				}
@@ -213,7 +223,7 @@ public class WebServer extends EventDispatcher
 
 		private function fetchSocket(socketID:int):Socket
 		{
-			for each (var proxySocket in proxySockets) {
+			for each (var proxySocket:ProxySocket in proxySockets) {
 				if (proxySocket.id == socketID) {
 					return proxySocket.socket;
 				}
