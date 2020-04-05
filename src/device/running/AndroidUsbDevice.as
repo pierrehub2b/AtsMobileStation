@@ -117,7 +117,7 @@ public class AndroidUsbDevice extends AndroidDevice {
 
     private function webSocketServerErrorHandler(event:Event):void
     {
-        trace("WebSocketServer error -> " + getQualifiedClassName(this) + id);
+        trace("WebSocketServer error -> " + getQualifiedClassName(this) + " " + id + " " + process.webSocketServerError);
         // usbError("Device server unavailable")
     }
 

@@ -9,6 +9,7 @@ import com.worlize.websocket.WebSocketMessage;
 import flash.events.Event;
 import flash.events.EventDispatcher;
 import flash.events.IOErrorEvent;
+import flash.events.OutputProgressEvent;
 import flash.events.ProgressEvent;
 import flash.events.ServerSocketConnectEvent;
 import flash.net.ServerSocket;
@@ -32,8 +33,6 @@ public class WebServer extends EventDispatcher
 			if (webSocket != null) {
 				webSocket.close(false);
 			}
-
-			closeSocket();
 			
 			if (serverSocket.bound) {
 				serverSocket.removeEventListener(ServerSocketConnectEvent.CONNECT, onConnect);
@@ -69,8 +68,6 @@ public class WebServer extends EventDispatcher
 
 		public function setupWebSocket(port:int):void {
 			webSocket = new WebSocket("ws://localhost:" + port.toString(), "*");
-			trace("Web Socket max message size : " + webSocket.config.maxMessageSize);
-			trace("Web Socket max received frame size : " + webSocket.config.maxReceivedFrameSize);
 			var webSocketConfig:WebSocketConfig = new WebSocketConfig();
 			webSocketConfig.maxReceivedFrameSize = 0x200000;
 			webSocket.config = webSocketConfig;
@@ -100,7 +97,7 @@ public class WebServer extends EventDispatcher
 		private function webSocketOnMessageHandler(event:WebSocketEvent):void
 		{
 			var buffer:ByteArray = event.message.binaryData;
-			// trace("Received data : " + buffer.length);
+			trace("Received data : " + buffer.length);
 
 			var socketID:int = buffer.readInt();
 			var socket:Socket = fetchSocket(socketID);
@@ -109,20 +106,7 @@ public class WebServer extends EventDispatcher
 				socket.flush();
 			}
 		}
-		
-		private function closeSocket():void {
-			/* if (activeSocket != null) {
-				activeSocket.removeEventListener(ProgressEvent.SOCKET_DATA, onClientSocketData);
-				activeSocket.removeEventListener(Event.CLOSE, onSocketClose);
-				
-				if (activeSocket.connected) {
-					activeSocket.close();
-				}
-				
-				activeSocket = null;
-			} */
-		}
-		
+
 		private function webSocketConnectionFailHandler(event:WebSocketErrorEvent):void 
 		{
 			trace("WebSocket ERROR : " + event.text);
@@ -132,9 +116,7 @@ public class WebServer extends EventDispatcher
 		{
 			webSocket.removeEventListener(WebSocketEvent.OPEN, webSocketOpenHandler);
 
-			// trace("Ma socket est connectée : " + proxySockets.length);
 			for each(var proxySocket:ProxySocket in proxySockets) {
-				// trace("Ma socket est connectée : j'envoie " + proxySocket.data.length);
 				webSocket.sendBytes(proxySocket.data);
 			}
 		}
@@ -143,6 +125,7 @@ public class WebServer extends EventDispatcher
 		{
 			var socket:Socket = event.socket;
 			socket.addEventListener(ProgressEvent.SOCKET_DATA, onClientSocketData, false, 0, true);
+			socket.addEventListener(OutputProgressEvent.OUTPUT_PROGRESS, onClientSocketOutputProgress, false, 0, true);
 			socket.addEventListener(Event.CLOSE, onSocketClose, false, 0, true);
 
 			// create new
@@ -151,15 +134,11 @@ public class WebServer extends EventDispatcher
 			proxySocket.id = count;
 			count++;
 
-			proxySockets.push(proxySocket);
+			trace(proxySocket.id);
 
-			/* if (activeSocket != null && activeSocket.connected) {
-				
-			} else {
-				activeSocket = event.socket;
-				activeSocket.addEventListener(ProgressEvent.SOCKET_DATA, onClientSocketData, false, 0, true);
-				activeSocket.addEventListener(Event.CLOSE, onSocketClose, false, 0, true);
-			} */
+			// trace("Socket add : " + proxySocket.id);
+
+			proxySockets.push(proxySocket);
 		}
 		
 		// 1. get from client
@@ -177,36 +156,32 @@ public class WebServer extends EventDispatcher
 			proxySocket.data = clientData;
 
 			// forward data
-			if (webSocket.connected == true) {
-				// trace("Ma socket est déjà connectée : j'envoie " + clientData.length);
+			if (webSocket.connected) {
 				webSocket.sendBytes(clientData);
 			} else {
 				webSocket.connect();
 			}
 		}
-						
-		private function onSocketClose(ev:Event):void {
-			trace("Socket close : " + ev + ev.target);
 
-			var socket:Socket = ev.target as Socket;
-			socket.removeEventListener(ProgressEvent.SOCKET_DATA, onClientSocketData);
-			socket.removeEventListener(Event.CLOSE, onSocketClose);
+		private function onClientSocketOutputProgress(event:OutputProgressEvent):void
+		{
+			if (event.bytesPending == 0) {
+				var socket:Socket = event.target as Socket;
+				socket.close();
 
-			removeProxySocket(socket);
+				removeProxySocket(socket);
+			}
 		}
 						
-		private function closeHandler(event:Event):void {
-			var serverSocket:ServerSocket = event.target as ServerSocket;
-			serverSocket.removeEventListener(ServerSocketConnectEvent.CONNECT, onConnect);
-			serverSocket.removeEventListener(Event.CLOSE, onClose);
+		private function onSocketClose(ev:Event):void {
+			var socket:Socket = ev.target as Socket;
+			removeProxySocket(socket);
 		}
 				
 		private function ioErrorHandler(event:IOErrorEvent):void
 		{
 			trace("ioErrorHandler: " + event);
 		}
-
-
 
 		/////
 
@@ -234,6 +209,10 @@ public class WebServer extends EventDispatcher
 
 		private function removeProxySocket(socket:Socket):void
 		{
+			socket.removeEventListener(ProgressEvent.SOCKET_DATA, onClientSocketData);
+			socket.removeEventListener(OutputProgressEvent.OUTPUT_PROGRESS, onClientSocketOutputProgress);
+			socket.removeEventListener(Event.CLOSE, onSocketClose);
+
 			var proxySocket:ProxySocket = fetchProxySocket(socket);
 			if (proxySocket != null) {
 				var index:int = proxySockets.indexOf(proxySocket);

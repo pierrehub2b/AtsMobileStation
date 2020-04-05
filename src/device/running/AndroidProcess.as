@@ -64,6 +64,7 @@ package device.running
 		private var instrumentCommandLine:String;
 
 		public var webSocketServerPort:int;
+		public var webSocketServerError:String;
 		
 		public function AndroidProcess(adbFile:File, id:String, port:String, usbMode:Boolean)
 		{
@@ -301,11 +302,26 @@ package device.running
 					webSocketServerPort = getWebSocketServerPort(data);
 					dispatchEvent(new Event(WEBSOCKET_SERVER_START));
 				} else if(data.indexOf("ATS_WEB_SOCKET_SERVER_ERROR") > -1) {
+					webSocketServerError = getWebSocketServerError(data);
 					dispatchEvent(new Event(WEBSOCKET_SERVER_ERROR));
 				} else if(data.indexOf("ATS_WEB_SOCKET_SERVER_STOP") > -1) {
 					dispatchEvent(new Event(WEBSOCKET_SERVER_STOP));
 				}
 			}
+		}
+
+		private function getWebSocketServerError(data:String):String
+		{
+			var array:Array = data.split("\n");
+			for each(var line:String in array) {
+				if (line.indexOf("ATS_WEB_SOCKET_SERVER_ERROR") > -1) {
+					var firstIndex:int = line.length;
+					var lastIndex:int = line.lastIndexOf("ATS_WEB_SOCKET_SERVER_ERROR:") + "ATS_WEB_SOCKET_SERVER_ERROR:".length;
+					return line.substring(lastIndex, firstIndex);
+				}
+			}
+
+			return "";
 		}
 
 		private function getWebSocketServerPort(data:String):int
