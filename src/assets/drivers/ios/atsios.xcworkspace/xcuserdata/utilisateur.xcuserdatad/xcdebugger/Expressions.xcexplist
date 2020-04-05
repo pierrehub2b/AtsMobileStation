@@ -12,7 +12,13 @@
                value = "UIScreen.main.scale">
             </PersistentString>
             <PersistentString
+               value = "self.appDomDesc">
+            </PersistentString>
+            <PersistentString
                value = "UIImagePNGRepresentation(img!)!">
+            </PersistentString>
+            <PersistentString
+               value = "app.debugDescription">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
