@@ -69,7 +69,7 @@ public class WebServer extends EventDispatcher
 		public function setupWebSocket(port:int):void {
 			webSocket = new WebSocket("ws://localhost:" + port.toString(), "*");
 			var webSocketConfig:WebSocketConfig = new WebSocketConfig();
-			webSocketConfig.maxReceivedFrameSize = 0x200000;
+			webSocketConfig.maxReceivedFrameSize = 0x600000;
 			webSocket.config = webSocketConfig;
 
 			webSocket.addEventListener(WebSocketEvent.OPEN, webSocketOpenHandler, false, 0, true);
@@ -97,11 +97,11 @@ public class WebServer extends EventDispatcher
 		private function webSocketOnMessageHandler(event:WebSocketEvent):void
 		{
 			var buffer:ByteArray = event.message.binaryData;
-			trace("Received data : " + buffer.length);
 
 			var socketID:int = buffer.readInt();
 			var socket:Socket = fetchSocket(socketID);
 			if (socket != null) {
+				trace("Socket " + socketID + " send " + buffer.length + " bytes.")
 				socket.writeBytes(buffer, 4, buffer.length - 4);
 				socket.flush();
 			}
@@ -134,10 +134,6 @@ public class WebServer extends EventDispatcher
 			proxySocket.id = count;
 			count++;
 
-			trace(proxySocket.id);
-
-			// trace("Socket add : " + proxySocket.id);
-
 			proxySockets.push(proxySocket);
 		}
 		
@@ -152,6 +148,8 @@ public class WebServer extends EventDispatcher
 			var tempData:ByteArray = new ByteArray();
 			clientData.writeInt(proxySocket.id);
 			socket.readBytes(tempData, 0, socket.bytesAvailable);
+			trace("Socket " + proxySocket.id + " received " + tempData.length + " bytes.")
+
 			clientData.writeBytes(tempData, 0, tempData.length);
 			proxySocket.data = clientData;
 

@@ -352,6 +352,7 @@ package device.running
 			process.exit(true);
 			process = null;
 			procInfo = null;
+			currentAdbFile = null;
 			
 			if (error != null) {
 				dispatchEvent(new Event(ERROR_EVENT));

@@ -50,11 +50,19 @@ public class AndroidUsbDevice extends AndroidDevice {
     override public function close():void
     {
         if (webServer != null) {
+            webServer.removeEventListener(WebServer.WEB_SERVER_INITIALIZED, webServerInitializedHandler);
+            webServer.removeEventListener(WebServer.WEB_SERVER_STARTED, webServerStartedHandler);
+            webServer.removeEventListener(WebServer.WEB_SERVER_ERROR, webServerErrorHandler);
+
             webServer.close();
             webServer = null;
         }
 
         if (captureServer != null) {
+            captureServer.removeEventListener(CaptureServer.CAPTURE_SERVER_INITIALIZED, captureServerInitializedHandler);
+            captureServer.removeEventListener(CaptureServer.CAPTURE_SERVER_STARTED, captureServerStartedHandler);
+            captureServer.removeEventListener(CaptureServer.CAPTURE_SERVER_ERROR, captureServerErrorHandler);
+
             captureServer.close();
             captureServer = null;
         }
@@ -277,7 +285,6 @@ public class AndroidUsbDevice extends AndroidDevice {
     private function forwardPortExitHandler(event:Event):void
     {
         (event.currentTarget as NativeProcess).removeEventListener(NativeProcessExitEvent.EXIT, forwardPortExitHandler);
-
         webServer.setupWebSocket(webSocketClientPort);
     }
 }

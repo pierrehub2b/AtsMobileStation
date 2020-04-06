@@ -61,7 +61,7 @@ package
 		{
 			this.port = port;
 			
-			if(macos){
+			if (macos) {
 				
 				adbFile = File.applicationDirectory.resolvePath(adbPath);
 								
@@ -74,7 +74,7 @@ package
 				proc.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
 				proc.start(procInfo);
 				
-			}else{
+			} else {
 				adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
 				
 				// only one type of devices to find, we can do loop faster
