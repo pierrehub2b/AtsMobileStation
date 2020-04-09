@@ -4,7 +4,6 @@ import com.worlize.websocket.WebSocket;
 import com.worlize.websocket.WebSocketConfig;
 import com.worlize.websocket.WebSocketErrorEvent;
 import com.worlize.websocket.WebSocketEvent;
-import com.worlize.websocket.WebSocketMessage;
 
 import flash.events.Event;
 import flash.events.EventDispatcher;
@@ -101,7 +100,6 @@ public class WebServer extends EventDispatcher
 			var socketID:int = buffer.readInt();
 			var socket:Socket = fetchSocket(socketID);
 			if (socket != null) {
-				trace("Socket " + socketID + " send " + buffer.length + " bytes.")
 				socket.writeBytes(buffer, 4, buffer.length - 4);
 				socket.flush();
 			}
@@ -148,7 +146,6 @@ public class WebServer extends EventDispatcher
 			var tempData:ByteArray = new ByteArray();
 			clientData.writeInt(proxySocket.id);
 			socket.readBytes(tempData, 0, socket.bytesAvailable);
-			trace("Socket " + proxySocket.id + " received " + tempData.length + " bytes.")
 
 			clientData.writeBytes(tempData, 0, tempData.length);
 			proxySocket.data = clientData;
