@@ -34,13 +34,13 @@ To execute automated tests on physical iPhone devices, you need to create an App
 - your driver should start (by seeing the green check image, and show you an Ip adress and port)
 
 ### 5/ Error handling
-- If the Apple key vault ask credential recurrently: 
+- If the Apple keychain access ask credential recurrently: 
   - unplug the device
-  - open the key vault application
+  - open the keychain access application
   - right click on "session"
-  - "**lock** the vault 'session'"
+  - "**lock** the keychain 'session'"
   - right click on "session"
-  - "**unlock** the vault 'session'"
+  - "**unlock** the keychain 'session'"
   - enter your Mac credentials
   - plug your device again
 
