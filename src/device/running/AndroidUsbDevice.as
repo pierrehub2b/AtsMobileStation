@@ -39,8 +39,8 @@ public class AndroidUsbDevice extends AndroidDevice {
     	_networkUtils = value;
     }
 
-    public function AndroidUsbDevice(id:String, adbFile:File, settings:DeviceSettings) {
-        super(adbFile, id);
+    public function AndroidUsbDevice(id:String, adbFile:File, simulator:Boolean, settings:DeviceSettings) {
+        super(adbFile, id, simulator);
 
         this.settings = settings;
         this.usbMode = true;

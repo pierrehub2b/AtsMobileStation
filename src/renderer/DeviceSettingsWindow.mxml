@@ -42,8 +42,8 @@
 				deviceName.text = dev.modelName;
 
 				if (dev is AndroidDevice) {
-					androidUsbGroup.visible = true;
-					androidUsbGroup.includeInLayout = true;
+					androidUsbGroup.visible = !dev.simulator; //true;
+					androidUsbGroup.includeInLayout = !dev.simulator; //true;
 					installAppButton.visible = false;
 				} else {
 					androidUsbGroup.visible = false;
