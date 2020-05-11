@@ -14,31 +14,28 @@ import servers.http.controllers.DeviceController;
 public class HttpServer {
 
     private var _server:ServerSocket
+
     private var _controllers:Object = new Object()
 
     private var _errorCallback:Function = null
 
-    private static var _instance: HttpServer = new HttpServer();
+    private static var _instance: HttpServer = new HttpServer()
 
-    /** Return singleton instance. */
     public static function getInstance():HttpServer {
-        return _instance;
+        return _instance
+    }
+
+    public function get port():int {
+        return _server.localPort
     }
 
     public function HttpServer() {
-        NativeApplication.nativeApplication.addEventListener(Event.EXITING, applicationExitHandler, false, 0, true);
-
         registerController(new DeviceController())
-    }
-
-    private function applicationExitHandler(event:Event) {
-        _server.removeEventListener(ServerSocketConnectEvent.CONNECT, onConnect)
-        _server.close()
     }
 
     private function registerController(controller: HttpController) {
         if (_instance) {
-            throw new Error("Singleton is a singleton and can only be accessed through HttpServer.getInstance()");
+            throw new Error("Singleton is a singleton and can only be accessed through HttpServer.getInstance()")
         }
 
         _controllers[controller.route] = controller
@@ -70,10 +67,10 @@ public class HttpServer {
         socket.removeEventListener(ProgressEvent.SOCKET_DATA, onClientSocketData)
 
         var bytes:ByteArray = new ByteArray()
-
         socket.readBytes(bytes)
-        var request:String = bytes.toString();
-        var url:String = request.substring(4, request.indexOf("HTTP/") - 1);
+
+        var request:String = bytes.toString()
+        var url:String = request.substring(4, request.indexOf("HTTP/") - 1)
 
         var urlPattern:RegExp = /(.*)\/([^\?]*)\??(.*)$/
         var action:String = url.replace(urlPattern, "$2")
@@ -86,8 +83,8 @@ public class HttpServer {
             socket.writeUTFBytes(HttpController.responseNotFound())
         }
 
-        socket.flush();
-        socket.close();
+        socket.flush()
+        socket.close()
     }
 }
 }
