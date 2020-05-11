@@ -13,12 +13,12 @@ import helpers.NetworkEvent;
 import helpers.NetworkUtils;
 import helpers.PortSwitcher;
 
-import servers.tcp.WebServer;
+import servers.tcp.ProxyServer;
 import servers.udp.CaptureServer;
 
 public class AndroidUsbDevice extends AndroidDevice {
 
-    private var webServer:WebServer;
+    private var webServer:ProxyServer;
     private var captureServer:CaptureServer;
 
     private var webServerPort:int;
@@ -50,9 +50,9 @@ public class AndroidUsbDevice extends AndroidDevice {
     override public function close():void
     {
         if (webServer != null) {
-            webServer.removeEventListener(WebServer.WEB_SERVER_INITIALIZED, webServerInitializedHandler);
-            webServer.removeEventListener(WebServer.WEB_SERVER_STARTED, webServerStartedHandler);
-            webServer.removeEventListener(WebServer.WEB_SERVER_ERROR, webServerErrorHandler);
+            webServer.removeEventListener(ProxyServer.WEB_SERVER_INITIALIZED, webServerInitializedHandler);
+            webServer.removeEventListener(ProxyServer.WEB_SERVER_STARTED, webServerStartedHandler);
+            webServer.removeEventListener(ProxyServer.WEB_SERVER_ERROR, webServerErrorHandler);
 
             webServer.close();
             webServer = null;
@@ -193,10 +193,10 @@ public class AndroidUsbDevice extends AndroidDevice {
 
     private function setupWebServer(port:int):void
     {
-        webServer = new WebServer();
-        webServer.addEventListener(WebServer.WEB_SERVER_INITIALIZED, webServerInitializedHandler, false, 0, true);
-        webServer.addEventListener(WebServer.WEB_SERVER_STARTED, webServerStartedHandler, false, 0, true);
-        webServer.addEventListener(WebServer.WEB_SERVER_ERROR, webServerErrorHandler, false, 0, true);
+        webServer = new ProxyServer();
+        webServer.addEventListener(ProxyServer.WEB_SERVER_INITIALIZED, webServerInitializedHandler, false, 0, true);
+        webServer.addEventListener(ProxyServer.WEB_SERVER_STARTED, webServerStartedHandler, false, 0, true);
+        webServer.addEventListener(ProxyServer.WEB_SERVER_ERROR, webServerErrorHandler, false, 0, true);
         webServer.bind(port);
     }
 
@@ -204,7 +204,7 @@ public class AndroidUsbDevice extends AndroidDevice {
 
     private function webServerInitializedHandler(event:Event):void
     {
-        webServer.removeEventListener(WebServer.WEB_SERVER_INITIALIZED, webServerInitializedHandler);
+        webServer.removeEventListener(ProxyServer.WEB_SERVER_INITIALIZED, webServerInitializedHandler);
 
         this.webServerPort = webServer.getLocalPort();
 
@@ -213,16 +213,16 @@ public class AndroidUsbDevice extends AndroidDevice {
 
     private function webServerStartedHandler(event:Event):void
     {
-        webServer.removeEventListener(WebServer.WEB_SERVER_STARTED, webServerInitializedHandler);
+        webServer.removeEventListener(ProxyServer.WEB_SERVER_STARTED, webServerInitializedHandler);
 
         captureServer.setupWebSocket(webSocketClientPort);
     }
 
     private function webServerErrorHandler(event:Event):void
     {
-        webServer.removeEventListener(WebServer.WEB_SERVER_INITIALIZED, webServerInitializedHandler);
-        webServer.removeEventListener(WebServer.WEB_SERVER_STARTED, webServerStartedHandler);
-        webServer.removeEventListener(WebServer.WEB_SERVER_ERROR, webServerErrorHandler);
+        webServer.removeEventListener(ProxyServer.WEB_SERVER_INITIALIZED, webServerInitializedHandler);
+        webServer.removeEventListener(ProxyServer.WEB_SERVER_STARTED, webServerStartedHandler);
+        webServer.removeEventListener(ProxyServer.WEB_SERVER_ERROR, webServerErrorHandler);
 
         usbError("Web server error");
     }
@@ -258,9 +258,9 @@ public class AndroidUsbDevice extends AndroidDevice {
 
     private function captureServerErrorHandler(event:Event):void
     {
-        captureServer.removeEventListener(WebServer.WEB_SERVER_INITIALIZED, webServerInitializedHandler);
-        captureServer.removeEventListener(WebServer.WEB_SERVER_STARTED, webServerInitializedHandler);
-        captureServer.removeEventListener(WebServer.WEB_SERVER_ERROR, webServerInitializedHandler);
+        captureServer.removeEventListener(ProxyServer.WEB_SERVER_INITIALIZED, webServerInitializedHandler);
+        captureServer.removeEventListener(ProxyServer.WEB_SERVER_STARTED, webServerInitializedHandler);
+        captureServer.removeEventListener(ProxyServer.WEB_SERVER_ERROR, webServerInitializedHandler);
 
         usbError("Capture server initialization error");
     }

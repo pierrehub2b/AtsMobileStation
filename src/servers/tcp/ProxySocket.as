@@ -8,10 +8,6 @@ public class ProxySocket {
     public var id:int;
     public var data:ByteArray;
 
-    public function ProxySocket() {
-
-    }
-
-
+    public function ProxySocket() {}
 }
 }

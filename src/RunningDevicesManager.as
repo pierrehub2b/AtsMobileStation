@@ -56,12 +56,22 @@ package
 		public static var devTeamId:String = "";
 		
 		private var usbDevicesIdList:Vector.<String>;
-		
-		public function RunningDevicesManager(port:String, macos:Boolean)
+
+		private static var _instance: RunningDevicesManager = new RunningDevicesManager();
+
+		/** Return singleton instance. */
+		public static function getInstance():RunningDevicesManager {
+			return _instance;
+		}
+
+		/** Constructor as singleton enforcer. */
+		public function RunningDevicesManager()
 		{
-			this.port = port;
-			
-			if (macos) {
+			if (_instance) {
+				throw new Error("Singleton is a singleton and can only be accessed through RunningDevicesManager.getInstance()");
+			}
+
+			if (AtsMobileStation.isMacOs) {
 				
 				adbFile = File.applicationDirectory.resolvePath(adbPath);
 								
