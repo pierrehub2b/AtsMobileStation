@@ -8,8 +8,8 @@ import flash.net.ServerSocket;
 import flash.net.Socket;
 import flash.utils.ByteArray;
 
-import servers.http.controllers.HttpController;
 import servers.http.controllers.DeviceController;
+import servers.http.controllers.HttpController;
 
 public class HttpServer {
 
@@ -33,7 +33,7 @@ public class HttpServer {
         registerController(new DeviceController())
     }
 
-    private function registerController(controller: HttpController) {
+    private function registerController(controller: HttpController):void {
         if (_instance) {
             throw new Error("HttpServer is a singleton and can only be accessed through HttpServer.getInstance()")
         }
@@ -57,13 +57,13 @@ public class HttpServer {
         }
     }
 
-    private function onConnect(event:ServerSocketConnectEvent) {
-        var socket = event.socket
+    private function onConnect(event:ServerSocketConnectEvent):void {
+        var socket:Socket = event.socket
         socket.addEventListener(ProgressEvent.SOCKET_DATA, onClientSocketData, false, 0, true)
     }
 
-    private function onClientSocketData(event:ProgressEvent) {
-        var socket = event.target as Socket
+    private function onClientSocketData(event:ProgressEvent):void {
+        var socket:Socket = event.target as Socket
         socket.removeEventListener(ProgressEvent.SOCKET_DATA, onClientSocketData)
 
         var bytes:ByteArray = new ByteArray()
