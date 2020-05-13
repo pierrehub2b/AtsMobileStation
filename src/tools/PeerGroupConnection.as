@@ -27,15 +27,9 @@ package tools
 			netConnection = new NetConnection();
 			netConnection.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 			netConnection.client = this;
-			netConnection.connect("rtmfp://192.168.1.57:1935/live", "mobilestation");
+			netConnection.connect("rtmfp://localhost:1935/live", "mobilestation");
 		}
-		
-		private function devicesChangeHandler(ev:CollectionEvent):void{
-			if(ev.kind != CollectionEventKind.REFRESH){
-				netGroup.post(getDevicesData(ev.items, ev.kind));
-			}
-		}
-		
+				
 		private function getDevicesData(value:Array, kind:String, destination:String="all"):Object{
 			
 			var message:Object = {value:value, kind:kind, destination:destination};
@@ -59,6 +53,12 @@ package tools
 					break;
 				default:
 					break;
+			}
+		}
+		
+		private function devicesChangeHandler(ev:CollectionEvent):void{
+			if(ev.kind != CollectionEventKind.REFRESH){
+				netGroup.post(getDevicesData(ev.items, ev.kind));
 			}
 		}
 		

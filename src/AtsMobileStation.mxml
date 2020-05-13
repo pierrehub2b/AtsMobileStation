@@ -121,7 +121,7 @@
 			}
 
 			httpServer.listen(8080, handleHttpServerError);
-			//peerGroup = new PeerGroupConnection(devices, simulators);
+			peerGroup = new PeerGroupConnection(devices, simulators);
 		}
 
 		private function handleHttpServerError(e:Error):void {
