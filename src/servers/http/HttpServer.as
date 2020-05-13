@@ -2,6 +2,7 @@ package servers.http {
 
 import flash.desktop.NativeApplication;
 import flash.events.Event;
+import flash.events.EventDispatcher;
 import flash.events.ProgressEvent;
 import flash.events.ServerSocketConnectEvent;
 import flash.net.ServerSocket;
@@ -11,13 +12,14 @@ import flash.utils.ByteArray;
 import servers.http.controllers.DeviceController;
 import servers.http.controllers.HttpController;
 
-public class HttpServer {
+public class HttpServer extends EventDispatcher {
 
     private var _server:ServerSocket
 
     private var _controllers:Object = new Object()
 
     private var _errorCallback:Function = null
+    private var _error:Error = null
 
     private static var _instance: HttpServer = new HttpServer()
 
@@ -29,7 +31,14 @@ public class HttpServer {
         return _server.localPort
     }
 
+    public function get error():Error {
+        return _error
+    }
+
     public function HttpServer() {
+        _server = new ServerSocket()
+        _server.addEventListener(ServerSocketConnectEvent.CONNECT, onConnect, false, 0, true)
+
         registerController(new DeviceController())
     }
 
@@ -45,12 +54,19 @@ public class HttpServer {
     {
         _errorCallback = errorCallback
 
-        try {
+        if (_server.bound) {
+            _server.removeEventListener(ServerSocketConnectEvent.CONNECT, onConnect)
+            _server.close()
             _server = new ServerSocket()
             _server.addEventListener(ServerSocketConnectEvent.CONNECT, onConnect, false, 0, true)
+        }
+
+        try {
             _server.bind(port)
             _server.listen()
+            _error = null
         } catch (e: Error) {
+            _error = e
             if (errorCallback != null) {
                 errorCallback(e)
             }
