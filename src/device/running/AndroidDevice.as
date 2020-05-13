@@ -85,7 +85,7 @@ public class AndroidDevice extends RunningDevice
 			var deviceSettingsHelper:DeviceSettingsHelper = DeviceSettingsHelper.shared;
 			var deviceSettings:DeviceSettings = deviceSettingsHelper.getSettingsForDevice(id);
 
-			var isEmulator = id.indexOf("emulator") >= 0
+			var isEmulator:Boolean = id.indexOf("emulator") >= 0
 
 			if (deviceSettings == null) {
 				deviceSettings = new DeviceSettings(id, true, isEmulator);

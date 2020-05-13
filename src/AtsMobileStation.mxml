@@ -119,7 +119,7 @@
 			httpServer.listen(8080, handleHttpServerError)
 		}
 
-		private function handleHttpServerError(e:Error) {
+		private function handleHttpServerError(e:Error):void {
 			trace("HTTP Server Error : " + e)
 		}
 
