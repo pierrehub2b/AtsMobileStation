@@ -56,12 +56,22 @@ package
 		public static var devTeamId:String = "";
 		
 		private var usbDevicesIdList:Vector.<String>;
-		
-		public function RunningDevicesManager(port:String, macos:Boolean)
+
+		private static var _instance: RunningDevicesManager = new RunningDevicesManager();
+
+		/** Return singleton instance. */
+		public static function getInstance():RunningDevicesManager {
+			return _instance;
+		}
+
+		/** Constructor as singleton enforcer. */
+		public function RunningDevicesManager()
 		{
-			this.port = port;
-			
-			if (macos) {
+			if (_instance) {
+				throw new Error("Singleton is a singleton and can only be accessed through RunningDevicesManager.getInstance()");
+			}
+
+			if (AtsMobileStation.isMacOs) {
 				
 				adbFile = File.applicationDirectory.resolvePath(adbPath);
 								
@@ -135,7 +145,7 @@ package
 			//------------------------------------------------------------------------------------------
 			
 			var data:Array = androidOutput.split("\n");
-			var runingIds:Vector.<String> = new Vector.<String>();
+			var runningIds:Vector.<String> = new Vector.<String>();
 			
 			if(data.length > 1){
 				
@@ -149,7 +159,7 @@ package
 					const info:Array = data[i].split(/\s+/g);
 					const runningId:String = info[0];
 					
-					runingIds.push(runningId);
+					runningIds.push(runningId);
 										
 					if(info.length >= 2 && runningId.length > 0){
 						dev = findDevice(runningId);
@@ -171,7 +181,7 @@ package
 			}
 			
 			for each(var androidDev:RunningDevice in collection){
-				if(androidDev is AndroidDevice && androidDev.simulator == false && runingIds.indexOf(androidDev.id) < 0){
+				if(androidDev is AndroidDevice && androidDev.simulator == false && runningIds.indexOf(androidDev.id) < 0){
 					androidDev.close()
 				}
 			}

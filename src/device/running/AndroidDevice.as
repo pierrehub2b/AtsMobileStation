@@ -18,11 +18,12 @@ public class AndroidDevice extends RunningDevice
 
 		public var settings: DeviceSettings;
 				
-		public function AndroidDevice(adbFile:File, id:String)
+		public function AndroidDevice(adbFile:File, id:String, simulator:Boolean = false)
 		{
 			this.id = id;
 			this.status = INSTALL;
 			this.currentAdbFile = adbFile;
+			this.simulator = simulator;
 		}
 
 		public override function start():void
@@ -83,16 +84,18 @@ public class AndroidDevice extends RunningDevice
 		public static function setup(id:String, adbFile:File):AndroidDevice {
 			var deviceSettingsHelper:DeviceSettingsHelper = DeviceSettingsHelper.shared;
 			var deviceSettings:DeviceSettings = deviceSettingsHelper.getSettingsForDevice(id);
+
+			var isEmulator:Boolean = id.indexOf("emulator") >= 0
+
 			if (deviceSettings == null) {
-				deviceSettings = new DeviceSettings(id);
+				deviceSettings = new DeviceSettings(id, true, isEmulator);
 				deviceSettingsHelper.save(deviceSettings);
 			}
-
 			var automaticPort:Boolean = deviceSettings.automaticPort;
 			var usbMode:Boolean = deviceSettings.usbMode;
 
 			if (usbMode) {
-				return new AndroidUsbDevice(id, adbFile, deviceSettings);
+				return new AndroidUsbDevice(id, adbFile, isEmulator, deviceSettings);
 			} else {
 				var port:int = deviceSettings.port;
 				return new AndroidWirelessDevice(id, adbFile, automaticPort, port);

@@ -15,7 +15,7 @@ import flash.net.ServerSocket;
 import flash.net.Socket;
 import flash.utils.ByteArray;
 
-public class WebServer extends EventDispatcher
+public class ProxyServer extends EventDispatcher
 	{
 		public static const WEB_SERVER_INITIALIZED:String = "webServerInitialized";
 		public static const WEB_SERVER_STARTED:String = "webServerStarted";
@@ -50,7 +50,7 @@ public class WebServer extends EventDispatcher
 			return serverSocket.localPort;
 		}
 		
-		public function WebServer():void {}
+		public function ProxyServer():void {}
 		
 		public function bind(port:int):void
 		{						
@@ -59,9 +59,9 @@ public class WebServer extends EventDispatcher
 				serverSocket.addEventListener(ServerSocketConnectEvent.CONNECT, onConnect, false, 0, true);
 				serverSocket.addEventListener(Event.CLOSE, onClose, false, 0, true);
 
-				dispatchEvent(new Event(WebServer.WEB_SERVER_INITIALIZED));
+				dispatchEvent(new Event(ProxyServer.WEB_SERVER_INITIALIZED));
 			} catch (e: Error) {
-				dispatchEvent(new Event(WebServer.WEB_SERVER_ERROR));
+				dispatchEvent(new Event(ProxyServer.WEB_SERVER_ERROR));
 			}
 		}
 
@@ -79,7 +79,7 @@ public class WebServer extends EventDispatcher
 
 			serverSocket.listen();
 
-			dispatchEvent(new Event(WebServer.WEB_SERVER_STARTED));
+			dispatchEvent(new Event(ProxyServer.WEB_SERVER_STARTED));
 		}
 		
 		private function onClose(e:Event):void {

@@ -6,181 +6,182 @@
 					   close="closeHandler(event)" backgroundColor="0xefefef">
 	<fx:Script>
 		<![CDATA[
-			import com.greensock.TweenMax;
-			
-			import flash.filters.BitmapFilterQuality;
-			
-			import mx.core.FlexGlobals;
-			import mx.events.FlexEvent;
-			import mx.managers.PopUpManager;
-			
-			import spark.filters.DropShadowFilter;
-			
-			import device.Device;
-			import device.RunningDevice;
-			import device.running.IosDevice;
-			
-			import renderer.PhysicialDeviceSettingsWindow;
-			import renderer.RunningDeviceRenderer;
-			
-			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
-			
-			public static const isMacOs:Boolean = Capabilities.os.indexOf("Mac") > -1;
-			
-			[Bindable]
-			private var port:String = "8080";
-			
-			[Bindable]
-			public var devices:RunningDevicesManager;
-			
-			[Bindable]
-			public var simulators:AvailableSimulatorsManager;
-			
-			public var teamId:String;
-			
-			public function get logsFolder():File{
-				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/logs");
-			}
-			
-			public function get devicesSettingsFile():File {
-				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/devicesSettings.txt");
+		import com.greensock.TweenMax;
+
+		import flash.filters.BitmapFilterQuality;
+
+		import mx.core.FlexGlobals;
+		import mx.events.FlexEvent;
+		import mx.managers.PopUpManager;
+
+		import servers.http.HttpServer;
+
+		import spark.filters.DropShadowFilter;
+
+		import device.Device;
+		import device.RunningDevice;
+		import device.running.IosDevice;
+
+		import renderer.PhysicialDeviceSettingsWindow;
+		import renderer.RunningDeviceRenderer;
+
+		public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
+
+		public static const isMacOs:Boolean = Capabilities.os.indexOf("Mac") > -1;
+
+		[Bindable]
+		private var port:String = "8080";
+
+		[Bindable]
+		public var devices:RunningDevicesManager;
+
+		[Bindable]
+		public var simulators:AvailableSimulatorsManager;
+
+		private var httpServer:HttpServer = HttpServer.getInstance()
+
+		public var teamId:String;
+
+		public function get logsFolder():File {
+			return File.userDirectory.resolvePath(".actiontestscript/mobilestation/logs");
+		}
+
+		public function get devicesSettingsFile():File {
+			return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/devicesSettings.txt");
+		}
+
+		public function get devicePortSettingsFile():File {
+			return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/portSettings.txt");
+		}
+
+		public function get settingsFile():File {
+			return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/settings.txt");
+		}
+
+		public function getTeamId():String {
+			return teamId;
+		}
+
+		public function setTeamId(value:String):void {
+			teamId = value;
+		}
+
+		protected function creationCompleteHandler(event:FlexEvent):void {
+			try {
+				logsFolder.deleteDirectory(true);
+			} catch (err:IOError) {
 			}
 
-			public function get devicePortSettingsFile():File {
-				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/portSettings.txt");
+			/* *** */
+			// files corrupted
+			var date:Date = new Date(2020, 2, 31, 18, 30, 0, 0);
+			if (devicePortSettingsFile.exists && devicePortSettingsFile.modificationDate < date) {
+				devicePortSettingsFile.deleteFile();
 			}
-			
-			public function get settingsFile():File {
-				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/settings.txt");
-			}
-			
-			public function getTeamId():String {
-				return teamId;
-			}
-			
-			public function setTeamId(value:String):void {
-				teamId = value;
-			}
-			
-			protected function creationCompleteHandler(event:FlexEvent):void
-			{
-				try{
-					logsFolder.deleteDirectory(true);
-				}catch(err:IOError){}
 
-				/* *** */
-				// files corrupted
-				var date:Date = new Date(2020, 2, 31, 18, 30, 0, 0);
-				if (devicePortSettingsFile.exists && devicePortSettingsFile.modificationDate < date) {
-					devicePortSettingsFile.deleteFile();
-				}
-
-				if (devicesSettingsFile.exists && devicesSettingsFile.modificationDate < date) {
-					devicesSettingsFile.deleteFile();
-				}
-				/* *** */
+			if (devicesSettingsFile.exists && devicesSettingsFile.modificationDate < date) {
+				devicesSettingsFile.deleteFile();
+			}
+			/* *** */
 
 
-				if(!Capabilities.isDebugger) {
-					cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
-				}
-				
-				simulators = new AvailableSimulatorsManager();
-				devices = new RunningDevicesManager(port, isMacOs);
-				
-				settingsButton.visible = isMacOs;
-				if(isMacOs) {
-					var file:File = FlexGlobals.topLevelApplication.settingsFile;
-					if(file.exists) {
-						
-						var fileStream:FileStream = new FileStream();
-						fileStream.open(file, FileMode.READ);
-						
-						var settingsContent:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
-						var settingsContentArray: Array = settingsContent.split("\n");
-						
-						for each(var setting:String in settingsContentArray) {
-							if(setting != "") {
-								var key:String = setting.split("==")[0];
-								if(key == "development_team") {
-									teamId = setting.split("==")[1];
-									break;
-								}
+			if (!Capabilities.isDebugger) {
+				cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
+			}
+
+			simulators = new AvailableSimulatorsManager();
+			devices = RunningDevicesManager.getInstance();
+
+			settingsButton.visible = isMacOs;
+			if (isMacOs) {
+				var file:File = FlexGlobals.topLevelApplication.settingsFile;
+				if (file.exists) {
+
+					var fileStream:FileStream = new FileStream();
+					fileStream.open(file, FileMode.READ);
+
+					var settingsContent:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
+					var settingsContentArray:Array = settingsContent.split("\n");
+
+					for each(var setting:String in settingsContentArray) {
+						if (setting != "") {
+							var key:String = setting.split("==")[0];
+							if (key == "development_team") {
+								teamId = setting.split("==")[1];
+								break;
 							}
 						}
-						fileStream.close();
+					}
+					fileStream.close();
+				}
+			}
+
+			httpServer.listen(8080, handleHttpServerError)
+		}
+
+		private function handleHttpServerError(e:Error):void {
+			trace("HTTP Server Error : " + e)
+		}
+
+		public function restartDevice(dev:Device):void {
+			devices.restartDev(dev);
+		}
+
+		public function restartIosDevices():void {
+			for each(var dv:RunningDevice in devices.collection) {
+				if (!dv.simulator && dv is IosDevice && dv.status != Device.READY) {
+					devices.restartDev(dv);
+				}
+			}
+		}
+
+		protected function closeHandler(event:Event):void {
+			devices.terminate();
+		}
+
+		protected function cleanDirectory(directory:File):void {
+			if (directory.isDirectory) {
+				var dirArray:Array = [];
+				var files:Array = directory.getDirectoryListing();
+				for (var i:int = 0; i < files.length; i++) {
+					if (files[i].isDirectory && files[i].nativePath.indexOf("driver_") > -1) {
+						dirArray.push(files[i]);
 					}
 				}
-			}
-			
-			public function restartDevice(dev:Device):void{
-				devices.restartDev(dev);
-			}
-			
-			public function restartIosDevices():void {
-				for each(var dv:RunningDevice in devices.collection) {
-					if(!dv.simulator && dv is IosDevice && dv.status != Device.READY) {
-						devices.restartDev(dv);
-					}
+
+				for each(var d:File in dirArray) {
+					d.deleteDirectory(true);
 				}
 			}
-			
-			protected function closeHandler(event:Event):void
-			{
-				devices.terminate();
+		}
+
+		protected function clickGroup_clickHandler(event:MouseEvent):void {
+			if (simulatorsGroup.height == 26) {
+				TweenMax.to(simulatorsGroup, 0.3, {height: height - 38})
+			} else {
+				TweenMax.to(simulatorsGroup, 0.3, {height: 26})
 			}
-			
-			protected function cleanDirectory(directory:File):void
-			{
-				if (directory.isDirectory) 
-				{
-					var dirArray: Array = [];
-					var files:Array = directory.getDirectoryListing();
-					for (var i:int = 0; i < files.length; i++)
-					{
-						if (files[i].isDirectory && files[i].nativePath.indexOf("driver_") > -1)
-						{
-							dirArray.push(files[i]);
-						}
-					}
-					
-					for each(var d:File in dirArray) {
-						d.deleteDirectory(true);
-					}
+		}
+
+		protected function clickConnected_clickHandler(event:MouseEvent):void {
+			if (simulatorsGroup.height != 26) {
+				TweenMax.to(simulatorsGroup, 0.3, {height: 26})
+			}
+		}
+
+		protected function settings_clickHandler(event:MouseEvent):void {
+			// create and configure the TitleWindow
+			var tw:PhysicialDeviceSettingsWindow = new PhysicialDeviceSettingsWindow();
+			for each(var dv:RunningDevice in devices.collection) {
+				if (!dv.simulator && dv is IosDevice) {
+					tw.devices.push(dv);
 				}
 			}
-			
-			protected function clickGroup_clickHandler(event:MouseEvent):void
-			{
-				if(simulatorsGroup.height == 26){
-					TweenMax.to(simulatorsGroup, 0.3, {height:height-38})
-				}else{
-					TweenMax.to(simulatorsGroup, 0.3, {height:26})
-				}
-			}
-			
-			protected function clickConnected_clickHandler(event:MouseEvent):void
-			{
-				if(simulatorsGroup.height != 26){
-					TweenMax.to(simulatorsGroup, 0.3, {height:26})
-				}
-			}
-			
-			protected function settings_clickHandler(event:MouseEvent):void
-			{
-				// create and configure the TitleWindow
-				var tw:PhysicialDeviceSettingsWindow = new PhysicialDeviceSettingsWindow();
-				for each(var dv:RunningDevice in devices.collection) {
-					if(!dv.simulator && dv is IosDevice) {
-						tw.devices.push(dv);
-					}
-				}
-				
-				// open the TitleWindow as a modal popup window
-				PopUpManager.addPopUp(tw, this, true);
-				PopUpManager.centerPopUp(tw);
-			}
-			
+
+			// open the TitleWindow as a modal popup window
+			PopUpManager.addPopUp(tw, this, true);
+			PopUpManager.centerPopUp(tw);
+		}
 		]]>
 	</fx:Script>
 	
