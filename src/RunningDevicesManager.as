@@ -296,9 +296,7 @@ package
 			collection.addItem(dev);
 			collection.refresh();
 			
-			if(dev.procInfo != null) {
-				dev.start();
-			}
+			dev.start();
 			
 			loadDevicesId()
 		}

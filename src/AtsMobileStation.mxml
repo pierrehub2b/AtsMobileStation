@@ -6,28 +6,32 @@
 					   close="closeHandler(event)" backgroundColor="0xefefef">
 	<fx:Script>
 		<![CDATA[
-		import com.greensock.TweenMax;
-
-		import flash.filters.BitmapFilterQuality;
-
-		import mx.core.FlexGlobals;
-		import mx.events.FlexEvent;
-		import mx.managers.PopUpManager;
-
-		import servers.http.HttpServer;
-
-		import spark.filters.DropShadowFilter;
-
-		import device.Device;
-		import device.RunningDevice;
-		import device.running.IosDevice;
-
-		import renderer.PhysicialDeviceSettingsWindow;
-		import renderer.RunningDeviceRenderer;
+			import com.greensock.TweenMax;
+			
+			import flash.filters.BitmapFilterQuality;
+			
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import spark.filters.DropShadowFilter;
+			
+			import device.Device;
+			import device.RunningDevice;
+			import device.running.IosDevice;
+			
+			import renderer.PhysicialDeviceSettingsWindow;
+			import renderer.RunningDeviceRenderer;
+			
+			import servers.http.HttpServer;
+			
+			import tools.PeerGroupConnection;
 
 		public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 
 		public static const isMacOs:Boolean = Capabilities.os.indexOf("Mac") > -1;
+			
+		private var peerGroup:PeerGroupConnection;
 
 		[Bindable]
 		private var port:String = "8080";
@@ -91,7 +95,7 @@
 
 			simulators = new AvailableSimulatorsManager();
 			devices = RunningDevicesManager.getInstance();
-
+						
 			settingsButton.visible = isMacOs;
 			if (isMacOs) {
 				var file:File = FlexGlobals.topLevelApplication.settingsFile;
@@ -116,7 +120,8 @@
 				}
 			}
 
-			httpServer.listen(8080, handleHttpServerError)
+			httpServer.listen(8080, handleHttpServerError);
+			//peerGroup = new PeerGroupConnection(devices, simulators);
 		}
 
 		private function handleHttpServerError(e:Error):void {

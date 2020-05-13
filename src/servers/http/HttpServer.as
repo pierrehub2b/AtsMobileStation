@@ -1,7 +1,5 @@
 package servers.http {
 
-import flash.desktop.NativeApplication;
-import flash.events.Event;
 import flash.events.ProgressEvent;
 import flash.events.ServerSocketConnectEvent;
 import flash.net.ServerSocket;

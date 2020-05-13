@@ -4,90 +4,74 @@ package tools
 	import flash.net.GroupSpecifier;
 	import flash.net.NetConnection;
 	import flash.net.NetGroup;
+	
+	import mx.collections.ArrayCollection;
+	import mx.events.CollectionEvent;
+	import mx.events.CollectionEventKind;
 
 	public class PeerGroupConnection
 	{
 		private var netConnection:NetConnection;
 		private var netGroup:NetGroup;
 		
-		public function PeerGroupConnection()
+		private var devices:ArrayCollection;
+		
+		public function PeerGroupConnection(devicesManager:RunningDevicesManager, sims:AvailableSimulatorsManager)
 		{
+			devices = devicesManager.collection;
+			//Start MonaServer process here
+			connectToPeerGroup();
+		}
+		
+		private function connectToPeerGroup():void{
 			netConnection = new NetConnection();
-			netConnection.addEventListener(NetStatusEvent.NET_STATUS, onConnectionHandler, false,0,true);
+			netConnection.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
+			netConnection.client = this;
+			netConnection.connect("rtmfp://192.168.1.57:1935/live", "mobilestation");
 		}
 		
-		protected function start():void
-		{
-			netConnection.connect("rtmfp:");
-		}
-		
-		private function onConnectionHandler(ev:NetStatusEvent):void{
-			
-			trace("connection -> " + ev.info.code);
-			switch(ev.info.code)
-			{
-				// Handle connection success
-				case "NetConnection.Connect.Success":
-					netConnectionSuccess();
-					break;
-				
-				case "NetGroup.Connect.Success": 
-					//netGroup.sendToAllNeighbors("klmkmlklmkm");
-					break;
-				
+		private function devicesChangeHandler(ev:CollectionEvent):void{
+			if(ev.kind != CollectionEventKind.REFRESH){
+				netGroup.post(getDevicesData(ev.items, ev.kind));
 			}
 		}
 		
-		private function netConnectionSuccess():void
-		{
-			var groupSpecifier:GroupSpecifier;
+		private function getDevicesData(value:Array, kind:String, destination:String="all"):Object{
 			
-			groupSpecifier = new GroupSpecifier("com.ats.mobilestation");
-			groupSpecifier.multicastEnabled     = true;
-			groupSpecifier.objectReplicationEnabled = true;
-			groupSpecifier.postingEnabled       = true;
-			groupSpecifier.routingEnabled       = true;
-			groupSpecifier.ipMulticastMemberUpdatesEnabled = true; 
+			var message:Object = {value:value, kind:kind, destination:destination};
+			var now:Date = new Date();
+			message.time = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
 			
-			groupSpecifier.addIPMulticastAddress("239.252.252.1:20000"); 
-			
-			netGroup = new NetGroup(netConnection, groupSpecifier.groupspecWithAuthorizations());
-			netGroup.addEventListener(NetStatusEvent.NET_STATUS, onNetGroupHandler);
+			return message;
 		}
-		
-		private function onNetGroupHandler(ev:NetStatusEvent):void
-		{
-			trace("group -> " + ev.info.code);
+				
+		private function onNetStatus(ev:NetStatusEvent):void{
 			switch(ev.info.code)
 			{
-				case "NetGroup.Connect.Rejected":
-				case "NetGroup.Connect.Failed": 
-					
+				case "NetConnection.Connect.Success":
+					createGroup();
 					break;
-				
-				case "NetGroup.SendTo.Notify": 
+				case "NetGroup.Connect.Success": 
+					devices.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
 					break;
-				case "NetGroup.Posting.Notify":
-					
-					break;
-				
 				case "NetGroup.Neighbor.Connect":
-					
-					// no break here to continue on the same segment than the disconnect part
-				case "NetGroup.Neighbor.Disconnect":
-					
+					netGroup.post(getDevicesData(devices.source, CollectionEventKind.RESET, ev.info.peerID));
 					break;
-				
-				case "NetGroup.LocalCoverage.Notify":
-				case "NetGroup.MulticastStream.PublishNotify": 
-				case "NetGroup.MulticastStream.UnpublishNotify":
-				case "NetGroup.Replication.Fetch.SendNotify":
-				case "NetGroup.Replication.Fetch.Failed":
-				case "NetGroup.Replication.Fetch.Result":
-				case "NetGroup.Replication.Request":
 				default:
 					break;
 			}
+		}
+		
+		private function createGroup():void
+		{
+			var groupSpecifier:GroupSpecifier = new GroupSpecifier("com.ats.mobilestation/");
+
+			groupSpecifier.postingEnabled       = true;
+			groupSpecifier.serverChannelEnabled = true;
+			groupSpecifier.objectReplicationEnabled = true;
+			
+			netGroup = new NetGroup(netConnection, groupSpecifier.groupspecWithAuthorizations());
+			netGroup.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 		}
 	}
 }

@@ -13,9 +13,13 @@ public class AndroidDevice extends RunningDevice
 		public var androidVersion:String = "";
 		public var androidSdk:String = "";
 
+		[Transient]
 		protected var process:AndroidProcess;
+		
+		[Transient]
 		protected var currentAdbFile:File;
 
+		[Transient]
 		public var settings: DeviceSettings;
 				
 		public function AndroidDevice(adbFile:File, id:String, simulator:Boolean = false)

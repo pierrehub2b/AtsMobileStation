@@ -8,24 +8,24 @@ package device.running
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
-
-import helpers.DevicePortSettings;
-import helpers.DevicePortSettingsHelper;
-
-import mx.core.FlexGlobals;
+	
+	import helpers.DevicePortSettings;
+	import helpers.DevicePortSettingsHelper;
+	
+	import mx.core.FlexGlobals;
 	
 	import device.Device;
 	import device.RunningDevice;
 	import device.simulator.Simulator;
-
-import helpers.DeviceSettings;
-
-import helpers.DeviceSettingsHelper;
-
-import helpers.PortSwitcher;
-import flash.globalization.DateTimeFormatter;
-
-public class IosDevice extends RunningDevice
+	
+	import helpers.DeviceSettings;
+	
+	import helpers.DeviceSettingsHelper;
+	
+	import helpers.PortSwitcher;
+	import flash.globalization.DateTimeFormatter;
+	
+	public class IosDevice extends RunningDevice
 	{
 		private static const ATSDRIVER_DRIVER_HOST:String = "ATSDRIVER_DRIVER_HOST";
 		
@@ -35,20 +35,20 @@ public class IosDevice extends RunningDevice
 		private static const noCertificatesError:RegExp = /signing certificate matching team ID(\s*)/;
 		private static const noXcodeInstalled:RegExp = /requires Xcode(\s*)/;
 		private static const wrongVersionofxCode:RegExp = /which may not be supported by this version of Xcode(\s*)/;
-
+		
 		private var logFile:File;
 		private var logStream:FileStream = new FileStream();
 		private var dateFormatter:DateTimeFormatter = new DateTimeFormatter("en-US");
-
+		
 		private var testingProcess:NativeProcess;
-		public var procInfo:NativeProcessStartupInfo;
+		private var procInfo:NativeProcessStartupInfo;
 		
 		private static const iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
 		private static const xcodeBuildExec:File = new File("/usr/bin/env");
 		private static const iosMobileDeviceTools:File = File.applicationDirectory.resolvePath("assets/tools/ios");
 		
 		private var resultDir: File;
-
+		
 		public function IosDevice(id:String, name:String, simulator:Boolean, ip:String)
 		{
 			this.id = id;
@@ -56,9 +56,9 @@ public class IosDevice extends RunningDevice
 			this.modelName = name;
 			this.manufacturer = "Apple";
 			this.simulator = simulator;
-
+			
 			//---------------------------------------------------------------------------------------
-
+			
 			dateFormatter.setDateTimePattern("yyyy-MM-dd hh:mm:ss");
 			logFile = FlexGlobals.topLevelApplication.logsFolder.resolvePath("ios_" + id + "_" + new Date().time + ".log");
 			
@@ -68,34 +68,34 @@ public class IosDevice extends RunningDevice
 			logStream.close();
 			
 			//---------------------------------------------------------------------------------------
-
+			
 			var fileStream:FileStream = new FileStream();
 			var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
-
 			
-
+			
+			
 			var deviceSettingsHelper:DeviceSettingsHelper = DeviceSettingsHelper.shared;
 			var deviceSettings:DeviceSettings = deviceSettingsHelper.getSettingsForDevice(id);
 			if (deviceSettings == null) {
 				deviceSettings = new DeviceSettings(id);
 				deviceSettingsHelper.save(deviceSettings);
 			}
-
+			
 			automaticPort = deviceSettings.automaticPort;
-
+			
 			if (simulator == true) {
 				var portSwitcher:PortSwitcher = new PortSwitcher();
 				settingsPort = portSwitcher.getLocalPort(id, automaticPort).toString();
 			} else {
 				settingsPort = deviceSettings.port.toString();
 			}
-
+			
 			if (simulator) {
 				var devicePortSettings:DevicePortSettings = DevicePortSettingsHelper.shared.getPortSetting(id);
 				devicePortSettings.port = parseInt(settingsPort);
 				DevicePortSettingsHelper.shared.addSettings(devicePortSettings);
 			}
-
+			
 			if(FlexGlobals.topLevelApplication.getTeamId() == "" && !simulator) {
 				status = Device.FAIL;
 				errorMessage = " - No development team id set";
@@ -163,7 +163,7 @@ public class IosDevice extends RunningDevice
 			getBundleIds(id);
 			procInfo.arguments = args;
 		}
-
+		
 		protected function addLineToLogs(log: String):void {
 			var file:File = resultDir.resolvePath("logs.txt");
 			var fileStream:FileStream = new FileStream();
@@ -177,7 +177,7 @@ public class IosDevice extends RunningDevice
 			
 			fileStream.close();
 		}
-
+		
 		private function writeLogs(data:String):void{
 			if(data.length > 0){
 				logStream.open(logFile, FileMode.APPEND);
@@ -185,7 +185,7 @@ public class IosDevice extends RunningDevice
 				logStream.close();
 			}
 		}
-
+		
 		private function writeTypedLogs(data:String, type:String):void{
 			if(data.length > 0){
 				logStream.open(logFile, FileMode.APPEND);
@@ -258,15 +258,17 @@ public class IosDevice extends RunningDevice
 		}
 		
 		public override function start():void{
-			//Getting App list
-			var mobileDeviceProcess:NativeProcess = new NativeProcess();
-			var mobileDeviceProcessInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			mobileDeviceProcessInfo.executable = new File("/usr/bin/env");
-			mobileDeviceProcessInfo.workingDirectory = iosMobileDeviceTools;
-			var args: Vector.<String> = new <String>["./mobiledevice", "uninstall_app", "-u", id, "com.atsios.xctrunner"];
-			mobileDeviceProcessInfo.arguments = args;
-			mobileDeviceProcess.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
-			mobileDeviceProcess.start(mobileDeviceProcessInfo);
+			if(procInfo != null){
+				//Getting App list
+				var mobileDeviceProcess:NativeProcess = new NativeProcess();
+				var mobileDeviceProcessInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+				mobileDeviceProcessInfo.executable = new File("/usr/bin/env");
+				mobileDeviceProcessInfo.workingDirectory = iosMobileDeviceTools;
+				var args: Vector.<String> = new <String>["./mobiledevice", "uninstall_app", "-u", id, "com.atsios.xctrunner"];
+				mobileDeviceProcessInfo.arguments = args;
+				mobileDeviceProcess.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
+				mobileDeviceProcess.start(mobileDeviceProcessInfo);
+			}
 		}
 		
 		override public function dispose():Boolean
@@ -299,7 +301,7 @@ public class IosDevice extends RunningDevice
 		protected function onTestingOutput(event:ProgressEvent):void
 		{
 			const data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
-
+			
 			if (data.indexOf("** WIFI NOT CONNECTED **") > -1) {
 				errorMessage = " - WIFI not connected !";
 				removeReceivers();
@@ -326,7 +328,7 @@ public class IosDevice extends RunningDevice
 				writeLogs(data);
 			}
 		}
-
+		
 		protected function removeReceivers():void {
 			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
 			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
@@ -343,28 +345,28 @@ public class IosDevice extends RunningDevice
 				removeReceivers();
 				return;
 			}
-
+			
 			if (noCertificatesError.test(data)) {
 				errorMessage = "Certificate error\nMore informations in our Github page";
 				testingProcess.exit();
 				removeReceivers();
 				return;
 			}
-
+			
 			if (startInfoLocked.test(data)) {
 				errorMessage = "Locked with passcode. Please disable code\n and auto-lock in device settings";
 				testingProcess.exit();
 				removeReceivers();
 				return;
 			}
-
+			
 			if (noXcodeInstalled.test(data)) {
 				errorMessage = "No XCode founded on this computer\nGo to AppStore for download it";
 				testingProcess.exit();
 				removeReceivers();
 				return;
 			}
-
+			
 			if (wrongVersionofxCode.test(data)) {
 				errorMessage = "Your device need a more recent version\n of xCode. Go to AppStore for download it";
 				testingProcess.exit();
