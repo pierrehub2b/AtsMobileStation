@@ -35,7 +35,7 @@ public class HttpServer {
 
     private function registerController(controller: HttpController) {
         if (_instance) {
-            throw new Error("Singleton is a singleton and can only be accessed through HttpServer.getInstance()")
+            throw new Error("HttpServer is a singleton and can only be accessed through HttpServer.getInstance()")
         }
 
         _controllers[controller.route] = controller
