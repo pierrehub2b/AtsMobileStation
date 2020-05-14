@@ -2,36 +2,19 @@ package device
 {
 	import avmplus.getQualifiedClassName;
 
+	[Bindable]
 	public class RunningDevice extends Device
 	{
-		[Bindable]
+		public var lockedBy:String = "";
 		public var ip:String;
-		
-		[Bindable]
 		public var port:String = "";
-		
-		[Bindable]
 		public var screenshotPort:String = "";
-		
-		[Bindable]
 		public var settingsPort:String = "";
-		
-		[Bindable]
 		public var automaticPort:Boolean = true;
-		
-		[Bindable]
 		public var error:String = null;
-				
-		[Bindable]
 		public var errorMessage:String = "";
-				
-		[Bindable]
 		public var simulator:Boolean = false;
-		
-		[Bindable]
 		public var usbMode:Boolean = false;
-		
-		[Bindable]
 		public var udpIpAddress:String;
 		
 		public function RunningDevice(id:String=""){

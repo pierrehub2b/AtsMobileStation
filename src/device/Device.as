@@ -17,7 +17,6 @@ package device
 		public static const USB_ERROR:String = "usbError";
 
 		public var uuid:String = UIDUtil.createUID();
-		public var lockedBy:String = "";
 		public var id:String = "";
 		public var manufacturer:String = "";
 		public var modelId:String = "";
