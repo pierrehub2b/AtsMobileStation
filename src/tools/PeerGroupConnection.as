@@ -27,13 +27,14 @@ package tools
 			netConnection = new NetConnection();
 			netConnection.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 			netConnection.client = this;
-			netConnection.connect("rtmfp://localhost:1935/live", "mobilestation");
+			netConnection.connect("rtmfp://localhost", "mobilestation");
 		}
 				
 		private function getDevicesData(value:Array, kind:String, destination:String="all"):Object{
 			
-			var message:Object = {value:value, kind:kind, destination:destination};
 			var now:Date = new Date();
+			
+			var message:Object = {value:value, kind:kind, destination:destination};
 			message.time = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
 			
 			return message;
