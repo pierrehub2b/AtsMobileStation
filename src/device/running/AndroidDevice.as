@@ -51,6 +51,7 @@ public class AndroidDevice extends RunningDevice
 			process.addEventListener(AndroidProcess.RUNNING, runningTestHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.STOPPED, stoppedTestHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.DEVICE_INFO, deviceInfoHandler, false, 0, true);
+			process.addEventListener(AndroidProcess.DEVICE_LOCKED_STATUS, deviceLockStatusHandler, false, 0, true);
 		}
 
 		protected function removeAndroidProcessEventListeners():void {
@@ -58,13 +59,14 @@ public class AndroidDevice extends RunningDevice
 			process.removeEventListener(AndroidProcess.DEVICE_INFO, deviceInfoHandler);
 			process.removeEventListener(AndroidProcess.RUNNING, runningTestHandler);
 			process.removeEventListener(AndroidProcess.STOPPED, stoppedTestHandler);
+			process.removeEventListener(AndroidProcess.DEVICE_LOCKED_STATUS, deviceLockStatusHandler)
 		}
 
 		protected function processErrorHandler(ev:Event):void{
 			removeAndroidProcessEventListeners();
 			status = FAIL;
 
-			process.writeErrorLogFile("Faillure on android process"); //TODO add more detailed info
+			process.writeErrorLogFile("Failure on android process"); //TODO add more detailed info
 		}
 
 		public function runningTestHandler(ev:Event):void{
@@ -83,6 +85,10 @@ public class AndroidDevice extends RunningDevice
 			modelName = process.deviceInfo.modelName;
 			androidVersion = process.deviceInfo.osVersion;
 			androidSdk = process.deviceInfo.sdkVersion
+		}
+
+		protected function deviceLockStatusHandler(ev:Event):void {
+			lockedBy = process.lockedBy
 		}
 
 		public static function setup(id:String, adbFile:File):AndroidDevice {

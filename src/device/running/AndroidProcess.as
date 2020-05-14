@@ -33,7 +33,8 @@ package device.running
 		public static const WEBSOCKET_SERVER_ERROR:String = "webSocketServerError";
 
 		public static const DEVICE_INFO:String = "deviceInfo";
-		
+		public static const DEVICE_LOCKED_STATUS:String = "deviceLockedStatus";
+
 		public static const RUNNING:String = "running";
 		public static const STOPPED:String = "stopped";
 		
@@ -52,6 +53,7 @@ package device.running
 		public var deviceIp:String;
 		public var error:String;
 		public var deviceInfo:Device;
+		public var lockedBy:String;
 		
 		private var process:NativeProcess;
 		private var procInfo:NativeProcessStartupInfo;
@@ -284,7 +286,7 @@ package device.running
 				
 		protected function onExecuteData(event:ProgressEvent):void{
 			var data:String = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
-			
+
 			if(data.indexOf("Process crashed") > -1){
 				writeErrorLogFile(data);
 				process.standardInput.writeUTFBytes(instrumentCommandLine);
@@ -298,6 +300,12 @@ package device.running
 					trace("driver stop");
 				} else if(data.indexOf("ATS_WIFI_STOP") > -1) {
 					dispatchEvent(new Event(WIFI_ERROR_EVENT));
+				} else if(data.indexOf("ATS_DRIVER_LOCKED_BY:") > -1) {
+					lockedBy = getDeviceOwner(data)
+					dispatchEvent(new Event(DEVICE_LOCKED_STATUS))
+				} else if(data.indexOf("ATS_DRIVER_UNLOCKED") > -1) {
+					lockedBy = null;
+					dispatchEvent(new Event(DEVICE_LOCKED_STATUS))
 				} else if(data.indexOf("ATS_WEB_SOCKET_SERVER_START:") > -1) {
 					webSocketServerPort = getWebSocketServerPort(data);
 					dispatchEvent(new Event(WEBSOCKET_SERVER_START));
@@ -308,6 +316,19 @@ package device.running
 					dispatchEvent(new Event(WEBSOCKET_SERVER_STOP));
 				}
 			}
+		}
+
+		private function getDeviceOwner(data:String):String {
+			var array:Array = data.split("\n");
+			for each(var line:String in array) {
+				if (line.indexOf("ATS_DRIVER_LOCKED_BY") > -1) {
+					var firstIndex:int = line.length;
+					var lastIndex:int = line.lastIndexOf("ATS_DRIVER_LOCKED_BY:") + "ATS_DRIVER_LOCKED_BY:".length;
+					return line.substring(lastIndex, firstIndex).slice(0, -1);
+				}
+			}
+
+			return null;
 		}
 
 		private function getWebSocketServerError(data:String):String

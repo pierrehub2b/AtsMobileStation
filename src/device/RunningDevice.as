@@ -5,10 +5,9 @@ package device
 	[Bindable]
 	public class RunningDevice extends Device
 	{
-		public var lockedBy:String = "";
+		public var lockedBy:String;
 		public var ip:String;
 		public var port:String = "";
-		public var screenshotPort:String = "";
 		public var settingsPort:String = "";
 		public var automaticPort:Boolean = true;
 		public var error:String = null;

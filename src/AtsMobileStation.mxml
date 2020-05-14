@@ -96,7 +96,6 @@
 			simulators = new AvailableSimulatorsManager();
 			devices = RunningDevicesManager.getInstance();
 						
-			settingsButton.visible = isMacOs;
 			if (isMacOs) {
 				var file:File = FlexGlobals.topLevelApplication.settingsFile;
 				if (file.exists) {
@@ -207,9 +206,9 @@
 		<s:HGroup width="100%" paddingLeft="7" paddingRight="3" verticalCenter="0" verticalAlign="middle" gap="3">
 			<s:Label fontSize="13" text="Connected Devices" fontWeight="bold"/>
 			<s:Spacer width="100%"/>
-			<s:Group id="settingsButton" visible="false" alpha="0.5" buttonMode="true" click="settings_clickHandler(event)"
-					 toolTip="Apple developer settings" height="22" width="22">
-				<s:BitmapImage source="assets/icons/20/apple.png" smooth="true" smoothingQuality="high"/>
+			<s:Group id="settingsButton" visible="true" alpha="0.5" buttonMode="true" click="settings_clickHandler(event)"
+					 toolTip="Settings" height="22" width="22">
+				<s:BitmapImage source="assets/icons/16/info.png" smooth="true" smoothingQuality="high"/>
 			</s:Group>
 		</s:HGroup>
 	</s:Group>
