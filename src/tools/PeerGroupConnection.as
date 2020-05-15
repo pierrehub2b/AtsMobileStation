@@ -1,15 +1,14 @@
 package tools
 {
-	import device.RunningDevice;
-	
 	import flash.events.NetStatusEvent;
 	import flash.net.NetConnection;
 	import flash.net.NetGroup;
-	import flash.utils.ByteArray;
 	
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
+	
+	import device.RunningDevice;
 
 	public class PeerGroupConnection
 	{
@@ -27,9 +26,10 @@ package tools
 		
 		private function connectToPeerGroup():void{
 			netConnection = new NetConnection();
+			netConnection.objectEncoding = 3;
 			netConnection.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 			netConnection.client = this;
-			netConnection.connect("rtmp://localhost/mobilestation", "mobilestation");
+			netConnection.connect("rtmfp://192.168.1.57/mobilestation", "mobilestation");
 		}
 				
 		private function getDevicesData(value:Array, kind:String, destination:String="all"):Object{
@@ -55,14 +55,10 @@ package tools
 		}
 		
 		private function setDevicesList():void{
-			//var ba:ByteArray = new ByteArray();
-			//ba.writeObject(devices.source);
-			
-			var data:Array = [];
+			netConnection.call("clearDevices", null);
 			for each(var dev:RunningDevice in devices){
-				data.push({modelName:dev.modelName, modelId:dev.modelId, manufacturer:dev.manufacturer, ip:dev.ip, port:dev.port});
+				netConnection.call("pushDevice", null, {modelName:dev.modelName, modelId:dev.modelId, manufacturer:dev.manufacturer, ip:dev.ip, port:dev.port});
 			}
-			netConnection.call("devicesList", null, data);
 		}
 		
 		private function devicesChangeHandler(ev:CollectionEvent):void{

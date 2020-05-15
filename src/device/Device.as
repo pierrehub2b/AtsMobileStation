@@ -2,8 +2,6 @@ package device
 {
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
-	
-	import mx.utils.UIDUtil;
 
 	[Bindable]
 	public class Device extends EventDispatcher
@@ -16,7 +14,6 @@ package device
 		public static const WIFI_ERROR:String = "wifiError";
 		public static const USB_ERROR:String = "usbError";
 
-		public var uuid:String = UIDUtil.createUID();
 		public var id:String = "";
 		public var manufacturer:String = "";
 		public var modelId:String = "";
