@@ -1,9 +1,11 @@
 package tools
 {
+	import device.RunningDevice;
+	
 	import flash.events.NetStatusEvent;
-	import flash.net.GroupSpecifier;
 	import flash.net.NetConnection;
 	import flash.net.NetGroup;
+	import flash.utils.ByteArray;
 	
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
@@ -27,7 +29,7 @@ package tools
 			netConnection = new NetConnection();
 			netConnection.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 			netConnection.client = this;
-			netConnection.connect("rtmfp://localhost", "mobilestation");
+			netConnection.connect("rtmp://localhost/mobilestation", "mobilestation");
 		}
 				
 		private function getDevicesData(value:Array, kind:String, destination:String="all"):Object{
@@ -39,40 +41,45 @@ package tools
 			
 			return message;
 		}
-				
+		
 		private function onNetStatus(ev:NetStatusEvent):void{
 			switch(ev.info.code)
 			{
 				case "NetConnection.Connect.Success":
-					createGroup();
-					break;
-				case "NetGroup.Connect.Success": 
 					devices.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
-					break;
-				case "NetGroup.Neighbor.Connect":
-					netGroup.post(getDevicesData(devices.source, CollectionEventKind.RESET, ev.info.peerID));
+					setDevicesList();
 					break;
 				default:
 					break;
 			}
 		}
 		
-		private function devicesChangeHandler(ev:CollectionEvent):void{
-			if(ev.kind != CollectionEventKind.REFRESH){
-				netGroup.post(getDevicesData(ev.items, ev.kind));
+		private function setDevicesList():void{
+			//var ba:ByteArray = new ByteArray();
+			//ba.writeObject(devices.source);
+			
+			var data:Array = [];
+			for each(var dev:RunningDevice in devices){
+				data.push({modelName:dev.modelName, modelId:dev.modelId, manufacturer:dev.manufacturer, ip:dev.ip, port:dev.port});
 			}
+			netConnection.call("devicesList", null, data);
 		}
 		
-		private function createGroup():void
-		{
-			var groupSpecifier:GroupSpecifier = new GroupSpecifier("com.ats.mobilestation/");
-
-			groupSpecifier.postingEnabled       = true;
-			groupSpecifier.serverChannelEnabled = true;
-			groupSpecifier.objectReplicationEnabled = true;
-			
-			netGroup = new NetGroup(netConnection, groupSpecifier.groupspecWithAuthorizations());
-			netGroup.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
+		private function devicesChangeHandler(ev:CollectionEvent):void{
+			var dev:RunningDevice
+			if(ev.kind == CollectionEventKind.REMOVE){
+				dev = ev.items[0] as RunningDevice
+				netConnection.call("deviceRemoved", null, dev.id, dev.modelName, dev.modelId, dev.manufacturer, dev.ip, dev.port);
+				setDevicesList();
+			}else if(ev.kind == CollectionEventKind.UPDATE){
+				dev = ev.items[0].source as RunningDevice
+				if(ev.items[0].property == "status" && ev.items[0].newValue == "ready"){
+					netConnection.call("deviceReady", null, dev.id, dev.modelName, dev.modelId, dev.manufacturer, dev.ip, dev.port);
+					setDevicesList();
+				}else if (ev.items[0].property == "lockedBy"){
+					netConnection.call("deviceLocked", null, ev.items[0].newValue, dev.id, dev.modelName, dev.modelId, dev.manufacturer, dev.ip, dev.port);
+				}
+			}
 		}
 	}
 }
