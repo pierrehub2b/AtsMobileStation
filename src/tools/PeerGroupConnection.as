@@ -1,5 +1,7 @@
 package tools
 {
+	import device.RunningDevice;
+	
 	import flash.events.NetStatusEvent;
 	import flash.net.NetConnection;
 	import flash.net.NetGroup;
@@ -8,8 +10,6 @@ package tools
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
 	
-	import device.RunningDevice;
-
 	public class PeerGroupConnection
 	{
 		private var netConnection:NetConnection;
@@ -31,7 +31,7 @@ package tools
 			netConnection.client = this;
 			netConnection.connect("rtmfp://192.168.1.57/mobilestation", "mobilestation");
 		}
-				
+		
 		private function getDevicesData(value:Array, kind:String, destination:String="all"):Object{
 			
 			var now:Date = new Date();
@@ -46,19 +46,22 @@ package tools
 			switch(ev.info.code)
 			{
 				case "NetConnection.Connect.Success":
+					
+					for each(var dev:RunningDevice in devices){
+						if(dev.status == "ready"){
+							pushDevice(dev);
+						}
+					}
 					devices.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
-					setDevicesList();
+
 					break;
 				default:
 					break;
 			}
 		}
 		
-		private function setDevicesList():void{
-			netConnection.call("clearDevices", null);
-			for each(var dev:RunningDevice in devices){
-				netConnection.call("pushDevice", null, {modelName:dev.modelName, modelId:dev.modelId, manufacturer:dev.manufacturer, ip:dev.ip, port:dev.port});
-			}
+		private function pushDevice(dev:RunningDevice):void{
+			netConnection.call("pushDevice", null, {modelName:dev.modelName, modelId:dev.modelId, manufacturer:dev.manufacturer, ip:dev.ip, port:dev.port});
 		}
 		
 		private function devicesChangeHandler(ev:CollectionEvent):void{
@@ -66,12 +69,10 @@ package tools
 			if(ev.kind == CollectionEventKind.REMOVE){
 				dev = ev.items[0] as RunningDevice
 				netConnection.call("deviceRemoved", null, dev.id, dev.modelName, dev.modelId, dev.manufacturer, dev.ip, dev.port);
-				setDevicesList();
 			}else if(ev.kind == CollectionEventKind.UPDATE){
 				dev = ev.items[0].source as RunningDevice
 				if(ev.items[0].property == "status" && ev.items[0].newValue == "ready"){
-					netConnection.call("deviceReady", null, dev.id, dev.modelName, dev.modelId, dev.manufacturer, dev.ip, dev.port);
-					setDevicesList();
+					pushDevice(dev);
 				}else if (ev.items[0].property == "lockedBy"){
 					netConnection.call("deviceLocked", null, ev.items[0].newValue, dev.id, dev.modelName, dev.modelId, dev.manufacturer, dev.ip, dev.port);
 				}
