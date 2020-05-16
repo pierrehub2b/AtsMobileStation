@@ -14,16 +14,10 @@ end
 function onConnection(client,type,info,...)
 	if type == "editor" then
 		editors[client] = client.writer
-		function client:devicesList()
-			return devices
-		end
-		function client:info()
-			return dataInfo
-		end
+		client.writer:writeInvocation("setInfo", dataInfo)
+		client.writer:writeInvocation("setDevices", devices)
 	else
-	
 		dataInfo = info
-		
 		function client:deviceRemoved(id, modelName, modelId, manufacturer, ip, port)
 			local idx = getDeviceIndex(devices, ip, port)
 			if idx ~= nil then 
