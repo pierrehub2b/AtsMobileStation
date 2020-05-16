@@ -29,7 +29,7 @@ package tools
 			netConnection.objectEncoding = 3;
 			netConnection.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 			netConnection.client = this;
-			netConnection.connect("rtmfp://192.168.1.57/mobilestation", "mobilestation");
+			netConnection.connect("rtmp://localhost/mobilestation", "mobilestation");
 		}
 		
 		private function getDevicesData(value:Array, kind:String, destination:String="all"):Object{
