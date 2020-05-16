@@ -6,6 +6,11 @@ src/assets/tools/android
 temp/
 [Oo]bj/
 [Bb]in/
+src/assets/tools/monaserver/MonaBase/
+src/assets/tools/monaserver/MonaCore/
+src/assets/tools/monaserver/bin/logs
+src/assets/tools/monaserver/bin/MonaServer
+src/assets/tools/monaserver/bin/MonaServer.exe
 
 # Other files and folders
 .settings/
@@ -32,5 +37,3 @@ Thumbs.db
 .Spotlight-V100
 .Trashes
 build.properties
-src/assets/tools/monaserver/MonaBase/
-src/assets/tools/monaserver/MonaCore/
