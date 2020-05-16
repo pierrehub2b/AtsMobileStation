@@ -46,6 +46,7 @@ function onConnection(client,type,info,...)
 		end
 	end
 end
+
 function onDisconnection(client)
   editors[client] = nil
 end
