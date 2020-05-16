@@ -1,5 +1,7 @@
 package tools
 {
+	import device.RunningDevice;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.NativeProcessExitEvent;
@@ -12,8 +14,6 @@ package tools
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
-	
-	import device.RunningDevice;
 	
 	public class PeerGroupConnection
 	{
@@ -47,6 +47,10 @@ package tools
 
 			} else {
 				monaServerFile = File.applicationDirectory.resolvePath(monServerPath + ".exe");
+				if(monaServerFile.exists){
+					devices = devicesManager.collection;
+					startMonaServer();
+				}
 			}
 		}
 		
@@ -54,7 +58,10 @@ package tools
 		{
 			ev.target.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
 			ev.target.closeInput();
-
+			startMonaServer();
+		}
+		
+		private function startMonaServer():void{
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfo.executable = monaServerFile;			
 			procInfo.workingDirectory = monaServerFile.parent;
@@ -67,6 +74,7 @@ package tools
 		protected function onMonaServerRun(ev:ProgressEvent):void{
 			const len:int = ev.target.standardOutput.bytesAvailable;
 			const data:String = ev.target.standardOutput.readUTFBytes(len);
+			trace(data)
 			
 			if(data.indexOf("RTMP server started") > -1){
 				monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun);
@@ -79,7 +87,7 @@ package tools
 			netConnection.objectEncoding = 3;
 			netConnection.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 			netConnection.client = this;
-			netConnection.connect("rtmp://localhost/mobilestation", "mobilestation");
+			netConnection.connect("rtmfp://localhost/mobilestation", "mobilestation");
 		}
 		
 		private function getDevicesData(value:Array, kind:String, destination:String="all"):Object{
