@@ -132,7 +132,6 @@ package
 			const len:int = ev.target.standardOutput.bytesAvailable;
 			const data:String = ev.target.standardOutput.readUTFBytes(len);
 			androidOutput = String(androidOutput.concat(data));
-			trace(data);
 		}
 		
 		protected function onReadAndroidDevicesExit(ev:NativeProcessExitEvent):void
