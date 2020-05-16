@@ -1,8 +1,11 @@
 package tools
 {
-	import device.RunningDevice;
-	
+	import flash.desktop.NativeProcess;
+	import flash.desktop.NativeProcessStartupInfo;
+	import flash.events.NativeProcessExitEvent;
 	import flash.events.NetStatusEvent;
+	import flash.events.ProgressEvent;
+	import flash.filesystem.File;
 	import flash.net.NetConnection;
 	import flash.net.NetGroup;
 	
@@ -10,17 +13,59 @@ package tools
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
 	
+	import device.RunningDevice;
+	
 	public class PeerGroupConnection
 	{
+		public static const monServerPath:String = "assets/tools/monaserver/bin/MonaServer";
+		
 		private var netConnection:NetConnection;
 		private var netGroup:NetGroup;
 		
 		private var devices:ArrayCollection;
 		
+		private var monaServerFile:File;
+		private var monaServerProc:NativeProcess;
+		
 		public function PeerGroupConnection(devicesManager:RunningDevicesManager, sims:AvailableSimulatorsManager)
 		{
-			devices = devicesManager.collection;
-			//Start MonaServer process here
+			if (AtsMobileStation.isMacOs) {
+				monaServerFile = File.applicationDirectory.resolvePath(monServerPath);
+				
+				if(monaServerFile.exists){
+					devices = devicesManager.collection;
+					
+					var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+					procInfo.executable = new File("/bin/chmod");			
+					procInfo.workingDirectory = File.applicationDirectory.resolvePath("assets/tools");
+					procInfo.arguments = new <String>["+x", "monaserver/bin/MonaServer"];
+					
+					var proc:NativeProcess = new NativeProcess();
+					proc.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
+					proc.start(procInfo);
+				}
+
+			} else {
+				monaServerFile = File.applicationDirectory.resolvePath(monServerPath + ".exe");
+			}
+		}
+		
+		protected function onChmodExit(ev:NativeProcessExitEvent):void
+		{
+			ev.target.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
+			ev.target.closeInput();
+
+			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			procInfo.executable = monaServerFile;			
+			procInfo.workingDirectory = monaServerFile.parent;
+			
+			monaServerProc = new NativeProcess();
+			monaServerProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerStart, false, 0, true);
+			monaServerProc.start(procInfo);
+		}
+		
+		protected function onMonaServerStart(ev:ProgressEvent):void{
+			monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerStart);
 			connectToPeerGroup();
 		}
 		
@@ -46,7 +91,7 @@ package tools
 			switch(ev.info.code)
 			{
 				case "NetConnection.Connect.Success":
-					
+					trace("connected to MonaServer!")
 					for each(var dev:RunningDevice in devices){
 						if(dev.status == "ready"){
 							pushDevice(dev);
