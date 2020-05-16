@@ -60,13 +60,26 @@ package tools
 			procInfo.workingDirectory = monaServerFile.parent;
 			
 			monaServerProc = new NativeProcess();
-			monaServerProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerStart, false, 0, true);
+			monaServerProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun, false, 0, true);
 			monaServerProc.start(procInfo);
 		}
 		
-		protected function onMonaServerStart(ev:ProgressEvent):void{
+		/*protected function onMonaServerStart(ev:ProgressEvent):void{
 			monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerStart);
 			connectToPeerGroup();
+			monaServerProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun, false, 0, true);
+		}*/
+		
+		protected function onMonaServerRun(ev:ProgressEvent):void{
+			const len:int = ev.target.standardOutput.bytesAvailable;
+			const data:String = ev.target.standardOutput.readUTFBytes(len);
+			
+			if(data.indexOf("RTMP server started") > -1){
+				monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun);
+				connectToPeerGroup();
+			}
+			
+			trace(data)
 		}
 		
 		private function connectToPeerGroup():void{
