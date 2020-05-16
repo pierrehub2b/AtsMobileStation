@@ -2,13 +2,6 @@ package
 {
 	import com.greensock.TweenLite;
 	
-	import device.Device;
-	import device.RunningDevice;
-	import device.running.AndroidDevice;
-	import device.running.IosDevice;
-	import device.running.IosDeviceInfo;
-	import device.simulator.IosSimulator;
-	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -19,6 +12,13 @@ package
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.FlexGlobals;
+	
+	import device.Device;
+	import device.RunningDevice;
+	import device.running.AndroidDevice;
+	import device.running.IosDevice;
+	import device.running.IosDeviceInfo;
+	import device.simulator.IosSimulator;
 	
 	import net.tautausan.plist.PDict;
 	import net.tautausan.plist.Plist10;

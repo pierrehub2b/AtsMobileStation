@@ -1,7 +1,5 @@
 package tools
 {
-	import device.RunningDevice;
-	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.NativeProcessExitEvent;
@@ -16,9 +14,13 @@ package tools
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
 	
+	import device.RunningDevice;
+	
 	public class PeerGroupConnection
 	{
 		public static const monServerPath:String = "assets/tools/monaserver/work/MonaServer";
+		
+		private static const rtmpProtocol:String = "RTMFP";
 		
 		private var netConnection:NetConnection;
 		private var netGroup:NetGroup;
@@ -108,9 +110,8 @@ package tools
 		protected function onMonaServerRun(ev:ProgressEvent):void{
 			const len:int = ev.target.standardOutput.bytesAvailable;
 			const data:String = ev.target.standardOutput.readUTFBytes(len);
-			trace(data)
 			
-			if(data.indexOf("RTMP server started") > -1){
+			if(data.indexOf(rtmpProtocol + " server started") > -1){
 				monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun);
 				connectToPeerGroup();
 			}
@@ -121,7 +122,7 @@ package tools
 			netConnection.objectEncoding = 3;
 			netConnection.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 			netConnection.client = this;
-			netConnection.connect("rtmfp://localhost/mobilestation", "mobilestation", info);
+			netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost/mobilestation", "mobilestation");
 		}
 		
 		private function getDevicesData(value:Array, kind:String, destination:String="all"):Object{
