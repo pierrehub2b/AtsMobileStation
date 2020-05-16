@@ -10,6 +10,7 @@ package tools
 	import flash.filesystem.File;
 	import flash.net.NetConnection;
 	import flash.net.NetGroup;
+	import flash.net.SharedObject;
 	
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
@@ -27,8 +28,18 @@ package tools
 		private var monaServerFile:File;
 		private var monaServerProc:NativeProcess;
 		
+		public var so:SharedObject = SharedObject.getLocal("MobileStationSettings");
+		
+		public var description:String = "";
+		
 		public function PeerGroupConnection(devicesManager:RunningDevicesManager, sims:AvailableSimulatorsManager)
 		{
+			if(so.data["MSInfo"] != null){
+				description = so.data["MSInfo"].description;
+			}else{
+				saveDescription("");
+			}
+			
 			if (AtsMobileStation.isMacOs) {
 				monaServerFile = File.applicationDirectory.resolvePath(monServerPath);
 				
@@ -51,6 +62,29 @@ package tools
 					devices = devicesManager.collection;
 					startMonaServer();
 				}
+			}
+		}
+		
+		private function get info():Object{
+			var o:Object = {description:description}
+			if(AtsMobileStation.isMacOs){
+				o.os = "mac"
+			}else{
+				o.os = "win"
+			}
+			return o;
+		}
+				
+		public function saveDescription(desc:String):void{
+			
+			description = desc;
+			so.setProperty("MSInfo", info);
+			so.flush();
+		}
+		
+		public function close():void{
+			if(monaServerProc != null && monaServerProc.running){
+				monaServerProc.exit(true);
 			}
 		}
 		
@@ -87,7 +121,7 @@ package tools
 			netConnection.objectEncoding = 3;
 			netConnection.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 			netConnection.client = this;
-			netConnection.connect("rtmfp://localhost/mobilestation", "mobilestation");
+			netConnection.connect("rtmfp://localhost/mobilestation", "mobilestation", info);
 		}
 		
 		private function getDevicesData(value:Array, kind:String, destination:String="all"):Object{

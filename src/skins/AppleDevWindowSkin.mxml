@@ -245,7 +245,7 @@
                 
                 <!-- layer 3: text -->
                 <!--- @copy spark.components.Panel#titleDisplay -->
-				<s:BitmapImage left="5" top="3" source="assets/icons/20/apple.png"/>
+				<s:BitmapImage left="5" top="3" source="assets/icons/20/settings.png"/>
 					
                 <s:Label id="titleDisplay" maxDisplayedLines="1"
                          left="28" right="36" top="1" bottom="0" minHeight="30"
