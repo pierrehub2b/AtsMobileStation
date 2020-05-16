@@ -17,7 +17,7 @@ package tools
 	
 	public class PeerGroupConnection
 	{
-		public static const monServerPath:String = "assets/tools/monaserver/bin/MonaServer";
+		public static const monServerPath:String = "assets/tools/monaserver/work/MonaServer";
 		
 		private var netConnection:NetConnection;
 		private var netGroup:NetGroup;
@@ -38,7 +38,7 @@ package tools
 					var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 					procInfo.executable = new File("/bin/chmod");			
 					procInfo.workingDirectory = File.applicationDirectory.resolvePath("assets/tools");
-					procInfo.arguments = new <String>["+x", "monaserver/bin/MonaServer"];
+					procInfo.arguments = new <String>["+x", "monaserver/work/MonaServer"];
 					
 					var proc:NativeProcess = new NativeProcess();
 					proc.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
@@ -64,12 +64,6 @@ package tools
 			monaServerProc.start(procInfo);
 		}
 		
-		/*protected function onMonaServerStart(ev:ProgressEvent):void{
-			monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerStart);
-			connectToPeerGroup();
-			monaServerProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun, false, 0, true);
-		}*/
-		
 		protected function onMonaServerRun(ev:ProgressEvent):void{
 			const len:int = ev.target.standardOutput.bytesAvailable;
 			const data:String = ev.target.standardOutput.readUTFBytes(len);
@@ -78,8 +72,6 @@ package tools
 				monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun);
 				connectToPeerGroup();
 			}
-			
-			trace(data)
 		}
 		
 		private function connectToPeerGroup():void{
