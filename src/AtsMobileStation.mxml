@@ -123,8 +123,8 @@
 				peerGroup = new PeerGroupConnection(devices, simulators);
 			}
 			
-			public function saveDescription(value:String):void {
-				peerGroup.saveDescription(value);
+			public function saveValues(desc:String, name:String):void {
+				peerGroup.saveValues(desc, name);
 			}
 			
 			private function handleHttpServerError(e:Error):void {

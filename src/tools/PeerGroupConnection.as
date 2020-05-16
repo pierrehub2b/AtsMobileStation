@@ -1,5 +1,7 @@
 package tools
 {
+	import device.RunningDevice;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.NativeProcessExitEvent;
@@ -13,8 +15,6 @@ package tools
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
-	
-	import device.RunningDevice;
 	
 	public class PeerGroupConnection
 	{
@@ -33,13 +33,15 @@ package tools
 		public var so:SharedObject = SharedObject.getLocal("MobileStationSettings");
 		
 		public var description:String = "";
+		public var name:String = "";
 		
 		public function PeerGroupConnection(devicesManager:RunningDevicesManager, sims:AvailableSimulatorsManager)
 		{
 			if(so.data["MSInfo"] != null){
 				description = so.data["MSInfo"].description;
+				name = so.data["MSInfo"].name;
 			}else{
-				saveDescription("");
+				saveValues("Description of this station", "Mobile Station");
 			}
 			
 			if (AtsMobileStation.isMacOs) {
@@ -68,7 +70,7 @@ package tools
 		}
 		
 		private function get info():Object{
-			var o:Object = {description:description}
+			var o:Object = {description:description, name:name}
 			if(AtsMobileStation.isMacOs){
 				o.os = "mac"
 			}else{
@@ -77,9 +79,9 @@ package tools
 			return o;
 		}
 				
-		public function saveDescription(desc:String):void{
-			
-			description = desc;
+		public function saveValues(d:String, n:String):void{
+			description = d;
+			name = n;
 			so.setProperty("MSInfo", info);
 			so.flush();
 		}

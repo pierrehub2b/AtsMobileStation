@@ -38,6 +38,7 @@
 			{
 				devTeamId.text = FlexGlobals.topLevelApplication.getTeamId();
 				desc.text = FlexGlobals.topLevelApplication.peerGroup.description;
+				nm.text = FlexGlobals.topLevelApplication.peerGroup.name;
 			}
 			
 			private function closeHandler(event:CloseEvent):void {
@@ -52,7 +53,8 @@
 				fileStream.close();
 				FlexGlobals.topLevelApplication.setTeamId(devTeamId.text);
 				FlexGlobals.topLevelApplication.restartIosDevices();
-				FlexGlobals.topLevelApplication.saveDescription(desc.text);
+				
+				FlexGlobals.topLevelApplication.saveValues(desc.text, nm.text);
 				
 				PopUpManager.removePopUp(this);
 			}
@@ -147,6 +149,9 @@
 	
 	<s:VGroup left="6" right="6" top="10" bottom="36" gap="2" horizontalAlign="left"
 			  verticalAlign="middle">
+		<s:Label fontWeight="bold" text="Mobile station name"/>
+		<s:TextInput id="nm" width="100%"/>
+		<s:Spacer height="6"/>
 		<s:Label fontWeight="bold" text="Mobile station description"/>
 		<s:TextArea id="desc" width="100%" height="60"/>
 		<s:Spacer height="6"/>
