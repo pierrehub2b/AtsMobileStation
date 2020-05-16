@@ -110,7 +110,7 @@ package tools
 		protected function onMonaServerRun(ev:ProgressEvent):void{
 			const len:int = ev.target.standardOutput.bytesAvailable;
 			const data:String = ev.target.standardOutput.readUTFBytes(len);
-			
+			trace(data)
 			if(data.indexOf(rtmpProtocol + " server started") > -1){
 				monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun);
 				connectToPeerGroup();
@@ -122,7 +122,7 @@ package tools
 			netConnection.objectEncoding = 3;
 			netConnection.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 			netConnection.client = this;
-			netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost/mobilestation", "mobilestation");
+			netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost/mobilestation", "mobilestation", info);
 		}
 		
 		private function getDevicesData(value:Array, kind:String, destination:String="all"):Object{

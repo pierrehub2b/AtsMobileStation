@@ -11,7 +11,7 @@ function getDeviceIndex(tab, ip, port)
 	return nil
 end
 
-function onConnection(client,type,data,...)
+function onConnection(client,type,info,...)
 	if type == "editor" then
 		editors[client] = client.writer
 		function client:devicesList()
@@ -21,7 +21,9 @@ function onConnection(client,type,data,...)
 			return dataInfo
 		end
 	else
-		dataInfo = data
+	
+		dataInfo = info
+		
 		function client:deviceRemoved(id, modelName, modelId, manufacturer, ip, port)
 			local idx = getDeviceIndex(devices, ip, port)
 			if idx ~= nil then 
