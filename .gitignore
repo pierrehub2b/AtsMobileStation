@@ -8,9 +8,9 @@ temp/
 [Bb]in/
 src/assets/tools/monaserver/MonaBase/
 src/assets/tools/monaserver/MonaCore/
-src/assets/tools/monaserver/bin/logs
-src/assets/tools/monaserver/bin/MonaServer
-src/assets/tools/monaserver/bin/MonaServer.exe
+src/assets/tools/monaserver/work/logs
+src/assets/tools/monaserver/work/MonaServer
+src/assets/tools/monaserver/work/MonaServer.exe
 
 # Other files and folders
 .settings/
