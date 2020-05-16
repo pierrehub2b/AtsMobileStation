@@ -150,7 +150,7 @@
 	<s:VGroup left="6" right="6" top="10" bottom="36" gap="2" horizontalAlign="left"
 			  verticalAlign="middle">
 		<s:Label fontWeight="bold" text="Mobile station name"/>
-		<s:TextInput id="nm" width="100%"/>
+		<s:TextInput id="nm" width="100%" maxChars="32"/>
 		<s:Spacer height="6"/>
 		<s:Label fontWeight="bold" text="Mobile station description"/>
 		<s:TextArea id="desc" width="100%" height="60"/>

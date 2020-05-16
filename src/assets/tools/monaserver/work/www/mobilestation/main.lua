@@ -28,7 +28,7 @@ function onConnection(client,type,info,...)
 			end
 		end
 		function client:pushDevice(device)
-			local idx = getDeviceIndex(devices, ip, port)
+			local idx = getDeviceIndex(devices, device["ip"], device["port"])
 			if idx == nil then 
 				table.insert(devices, device)
 				for editor,writer in pairs(editors) do
@@ -37,8 +37,11 @@ function onConnection(client,type,info,...)
 			end
 		end
 		function client:deviceLocked(by, id, modelName, modelId, manufacturer, ip, port)
-			for editor,writer in pairs(editors) do
-				writer:writeInvocation("deviceLocked", by, id, modelName, modelId, manufacturer, ip, port)
+			local idx = getDeviceIndex(devices, ip, port)
+			if idx ~= nil then 
+				for editor,writer in pairs(editors) do
+					writer:writeInvocation("deviceLocked", by, id, modelName, modelId, manufacturer, ip, port)
+				end
 			end
 		end
 	end

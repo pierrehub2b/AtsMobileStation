@@ -25,7 +25,7 @@ package tools
 		private var netConnection:NetConnection;
 		private var netGroup:NetGroup;
 		
-		private var devices:ArrayCollection;
+		private var devicesManager:RunningDevicesManager;
 		
 		private var monaServerFile:File;
 		private var monaServerProc:NativeProcess;
@@ -35,8 +35,10 @@ package tools
 		public var description:String = "";
 		public var name:String = "";
 		
-		public function PeerGroupConnection(devicesManager:RunningDevicesManager, sims:AvailableSimulatorsManager)
+		public function PeerGroupConnection(devManager:RunningDevicesManager, simManager:AvailableSimulatorsManager)
 		{
+			devicesManager = devManager;
+			
 			if(so.data["MSInfo"] != null){
 				description = so.data["MSInfo"].description;
 				name = so.data["MSInfo"].name;
@@ -48,8 +50,7 @@ package tools
 				monaServerFile = File.applicationDirectory.resolvePath(monServerPath);
 				
 				if(monaServerFile.exists){
-					devices = devicesManager.collection;
-					
+				
 					var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 					procInfo.executable = new File("/bin/chmod");			
 					procInfo.workingDirectory = File.applicationDirectory.resolvePath("assets/tools");
@@ -63,7 +64,6 @@ package tools
 			} else {
 				monaServerFile = File.applicationDirectory.resolvePath(monServerPath + ".exe");
 				if(monaServerFile.exists){
-					devices = devicesManager.collection;
 					startMonaServer();
 				}
 			}
@@ -114,7 +114,7 @@ package tools
 			const data:String = ev.target.standardOutput.readUTFBytes(len);
 			trace(data)
 			if(data.indexOf(rtmpProtocol + " server started") > -1){
-				monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun);
+				//monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun);
 				connectToPeerGroup();
 			}
 		}
@@ -142,12 +142,12 @@ package tools
 			{
 				case "NetConnection.Connect.Success":
 					trace("connected to MonaServer!")
-					for each(var dev:RunningDevice in devices){
+					for each(var dev:RunningDevice in devicesManager.collection){
 						if(dev.status == "ready"){
 							pushDevice(dev);
 						}
 					}
-					devices.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
+					devicesManager.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
 
 					break;
 				default:
