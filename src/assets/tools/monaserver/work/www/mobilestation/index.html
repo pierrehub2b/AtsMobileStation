@@ -1,0 +1,95 @@
+<html><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ATS Mobile Station</title>
+    <style type="text/css">
+		ul {
+		  list-style: none;
+		}
+
+		ul li::before {
+		  content: "\2022";
+		  color: blue;
+		  font-weight: bold;
+		  display: inline-block; 
+		  width: 1em;
+		  margin-left: -1em;
+		}
+    </style>
+    <script type="text/javascript">
+		var socket;
+      
+		function showDevices(array){
+			var list = document.getElementById("listDevices");
+			list.innerHTML = "";
+
+			for (var i = 0; i < array.length; i++) {
+				var item = document.createElement("li");
+				item.appendChild(document.createTextNode(array[i].modelName + " (" + array[i].ip + ":" + array[i].port + ")"));
+				list.appendChild(item);
+			}
+		}
+	  
+        // Reception handler
+        function onMessage(msg) {
+            try { // try to parse data
+                data = JSON.parse(msg.data);
+                switch (data[0]) {
+					case "deviceReady":
+						showDevices(data[1]);
+						break;
+					case "deviceRemoved":
+						showDevices(data[7]);
+						break;
+					case "setDevices":
+						showDevices(data[1]);
+						break;
+					case "setInfo":
+						document.getElementById("info").innerHTML = data[1].description;
+					break;
+                }
+            } catch(exception) {}
+        }
+              
+        // Connection handler
+        function onConnection() {
+			socket.send(JSON.stringify(["getInfo"]));
+			socket.send(JSON.stringify(["getDevices"]));
+        }
+        
+        // Disconnection handler
+        function onDisconnection() { 
+            document.getElementById("info").value = 'socket closed'; 
+        }
+        
+        // Socket connector
+        function createWebSocket() {
+            host = "ws://" + window.location.host + "/" + window.location.pathname;
+
+            if(window.MozWebSocket)
+                window.WebSocket=window.MozWebSocket;
+            if(!window.WebSocket) {
+                alert("Your browser don't support webSocket!");
+                return false;
+            }
+            
+            socket = new WebSocket(host);
+            socket.onopen = onConnection;
+            socket.onclose = onDisconnection;
+            socket.onerror = function() { document.getElementById("info").value = 'An error occurs'; }
+            socket.onmessage = onMessage;
+            return true;
+        }
+       
+        createWebSocket();
+    </script>
+</head>
+<body>
+<h2>ATS Mobile Station</h2>
+<b>Description :</b><span style="color: #666699;"><em><label id="info"/></span> 
+    <div style="height:95%; width:100%">
+        <div style="width:100%%; height:100%; float: left">
+            <ul id="listDevices"></ul>
+        </div>
+    </div>
+</body>
+<html>

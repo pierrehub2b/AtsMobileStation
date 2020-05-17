@@ -12,11 +12,7 @@ function getDeviceIndex(tab, ip, port)
 end
 
 function onConnection(client,type,info,...)
-	if type == "editor" then
-		editors[client] = client.writer
-		client.writer:writeInvocation("setInfo", dataInfo)
-		client.writer:writeInvocation("setDevices", devices)
-	else
+	if type == "mobilestation" then
 		dataInfo = info
 		function client:deviceRemoved(id, modelName, modelId, manufacturer, ip, port)
 			local idx = getDeviceIndex(devices, ip, port)
@@ -42,6 +38,19 @@ function onConnection(client,type,info,...)
 				for editor,writer in pairs(editors) do
 					writer:writeInvocation("deviceLocked", by, id, modelName, modelId, manufacturer, ip, port)
 				end
+			end
+		end
+	else
+		editors[client] = client.writer
+		if type == "editor" then
+			client.writer:writeInvocation("setInfo", dataInfo)
+			client.writer:writeInvocation("setDevices", devices)
+		else
+			function client:getInfo(param)
+				client.writer:writeInvocation("setInfo", dataInfo)
+			end
+			function client:getDevices(param)
+				client.writer:writeInvocation("setDevices", devices)
 			end
 		end
 	end

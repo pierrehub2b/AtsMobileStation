@@ -114,7 +114,7 @@ package tools
 			trace(data)
 			
 			if(data.indexOf(rtmpProtocol + " server started") > -1){
-				monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun);
+				//monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun);
 				connectToPeerGroup();
 			}
 		}
