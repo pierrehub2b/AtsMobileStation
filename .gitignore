@@ -38,3 +38,5 @@ Thumbs.db
 .Trashes
 build.properties
 src/assets/tools/monaserver/work/lua51.dll
+*.dll
+*.exe
