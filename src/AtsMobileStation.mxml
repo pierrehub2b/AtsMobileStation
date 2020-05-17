@@ -3,7 +3,8 @@
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   showStatusBar="false" frameRate="60"
 					   creationComplete="creationCompleteHandler(event)"
-					   close="closeHandler(event)" backgroundColor="0xefefef">
+					   close="closeHandler(event)" backgroundColor="0xefefef"
+					   title="Ats MobileStation (port:{httpPort})">
 	<fx:Script>
 		<![CDATA[
 			import com.greensock.TweenMax;
@@ -37,7 +38,7 @@
 			public var peerGroup:PeerGroupConnection;
 			
 			[Bindable]
-			private var port:String = "8080";
+			private var httpPort:int = 8686;
 			
 			[Bindable]
 			public var devices:RunningDevicesManager;
@@ -178,7 +179,7 @@
 				}
 				
 				httpServer.listen(8080, handleHttpServerError);
-				peerGroup = new PeerGroupConnection(devices, simulators);
+				peerGroup = new PeerGroupConnection(devices, simulators, httpPort);
 			}
 			
 			public function saveValues(desc:String, name:String):void {

@@ -1,11 +1,15 @@
 package tools
 {
+	import device.RunningDevice;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.NetStatusEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
+	import flash.filesystem.FileMode;
+	import flash.filesystem.FileStream;
 	import flash.net.NetConnection;
 	import flash.net.NetGroup;
 	import flash.net.SharedObject;
@@ -13,20 +17,20 @@ package tools
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
 	
-	import device.RunningDevice;
-	
 	public class PeerGroupConnection
 	{
-		public static const monServerPath:String = "assets/tools/monaserver/work/MonaServer";
+		public static const monServerFolder:String = "assets/tools/monaserver";
 		
-		private static const rtmpProtocol:String = "RTMFP";
+		private static const rtmpProtocol:String = "RTMP";
+		private static const rtmpPort:int = 1935;
+		private var httpPort:int = 8989;
 		
 		private var netConnection:NetConnection;
 		private var netGroup:NetGroup;
 		
 		private var devicesManager:RunningDevicesManager;
 		
-		private var monaServerFile:File;
+		private var monaServerBinary:File;
 		private var monaServerProc:NativeProcess;
 		
 		public var so:SharedObject = SharedObject.getLocal("MobileStationSettings");
@@ -34,9 +38,10 @@ package tools
 		public var description:String = "";
 		public var name:String = "";
 		
-		public function PeerGroupConnection(devManager:RunningDevicesManager, simManager:AvailableSimulatorsManager)
+		public function PeerGroupConnection(devManager:RunningDevicesManager, simManager:AvailableSimulatorsManager, port:int)
 		{
 			devicesManager = devManager;
+			httpPort = port;
 			
 			if(so.data["MSInfo"] != null){
 				description = so.data["MSInfo"].description;
@@ -45,31 +50,38 @@ package tools
 				saveValues("Description of this station", "Mobile Station");
 			}
 			
-			if (AtsMobileStation.isMacOs) {
-				monaServerFile = File.applicationDirectory.resolvePath(monServerPath);
-				
-				if(monaServerFile.exists){
-				
-					var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-					procInfo.executable = new File("/bin/chmod");			
-					procInfo.workingDirectory = File.applicationDirectory.resolvePath("assets/tools");
-					procInfo.arguments = new <String>["+x", "monaserver/work/MonaServer"];
-					
-					var proc:NativeProcess = new NativeProcess();
-					proc.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
-					proc.start(procInfo);
+			var mona:File = File.applicationDirectory.resolvePath(monServerFolder);
+			if(mona.exists){
+				var monaTempFolder:File = File.userDirectory.resolvePath(".atsmobilestation").resolvePath("monaserver");
+				if(monaTempFolder.exists){
+					monaTempFolder.deleteDirectory(true);
 				}
-
-			} else {
-				monaServerFile = File.applicationDirectory.resolvePath(monServerPath + ".exe");
-				if(monaServerFile.exists){
-					startMonaServer();
+				monaTempFolder.createDirectory();
+				mona.copyTo(monaTempFolder, true);
+				
+				if (AtsMobileStation.isMacOs) {
+					monaServerBinary = monaTempFolder.resolvePath("server").resolvePath("MonaServer");
+					if(monaServerBinary.exists){
+						var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+						procInfo.executable = new File("/bin/chmod");			
+						procInfo.workingDirectory = File.applicationDirectory.resolvePath("assets/tools");
+						procInfo.arguments = new <String>["+x", "monaserver/work/MonaServer"];
+						
+						var proc:NativeProcess = new NativeProcess();
+						proc.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
+						proc.start(procInfo);
+					}
+				} else {
+					monaServerBinary = monaTempFolder.resolvePath("server").resolvePath("MonaServer.exe");
+					if(monaServerBinary.exists){
+						startMonaServer();
+					}
 				}
 			}
 		}
 		
 		private function get info():Object{
-			var o:Object = {description:description, name:name}
+			var o:Object = {description:description, name:name, httpPort:httpPort}
 			if(AtsMobileStation.isMacOs){
 				o.os = "mac"
 			}else{
@@ -77,7 +89,7 @@ package tools
 			}
 			return o;
 		}
-				
+		
 		public function saveValues(d:String, n:String):void{
 			description = d;
 			name = n;
@@ -99,9 +111,12 @@ package tools
 		}
 		
 		private function startMonaServer():void{
+			
+			saveIniFile(monaServerBinary.parent.resolvePath("MonaServer.ini"));
+			
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			procInfo.executable = monaServerFile;			
-			procInfo.workingDirectory = monaServerFile.parent;
+			procInfo.executable = monaServerBinary;			
+			procInfo.workingDirectory = monaServerBinary.parent;
 			
 			monaServerProc = new NativeProcess();
 			monaServerProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun, false, 0, true);
@@ -124,7 +139,7 @@ package tools
 			netConnection.objectEncoding = 3;
 			netConnection.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 			netConnection.client = this;
-			netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost/mobilestation", "mobilestation", info);
+			netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + rtmpPort + "/mobilestation", "mobilestation", info);
 		}
 		
 		private function getDevicesData(value:Array, kind:String, destination:String="all"):Object{
@@ -143,12 +158,12 @@ package tools
 				case "NetConnection.Connect.Success":
 					trace("connected to MonaServer!")
 					for each(var dev:RunningDevice in devicesManager.collection){
-						if(dev.status == "ready"){
-							pushDevice(dev);
-						}
+					if(dev.status == "ready"){
+						pushDevice(dev);
 					}
+				}
 					devicesManager.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
-
+					
 					break;
 				default:
 					break;
@@ -172,6 +187,13 @@ package tools
 					netConnection.call("deviceLocked", null, ev.items[0].newValue, dev.id, dev.modelName, dev.modelId, dev.manufacturer, dev.ip, dev.port);
 				}
 			}
+		}
+		
+		private function saveIniFile(monServerIni:File):void{
+			var stream:FileStream = new FileStream();
+			stream.open(monServerIni, FileMode.WRITE);
+			stream.writeUTFBytes("[RTMFP]\nport = " + rtmpPort + "\n[RTMP]\nport = " + rtmpPort + "\n[HTTP]\nport = " + httpPort + "\nindex = index.html\n[RTSP]\nport = 0");
+			stream.close();
 		}
 	}
 }
