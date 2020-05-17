@@ -46,10 +46,8 @@ function onConnection(client,type,info,...)
 			client.writer:writeInvocation("setInfo", dataInfo)
 			client.writer:writeInvocation("setDevices", devices)
 		else
-			function client:getInfo(param)
+			function client:getData()
 				client.writer:writeInvocation("setInfo", dataInfo)
-			end
-			function client:getDevices(param)
 				client.writer:writeInvocation("setDevices", devices)
 			end
 		end

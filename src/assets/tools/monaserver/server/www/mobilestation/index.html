@@ -52,8 +52,7 @@
               
         // Connection handler
         function onConnection() {
-			socket.send(JSON.stringify(["getInfo"]));
-			socket.send(JSON.stringify(["getDevices"]));
+			socket.send(JSON.stringify(["getData"]));
         }
         
         // Disconnection handler
