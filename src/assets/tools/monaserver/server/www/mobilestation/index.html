@@ -40,11 +40,9 @@
 					case "deviceRemoved":
 						showDevices(data[7]);
 						break;
-					case "setDevices":
-						showDevices(data[1]);
-						break;
-					case "setInfo":
+					case "setData":
 						document.getElementById("info").innerHTML = data[1].description;
+						showDevices(data[2]);
 					break;
                 }
             } catch(exception) {}

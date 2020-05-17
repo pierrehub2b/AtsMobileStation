@@ -1,7 +1,5 @@
 package tools
 {
-	import device.RunningDevice;
-	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.NativeProcessExitEvent;
@@ -14,8 +12,11 @@ package tools
 	import flash.net.NetGroup;
 	import flash.net.SharedObject;
 	
+	import mx.core.FlexGlobals;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
+	
+	import device.RunningDevice;
 	
 	public class PeerGroupConnection
 	{
@@ -64,8 +65,8 @@ package tools
 					if(monaServerBinary.exists){
 						var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 						procInfo.executable = new File("/bin/chmod");			
-						procInfo.workingDirectory = File.applicationDirectory.resolvePath("assets/tools");
-						procInfo.arguments = new <String>["+x", "monaserver/work/MonaServer"];
+						procInfo.workingDirectory = monaTempFolder;
+						procInfo.arguments = new <String>["+x", "server/MonaServer"];
 						
 						var proc:NativeProcess = new NativeProcess();
 						proc.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
@@ -111,7 +112,7 @@ package tools
 		}
 		
 		private function startMonaServer():void{
-			
+
 			saveIniFile(monaServerBinary.parent.resolvePath("MonaServer.ini"));
 			
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
@@ -120,14 +121,19 @@ package tools
 			
 			monaServerProc = new NativeProcess();
 			monaServerProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun, false, 0, true);
+			monaServerProc.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onMonaServerError, false, 0, true);
 			monaServerProc.start(procInfo);
+		}
+		
+		protected function onMonaServerError(ev:ProgressEvent):void{
+			const len:int = monaServerProc.standardError.bytesAvailable;
+			FlexGlobals.topLevelApplication.log = monaServerProc.standardError.readUTFBytes(len);
 		}
 		
 		protected function onMonaServerRun(ev:ProgressEvent):void{
 			const len:int = ev.target.standardOutput.bytesAvailable;
 			const data:String = ev.target.standardOutput.readUTFBytes(len);
 			trace(data)
-			
 			if(data.indexOf(rtmpProtocol + " server started") > -1){
 				monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun);
 				connectToPeerGroup();
@@ -156,7 +162,7 @@ package tools
 			switch(ev.info.code)
 			{
 				case "NetConnection.Connect.Success":
-					trace("connected to MonaServer!")
+					trace("connected to MonaServer!");
 					for each(var dev:RunningDevice in devicesManager.collection){
 					if(dev.status == "ready"){
 						pushDevice(dev);

@@ -9,22 +9,22 @@
 		<![CDATA[
 			import com.greensock.TweenMax;
 			
-			import device.Device;
-			import device.RunningDevice;
-			import device.running.IosDevice;
-			
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.core.FlexGlobals;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
 			
+			import spark.filters.DropShadowFilter;
+			
+			import device.Device;
+			import device.RunningDevice;
+			import device.running.IosDevice;
+			
 			import renderer.PhysicialDeviceSettingsWindow;
 			import renderer.RunningDeviceRenderer;
 			
 			import servers.http.HttpServer;
-			
-			import spark.filters.DropShadowFilter;
 			
 			import tools.PeerGroupConnection;
 			
@@ -73,7 +73,7 @@
 			public function setTeamId(value:String):void {
 				teamId = value;
 			}
-			
+						
 			private function iconLoadComplete(event:Event):void 
 			{ 
 				NativeApplication.nativeApplication.icon.bitmaps = [event.target.content.bitmapData]; 
@@ -328,5 +328,4 @@
 				contentBackgroundAlpha="0.0" dataProvider="{simulators.collection}"
 				itemRenderer="renderer.SimulatorDeviceRenderer" useVirtualLayout="false"/>
 	</s:Group>
-	
 </s:WindowedApplication>

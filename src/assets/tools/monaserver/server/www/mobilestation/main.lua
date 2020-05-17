@@ -43,12 +43,10 @@ function onConnection(client,type,info,...)
 	else
 		editors[client] = client.writer
 		if type == "editor" then
-			client.writer:writeInvocation("setInfo", dataInfo)
-			client.writer:writeInvocation("setDevices", devices)
+			client.writer:writeInvocation("setData", dataInfo, devices)
 		else
 			function client:getData()
-				client.writer:writeInvocation("setInfo", dataInfo)
-				client.writer:writeInvocation("setDevices", devices)
+				client.writer:writeInvocation("setData", dataInfo, devices)
 			end
 		end
 	end
