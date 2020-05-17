@@ -22,6 +22,9 @@
 	
 	<target name="compile.project" description="" depends="init.sdk">
 		
+		<mkdir dir="temp"/>
+		<mkdir dir="release"/>
+		
 		<echo message="Application type -> '${package.type}'"/>
 		
 		<delete>
