@@ -31,6 +31,9 @@
 			
 			public static const isMacOs:Boolean = Capabilities.os.indexOf("Mac") > -1;
 			
+			private var icon:Loader = new Loader(); 
+			private var iconMenu:NativeMenu = new NativeMenu(); 
+			
 			public var peerGroup:PeerGroupConnection;
 			
 			[Bindable]
@@ -70,12 +73,61 @@
 				teamId = value;
 			}
 			
+			private function iconLoadComplete(event:Event):void 
+			{ 
+				NativeApplication.nativeApplication.icon.bitmaps = [event.target.content.bitmapData]; 
+			} 
+			
+			private function trayClick(ev:ScreenMouseEvent):void{
+				nativeWindow.restore();
+				NativeApplication.nativeApplication.activate()
+			}
+			
 			protected function creationCompleteHandler(event:FlexEvent):void {
 				
 				if (NativeApplication.supportsStartAtLogin)
 				{
 					NativeApplication.nativeApplication.startAtLogin = true;
 				}
+				
+				var exitCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Exit")); 
+				exitCommand.addEventListener(Event.SELECT, function(event:Event):void { 
+					NativeApplication.nativeApplication.icon.bitmaps = []; 
+					NativeApplication.nativeApplication.exit(); 
+				}); 
+				
+				var restartCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Restart")); 
+				restartCommand.addEventListener(Event.SELECT, function(event:Event):void { 
+					var execFilePath:String = "AtsMobileStation.";
+					if(isMacOs){
+						execFilePath += "app";
+					}else{
+						execFilePath += "exe";
+					}
+					
+					var execFile:File = File.applicationDirectory.resolvePath(execFilePath);
+					if(execFile.exists){
+						NativeApplication.nativeApplication.exit();
+						execFile.openWithDefaultApplication();
+					}
+				}); 
+				
+				if (NativeApplication.supportsSystemTrayIcon){
+					icon.contentLoaderInfo.addEventListener(Event.COMPLETE, iconLoadComplete); 
+					icon.load(new URLRequest("assets/icons/16/ats_logo.png")); 
+					
+					var systray:SystemTrayIcon = NativeApplication.nativeApplication.icon as SystemTrayIcon; 
+					systray.tooltip = "ATS Mobile Station"; 
+					systray.menu = iconMenu; 
+					systray.addEventListener(ScreenMouseEvent.CLICK, trayClick);
+				}
+								
+				if (NativeApplication.supportsDockIcon){ 
+					icon.contentLoaderInfo.addEventListener(Event.COMPLETE,iconLoadComplete); 
+					icon.load(new URLRequest("assets/icons/32/ats_logo.png")); 
+					var dock:DockIcon = NativeApplication.nativeApplication.icon as DockIcon;  
+					dock.menu = iconMenu; 
+				} 
 				
 				try {
 					logsFolder.deleteDirectory(true);
