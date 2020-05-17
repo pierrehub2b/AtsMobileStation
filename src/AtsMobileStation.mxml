@@ -71,6 +71,12 @@
 			}
 			
 			protected function creationCompleteHandler(event:FlexEvent):void {
+				
+				if (NativeApplication.supportsStartAtLogin)
+				{
+					NativeApplication.nativeApplication.startAtLogin = true;
+				}
+				
 				try {
 					logsFolder.deleteDirectory(true);
 				} catch (err:IOError) {

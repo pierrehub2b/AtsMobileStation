@@ -1,7 +1,5 @@
 package tools
 {
-	import device.RunningDevice;
-	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.NativeProcessExitEvent;
@@ -12,9 +10,10 @@ package tools
 	import flash.net.NetGroup;
 	import flash.net.SharedObject;
 	
-	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
+	
+	import device.RunningDevice;
 	
 	public class PeerGroupConnection
 	{
@@ -113,8 +112,9 @@ package tools
 			const len:int = ev.target.standardOutput.bytesAvailable;
 			const data:String = ev.target.standardOutput.readUTFBytes(len);
 			trace(data)
+			
 			if(data.indexOf(rtmpProtocol + " server started") > -1){
-				//monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun);
+				monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun);
 				connectToPeerGroup();
 			}
 		}
