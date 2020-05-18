@@ -16,6 +16,7 @@
 			import mx.core.DragSource;
 			import mx.managers.DragManager;
 			import mx.managers.PopUpManager;
+			import flash.filters.BitmapFilterQuality;
 			
 			import spark.filters.DropShadowFilter;
 			
@@ -119,8 +120,8 @@
 			</s:Group>
 			<s:Group width="24" height="24">
 				<s:BitmapImage id="iconStatus" source="assets/icons/24/{(data as RunningDevice).status}.png" 
-							   smooth="true" smoothingQuality="high" visible="{(data as RunningDevice).lockedBy==''}"/>
-				<s:BitmapImage id="iconLock" source="assets/icons/24/lock.png" visible="{(data as RunningDevice).lockedBy!=''}"/>
+							   smooth="true" smoothingQuality="high" visible="{(data as RunningDevice).lockedBy==null}"/>
+				<s:BitmapImage id="iconLock" source="assets/icons/24/lock.png" visible="{(data as RunningDevice).lockedBy!=null}"/>
 				<s:Group id="restartButton" buttonMode="true" click="restart_clickHandler(event)"
 						 toolTip="Restart driver" visible="false">
 					<s:BitmapImage source="assets/icons/24/restart.png" smooth="true" smoothingQuality="high"/>

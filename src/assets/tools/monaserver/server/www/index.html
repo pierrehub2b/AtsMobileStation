@@ -40,6 +40,11 @@
 					case "deviceRemoved":
 						showDevices(data[7]);
 						break;
+					case "deviceLocked":
+						var ip = data[6];
+						var port = data[7];
+
+						break;
 					case "setData":
 						document.getElementById("info").innerHTML = data[1].description;
 						showDevices(data[2]);
