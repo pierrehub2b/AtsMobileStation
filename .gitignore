@@ -40,3 +40,4 @@ build.properties
 src/assets/tools/monaserver/work/lua51.dll
 *.dll
 *.exe
+src/assets/tools/monaserver/server/MonaServer
