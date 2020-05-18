@@ -86,10 +86,10 @@
 			
 			protected function creationCompleteHandler(event:FlexEvent):void {
 				
-				if (NativeApplication.supportsStartAtLogin)
+				/*if (NativeApplication.supportsStartAtLogin)
 				{
 					NativeApplication.nativeApplication.startAtLogin = true;
-				}
+				}*/
 				
 				var exitCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Exit")); 
 				exitCommand.addEventListener(Event.SELECT, function(event:Event):void { 
