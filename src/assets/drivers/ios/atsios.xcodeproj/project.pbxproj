@@ -8,10 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		0400C0A8231D145B004CD4C9 /* UIDeviceName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0400C0A7231D145B004CD4C9 /* UIDeviceName.swift */; };
-		0417A86D231535850094FC89 /* UIElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0417A86C231535850094FC89 /* UIElement.swift */; };
-		0417A86F231535A10094FC89 /* ActionsEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0417A86E231535A10094FC89 /* ActionsEnum.swift */; };
-		0417A871231536100094FC89 /* DeviceButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0417A870231536100094FC89 /* DeviceButtons.swift */; };
-		0417A8732315362F0094FC89 /* Frame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0417A8722315362F0094FC89 /* Frame.swift */; };
 		0417A8752315366D0094FC89 /* EnumFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0417A8742315366D0094FC89 /* EnumFunctions.swift */; };
 		047BFA6822F178D700BB2E25 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047BFA6722F178D700BB2E25 /* AppDelegate.swift */; };
 		047BFA6A22F178D700BB2E25 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047BFA6922F178D700BB2E25 /* ViewController.swift */; };
@@ -25,6 +21,19 @@
 		04FB981222F17BC500D2B564 /* libEnvoyAmbassador.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04FB981122F17BC500D2B564 /* libEnvoyAmbassador.a */; };
 		2DFC38B12435ECC900E445DB /* sendLogs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DFC38B02435ECC900E445DB /* sendLogs.swift */; };
 		4642DFB0BA296DCD9288BF84 /* libPods-atsDriver.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 672037982A627CDF33E32082 /* libPods-atsDriver.a */; };
+		923AE14E24571C9900156ECB /* ElementController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE14D24571C9900156ECB /* ElementController.swift */; };
+		923AE15024571FFB00156ECB /* DriverController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE14F24571FFB00156ECB /* DriverController.swift */; };
+		923AE1522457200400156ECB /* AppController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE1512457200400156ECB /* AppController.swift */; };
+		923AE154245874E800156ECB /* CaptureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE153245874E800156ECB /* CaptureController.swift */; };
+		923AE1562458755100156ECB /* InfoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE1552458755100156ECB /* InfoController.swift */; };
+		923AE1582459690400156ECB /* ScreenshotController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE1572459690400156ECB /* ScreenshotController.swift */; };
+		923AE15A245F007600156ECB /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE159245F007600156ECB /* Router.swift */; };
+		923AE15C245F008500156ECB /* Routeable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE15B245F008500156ECB /* Routeable.swift */; };
+		923AE15E245F21DF00156ECB /* ButtonController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE15D245F21DF00156ECB /* ButtonController.swift */; };
+		923AE161245F3D8100156ECB /* Application.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE160245F3D8100156ECB /* Application.swift */; };
+		9254C2A02449A8E3006DC4FC /* ScriptingExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9254C29F2449A8E3006DC4FC /* ScriptingExecutor.swift */; };
+		92C416C32473CB5B00A772AF /* AtsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92C416C22473CB5B00A772AF /* AtsClient.swift */; };
+		92C416C52473D9D300A772AF /* Content.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92C416C42473D9D300A772AF /* Content.swift */; };
 		9A907BBD234901DF00F3DE15 /* AppIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A907BBC234901DF00F3DE15 /* AppIcons.swift */; };
 		C0D378BF233B5E5C009A6AB1 /* Settings.plist in Resources */ = {isa = PBXBuildFile; fileRef = 047BFA8122F178D800BB2E25 /* Settings.plist */; };
 /* End PBXBuildFile section */
@@ -41,10 +50,6 @@
 
 /* Begin PBXFileReference section */
 		0400C0A7231D145B004CD4C9 /* UIDeviceName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDeviceName.swift; sourceTree = "<group>"; };
-		0417A86C231535850094FC89 /* UIElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIElement.swift; sourceTree = "<group>"; };
-		0417A86E231535A10094FC89 /* ActionsEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionsEnum.swift; sourceTree = "<group>"; };
-		0417A870231536100094FC89 /* DeviceButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceButtons.swift; sourceTree = "<group>"; };
-		0417A8722315362F0094FC89 /* Frame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Frame.swift; sourceTree = "<group>"; };
 		0417A8742315366D0094FC89 /* EnumFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnumFunctions.swift; sourceTree = "<group>"; };
 		043FEF81230C1DFD007051EF /* libBlueSocket.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libBlueSocket.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		046FFFB122F9BDF8008C6466 /* libUITestHelpers.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libUITestHelpers.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -74,6 +79,19 @@
 		5678C43C43C84FCACF81C48D /* Pods-atsiosUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-atsiosUITests.release.xcconfig"; path = "Target Support Files/Pods-atsiosUITests/Pods-atsiosUITests.release.xcconfig"; sourceTree = "<group>"; };
 		672037982A627CDF33E32082 /* libPods-atsDriver.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-atsDriver.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		89F6EEB0CA1DB5071991C47F /* Pods-atsDriver.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-atsDriver.debug.xcconfig"; path = "Target Support Files/Pods-atsDriver/Pods-atsDriver.debug.xcconfig"; sourceTree = "<group>"; };
+		923AE14D24571C9900156ECB /* ElementController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElementController.swift; sourceTree = "<group>"; };
+		923AE14F24571FFB00156ECB /* DriverController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriverController.swift; sourceTree = "<group>"; };
+		923AE1512457200400156ECB /* AppController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppController.swift; sourceTree = "<group>"; };
+		923AE153245874E800156ECB /* CaptureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureController.swift; sourceTree = "<group>"; };
+		923AE1552458755100156ECB /* InfoController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoController.swift; sourceTree = "<group>"; };
+		923AE1572459690400156ECB /* ScreenshotController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotController.swift; sourceTree = "<group>"; };
+		923AE159245F007600156ECB /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
+		923AE15B245F008500156ECB /* Routeable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Routeable.swift; sourceTree = "<group>"; };
+		923AE15D245F21DF00156ECB /* ButtonController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonController.swift; sourceTree = "<group>"; };
+		923AE160245F3D8100156ECB /* Application.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application.swift; sourceTree = "<group>"; };
+		9254C29F2449A8E3006DC4FC /* ScriptingExecutor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScriptingExecutor.swift; sourceTree = "<group>"; };
+		92C416C22473CB5B00A772AF /* AtsClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtsClient.swift; sourceTree = "<group>"; };
+		92C416C42473D9D300A772AF /* Content.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Content.swift; sourceTree = "<group>"; };
 		9A907BBC234901DF00F3DE15 /* AppIcons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIcons.swift; sourceTree = "<group>"; };
 		CF14D7879408BF914F82B665 /* Pods-atsiosUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-atsiosUITests.debug.xcconfig"; path = "Target Support Files/Pods-atsiosUITests/Pods-atsiosUITests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -137,16 +155,12 @@
 		047BFA7E22F178D800BB2E25 /* atsDriver */ = {
 			isa = PBXGroup;
 			children = (
-				047BFA7F22F178D800BB2E25 /* atsDriver.swift */,
 				047BFA8122F178D800BB2E25 /* Settings.plist */,
-				0417A86C231535850094FC89 /* UIElement.swift */,
-				0417A86E231535A10094FC89 /* ActionsEnum.swift */,
-				0417A870231536100094FC89 /* DeviceButtons.swift */,
-				0417A8722315362F0094FC89 /* Frame.swift */,
-				0417A8742315366D0094FC89 /* EnumFunctions.swift */,
-				0400C0A7231D145B004CD4C9 /* UIDeviceName.swift */,
-				9A907BBC234901DF00F3DE15 /* AppIcons.swift */,
-				2DFC38B02435ECC900E445DB /* sendLogs.swift */,
+				92C416C62473D9FF00A772AF /* Utils */,
+				923AE15F245F3D7500156ECB /* Models */,
+				923AE14C24571BB600156ECB /* Controllers */,
+				9254C2A124518FF1006DC4FC /* Scripting */,
+				047BFA7F22F178D800BB2E25 /* atsDriver.swift */,
 			);
 			path = atsDriver;
 			sourceTree = "<group>";
@@ -160,6 +174,51 @@
 				29A033C72F092427CC8F9466 /* Pods-atsDriver.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		923AE14C24571BB600156ECB /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				923AE14D24571C9900156ECB /* ElementController.swift */,
+				923AE14F24571FFB00156ECB /* DriverController.swift */,
+				923AE1512457200400156ECB /* AppController.swift */,
+				923AE153245874E800156ECB /* CaptureController.swift */,
+				923AE1552458755100156ECB /* InfoController.swift */,
+				923AE1572459690400156ECB /* ScreenshotController.swift */,
+				923AE15D245F21DF00156ECB /* ButtonController.swift */,
+				923AE159245F007600156ECB /* Router.swift */,
+				923AE15B245F008500156ECB /* Routeable.swift */,
+				92C416C42473D9D300A772AF /* Content.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		923AE15F245F3D7500156ECB /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				923AE160245F3D8100156ECB /* Application.swift */,
+				92C416C22473CB5B00A772AF /* AtsClient.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		9254C2A124518FF1006DC4FC /* Scripting */ = {
+			isa = PBXGroup;
+			children = (
+				9254C29F2449A8E3006DC4FC /* ScriptingExecutor.swift */,
+			);
+			path = Scripting;
+			sourceTree = "<group>";
+		};
+		92C416C62473D9FF00A772AF /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				0417A8742315366D0094FC89 /* EnumFunctions.swift */,
+				0400C0A7231D145B004CD4C9 /* UIDeviceName.swift */,
+				9A907BBC234901DF00F3DE15 /* AppIcons.swift */,
+				2DFC38B02435ECC900E445DB /* sendLogs.swift */,
+			);
+			path = Utils;
 			sourceTree = "<group>";
 		};
 		CE6333FFDB6E768160A7BE15 /* Frameworks */ = {
@@ -233,9 +292,11 @@
 				TargetAttributes = {
 					047BFA6322F178D700BB2E25 = {
 						CreatedOnToolsVersion = 10.3;
+						LastSwiftMigration = 1140;
 					};
 					047BFA7A22F178D800BB2E25 = {
 						CreatedOnToolsVersion = 10.3;
+						LastSwiftMigration = 1140;
 						TestTargetID = 047BFA6322F178D700BB2E25;
 					};
 				};
@@ -320,15 +381,24 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0417A86F231535A10094FC89 /* ActionsEnum.swift in Sources */,
-				0417A871231536100094FC89 /* DeviceButtons.swift in Sources */,
-				0417A86D231535850094FC89 /* UIElement.swift in Sources */,
+				923AE161245F3D8100156ECB /* Application.swift in Sources */,
+				923AE15E245F21DF00156ECB /* ButtonController.swift in Sources */,
+				923AE14E24571C9900156ECB /* ElementController.swift in Sources */,
+				923AE154245874E800156ECB /* CaptureController.swift in Sources */,
+				923AE1522457200400156ECB /* AppController.swift in Sources */,
+				92C416C52473D9D300A772AF /* Content.swift in Sources */,
+				923AE15C245F008500156ECB /* Routeable.swift in Sources */,
 				0417A8752315366D0094FC89 /* EnumFunctions.swift in Sources */,
+				923AE1582459690400156ECB /* ScreenshotController.swift in Sources */,
+				923AE15024571FFB00156ECB /* DriverController.swift in Sources */,
 				0400C0A8231D145B004CD4C9 /* UIDeviceName.swift in Sources */,
+				923AE15A245F007600156ECB /* Router.swift in Sources */,
 				047BFA8022F178D800BB2E25 /* atsDriver.swift in Sources */,
+				92C416C32473CB5B00A772AF /* AtsClient.swift in Sources */,
 				9A907BBD234901DF00F3DE15 /* AppIcons.swift in Sources */,
+				9254C2A02449A8E3006DC4FC /* ScriptingExecutor.swift in Sources */,
 				2DFC38B12435ECC900E445DB /* sendLogs.swift in Sources */,
-				0417A8732315362F0094FC89 /* Frame.swift in Sources */,
+				923AE1562458755100156ECB /* InfoController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -498,7 +568,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ats.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -519,7 +589,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ats.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -547,7 +617,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = atsios;
 			};
@@ -576,7 +646,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = atsios;
 			};
