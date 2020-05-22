@@ -23,9 +23,26 @@
 			list.innerHTML = "";
 
 			for (var i = 0; i < array.length; i++) {
+				var endPoint = array[i].ip + ":" + array[i].port;
 				var item = document.createElement("li");
-				item.appendChild(document.createTextNode(array[i].modelName + " (" + array[i].ip + ":" + array[i].port + ")"));
+				
+				item.appendChild(document.createTextNode(array[i].modelName + " (" + endPoint + ") "));
+				item["endPoint"] = endPoint;
+				checkLock(item, array[i].locked);
 				list.appendChild(item);
+			}
+		}
+		
+		function checkLock(item, locked){
+			if(locked == null){
+				var lockImg = item.getElementsByTagName("img");
+				if(lockImg.length > 0){
+					item.removeChild(lockImg[0]);
+				}
+			}else{
+				var img = document.createElement("img");
+				img.src = "lock.png";
+				item.appendChild(img);
 			}
 		}
 	  
@@ -39,6 +56,19 @@
 						break;
 					case "deviceRemoved":
 						showDevices(data[7]);
+						break;
+					case "deviceLocked":
+						var locked = data[1];
+						var endPoint = data[6] + ":" + data[7];
+
+						var list = document.getElementById("listDevices");
+						var items = list.getElementsByTagName("li");
+						for (var i = 0; i < items.length; ++i) {
+							if(items[i]["endPoint"] == endPoint){
+								checkLock(items[i], locked);
+								break;
+							}
+						}
 						break;
 					case "setData":
 						document.getElementById("info").innerHTML = data[1].description;

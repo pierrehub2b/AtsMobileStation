@@ -148,16 +148,6 @@ package tools
 			netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + rtmpPort + "/mobilestation", "mobilestation", info);
 		}
 		
-		private function getDevicesData(value:Array, kind:String, destination:String="all"):Object{
-			
-			var now:Date = new Date();
-			
-			var message:Object = {value:value, kind:kind, destination:destination};
-			message.time = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
-			
-			return message;
-		}
-		
 		private function onNetStatus(ev:NetStatusEvent):void{
 			switch(ev.info.code)
 			{
@@ -177,7 +167,7 @@ package tools
 		}
 		
 		private function pushDevice(dev:RunningDevice):void{
-			netConnection.call("pushDevice", null, {modelName:dev.modelName, modelId:dev.modelId, manufacturer:dev.manufacturer, ip:dev.ip, port:dev.port});
+			netConnection.call("pushDevice", null, {modelName:dev.modelName, modelId:dev.modelId, manufacturer:dev.manufacturer, ip:dev.ip, port:dev.port, locked:dev.lockedBy});
 		}
 		
 		private function devicesChangeHandler(ev:CollectionEvent):void{

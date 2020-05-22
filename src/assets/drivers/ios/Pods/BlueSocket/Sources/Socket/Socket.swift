@@ -2312,7 +2312,7 @@ public class Socket: SocketReader, SocketWriter {
 		#if os(Linux)
 			if Glibc.listen(self.socketfd, Int32(maxBacklogSize)) < 0 {
 
-				throw Error(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
+				throw Error(status: Socket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
 			}
 		#else
 			if Darwin.listen(self.socketfd, Int32(maxBacklogSize)) < 0 {
@@ -2401,7 +2401,7 @@ public class Socket: SocketReader, SocketWriter {
 		#if os(Linux)
 			if Glibc.listen(self.socketfd, Int32(maxBacklogSize)) < 0 {
 
-				throw Error(code: Socket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
+				throw Error(status: Socket.SOCKET_ERR_LISTEN_FAILED, reason: self.lastError())
 			}
 		#else
 			if Darwin.listen(self.socketfd, Int32(maxBacklogSize)) < 0 {

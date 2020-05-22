@@ -110,7 +110,7 @@ package device.running
 			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
 			writeTypedLogs("Copy files into temp directory", "info");
 			resultDir = File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id);
-			var alreadyCopied:Boolean = resultDir.exists;
+			var alreadyCopied:Boolean = false;//resultDir.exists;
 			if(!alreadyCopied) {
 				iosDriverProjectFolder.copyTo(resultDir, true);
 			}
@@ -306,6 +306,10 @@ package device.running
 				errorMessage = " - WIFI not connected !";
 				removeReceivers();
 				testingProcess.exit();
+			} else if (data.indexOf("** DEVICE LOCKED BY : ") > -1) {
+				this.lockedBy = getDeviceOwner(data);
+			} else if (data.indexOf("** DEVICE UNLOCKED **") > -1) {
+				this.lockedBy = null;
 			} else if (data.indexOf("** Port unavailable **") > -1) {
 				errorMessage = " - Unavailable port !";
 				removeReceivers();
@@ -373,6 +377,19 @@ package device.running
 				removeReceivers();
 				return;
 			}
+		}
+
+		private function getDeviceOwner(data:String):String {
+			var array:Array = data.split("\n");
+			for each(var line:String in array) {
+				if (line.indexOf("** DEVICE LOCKED BY : ") > -1) {
+					var firstIndex:int = line.length;
+					var lastIndex:int = line.lastIndexOf("** DEVICE LOCKED BY : ") + "** DEVICE LOCKED BY : ".length;
+					return line.substring(lastIndex, firstIndex).slice(0, -3);
+				}
+			}
+
+			return null;
 		}
 	}
 }

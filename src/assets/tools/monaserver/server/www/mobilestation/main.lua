@@ -11,6 +11,16 @@ function getDeviceIndex(tab, ip, port)
 	return nil
 end
 
+function updateDevice(tab, ip, port, locked)
+	for i, v in ipairs (tab) do 
+		if (v.ip == ip and v.port == port) then
+			v.locked = locked
+			return true 
+		end
+	end
+	return false
+end
+
 function onConnection(client,type,info,...)
 	if type == "mobilestation" then
 		dataInfo = info
@@ -32,11 +42,11 @@ function onConnection(client,type,info,...)
 				end
 			end
 		end
-		function client:deviceLocked(by, id, modelName, modelId, manufacturer, ip, port)
-			local idx = getDeviceIndex(devices, ip, port)
-			if idx ~= nil then 
+		function client:deviceLocked(locked, id, modelName, modelId, manufacturer, ip, port)
+			local update = updateDevice(devices, ip, port, locked)
+			if update then 
 				for editor,writer in pairs(editors) do
-					writer:writeInvocation("deviceLocked", by, id, modelName, modelId, manufacturer, ip, port)
+					writer:writeInvocation("deviceLocked", locked, id, modelName, modelId, manufacturer, ip, port)
 				end
 			end
 		end
