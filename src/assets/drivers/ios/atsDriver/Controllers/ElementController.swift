@@ -38,7 +38,9 @@ extension ElementController: Routeable {
             
             return swipe(from, to: CGPoint(x: directionX, y: directionY))
         case .scripting:
-            return [:]
+            let coordinate = try fetchCoordinates(parameters)
+            let script: String = ""
+            return scripting(script, coordinate: coordinate)
         case .input:
             guard parameters.count > 2 else { throw Router.RouterError.missingParameters }
             let text = parameters[2]
@@ -55,34 +57,20 @@ final class ElementController {
         case scripting
         case input
     }
-    
-    struct Output: Content {
-        let status: String
-        let message: String?
-        let error: String?
-    }
-        
-    struct ScriptingInput: Content {
-        let script: String
-        let frame: CGRect
-    }
-    
+                
     private func scripting(_ script: String, coordinate: CGPoint) -> Content {
-        let coordinate: XCUICoordinate
-        let script: String
-        
         /* let executor = ScriptingExecutor(script);
         
         do {
             if let message = try executor.execute(coordinate: coordinate) {
-                return Output(status: "0", message: message, error: nil)
+                return Router.Output(message: message)
             } else {
-                return Output(status: "0", message: "", error: nil)
+                return Router.Output(message: "scripting on element")
             }
         } catch {
-            return Output(status: "", message: nil, error: error.localizedDescription)
-        }
-        
+            return Router.Output(message: error.localizedDescription, status: "-20")
+        } */
+        /*
         let executor = ScriptingExecutor(script)
 
         let normalized = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
@@ -97,14 +85,14 @@ final class ElementController {
             self.resultElement["error"] = error.localizedDescription
         } */
         
-        return Router.Output(message: "scripting on element")
+        return Router.Output(message: "Scripting on element")
     }
     
     private func tap(_ coordinate: CGPoint) -> Content {
         let xCoordinate = Double(coordinate.x) * deviceWidth / channelWidth
         let yCoordinate = Double(coordinate.y) * deviceHeight / channelHeight
         
-        if(app != nil) {
+        if (app != nil) {
             let normalized = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
             let coordinate = normalized.withOffset(CGVector(dx: xCoordinate, dy: yCoordinate))
             coordinate.tap()

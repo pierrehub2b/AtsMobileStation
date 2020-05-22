@@ -35,6 +35,7 @@ extension DriverController: Routeable {
         case .stop:
             let result = stop()
             AtsClient.current = nil
+            activeChannelsCount = 0
             sendLogs(type: logType.STATUS, message: "** DEVICE UNLOCKED **")
             return result
         case .quit:
