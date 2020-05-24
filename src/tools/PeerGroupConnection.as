@@ -191,9 +191,19 @@ package tools
 			procInfo.workingDirectory = monaServerBinary.parent;
 			
 			monaServerProc = new NativeProcess();
-			monaServerProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun, false, 0, true);
-			monaServerProc.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onMonaServerError, false, 0, true);
+			
+			if (AtsMobileStation.isMacOs) {
+				procInfo.arguments.push("--daemon");
+				monaServerProc.addEventListener(NativeProcessExitEvent.EXIT, monaServerDaemonExit, false, 0, true);
+			}else{
+				monaServerProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun, false, 0, true);
+				monaServerProc.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onMonaServerError, false, 0, true);
+			}
 			monaServerProc.start(procInfo);
+		}
+		
+		protected function monaServerDaemonExit(ev:NativeProcessExitEvent):void{
+			connectToPeerGroup();
 		}
 		
 		protected function onMonaServerError(ev:ProgressEvent):void{
@@ -212,6 +222,10 @@ package tools
 		}
 		
 		private function connectToPeerGroup():void{
+			if(netConnection != null){
+				netConnection.removeEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
+			}
+			
 			netConnection = new NetConnection();
 			netConnection.objectEncoding = 3;
 			netConnection.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
@@ -219,12 +233,20 @@ package tools
 			netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + rtmpPort + "/mobilestation", "mobilestation");
 		}
 		
+		private var maxTry:int = 20;
 		private function onNetStatus(ev:NetStatusEvent):void{
+
 			netConnection.removeEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 			switch(ev.info.code)
 			{
 				case "NetConnection.Connect.Success":
 					trace("connected to MonaServer!");
+					break;
+				case "NetConnection.Connect.Failed":
+					maxTry--;
+					if(maxTry > 0){
+						connectToPeerGroup();
+					}
 					break;
 				default:
 					break;
