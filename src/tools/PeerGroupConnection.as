@@ -1,5 +1,7 @@
 package tools
 {
+	import com.greensock.TweenMax;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -222,10 +224,6 @@ package tools
 		}
 		
 		private function connectToPeerGroup():void{
-			if(netConnection != null){
-				netConnection.removeEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
-			}
-			
 			netConnection = new NetConnection();
 			netConnection.objectEncoding = 3;
 			netConnection.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
@@ -233,9 +231,9 @@ package tools
 			netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + rtmpPort + "/mobilestation", "mobilestation");
 		}
 		
-		private var maxTry:int = 20;
+		private var maxTry:int = 50;
 		private function onNetStatus(ev:NetStatusEvent):void{
-
+			trace(maxTry);
 			netConnection.removeEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 			switch(ev.info.code)
 			{
@@ -245,7 +243,7 @@ package tools
 				case "NetConnection.Connect.Failed":
 					maxTry--;
 					if(maxTry > 0){
-						connectToPeerGroup();
+						TweenMax.delayedCall(0.5, connectToPeerGroup);
 					}
 					break;
 				default:
