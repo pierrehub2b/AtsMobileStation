@@ -46,37 +46,7 @@ package tools
 		{
 			devicesManager = devManager;
 			httpPort = port;
-			
 			checkMonaserverPort();
-			
-			/*var mona:File = File.applicationDirectory.resolvePath(monaServerFolder);
-			if(mona.exists){
-			var monaTempFolder:File = File.userDirectory.resolvePath(".atsmobilestation").resolvePath("monaserver");
-			if(monaTempFolder.exists){
-			monaTempFolder.deleteDirectory(true);
-			}
-			monaTempFolder.createDirectory();
-			mona.copyTo(monaTempFolder, true);
-			
-			if (AtsMobileStation.isMacOs) {
-			monaServerBinary = monaTempFolder.resolvePath("server").resolvePath("MonaServer");
-			if(monaServerBinary.exists){
-			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			procInfo.executable = new File("/bin/chmod");			
-			procInfo.workingDirectory = monaTempFolder;
-			procInfo.arguments = new <String>["+x", "server/MonaServer"];
-			
-			var proc:NativeProcess = new NativeProcess();
-			proc.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
-			proc.start(procInfo);
-			}
-			} else {
-			monaServerBinary = monaTempFolder.resolvePath("server").resolvePath("MonaServer.exe");
-			if(monaServerBinary.exists){
-			startMonaServer();
-			}
-			}
-			}*/
 		}
 		
 		private function checkMonaserverPort():void{
