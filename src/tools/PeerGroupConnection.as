@@ -205,7 +205,7 @@ package tools
 		}
 		
 		protected function monaServerDaemonExit(ev:NativeProcessExitEvent):void{
-			connectToPeerGroup();
+			TweenMax.delayedCall(0.5, connectToPeerGroup);
 		}
 		
 		protected function onMonaServerError(ev:ProgressEvent):void{
@@ -231,9 +231,8 @@ package tools
 			netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + rtmpPort + "/mobilestation", "mobilestation");
 		}
 		
-		private var maxTry:int = 50;
+		private var maxTry:int = 20;
 		private function onNetStatus(ev:NetStatusEvent):void{
-			trace(maxTry);
 			netConnection.removeEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 			switch(ev.info.code)
 			{
