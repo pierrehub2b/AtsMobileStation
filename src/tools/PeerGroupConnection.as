@@ -1,7 +1,5 @@
 package tools
 {
-	import device.RunningDevice;
-	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -14,14 +12,14 @@ package tools
 	import flash.filesystem.FileStream;
 	import flash.net.NetConnection;
 	import flash.net.NetGroup;
-	import flash.net.SharedObject;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	
 	import mx.core.FlexGlobals;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
-	import mx.utils.StringUtil;
+	
+	import device.RunningDevice;
 	
 	public class PeerGroupConnection
 	{
@@ -156,11 +154,16 @@ package tools
 		}
 		
 		public function deviceLocked(device:Object):void{}
+		public function setDevices(devices:Object):void{}
 		public function deviceReady(devices:Array):void{}
 		public function deviceRemoved(devices:Array, device:Object):void{}
 		public function setInfo(nm:String, desc:String, undef:Object=null):void {
 			description = desc;
 			name = nm;
+		}
+		
+		public function close():void{
+			netConnection.call("close", null);
 		}
 		
 		//--------------------------------------------------------------------------------------------------------
@@ -172,6 +175,12 @@ package tools
 				var monaInstallFolder:File = File.userDirectory.resolvePath(".atsmobilestation").resolvePath("monaserver");
 								
 				if (AtsMobileStation.isMacOs) {
+					
+					mona.resolvePath("server").resolvePath("www").copyTo(monaInstallFolder.resolvePath("server").resolvePath("www"), true);
+					mona.resolvePath("server").resolvePath("MonaServer").copyTo(monaInstallFolder.resolvePath("server").resolvePath("MonaServer"), true);
+					mona.resolvePath("MonaBase").copyTo(monaInstallFolder.resolvePath("MonaBase"), true);
+					mona.resolvePath("MonaCore").copyTo(monaInstallFolder.resolvePath("MonaCore"), true);
+										
 					monaServerBinary = monaInstallFolder.resolvePath("server").resolvePath("MonaServer");
 					if(monaServerBinary.exists){
 						var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
@@ -241,17 +250,11 @@ package tools
 		}
 		
 		private function onNetStatus(ev:NetStatusEvent):void{
+			netConnection.removeEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 			switch(ev.info.code)
 			{
 				case "NetConnection.Connect.Success":
 					trace("connected to MonaServer!");
-					for each(var dev:RunningDevice in devicesManager.collection){
-					if(dev.status == "ready"){
-						pushDevice(dev);
-					}
-				}
-					devicesManager.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
-					
 					break;
 				default:
 					break;

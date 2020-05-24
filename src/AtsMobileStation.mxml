@@ -86,11 +86,6 @@
 			
 			protected function creationCompleteHandler(event:FlexEvent):void {
 				
-				/*if (NativeApplication.supportsStartAtLogin)
-				{
-					NativeApplication.nativeApplication.startAtLogin = true;
-				}*/
-				
 				var exitCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Exit")); 
 				exitCommand.addEventListener(Event.SELECT, function(event:Event):void { 
 					NativeApplication.nativeApplication.icon.bitmaps = []; 
@@ -204,6 +199,7 @@
 			
 			protected function closeHandler(event:Event):void {
 				devices.terminate();
+				peerGroup.close();
 			}
 			
 			protected function cleanDirectory(directory:File):void {

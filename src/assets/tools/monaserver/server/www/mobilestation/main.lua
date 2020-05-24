@@ -24,16 +24,18 @@ function onConnection(client,type,...)
 		
 		if data["info"] == nil then 
 			data["info"] = {} 
-			data["info"]["name"] = "MS-" .. os.getenv("USERNAME")
 			data["info"]["description"] = "Mobile Station server"
 			
 			local libType = package.cpath:match("%p[\\|/]?%p(%a+)")
 			if libType == "dll" then
 				data["info"]["os"] = "win"
+				data["info"]["name"] = "MS-" .. os.getenv("USERNAME")
 			elseif libType == "dylib" then
+				data["info"]["name"] = "MS-" .. os.getenv("HOME")
 				data["info"]["os"] = "mac"
 			elseif libType == "so" then
 				data["info"]["os"] = "linux"
+				data["info"]["name"] = "MS-" .. os.getenv("HOME")
 			end
 		end
 
@@ -59,6 +61,7 @@ function onConnection(client,type,...)
 					cli.writer:writeInvocation("deviceRemoved", devices, device)
 			end
 		end
+		
 		function client:pushDevice(device)
 			local idx = getDeviceIndex(device["ip"], device["port"])
 			if idx == nil then 
@@ -68,12 +71,21 @@ function onConnection(client,type,...)
 				end
 			end
 		end
+		
 		function client:deviceLocked(device)
 			local update = updateDevice(device["ip"], device["port"], device["lockedBy"])
 			if update then 
 				for id, cli in pairs(mona.clients) do
-					cli.writer:writeInvocation("deviceLocked", device)
+					cli.writer:writeInvocation("setDevices", devices)
 				end
+			end
+		end
+		
+		function client:close()
+			count = #devices
+			for i=0, count do devices[i]=nil end
+			for id, cli in pairs(mona.clients) do
+				cli.writer:writeInvocation("setDevices", devices)
 			end
 		end
 	else
