@@ -76,7 +76,7 @@ function onConnection(client,type,...)
 			local update = updateDevice(device["ip"], device["port"], device["lockedBy"])
 			if update then 
 				for id, cli in pairs(mona.clients) do
-					cli.writer:writeInvocation("setDevices", devices)
+					cli.writer:writeInvocation("deviceLocked", device)
 				end
 			end
 		end
