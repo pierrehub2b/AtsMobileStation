@@ -55,11 +55,12 @@
 						showDevices(data[1]);
 						break;
 					case "deviceRemoved":
-						showDevices(data[7]);
+						showDevices(data[1]);
 						break;
 					case "deviceLocked":
-						var locked = data[1];
-						var endPoint = data[6] + ":" + data[7];
+						var device = data[1];
+						var locked = device["lockedBy"];
+						var endPoint = device["ip"] + ":" + device["port"];
 
 						var list = document.getElementById("listDevices");
 						var items = list.getElementsByTagName("li");

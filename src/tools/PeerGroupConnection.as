@@ -154,10 +154,10 @@ package tools
 				case "NetConnection.Connect.Success":
 					trace("connected to MonaServer!");
 					for each(var dev:RunningDevice in devicesManager.collection){
-					if(dev.status == "ready"){
-						pushDevice(dev);
+						if(dev.status == "ready"){
+							pushDevice(dev);
+						}
 					}
-				}
 					devicesManager.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
 					
 					break;
@@ -167,20 +167,21 @@ package tools
 		}
 		
 		private function pushDevice(dev:RunningDevice):void{
-			netConnection.call("pushDevice", null, {modelName:dev.modelName, modelId:dev.modelId, manufacturer:dev.manufacturer, ip:dev.ip, port:dev.port, locked:dev.lockedBy});
+			//netConnection.call("pushDevice", null, {modelName:dev.modelName, modelId:dev.modelId, manufacturer:dev.manufacturer, ip:dev.ip, port:dev.port, locked:dev.lockedBy});
+			netConnection.call("pushDevice", null, dev);
 		}
 		
 		private function devicesChangeHandler(ev:CollectionEvent):void{
 			var dev:RunningDevice
 			if(ev.kind == CollectionEventKind.REMOVE){
 				dev = ev.items[0] as RunningDevice
-				netConnection.call("deviceRemoved", null, dev.id, dev.modelName, dev.modelId, dev.manufacturer, dev.ip, dev.port);
+				netConnection.call("deviceRemoved", null, dev);
 			}else if(ev.kind == CollectionEventKind.UPDATE){
 				dev = ev.items[0].source as RunningDevice
 				if(ev.items[0].property == "status" && ev.items[0].newValue == "ready"){
 					pushDevice(dev);
 				}else if (ev.items[0].property == "lockedBy"){
-					netConnection.call("deviceLocked", null, ev.items[0].newValue, dev.id, dev.modelName, dev.modelId, dev.manufacturer, dev.ip, dev.port);
+					netConnection.call("deviceLocked", null, dev);
 				}
 			}
 		}

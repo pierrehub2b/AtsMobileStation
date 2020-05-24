@@ -2,8 +2,8 @@ editors = {}
 devices = {}
 dataInfo = {}
 
-function getDeviceIndex(tab, ip, port)
-	for i, v in ipairs (tab) do 
+function getDeviceIndex(ip, port)
+	for i, v in ipairs (devices) do 
 		if (v.ip == ip and v.port == port) then
 			return i 
 		end
@@ -11,8 +11,8 @@ function getDeviceIndex(tab, ip, port)
 	return nil
 end
 
-function updateDevice(tab, ip, port, locked)
-	for i, v in ipairs (tab) do 
+function updateDevice(ip, port, locked)
+	for i, v in ipairs (devices) do 
 		if (v.ip == ip and v.port == port) then
 			v.locked = locked
 			return true 
@@ -24,17 +24,17 @@ end
 function onConnection(client,type,info,...)
 	if type == "mobilestation" then
 		dataInfo = info
-		function client:deviceRemoved(id, modelName, modelId, manufacturer, ip, port)
-			local idx = getDeviceIndex(devices, ip, port)
+		function client:deviceRemoved(device)
+			local idx = getDeviceIndex(device["ip"], device["port"])
 			if idx ~= nil then 
 				table.remove(devices, idx)
 				for editor,writer in pairs(editors) do
-					writer:writeInvocation("deviceRemoved", id, modelName, modelId, manufacturer, ip, port, devices)
+					writer:writeInvocation("deviceRemoved", devices, device)
 				end
 			end
 		end
 		function client:pushDevice(device)
-			local idx = getDeviceIndex(devices, device["ip"], device["port"])
+			local idx = getDeviceIndex(device["ip"], device["port"])
 			if idx == nil then 
 				table.insert(devices, device)
 				for editor,writer in pairs(editors) do
@@ -42,11 +42,11 @@ function onConnection(client,type,info,...)
 				end
 			end
 		end
-		function client:deviceLocked(locked, id, modelName, modelId, manufacturer, ip, port)
-			local update = updateDevice(devices, ip, port, locked)
+		function client:deviceLocked(device)
+			local update = updateDevice(device["ip"], device["port"], device["lockedBy"])
 			if update then 
 				for editor,writer in pairs(editors) do
-					writer:writeInvocation("deviceLocked", locked, id, modelName, modelId, manufacturer, ip, port)
+					writer:writeInvocation("deviceLocked", device)
 				end
 			end
 		end
