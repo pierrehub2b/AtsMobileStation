@@ -1,6 +1,13 @@
 # AtsMobileStation
 PC and Mac OS application to start and install mobile drivers used by ATS test framework
 
+# Before launching the software on MacOS, please do actions below
+- Copy and paste the content of the AtsMobileStation folder "assets/tools/monaserver/macos" to "src/assets/tools/monaserver"
+- If not already install, launch the command: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+- Launch the command: brew install openssl@1.1
+- Copy and paste the content of the AtsMobileStation folder "assets/tools/libluajit" to your personal folder "/usr/local/lib/" 
+**After the first launch, your computer possibly tel you that le library "luajit" is not safe. For autorise it, go to your security settings and click on button "allow acess"**
+
 ## iOS Devices
 **This procedure is useless if you're using iOS Simulators**
 ### Apple Developer settings
