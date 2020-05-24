@@ -10,8 +10,11 @@ import helpers.DeviceSettingsHelper;
 
 public class AndroidDevice extends RunningDevice
 	{		
-		public var androidVersion:String = "";
-		public var androidSdk:String = "";
+		[Transient]
+		public var androidVersion:String = "0";
+		
+		[Transient]
+		public var androidSdk:String = "0";
 
 		[Transient]
 		protected var process:AndroidProcess;

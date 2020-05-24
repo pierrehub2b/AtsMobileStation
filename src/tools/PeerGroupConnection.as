@@ -1,7 +1,11 @@
 package tools
 {
+	import device.RunningDevice;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
+	import flash.events.Event;
+	import flash.events.IOErrorEvent;
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.NetStatusEvent;
 	import flash.events.ProgressEvent;
@@ -11,20 +15,23 @@ package tools
 	import flash.net.NetConnection;
 	import flash.net.NetGroup;
 	import flash.net.SharedObject;
+	import flash.net.URLLoader;
+	import flash.net.URLRequest;
 	
 	import mx.core.FlexGlobals;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
-	
-	import device.RunningDevice;
+	import mx.utils.StringUtil;
 	
 	public class PeerGroupConnection
 	{
-		public static const monServerFolder:String = "assets/tools/monaserver";
+		public static const monaServerFolder:String = "assets/tools/monaserver";
 		
 		private static const rtmpProtocol:String = "RTMP";
-		private static const rtmpPort:int = 1935;
+		private static const defaultRtmpPort:int = 1935;
 		private var httpPort:int = 8989;
+		
+		private var rtmpPort:int = defaultRtmpPort;
 		
 		private var netConnection:NetConnection;
 		private var netGroup:NetGroup;
@@ -33,9 +40,7 @@ package tools
 		
 		private var monaServerBinary:File;
 		private var monaServerProc:NativeProcess;
-		
-		public var so:SharedObject = SharedObject.getLocal("MobileStationSettings");
-		
+				
 		public var description:String = "";
 		public var name:String = "";
 		
@@ -44,28 +49,134 @@ package tools
 			devicesManager = devManager;
 			httpPort = port;
 			
-			if(so.data["MSInfo"] != null){
-				description = so.data["MSInfo"].description;
-				name = so.data["MSInfo"].name;
-			}else{
-				saveValues("Description of this station", "Mobile Station");
-			}
+			checkMonaserverPort();
 			
-			var mona:File = File.applicationDirectory.resolvePath(monServerFolder);
+			/*var mona:File = File.applicationDirectory.resolvePath(monaServerFolder);
 			if(mona.exists){
-				var monaTempFolder:File = File.userDirectory.resolvePath(".atsmobilestation").resolvePath("monaserver");
-				if(monaTempFolder.exists){
-					monaTempFolder.deleteDirectory(true);
+			var monaTempFolder:File = File.userDirectory.resolvePath(".atsmobilestation").resolvePath("monaserver");
+			if(monaTempFolder.exists){
+			monaTempFolder.deleteDirectory(true);
+			}
+			monaTempFolder.createDirectory();
+			mona.copyTo(monaTempFolder, true);
+			
+			if (AtsMobileStation.isMacOs) {
+			monaServerBinary = monaTempFolder.resolvePath("server").resolvePath("MonaServer");
+			if(monaServerBinary.exists){
+			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			procInfo.executable = new File("/bin/chmod");			
+			procInfo.workingDirectory = monaTempFolder;
+			procInfo.arguments = new <String>["+x", "server/MonaServer"];
+			
+			var proc:NativeProcess = new NativeProcess();
+			proc.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
+			proc.start(procInfo);
+			}
+			} else {
+			monaServerBinary = monaTempFolder.resolvePath("server").resolvePath("MonaServer.exe");
+			if(monaServerBinary.exists){
+			startMonaServer();
+			}
+			}
+			}*/
+		}
+		
+		private function checkMonaserverPort():void{
+			var monaInstallFolder:File = File.userDirectory.resolvePath(".atsmobilestation").resolvePath("monaserver");
+			var iniFile:File = monaInstallFolder.resolvePath("server").resolvePath("MonaServer.ini");
+			
+			if(iniFile.exists){
+				var iniFileLoader:URLLoader = new URLLoader();
+				iniFileLoader.addEventListener(Event.COMPLETE, iniFileLoaded, false, 0, true);
+				iniFileLoader.load(new URLRequest(iniFile.url));
+			}else{
+				installMonaserver();
+			}
+		}
+		
+		private function iniFileLoaded(ev:Event):void{
+			var loader:URLLoader = ev.currentTarget as URLLoader;
+			var data:Array = loader.data.split("\n");
+			
+			for(var i:int = 0; i < data.length; ++i){
+				if(data[i] == "[" + rtmpProtocol + "]"){
+					var dataPort:Array = data[i+1].split("=");
+					connectToMonaserver(parseInt(dataPort[1]));
+					break;
 				}
-				monaTempFolder.createDirectory();
-				mona.copyTo(monaTempFolder, true);
-				
+			}
+		}
+		
+		private function connectToMonaserver(port:int):void{
+			if(port > 0){
+				netConnection = new NetConnection();
+				netConnection.objectEncoding = 3;
+				netConnection.addEventListener(NetStatusEvent.NET_STATUS, onFirstConnect);
+				netConnection.addEventListener(IOErrorEvent.IO_ERROR, netIOError);
+				netConnection.client = this;
+				netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + port + "/mobilestation", "mobilestation");
+			}
+		}
+		
+		private function netIOError(ev:IOErrorEvent):void{
+			trace("io error");
+		}
+		
+		private function onFirstConnect(ev:NetStatusEvent):void{
+			
+			netConnection.removeEventListener(NetStatusEvent.NET_STATUS, onFirstConnect);
+			netConnection.removeEventListener(IOErrorEvent.IO_ERROR, netIOError);
+			
+			switch(ev.info.code)
+			{
+				case "NetConnection.Connect.Success":
+					trace("connected to MonaServer!");
+					break;
+				case "NetConnection.Connect.Failed":
+					trace("MonaServer not running, launch install ...");
+					installMonaserver();
+					break;
+				default:
+					break;
+			}
+		}
+		
+		//--------------------------------------------------------------------------------------------------------
+		// Client methods
+		//--------------------------------------------------------------------------------------------------------
+		
+		public function init(name:String, description:String, configs:Object=null, obj:Object=null):void{
+			this.name = name;
+			this.description = description;
+			devicesManager.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
+		}
+		
+		public function saveValues(desc:String, nm:String):void{
+			netConnection.call("updateInfo", null, nm, desc);
+		}
+		
+		public function deviceLocked(device:Object):void{}
+		public function deviceReady(devices:Array):void{}
+		public function deviceRemoved(devices:Array, device:Object):void{}
+		public function setInfo(nm:String, desc:String, undef:Object=null):void {
+			description = desc;
+			name = nm;
+		}
+		
+		//--------------------------------------------------------------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------
+
+		private function installMonaserver():void{
+			var mona:File = File.applicationDirectory.resolvePath(monaServerFolder);
+			if(mona.exists){
+				var monaInstallFolder:File = File.userDirectory.resolvePath(".atsmobilestation").resolvePath("monaserver");
+								
 				if (AtsMobileStation.isMacOs) {
-					monaServerBinary = monaTempFolder.resolvePath("server").resolvePath("MonaServer");
+					monaServerBinary = monaInstallFolder.resolvePath("server").resolvePath("MonaServer");
 					if(monaServerBinary.exists){
 						var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 						procInfo.executable = new File("/bin/chmod");			
-						procInfo.workingDirectory = monaTempFolder;
+						procInfo.workingDirectory = monaInstallFolder;
 						procInfo.arguments = new <String>["+x", "server/MonaServer"];
 						
 						var proc:NativeProcess = new NativeProcess();
@@ -73,34 +184,15 @@ package tools
 						proc.start(procInfo);
 					}
 				} else {
-					monaServerBinary = monaTempFolder.resolvePath("server").resolvePath("MonaServer.exe");
+					mona.resolvePath("server").resolvePath("www").copyTo(monaInstallFolder.resolvePath("server").resolvePath("www"), true);
+					mona.resolvePath("server").resolvePath("lua51.dll").copyTo(monaInstallFolder.resolvePath("server").resolvePath("lua51.dll"), true);
+					mona.resolvePath("server").resolvePath("MonaServer.exe").copyTo(monaInstallFolder.resolvePath("server").resolvePath("MonaServer.exe"), true);
+					
+					monaServerBinary = monaInstallFolder.resolvePath("server").resolvePath("MonaServer.exe");
 					if(monaServerBinary.exists){
 						startMonaServer();
 					}
 				}
-			}
-		}
-		
-		private function get info():Object{
-			var o:Object = {description:description, name:name, httpPort:httpPort}
-			if(AtsMobileStation.isMacOs){
-				o.os = "mac"
-			}else{
-				o.os = "win"
-			}
-			return o;
-		}
-		
-		public function saveValues(d:String, n:String):void{
-			description = d;
-			name = n;
-			so.setProperty("MSInfo", info);
-			so.flush();
-		}
-		
-		public function close():void{
-			if(monaServerProc != null && monaServerProc.running){
-				monaServerProc.exit(true);
 			}
 		}
 		
@@ -112,7 +204,7 @@ package tools
 		}
 		
 		private function startMonaServer():void{
-
+			
 			saveIniFile(monaServerBinary.parent.resolvePath("MonaServer.ini"));
 			
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
@@ -145,7 +237,7 @@ package tools
 			netConnection.objectEncoding = 3;
 			netConnection.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 			netConnection.client = this;
-			netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + rtmpPort + "/mobilestation", "mobilestation", info);
+			netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + rtmpPort + "/mobilestation", "mobilestation");
 		}
 		
 		private function onNetStatus(ev:NetStatusEvent):void{
@@ -154,10 +246,10 @@ package tools
 				case "NetConnection.Connect.Success":
 					trace("connected to MonaServer!");
 					for each(var dev:RunningDevice in devicesManager.collection){
-						if(dev.status == "ready"){
-							pushDevice(dev);
-						}
+					if(dev.status == "ready"){
+						pushDevice(dev);
 					}
+				}
 					devicesManager.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
 					
 					break;
@@ -167,7 +259,6 @@ package tools
 		}
 		
 		private function pushDevice(dev:RunningDevice):void{
-			//netConnection.call("pushDevice", null, {modelName:dev.modelName, modelId:dev.modelId, manufacturer:dev.manufacturer, ip:dev.ip, port:dev.port, locked:dev.lockedBy});
 			netConnection.call("pushDevice", null, dev);
 		}
 		

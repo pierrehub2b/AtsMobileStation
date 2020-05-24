@@ -204,7 +204,6 @@
 			
 			protected function closeHandler(event:Event):void {
 				devices.terminate();
-				peerGroup.close();
 			}
 			
 			protected function cleanDirectory(directory:File):void {

@@ -1,6 +1,4 @@
-editors = {}
 devices = {}
-dataInfo = {}
 
 function getDeviceIndex(ip, port)
 	for i, v in ipairs (devices) do 
@@ -21,47 +19,77 @@ function updateDevice(ip, port, locked)
 	return false
 end
 
-function onConnection(client,type,info,...)
+function onConnection(client,type,...)
 	if type == "mobilestation" then
-		dataInfo = info
+		
+		if data["info"] == nil then 
+			data["info"] = {} 
+			data["info"]["name"] = "MS-" .. os.getenv("USERNAME")
+			data["info"]["description"] = "Mobile Station server"
+			
+			local libType = package.cpath:match("%p[\\|/]?%p(%a+)")
+			if libType == "dll" then
+				data["info"]["os"] = "win"
+			elseif libType == "dylib" then
+				data["info"]["os"] = "mac"
+			elseif libType == "so" then
+				data["info"]["os"] = "linux"
+			end
+		end
+
+		count = #devices
+		for i=0, count do devices[i]=nil end
+		
+		client.writer:writeInvocation("init", data["info"]["name"], data["info"]["description"], mona.configs)
+		
+		function client:updateInfo(name, description)
+			data["info"]["name"] = name
+			data["info"]["description"] = description
+			for id, cli in pairs(mona.clients) do
+				cli.writer:writeInvocation("setInfo", name, description)
+			end
+		end
+		
 		function client:deviceRemoved(device)
 			local idx = getDeviceIndex(device["ip"], device["port"])
 			if idx ~= nil then 
 				table.remove(devices, idx)
-				for editor,writer in pairs(editors) do
-					writer:writeInvocation("deviceRemoved", devices, device)
-				end
+			end
+			for id, cli in pairs(mona.clients) do
+					cli.writer:writeInvocation("deviceRemoved", devices, device)
 			end
 		end
 		function client:pushDevice(device)
 			local idx = getDeviceIndex(device["ip"], device["port"])
 			if idx == nil then 
 				table.insert(devices, device)
-				for editor,writer in pairs(editors) do
-					writer:writeInvocation("deviceReady", devices)
+				for id, cli in pairs(mona.clients) do
+					cli.writer:writeInvocation("deviceReady", devices)
 				end
 			end
 		end
 		function client:deviceLocked(device)
 			local update = updateDevice(device["ip"], device["port"], device["lockedBy"])
 			if update then 
-				for editor,writer in pairs(editors) do
-					writer:writeInvocation("deviceLocked", device)
+				for id, cli in pairs(mona.clients) do
+					cli.writer:writeInvocation("deviceLocked", device)
 				end
 			end
 		end
 	else
-		editors[client] = client.writer
 		if type == "editor" then
-			client.writer:writeInvocation("setData", dataInfo, devices)
+			client.writer:writeInvocation("setInfo", data["info"]["name"], data["info"]["description"])
+			client.writer:writeInvocation("setDevices", devices)
+			client.writer:writeInvocation("setHttpPort", mona.configs.HTTP.port)
 		else
 			function client:getData()
-				client.writer:writeInvocation("setData", dataInfo, devices)
+				client.writer:writeInvocation("setInfo", data["info"]["name"], data["info"]["description"])
+				client.writer:writeInvocation("setDevices", devices)
 			end
 		end
 	end
 end
 
 function onDisconnection(client)
-  editors[client] = nil
+
 end

@@ -8,13 +8,14 @@ package device
 		public var lockedBy:String = null;
 		public var ip:String;
 		public var port:String = "";
-		public var settingsPort:String = "";
-		public var automaticPort:Boolean = true;
-		public var error:String = null;
-		public var errorMessage:String = "";
-		public var simulator:Boolean = false;
-		public var usbMode:Boolean = false;
-		public var udpIpAddress:String;
+		
+		[Transient]public var settingsPort:String = "";
+		[Transient]public var automaticPort:Boolean = true;
+		[Transient]public var error:String = null;
+		[Transient]public var errorMessage:String = "";
+		[Transient]public var simulator:Boolean = false;
+		[Transient]public var usbMode:Boolean = false;
+		[Transient]public var udpIpAddress:String;
 		
 		public function RunningDevice(id:String=""){
 			super(id);
