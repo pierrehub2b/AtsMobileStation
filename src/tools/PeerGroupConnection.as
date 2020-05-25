@@ -199,18 +199,13 @@ package tools
 				monaServerProc.addEventListener(NativeProcessExitEvent.EXIT, monaServerDaemonExit, false, 0, true);
 			}else{
 				monaServerProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun, false, 0, true);
-				monaServerProc.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onMonaServerError, false, 0, true);
 			}
 			monaServerProc.start(procInfo);
 		}
 		
 		protected function monaServerDaemonExit(ev:NativeProcessExitEvent):void{
+			monaServerProc.removeEventListener(NativeProcessExitEvent.EXIT, monaServerDaemonExit);
 			TweenMax.delayedCall(0.5, connectToPeerGroup);
-		}
-		
-		protected function onMonaServerError(ev:ProgressEvent):void{
-			const len:int = monaServerProc.standardError.bytesAvailable;
-			FlexGlobals.topLevelApplication.log = monaServerProc.standardError.readUTFBytes(len);
 		}
 		
 		protected function onMonaServerRun(ev:ProgressEvent):void{
