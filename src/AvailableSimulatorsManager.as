@@ -1,6 +1,8 @@
 package 
 {
-	import flash.desktop.NativeProcess;
+import device.simulator.AndroidSimulator;
+
+import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.EventDispatcher;
 	import flash.events.NativeProcessExitEvent;
@@ -11,8 +13,10 @@ package
 	import mx.collections.ArrayCollection;
 	
 	import device.simulator.IosSimulator;
-	
-	public class AvailableSimulatorsManager extends EventDispatcher
+
+import mx.utils.UIDUtil;
+
+public class AvailableSimulatorsManager extends EventDispatcher
 	{
 		public static const COLLECTION_CHANGED:String = "collectionChanged";
 		
@@ -33,23 +37,26 @@ package
 		
 		public function AvailableSimulatorsManager()
 		{
-			if(Capabilities.os.indexOf("Mac") > -1){
-				
-				info = "Loading simulators, please wait ...";
-				
-				procInfo = new NativeProcessStartupInfo();
-				process = new NativeProcess();
-				
-				procInfo.executable = new File("/usr/bin/env");
-				procInfo.workingDirectory = File.userDirectory;
-				
-				process.addEventListener(NativeProcessExitEvent.EXIT, onSetupSimulatorExit, false, 0, true);
-				
-				procInfo.arguments = new <String>["defaults", "write" ,"com.apple.iphonesimulator", "ShowChrome", "-int", "0"];
-				process.start(procInfo);
-			}else{
-				info = "Android simulators are not yet implemented ...";
+			info = "Loading simulators, please wait ...";
+
+			if (Capabilities.os.indexOf("Mac") > -1) {
+				fetchIosSimulators()
 			}
+
+			fetchAndroidEmulators()
+		}
+
+		protected function fetchIosSimulators():void {
+			procInfo = new NativeProcessStartupInfo();
+			process = new NativeProcess();
+
+			procInfo.executable = new File("/usr/bin/env");
+			procInfo.workingDirectory = File.userDirectory;
+
+			process.addEventListener(NativeProcessExitEvent.EXIT, onSetupSimulatorExit, false, 0, true);
+
+			procInfo.arguments = new <String>["defaults", "write" ,"com.apple.iphonesimulator", "ShowChrome", "-int", "0"];
+			process.start(procInfo);
 		}
 		
 		protected function onSetupSimulatorExit(ev:NativeProcessExitEvent):void
@@ -113,12 +120,55 @@ package
 					runtime = null;					
 				}
 				
-				if(collection.length == 0){
+				if (collection.length == 0) {
 					info = String("No simulators found !\n(Xcode may not be installed on this station !)");
-				}else{
+				} else {
 					info = String("");
 				}
 			}			
+		}
+
+		private var avdmProcess:NativeProcess
+		private var avdmOutputData:String
+		private var avdmErrorData:String
+
+		protected function fetchAndroidEmulators(callback:Function = null) {
+			var info:NativeProcessStartupInfo = new NativeProcessStartupInfo()
+			info.executable = File.userDirectory.resolvePath("AppData/Local/Android/Sdk/emulator/emulator.exe")
+			info.arguments = new <String>["-list-avds"];
+
+			avdmProcess = new NativeProcess()
+			avdmProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputData, false, 0, true);
+			avdmProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onErrorData, false, 0, true);
+			avdmProcess.addEventListener(NativeProcessExitEvent.EXIT, onExit, false, 0, true);
+			avdmProcess.start(info)
+		}
+
+		private function onOutputData(event:ProgressEvent):void {
+			avdmOutputData = avdmProcess.standardOutput.readUTFBytes(avdmProcess.standardOutput.bytesAvailable)
+		}
+
+		private function onErrorData(event:ProgressEvent):void {
+			avdmOutputData = avdmProcess.standardError.readUTFBytes(avdmProcess.standardError.bytesAvailable)
+		}
+
+		private function onExit(event:NativeProcessExitEvent):void {
+			avdmProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputData);
+			avdmProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onErrorData);
+			avdmProcess.removeEventListener(NativeProcessExitEvent.EXIT, onExit);
+
+			if (avdmErrorData != null) {
+				// handle error
+				return
+			}
+
+			// handle data
+			var lines:Array = avdmOutputData.split("\r\n")
+			for each (var line:String in lines) {
+				if (line) {
+					collection.addItem(new AndroidSimulator(line));
+				}
+			}
 		}
 	}
 }
