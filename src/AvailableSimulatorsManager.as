@@ -135,7 +135,13 @@ public class AvailableSimulatorsManager extends EventDispatcher
 		private var emulatorErrorData:String
 
 		protected function fetchAndroidEmulators(callback:Function = null) {
-			var file = Settings.getInstance().androidSDKDirectory.resolvePath("emulator/emulator")
+			var file:File
+			if (Capabilities.os.indexOf("Mac") > -1) {
+				file = Settings.getInstance().androidSDKDirectory.resolvePath("emulator/emulator")
+			} else {
+				file = Settings.getInstance().androidSDKDirectory.resolvePath("emulator/emulator.exe")
+			}
+
 			if (!file.exists) {
 				trace("No Android SDK configured")
 				return
@@ -175,7 +181,7 @@ public class AvailableSimulatorsManager extends EventDispatcher
 			if (Capabilities.os.indexOf("Mac") > -1) {
 				lines = emulatorOutputData.split("\n")
 			} else {
-				lines = emulatorOutputData.split("\n\r")
+				lines = emulatorOutputData.split("\r\n")
 			}
 
 			for each (var line:String in lines) {

@@ -156,10 +156,7 @@
 			androidSDKDirectory.text = directory.nativePath
 			// save
 		}
-
-		protected function openAndroidSDKDownloadURL(event:MouseEvent) {
-			navigateToURL(new URLRequest("https://developer.android.com/studio#cmdline-tools"));
-		}
+		
 		]]>
 	</fx:Script>
 
@@ -185,7 +182,6 @@
 			<s:TextInput id="androidSDKDirectory" width="100%" height="100%" maxChars="5" enabled="false" text="{Settings.getInstance().androidSDKDirectory.nativePath}"/>
 			<s:Button label="Search" fontStyle="normal" fontSize="11" click="searchDirectory(event)"/>
 		</s:HGroup>
-		<s:Button label="Download" fontStyle="normal" fontSize="11" click="openAndroidSDKDownloadURL(event)"/>
 		<s:Spacer height="6"/>
 		<mx:HRule height="6" width="100%"/>
 
