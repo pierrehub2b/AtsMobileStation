@@ -9,8 +9,10 @@ import flash.desktop.NativeProcess;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
 	import flash.system.Capabilities;
-	
-	import mx.collections.ArrayCollection;
+
+import helpers.Settings;
+
+import mx.collections.ArrayCollection;
 	
 	import device.simulator.IosSimulator;
 
@@ -43,7 +45,7 @@ public class AvailableSimulatorsManager extends EventDispatcher
 				fetchIosSimulators()
 			}
 
-			fetchAndroidEmulators()
+			// fetchAndroidEmulators()
 		}
 
 		protected function fetchIosSimulators():void {
@@ -133,8 +135,14 @@ public class AvailableSimulatorsManager extends EventDispatcher
 		private var avdmErrorData:String
 
 		protected function fetchAndroidEmulators(callback:Function = null) {
+			var file = Settings.getInstance().androidSDKDirectory.resolvePath("tools/emulator")
+			if (!file.exists) {
+				trace("No Android SDK configured")
+				return
+			}
+
 			var info:NativeProcessStartupInfo = new NativeProcessStartupInfo()
-			info.executable = File.userDirectory.resolvePath("AppData/Local/Android/Sdk/emulator/emulator.exe")
+			info.executable = file
 			info.arguments = new <String>["-list-avds"];
 
 			avdmProcess = new NativeProcess()
