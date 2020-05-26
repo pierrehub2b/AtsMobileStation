@@ -5,6 +5,7 @@ import flash.events.NativeProcessExitEvent;
 import flash.events.ProgressEvent;
 import flash.filesystem.File;
 import flash.net.SharedObject;
+import flash.system.Capabilities;
 
 import helpers.Settings;
 
@@ -20,9 +21,16 @@ public class AndroidSimulator extends Simulator {
     }
 
     override public function startSim():void {
-        var file = Settings.getInstance().androidSDKDirectory.resolvePath("emulator/emulator.exe")
+        var file = Settings.getInstance().androidSDKDirectory
+        if (Capabilities.os.indexOf("Mac") > -1) {
+            file = file.resolvePath("emulator/emulator")
+        } else {
+            file = file.resolvePath("emulator/emulator.exe")
+        }
+
         if (!file.exists) {
             trace("No Android SDK found")
+            statusOff()
             return
         }
 
@@ -47,11 +55,15 @@ public class AndroidSimulator extends Simulator {
     private function onErrorData(event:ProgressEvent):void {
         var process = event.currentTarget as NativeProcess
         errorData = process.standardError.readUTFBytes(process.standardError.bytesAvailable)
+        process.exit()
+        statusOff()
     }
 
     private function onOutputData(event:ProgressEvent):void {
         var process = event.currentTarget as NativeProcess
         outputData = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable)
+        process.exit()
+        statusOn()
     }
 }
 }

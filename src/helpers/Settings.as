@@ -1,8 +1,11 @@
 package helpers {
 import flash.filesystem.File;
 import flash.net.SharedObject;
+import flash.system.Capabilities;
 
 public class Settings {
+
+    public static const isMacOs:Boolean = Capabilities.os.indexOf("Mac") > -1;
 
     private var sharedObject:SharedObject;
 
@@ -21,7 +24,11 @@ public class Settings {
 
         /* androidSDKDirectory
         if (androidSDKDirectory == null) { */
+        if (isMacOs) {
+            androidSDKDirectory = File.userDirectory.resolvePath("Library/Android/sdk")
+        } else {
             androidSDKDirectory = File.userDirectory.resolvePath("AppData/Local/Android/Sdk")
+        }
         // }
     }
 

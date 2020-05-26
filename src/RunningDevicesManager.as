@@ -1,8 +1,10 @@
 package 
 {
 	import com.greensock.TweenLite;
-	
-	import flash.desktop.NativeProcess;
+
+import device.simulator.Simulator;
+
+import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
 	import flash.events.NativeProcessExitEvent;
@@ -323,19 +325,22 @@ package
 		}
 		
 		private function realDevicesLoaded():void{
-			for each(var sim:IosSimulator in FlexGlobals.topLevelApplication.simulators.collection){
-				if(sim.started){
-					var dev:IosDevice = findDevice(sim.id) as IosDevice;
-					if(dev == null){
-						dev = sim.GetDevice;	
-						dev.start();
-						dev.addEventListener(Device.STOPPED_EVENT, deviceStoppedHandler, false, 0, true);
-						
-						collection.addItem(dev);
-						collection.refresh();
+			for each(var sim:Simulator in FlexGlobals.topLevelApplication.simulators.collection) {
+				if (sim is IosSimulator) {
+					if(sim.started){
+						var dev:IosDevice = findDevice(sim.id) as IosDevice;
+						if(dev == null){
+							dev = (sim as IosSimulator).GetDevice;
+							dev.start();
+							dev.addEventListener(Device.STOPPED_EVENT, deviceStoppedHandler, false, 0, true);
+
+							collection.addItem(dev);
+							collection.refresh();
+						}
 					}
 				}
 			}
+
 			iosLoop.restart(true);
 		}
 	}

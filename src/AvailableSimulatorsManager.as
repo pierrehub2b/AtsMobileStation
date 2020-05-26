@@ -45,7 +45,7 @@ public class AvailableSimulatorsManager extends EventDispatcher
 				fetchIosSimulators()
 			}
 
-			// fetchAndroidEmulators()
+			fetchAndroidEmulators()
 		}
 
 		protected function fetchIosSimulators():void {
@@ -130,12 +130,12 @@ public class AvailableSimulatorsManager extends EventDispatcher
 			}			
 		}
 
-		private var avdmProcess:NativeProcess
-		private var avdmOutputData:String
-		private var avdmErrorData:String
+		private var emulatorProcess:NativeProcess
+		private var emulatorOutputData:String
+		private var emulatorErrorData:String
 
 		protected function fetchAndroidEmulators(callback:Function = null) {
-			var file = Settings.getInstance().androidSDKDirectory.resolvePath("tools/emulator")
+			var file = Settings.getInstance().androidSDKDirectory.resolvePath("emulator/emulator")
 			if (!file.exists) {
 				trace("No Android SDK configured")
 				return
@@ -145,33 +145,39 @@ public class AvailableSimulatorsManager extends EventDispatcher
 			info.executable = file
 			info.arguments = new <String>["-list-avds"];
 
-			avdmProcess = new NativeProcess()
-			avdmProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputData, false, 0, true);
-			avdmProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onErrorData, false, 0, true);
-			avdmProcess.addEventListener(NativeProcessExitEvent.EXIT, onExit, false, 0, true);
-			avdmProcess.start(info)
+			emulatorProcess = new NativeProcess()
+			emulatorProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputData, false, 0, true);
+			emulatorProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onErrorData, false, 0, true);
+			emulatorProcess.addEventListener(NativeProcessExitEvent.EXIT, onExit, false, 0, true);
+			emulatorProcess.start(info)
 		}
 
 		private function onOutputData(event:ProgressEvent):void {
-			avdmOutputData = avdmProcess.standardOutput.readUTFBytes(avdmProcess.standardOutput.bytesAvailable)
+			emulatorOutputData = emulatorProcess.standardOutput.readUTFBytes(emulatorProcess.standardOutput.bytesAvailable)
 		}
 
 		private function onErrorData(event:ProgressEvent):void {
-			avdmOutputData = avdmProcess.standardError.readUTFBytes(avdmProcess.standardError.bytesAvailable)
+			emulatorOutputData = emulatorProcess.standardError.readUTFBytes(emulatorProcess.standardError.bytesAvailable)
 		}
 
 		private function onExit(event:NativeProcessExitEvent):void {
-			avdmProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputData);
-			avdmProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onErrorData);
-			avdmProcess.removeEventListener(NativeProcessExitEvent.EXIT, onExit);
+			emulatorProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputData);
+			emulatorProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onErrorData);
+			emulatorProcess.removeEventListener(NativeProcessExitEvent.EXIT, onExit);
 
-			if (avdmErrorData != null) {
+			if (emulatorErrorData != null) {
 				// handle error
 				return
 			}
 
 			// handle data
-			var lines:Array = avdmOutputData.split("\r\n")
+			var lines:Array
+			if (Capabilities.os.indexOf("Mac") > -1) {
+				lines = emulatorOutputData.split("\n")
+			} else {
+				lines = emulatorOutputData.split("\n\r")
+			}
+
 			for each (var line:String in lines) {
 				if (line) {
 					collection.addItem(new AndroidSimulator(line));
