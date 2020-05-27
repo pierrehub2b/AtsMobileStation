@@ -51,6 +51,11 @@
             try { // try to parse data
                 data = JSON.parse(msg.data);
                 switch (data[0]) {
+                	case "msStatus":
+                		if(data[1] == "close"){
+                			list.innerHTML = "";
+                		}
+                		break;
 					case "deviceConnected":
 						
 						var device = data[1];
