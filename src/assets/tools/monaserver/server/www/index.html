@@ -51,11 +51,32 @@
             try { // try to parse data
                 data = JSON.parse(msg.data);
                 switch (data[0]) {
-					case "deviceReady":
-						showDevices(data[1]);
+					case "deviceConnected":
+						
+						var device = data[1];
+						var endPoint = device["ip"] + ":" + device["port"];
+						
+						var item = document.createElement("li");
+						item.appendChild(document.createTextNode(device.modelName + " (" + endPoint + ") "));
+						item["endPoint"] = endPoint;
+						
+						var list = document.getElementById("listDevices");
+						list.appendChild(item);
+												
 						break;
 					case "deviceRemoved":
-						showDevices(data[1]);
+						var device = data[1];
+						var locked = device["lockedBy"];
+						var endPoint = device["ip"] + ":" + device["port"];
+
+						var list = document.getElementById("listDevices");
+						var items = list.getElementsByTagName("li");
+						for (var i = 0; i < items.length; ++i) {
+							if(items[i]["endPoint"] == endPoint){
+								list.removeChild(items[i]);
+								break;
+							}
+						}
 						break;
 					case "deviceLocked":
 						var device = data[1];
@@ -71,7 +92,7 @@
 							}
 						}
 						break;
-					case "setInfo":
+					case "infoUpdated":
 						document.getElementById("name").innerHTML = "[ " + data[1] + " ]";
 						document.getElementById("info").innerHTML = data[2];
 						break;

@@ -2,6 +2,8 @@ package tools
 {
 	import com.greensock.TweenMax;
 	
+	import device.RunningDevice;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -20,8 +22,6 @@ package tools
 	import mx.core.FlexGlobals;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
-	
-	import device.RunningDevice;
 	
 	public class PeerGroupConnection
 	{
@@ -101,6 +101,9 @@ package tools
 			{
 				case "NetConnection.Connect.Success":
 					trace("connected to MonaServer!");
+					
+					initData(ev.info);
+					
 					break;
 				case "NetConnection.Connect.Failed":
 					trace("MonaServer not running, launch install ...");
@@ -111,30 +114,31 @@ package tools
 			}
 		}
 		
+		private function initData(info:Object):void{
+			name = info.name
+			description = info.description
+			devicesManager.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
+		}
+		
 		//--------------------------------------------------------------------------------------------------------
 		// Client methods
 		//--------------------------------------------------------------------------------------------------------
-		
-		public function init(name:String, description:String, configs:Object=null, obj:Object=null):void{
-			this.name = name;
-			this.description = description;
-			devicesManager.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
-		}
 		
 		public function saveValues(desc:String, nm:String):void{
 			netConnection.call("updateInfo", null, nm, desc);
 		}
 		
+		public function msStatus(type:String):void{}
 		public function deviceLocked(device:Object):void{}
-		public function setDevices(devices:Object):void{}
-		public function deviceReady(devices:Array):void{}
-		public function deviceRemoved(devices:Array, device:Object):void{}
-		public function setInfo(nm:String, desc:String, undef:Object=null):void {
+		public function deviceConnected(device:Object):void{}
+		public function deviceRemoved(device:Object):void{}
+		public function infoUpdated(nm:String, desc:String):void {
 			description = desc;
 			name = nm;
 		}
 		
 		public function close():void{
+			devicesManager.collection.removeEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
 			netConnection.call("close", null);
 		}
 		
@@ -233,6 +237,7 @@ package tools
 			{
 				case "NetConnection.Connect.Success":
 					trace("connected to MonaServer!");
+					initData(ev.info);
 					break;
 				case "NetConnection.Connect.Failed":
 					maxTry--;
