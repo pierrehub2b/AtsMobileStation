@@ -5,11 +5,7 @@
       <configuration name="AtsMobileStation" target-platform="Desktop" main-class="AtsMobileStation" output-file="AtsMobileStation.swf" output-folder="$MODULE_DIR$/bin">
         <dependencies>
           <entries>
-<<<<<<< HEAD
-            <entry library-id="5eae72db-ef8e-47ac-b269-c1b72407a422">
-=======
-            <entry library-id="00a05dcb-b4eb-4c70-a894-b9cc8bd4e204">
->>>>>>> 1d6ae42ea5361bb3fe50052c88851868008f000c
+            <entry library-id="531c01ef-eeca-423b-9e78-d8492386d185">
               <dependency linkage="Merged" />
             </entry>
           </entries>
@@ -23,36 +19,25 @@
         <packaging-air-desktop use-generated-descriptor="false" custom-descriptor-path="$MODULE_DIR$/src/AtsMobileStation-app.xml" package-file-name="AtsMobileStation">
           <files-to-package>
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/icons" path-in-package="assets/icons" />
-<<<<<<< HEAD
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools" path-in-package="assets/tools" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/Pods" path-in-package="assets/drivers/ios/Pods" />
-=======
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/ios" path-in-package="assets/tools/ios" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/adb" path-in-package="assets/tools/android/adb" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/api" path-in-package="assets/tools/android/api" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/lib64" path-in-package="assets/tools/android/lib64" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/mke2fs" path-in-package="assets/tools/android/mke2fs" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/sqlite3" path-in-package="assets/tools/android/sqlite3" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/etc1tool" path-in-package="assets/tools/android/etc1tool" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/fastboot" path-in-package="assets/tools/android/fastboot" />
+            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/adb.exe" path-in-package="assets/tools/android/adb.exe" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/systrace" path-in-package="assets/tools/android/systrace" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/e2fsdroid" path-in-package="assets/tools/android/e2fsdroid" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/make_f2fs" path-in-package="assets/tools/android/make_f2fs" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/hprof-conv" path-in-package="assets/tools/android/hprof-conv" />
+            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/mke2fs.exe" path-in-package="assets/tools/android/mke2fs.exe" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/NOTICE.txt" path-in-package="assets/tools/android/NOTICE.txt" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/sload_f2fs" path-in-package="assets/tools/android/sload_f2fs" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/dmtracedump" path-in-package="assets/tools/android/dmtracedump" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/mke2fs.conf" path-in-package="assets/tools/android/mke2fs.conf" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/package.xml" path-in-package="assets/tools/android/package.xml" />
+            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/sqlite3.exe" path-in-package="assets/tools/android/sqlite3.exe" />
+            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/etc1tool.exe" path-in-package="assets/tools/android/etc1tool.exe" />
+            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/fastboot.exe" path-in-package="assets/tools/android/fastboot.exe" />
+            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/AdbWinApi.dll" path-in-package="assets/tools/android/AdbWinApi.dll" />
+            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/make_f2fs.exe" path-in-package="assets/tools/android/make_f2fs.exe" />
+            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/hprof-conv.exe" path-in-package="assets/tools/android/hprof-conv.exe" />
+            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/dmtracedump.exe" path-in-package="assets/tools/android/dmtracedump.exe" />
+            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/AdbWinUsbApi.dll" path-in-package="assets/tools/android/AdbWinUsbApi.dll" />
+            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/libwinpthread-1.dll" path-in-package="assets/tools/android/libwinpthread-1.dll" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/monaserver" path-in-package="assets/tools/monaserver" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/Pods/Embassy" path-in-package="assets/drivers/ios/Pods/Embassy" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/Pods/Headers" path-in-package="assets/drivers/ios/Pods/Headers" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/Pods/BlueSocket" path-in-package="assets/drivers/ios/Pods/BlueSocket" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/Pods/Manifest.lock" path-in-package="assets/drivers/ios/Pods/Manifest.lock" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/Pods/Pods.xcodeproj" path-in-package="assets/drivers/ios/Pods/Pods.xcodeproj" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/Pods/EnvoyAmbassador" path-in-package="assets/drivers/ios/Pods/EnvoyAmbassador" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/Pods/Target Support Files" path-in-package="assets/drivers/ios/Pods/Target Support Files" />
->>>>>>> 1d6ae42ea5361bb3fe50052c88851868008f000c
+            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/Pods" path-in-package="assets/drivers/ios/Pods" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/atsios/Base.lproj" path-in-package="assets/drivers/ios/atsios/Base.lproj" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/atsios/Info.plist" path-in-package="assets/drivers/ios/atsios/Info.plist" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/atsios/Assets.xcassets" path-in-package="assets/drivers/ios/atsios/Assets.xcassets" />
@@ -64,39 +49,10 @@
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/Podfile" path-in-package="assets/drivers/ios/Podfile" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/atsDriver" path-in-package="assets/drivers/ios/atsDriver" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/README.md" path-in-package="assets/drivers/ios/README.md" />
-<<<<<<< HEAD
-=======
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/.gitignore" path-in-package="assets/drivers/ios/.gitignore" />
->>>>>>> 1d6ae42ea5361bb3fe50052c88851868008f000c
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/Podfile.lock" path-in-package="assets/drivers/ios/Podfile.lock" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/atsios.xcodeproj" path-in-package="assets/drivers/ios/atsios.xcodeproj" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/atsios.xcworkspace" path-in-package="assets/drivers/ios/atsios.xcworkspace" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/testLineCommand.rtf" path-in-package="assets/drivers/ios/testLineCommand.rtf" />
-<<<<<<< HEAD
-=======
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/Pods/Embassy" path-in-package="assets/drivers/ios_/Pods/Embassy" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/Pods/Headers" path-in-package="assets/drivers/ios_/Pods/Headers" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/Pods/BlueSocket" path-in-package="assets/drivers/ios_/Pods/BlueSocket" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/Pods/Manifest.lock" path-in-package="assets/drivers/ios_/Pods/Manifest.lock" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/Pods/Pods.xcodeproj" path-in-package="assets/drivers/ios_/Pods/Pods.xcodeproj" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/Pods/EnvoyAmbassador" path-in-package="assets/drivers/ios_/Pods/EnvoyAmbassador" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/Pods/Target Support Files" path-in-package="assets/drivers/ios_/Pods/Target Support Files" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/atsios/Base.lproj" path-in-package="assets/drivers/ios_/atsios/Base.lproj" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/atsios/Info.plist" path-in-package="assets/drivers/ios_/atsios/Info.plist" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/atsios/Assets.xcassets" path-in-package="assets/drivers/ios_/atsios/Assets.xcassets" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/atsios/AppDelegate.swift" path-in-package="assets/drivers/ios_/atsios/AppDelegate.swift" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/atsios/atsios.xcdatamodeld" path-in-package="assets/drivers/ios_/atsios/atsios.xcdatamodeld" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/atsios/ViewController.swift" path-in-package="assets/drivers/ios_/atsios/ViewController.swift" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/output/Logs/Test" path-in-package="assets/drivers/ios_/output/Logs/Test" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/LICENSE" path-in-package="assets/drivers/ios_/LICENSE" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/Podfile" path-in-package="assets/drivers/ios_/Podfile" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/atsDriver" path-in-package="assets/drivers/ios_/atsDriver" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/README.md" path-in-package="assets/drivers/ios_/README.md" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/Podfile.lock" path-in-package="assets/drivers/ios_/Podfile.lock" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/atsios.xcodeproj" path-in-package="assets/drivers/ios_/atsios.xcodeproj" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/atsios.xcworkspace" path-in-package="assets/drivers/ios_/atsios.xcworkspace" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios_/testLineCommand.rtf" path-in-package="assets/drivers/ios_/testLineCommand.rtf" />
->>>>>>> 1d6ae42ea5361bb3fe50052c88851868008f000c
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/atsdroid.apk" path-in-package="assets/drivers/atsdroid.apk" />
           </files-to-package>
           <AirSigningOptions keystore-path="C:/Users/agilitest/GitHub/AtsMobileStation/cert_ats.p12" use-temp-certificate="false" />
@@ -116,11 +72,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library" exported="">
       <library type="flex">
-<<<<<<< HEAD
-        <properties id="5eae72db-ef8e-47ac-b269-c1b72407a422" />
-=======
-        <properties id="00a05dcb-b4eb-4c70-a894-b9cc8bd4e204" />
->>>>>>> 1d6ae42ea5361bb3fe50052c88851868008f000c
+        <properties id="531c01ef-eeca-423b-9e78-d8492386d185" />
         <CLASSES>
           <root url="file://$MODULE_DIR$/libs" />
         </CLASSES>

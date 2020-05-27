@@ -3,6 +3,7 @@ package device
 	import avmplus.getQualifiedClassName;
 
 	[Bindable]
+	[RemoteClass(alias="device.RunningDevice")]
 	public class RunningDevice extends Device
 	{
 		public var lockedBy:String = null;

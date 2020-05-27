@@ -42,13 +42,15 @@ function onConnection(client,type,...)
 		count = #devices
 		for i=0, count do devices[i]=nil end
 		
-		client.writer:writeInvocation("init", data["info"]["name"], data["info"]["description"], mona.configs)
+		for id, cli in pairs(mona.clients) do
+			cli.writer:writeInvocation("msStatus", "start")
+		end
 		
 		function client:updateInfo(name, description)
 			data["info"]["name"] = name
 			data["info"]["description"] = description
 			for id, cli in pairs(mona.clients) do
-				cli.writer:writeInvocation("setInfo", name, description)
+				cli.writer:writeInvocation("infoUpdated", name, description)
 			end
 		end
 		
@@ -58,16 +60,16 @@ function onConnection(client,type,...)
 				table.remove(devices, idx)
 			end
 			for id, cli in pairs(mona.clients) do
-					cli.writer:writeInvocation("deviceRemoved", devices, device)
+					cli.writer:writeInvocation("deviceRemoved", device)
 			end
 		end
 		
 		function client:pushDevice(device)
 			local idx = getDeviceIndex(device["ip"], device["port"])
 			if idx == nil then 
-				table.insert(devices, device)
+				devices[#devices+1] = device
 				for id, cli in pairs(mona.clients) do
-					cli.writer:writeInvocation("deviceReady", devices)
+					cli.writer:writeInvocation("deviceConnected", device)
 				end
 			end
 		end
@@ -76,26 +78,25 @@ function onConnection(client,type,...)
 			local update = updateDevice(device["ip"], device["port"], device["lockedBy"])
 			if update then 
 				for id, cli in pairs(mona.clients) do
-					cli.writer:writeInvocation("setDevices", devices)
+					cli.writer:writeInvocation("deviceLocked", device)
 				end
 			end
 		end
 		
 		function client:close()
-			count = #devices
-			for i=0, count do devices[i]=nil end
+			for i=0, #devices do devices[i]=nil end
 			for id, cli in pairs(mona.clients) do
-				cli.writer:writeInvocation("setDevices", devices)
+				cli.writer:writeInvocation("msStatus", "close")
 			end
 		end
+
+		return {name=data["info"]["name"], description=data["info"]["description"], configs=mona.configs}
 	else
 		if type == "editor" then
-			client.writer:writeInvocation("setInfo", data["info"]["name"], data["info"]["description"])
-			client.writer:writeInvocation("setDevices", devices)
-			client.writer:writeInvocation("setHttpPort", mona.configs.HTTP.port)
+			return {devices=devices, name=data["info"]["name"], description=data["info"]["description"], httpPort=mona.configs.HTTP.port}
 		else
 			function client:getData()
-				client.writer:writeInvocation("setInfo", data["info"]["name"], data["info"]["description"])
+				client.writer:writeInvocation("infoUpdated", data["info"]["name"], data["info"]["description"])
 				client.writer:writeInvocation("setDevices", devices)
 			end
 		end

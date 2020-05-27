@@ -49,7 +49,7 @@
 			private var httpServer:HttpServer = HttpServer.getInstance()
 			
 			public var teamId:String;
-			
+
 			public function get logsFolder():File {
 				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/logs");
 			}
