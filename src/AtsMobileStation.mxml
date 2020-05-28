@@ -3,7 +3,7 @@
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   showStatusBar="false" frameRate="60"
 					   creationComplete="creationCompleteHandler(event)"
-					   close="closeHandler(event)" backgroundColor="0xefefef"
+					   closing="closeHandler(event)" backgroundColor="0xefefef"
 					   title="Ats MobileStation (port:{httpPort})">
 	<fx:Script>
 		<![CDATA[
@@ -198,6 +198,9 @@
 			}
 			
 			protected function closeHandler(event:Event):void {
+				//event.preventDefault();
+				//event.stopPropagation();
+				
 				devices.terminate();
 				peerGroup.close();
 			}

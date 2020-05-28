@@ -2,8 +2,6 @@ package tools
 {
 	import com.greensock.TweenMax;
 	
-	import device.RunningDevice;
-	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -19,9 +17,10 @@ package tools
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	
-	import mx.core.FlexGlobals;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
+	
+	import device.RunningDevice;
 	
 	public class PeerGroupConnection
 	{
@@ -149,6 +148,7 @@ package tools
 		public function close():void{
 			devicesManager.collection.removeEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
 			netConnection.call("close", null);
+			netConnection.close();
 		}
 		
 		private function updateMonaServerWww():void{
