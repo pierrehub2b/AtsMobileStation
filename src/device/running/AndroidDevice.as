@@ -24,6 +24,8 @@ public class AndroidDevice extends RunningDevice
 
 		[Transient]
 		public var settings: DeviceSettings;
+
+		public var avdName: String
 				
 		public function AndroidDevice(adbFile:File, id:String, simulator:Boolean = false)
 		{
@@ -55,6 +57,7 @@ public class AndroidDevice extends RunningDevice
 			process.addEventListener(AndroidProcess.STOPPED, stoppedTestHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.DEVICE_INFO, deviceInfoHandler, false, 0, true);
 			process.addEventListener(AndroidProcess.DEVICE_LOCKED_STATUS, deviceLockStatusHandler, false, 0, true);
+			process.addEventListener(AndroidProcess.WAITING_FOR_DEVICE, waitingForDevice, false, 0, true);
 		}
 
 		protected function removeAndroidProcessEventListeners():void {
@@ -63,6 +66,8 @@ public class AndroidDevice extends RunningDevice
 			process.removeEventListener(AndroidProcess.RUNNING, runningTestHandler);
 			process.removeEventListener(AndroidProcess.STOPPED, stoppedTestHandler);
 			process.removeEventListener(AndroidProcess.DEVICE_LOCKED_STATUS, deviceLockStatusHandler)
+			process.removeEventListener(AndroidProcess.WAITING_FOR_DEVICE, waitingForDevice)
+
 		}
 
 		protected function processErrorHandler(ev:Event):void{
@@ -76,7 +81,7 @@ public class AndroidDevice extends RunningDevice
 			process.removeEventListener(AndroidProcess.RUNNING, runningTestHandler);
 		}
 
-		protected function stoppedTestHandler(ev:Event):void{
+		protected function stoppedTestHandler(ev:Event):void {
 			process.removeEventListener(AndroidProcess.STOPPED, stoppedTestHandler);
 			close();
 		}
@@ -113,6 +118,10 @@ public class AndroidDevice extends RunningDevice
 				var port:int = deviceSettings.port;
 				return new AndroidWirelessDevice(id, adbFile, automaticPort, port);
 			}
+		}
+
+		private function waitingForDevice(event:Event):void {
+			waiting()
 		}
 	}
 }

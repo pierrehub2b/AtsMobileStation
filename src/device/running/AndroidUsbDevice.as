@@ -176,7 +176,7 @@ public class AndroidUsbDevice extends AndroidDevice {
         settings.port = portSwitcher.getLocalPort(this.id, automaticPort);
         this.port = settings.port.toString();
 
-        if (errorMessage == "") {
+        if (!errorMessage) {
             setupWebServer(settings.port);
         }
     }
