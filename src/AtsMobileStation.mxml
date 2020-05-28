@@ -173,7 +173,7 @@
 					}
 				}
 				
-				httpServer.listen(8080, handleHttpServerError);
+				// httpServer.listen(8080, handleHttpServerError);
 				peerGroup = new PeerGroupConnection(devices, simulators, httpPort);
 			}
 			

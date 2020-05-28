@@ -17,18 +17,18 @@ import flash.net.ServerSocket;
 
 			// unknown device
 			if (port == -1) {
-				var newPort:int = generateAvailablePort();
-				var porta:DevicePortSettings = new DevicePortSettings(deviceId, newPort);
-				portSettings.addSettings(porta);
-				return newPort;
+				port = generateAvailablePort();
+				var devicePortSettings:DevicePortSettings = new DevicePortSettings(deviceId, port);
+				portSettings.addSettings(devicePortSettings);
+				return port;
 			} else {
 				var portIsAvailable:Boolean = checkPortAvailability(port);
 				if (portIsAvailable == false) {
 					if (automatic == true) {
-						var newPortb:int = generateAvailablePort();
-						var portb:DevicePortSettings = new DevicePortSettings(deviceId, newPortb);
-						portSettings.addSettings(portb);
-						return newPortb;
+						port = generateAvailablePort();
+						var devicePortSettings:DevicePortSettings = new DevicePortSettings(deviceId, port);
+						portSettings.addSettings(devicePortSettings);
+						return port;
 					} else {
 						dispatchEvent(new Event(PORT_NOT_AVAILABLE_EVENT));
 						return port;
@@ -43,6 +43,7 @@ import flash.net.ServerSocket;
 			var nextPortAvailable:int = portSettings.nextPortAvailable();
 			while (checkSocketPortAvailability(nextPortAvailable) == false) {
 				nextPortAvailable = portSettings.nextPortAvailable(nextPortAvailable);
+				nextPortAvailable++
 			}
 
 			return nextPortAvailable;
