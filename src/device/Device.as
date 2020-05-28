@@ -7,6 +7,7 @@ package device
 	public class Device extends EventDispatcher
 	{
 		public static const STOPPED_EVENT:String = "deviceStopped";
+		public static const WAITING_FOR_DEVICE:String = "waiting for device";
 		public static const INSTALL:String = "install";
 		public static const START:String = "start";
 		public static const READY:String = "ready";

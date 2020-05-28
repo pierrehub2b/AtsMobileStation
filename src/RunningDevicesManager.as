@@ -117,14 +117,13 @@ import flash.desktop.NativeProcess;
 		private function launchAdbProcess():void{
 			
 			androidOutput = String("");
-			
-			var proc:NativeProcess = new NativeProcess();
+
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			
 			procInfo.executable = adbFile;			
 			procInfo.workingDirectory = File.userDirectory;
 			procInfo.arguments = adbArgs;
-			
+
+			var proc:NativeProcess = new NativeProcess();
 			proc.addEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit, false, 0, true);
 			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData, false, 0, true);
 			proc.start(procInfo);	
@@ -169,7 +168,7 @@ import flash.desktop.NativeProcess;
 								dev.close();
 							}
 						} else {
-							dev = AndroidDevice.setup(runningId, adbFile); //new AndroidDevice(adbFile, runningId);
+							dev = AndroidDevice.setup(runningId, adbFile);
 							dev.addEventListener(Device.STOPPED_EVENT, deviceStoppedHandler, false, 0, true);
 							dev.start();
 							

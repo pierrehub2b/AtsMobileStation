@@ -27,6 +27,7 @@ package device.running
 		public static const USBSTARTRESPONSE:String = "usbResponseStart";
 		public static const USBSTARTENDEDRESPONSE:String = "usbResponseStartEnded";
 		public static const UNINSTALL_EXIT:String = "uninstallExit";
+		public static const WAITING_FOR_DEVICE:String = "waitingForDevice";
 
 		public static const WEBSOCKET_SERVER_START:String = "webSocketServerStart";
 		public static const WEBSOCKET_SERVER_STOP:String = "webSocketServerStop";
@@ -86,7 +87,10 @@ package device.running
 			logStream.close();
 			
 			//---------------------------------------------------------------------------------------
-			
+
+			// check if device booted
+			// checkBootedDevice()
+
 			process = new NativeProcess();
 			procInfo = new NativeProcessStartupInfo();
 			
@@ -106,8 +110,23 @@ package device.running
 			}
 		}
 
+		// private var adbProcess: NativeProcess
+
+		private function checkBootedDevice() {
+			var processInfo: NativeProcessStartupInfo = new NativeProcessStartupInfo()
+			processInfo.executable = File.applicationDirectory.resolvePath("assets/tools/android/adb.exe");
+			processInfo.arguments = new <String>["-s", id, "shell", "getprop", "sys.boot_completed"];
+
+			var adbProcess: NativeProcess = new NativeProcess()
+			adbProcess.addEventListener(NativeProcessExitEvent.EXIT, onBootCompletedExit, false, 0, true);
+			adbProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onBootCompletedError, false, 0, true);
+			adbProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onBootCompletedOutput, false, 0, true);
+			adbProcess.start(processInfo)
+		}
+
 		public function start():void{
-			process.start(procInfo);
+			// process.start(procInfo);
+			checkBootedDevice()
 		}
 		
 		public function terminate():Boolean{
@@ -184,6 +203,8 @@ package device.running
 				process.start(procInfo);
 			}
 		}
+
+
 
 		protected function onUninstallExit(event:NativeProcessExitEvent):void
 		{
@@ -380,6 +401,39 @@ package device.running
 			} else {
 				dispatchEvent(new Event(STOPPED));
 			}
+		}
+
+		private var bootCompletedError: String
+		private var bootCompletedOutput: String = ""
+
+		private function onBootCompletedExit(event:NativeProcessExitEvent):void {
+			var process: NativeProcess = event.currentTarget as NativeProcess
+			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onBootCompletedOutput)
+			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onBootCompletedError)
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onBootCompletedExit)
+
+			if (bootCompletedError) {
+				trace("BOOT CHECK ERROR - " + id + " : " + bootCompletedError)
+				dispatchEvent(new Event(ERROR_EVENT));
+				return
+			}
+
+			if (bootCompletedOutput.charAt(0) == "1") {
+				trace(id + " booted")
+				this.process.start(procInfo)
+			} else {
+				dispatchEvent(new Event(ERROR_EVENT));
+			}
+		}
+
+		private function onBootCompletedError(event:ProgressEvent):void {
+			var process: NativeProcess = event.currentTarget as NativeProcess
+			bootCompletedError = process.standardError.readUTFBytes(process.standardError.bytesAvailable)
+		}
+
+		private function onBootCompletedOutput(event:ProgressEvent):void {
+			var process: NativeProcess = event.currentTarget as NativeProcess
+			bootCompletedOutput = bootCompletedOutput.concat(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable).replace(/\r/g, ""));
 		}
 	}
 }

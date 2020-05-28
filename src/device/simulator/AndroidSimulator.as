@@ -4,7 +4,6 @@ import flash.desktop.NativeProcessStartupInfo;
 import flash.events.NativeProcessExitEvent;
 import flash.events.ProgressEvent;
 import flash.filesystem.File;
-import flash.net.SharedObject;
 import flash.system.Capabilities;
 
 import helpers.Settings;
@@ -18,6 +17,20 @@ public class AndroidSimulator extends Simulator {
         super(id);
 
         this.modelName = id
+
+        checkBootedDevice()
+    }
+
+    private function checkBootedDevice() {
+        var processInfo: NativeProcessStartupInfo = new NativeProcessStartupInfo()
+        processInfo.executable = File.applicationDirectory.resolvePath("assets/tools/android/adb.exe");
+        processInfo.arguments = new <String>["-s", id, "shell", "getprop", "sys.boot_completed"];
+
+        var adbProcess: NativeProcess = new NativeProcess()
+        adbProcess.addEventListener(NativeProcessExitEvent.EXIT, onBootCompletedExit, false, 0, true);
+        adbProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onBootCompletedError, false, 0, true);
+        adbProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onBootCompletedOutput, false, 0, true);
+        adbProcess.start(processInfo)
     }
 
     override public function startSim():void {
@@ -64,6 +77,41 @@ public class AndroidSimulator extends Simulator {
         outputData = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable)
         process.exit()
         statusOn()
+    }
+
+    override public function stopSim():void {
+        // var killEmulatorProcess:NativeProcess
+    }
+
+    private var bootCompletedError: String
+    private var bootCompletedOutput: String
+
+    private function onBootCompletedExit(event:NativeProcessExitEvent):void {
+        var process: NativeProcess = event.currentTarget as NativeProcess
+        process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onBootCompletedOutput)
+        process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onBootCompletedError)
+        process.removeEventListener(NativeProcessExitEvent.EXIT, onBootCompletedExit)
+
+        if (bootCompletedError) {
+            statusOff()
+            return
+        }
+
+        if (bootCompletedOutput && bootCompletedOutput.charAt(0) == "1") {
+            statusOn()
+        } else {
+            statusOff()
+        }
+    }
+
+    private function onBootCompletedError(event:ProgressEvent):void {
+        var process: NativeProcess = event.currentTarget as NativeProcess
+        bootCompletedError = process.standardError.readUTFBytes(process.standardError.bytesAvailable)
+    }
+
+    private function onBootCompletedOutput(event:ProgressEvent):void {
+        var process: NativeProcess = event.currentTarget as NativeProcess
+        bootCompletedOutput = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable)
     }
 }
 }
