@@ -7,7 +7,7 @@ package device
 	public class RunningDevice extends Device
 	{
 		public var lockedBy:String = null;
-		public var ip:String;
+		public var ip:String = "";
 		public var port:String = "";
 		
 		[Transient]public var settingsPort:String = "";
@@ -25,6 +25,10 @@ package device
 		}
 		
 		public function start():void{}
+		
+		public function get monaDevice():Object{
+			return {id:id, ip:ip, port:port, lockedBy:lockedBy ,manufacturer:manufacturer, modelId:modelId, modelName:modelName, osVersion:osVersion, sdkVersion:sdkVersion, status:status};
+		}
 	
 		protected function installing():void{
 			status = INSTALL;

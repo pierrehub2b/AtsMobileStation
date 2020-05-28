@@ -22,6 +22,8 @@ package device
 		public var sdkVersion:String = "";
 		
 		public var status:String = START;
+		
+		[Transient]
 		public var tooltip:String;
 		
 		public function Device(id:String="")

@@ -2,6 +2,9 @@ package tools
 {
 	import com.greensock.TweenMax;
 	
+	import device.RunningDevice;
+	
+	import flash.desktop.NativeApplication;
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -19,8 +22,6 @@ package tools
 	
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
-	
-	import device.RunningDevice;
 	
 	public class PeerGroupConnection
 	{
@@ -257,20 +258,20 @@ package tools
 		}
 		
 		private function pushDevice(dev:RunningDevice):void{
-			netConnection.call("pushDevice", null, dev);
+			netConnection.call("pushDevice", null, dev.monaDevice);
 		}
 		
 		private function devicesChangeHandler(ev:CollectionEvent):void{
 			var dev:RunningDevice
 			if(ev.kind == CollectionEventKind.REMOVE){
 				dev = ev.items[0] as RunningDevice
-				netConnection.call("deviceRemoved", null, dev);
+				netConnection.call("deviceRemoved", null, dev.monaDevice);
 			}else if(ev.kind == CollectionEventKind.UPDATE){
 				dev = ev.items[0].source as RunningDevice
 				if(ev.items[0].property == "status" && ev.items[0].newValue == "ready"){
 					pushDevice(dev);
 				}else if (ev.items[0].property == "lockedBy"){
-					netConnection.call("deviceLocked", null, dev);
+					netConnection.call("deviceLocked", null, dev.monaDevice);
 				}
 			}
 		}

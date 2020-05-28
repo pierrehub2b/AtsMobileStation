@@ -1,4 +1,5 @@
-devices = {}
+local inspect = require('inspect')
+local devices = {}
 
 function getDeviceIndex(ip, port)
 	for i, v in ipairs (devices) do 
@@ -55,6 +56,9 @@ function onConnection(client,type,...)
 		end
 		
 		function client:deviceRemoved(device)
+		
+		print(inspect(device))
+		
 			local idx = getDeviceIndex(device["ip"], device["port"])
 			if idx ~= nil then 
 				table.remove(devices, idx)

@@ -98,19 +98,19 @@ import flash.desktop.NativeProcess;
 			ev.target.closeInput();
 			
 			// two types of devices to find, ios loop need more resources to execute
-			adbLoop = TweenLite.delayedCall(3, launchAdbProcess);
+			adbLoop = TweenLite.delayedCall(5, launchAdbProcess);
 			iosLoop = TweenLite.delayedCall(5, launchIosProcess);
 		}	
 		
 		public function terminate():void{
-			var dv:RunningDevice;
-			for each(dv in collection){
-				dv.close();
-			}
-			
 			adbLoop.pause();
 			if(iosLoop != null){
 				iosLoop.pause();
+			}
+			
+			var dv:RunningDevice;
+			for each(dv in collection){
+				dv.close();
 			}
 		}
 		
@@ -302,7 +302,7 @@ import flash.desktop.NativeProcess;
 		}
 		
 		public function restartDev(dev:Device):void {
-			// dev.dispose();
+			//dev.dispose();
 			dev.close();
 		}
 				

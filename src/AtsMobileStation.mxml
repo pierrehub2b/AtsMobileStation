@@ -9,22 +9,22 @@
 		<![CDATA[
 			import com.greensock.TweenMax;
 			
+			import device.Device;
+			import device.RunningDevice;
+			import device.running.IosDevice;
+			
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.core.FlexGlobals;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
 			
-			import spark.filters.DropShadowFilter;
-			
-			import device.Device;
-			import device.RunningDevice;
-			import device.running.IosDevice;
-			
 			import renderer.PhysicialDeviceSettingsWindow;
 			import renderer.RunningDeviceRenderer;
 			
 			import servers.http.HttpServer;
+			
+			import spark.filters.DropShadowFilter;
 			
 			import tools.PeerGroupConnection;
 			
@@ -198,11 +198,18 @@
 			}
 			
 			protected function closeHandler(event:Event):void {
-				//event.preventDefault();
-				//event.stopPropagation();
+				event.preventDefault();
+				event.stopPropagation();
 				
 				devices.terminate();
+				simulators.terminate();
 				peerGroup.close();
+				
+				TweenMax.delayedCall(10.00, closeApp);
+			}
+			
+			private function closeApp():void{
+				NativeApplication.nativeApplication.exit(0);
 			}
 			
 			protected function cleanDirectory(directory:File):void {

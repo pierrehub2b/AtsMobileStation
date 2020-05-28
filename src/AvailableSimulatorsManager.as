@@ -47,6 +47,16 @@ public class AvailableSimulatorsManager extends EventDispatcher
 
 			fetchAndroidEmulators()
 		}
+		
+		public function terminate():void{
+			if(process != null && process.running){
+				process.exit(true);
+			}
+			
+			if(emulatorProcess != null && emulatorProcess.running){
+				emulatorProcess.exit(true);
+			}
+		}
 
 		protected function fetchIosSimulators():void {
 			procInfo = new NativeProcessStartupInfo();
@@ -134,7 +144,7 @@ public class AvailableSimulatorsManager extends EventDispatcher
 		private var emulatorOutputData:String
 		private var emulatorErrorData:String
 
-		protected function fetchAndroidEmulators(callback:Function = null) {
+		protected function fetchAndroidEmulators(callback:Function = null):void {
 			var file:File
 			if (Capabilities.os.indexOf("Mac") > -1) {
 				file = Settings.getInstance().androidSDKDirectory.resolvePath("emulator/emulator")
