@@ -17,21 +17,6 @@
     </style>
     <script type="text/javascript">
 		var socket;
-      
-		function showDevices(array){
-			var list = document.getElementById("listDevices");
-			list.innerHTML = "";
-
-			for (var i = 0; i < array.length; i++) {
-				var endPoint = array[i].ip + ":" + array[i].port;
-				var item = document.createElement("li");
-				
-				item.appendChild(document.createTextNode(array[i].modelName + " (" + endPoint + ") "));
-				item["endPoint"] = endPoint;
-				checkLock(item, array[i].locked);
-				list.appendChild(item);
-			}
-		}
 		
 		function showInfos(name, description){
 			document.getElementById("name").innerHTML = name;
@@ -104,16 +89,13 @@
 					case "infoUpdated":
 						showInfos("[ " + data[1] + " ]", data[2]);
 						break;
-					case "setDevices":
-						showDevices(data[1]);
-						break;
                 }
             } catch(exception) {}
         }
               
         // Connection handler
         function onConnection() {
-			socket.send(JSON.stringify(["getData"]));
+			socket.send(JSON.stringify(["initData"]));
         }
         
         // Disconnection handler

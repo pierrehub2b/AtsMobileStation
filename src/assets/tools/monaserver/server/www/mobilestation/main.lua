@@ -95,9 +95,11 @@ function onConnection(client,type,...)
 		if type == "editor" then
 			return {devices=devices, name=data["info"]["name"], description=data["info"]["description"], httpPort=mona.configs.HTTP.port}
 		else
-			function client:getData()
+			function client:initData()
 				client.writer:writeInvocation("infoUpdated", data["info"]["name"], data["info"]["description"])
-				client.writer:writeInvocation("setDevices", devices)
+				for i, device in pairs(devices) do
+					client.writer:writeInvocation("deviceConnected", device)
+				end
 			end
 		end
 	end
