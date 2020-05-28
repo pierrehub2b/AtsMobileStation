@@ -33,6 +33,11 @@
 			}
 		}
 		
+		function showInfos(name, description){
+			document.getElementById("name").innerHTML = name;
+			document.getElementById("info").innerHTML = description;
+		}
+		
 		function checkLock(item, locked){
 			if(locked == null){
 				var lockImg = item.getElementsByTagName("img");
@@ -53,7 +58,7 @@
                 switch (data[0]) {
                 	case "msStatus":
                 		if(data[1] == "close"){
-                			list.innerHTML = "";
+                			document.getElementById("listDevices").innerHTML = "";
                 		}
                 		break;
 					case "deviceConnected":
@@ -65,8 +70,7 @@
 						item.appendChild(document.createTextNode(device.modelName + " (" + endPoint + ") "));
 						item["endPoint"] = endPoint;
 						
-						var list = document.getElementById("listDevices");
-						list.appendChild(item);
+						document.getElementById("listDevices").appendChild(item);
 												
 						break;
 					case "deviceRemoved":
@@ -98,8 +102,7 @@
 						}
 						break;
 					case "infoUpdated":
-						document.getElementById("name").innerHTML = "[ " + data[1] + " ]";
-						document.getElementById("info").innerHTML = data[2];
+						showInfos("[ " + data[1] + " ]", data[2]);
 						break;
 					case "setDevices":
 						showDevices(data[1]);
@@ -115,7 +118,7 @@
         
         // Disconnection handler
         function onDisconnection() { 
-            document.getElementById("info").value = 'socket closed'; 
+
         }
         
         // Socket connector
@@ -136,8 +139,8 @@
             socket.onmessage = onMessage;
             return true;
         }
-       
         createWebSocket();
+        
     </script>
 </head>
 <body>

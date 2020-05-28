@@ -40,20 +40,29 @@ package tools
 		
 		private var monaServerBinary:File;
 		private var monaServerProc:NativeProcess;
-				
+		
 		public var description:String = "";
 		public var name:String = "";
+		
+		private var mona:File;
+		private var monaInstallFolder:File;
 		
 		public function PeerGroupConnection(devManager:RunningDevicesManager, simManager:AvailableSimulatorsManager, port:int)
 		{
 			devicesManager = devManager;
 			httpPort = port;
-			checkMonaserverPort();
+			
+			mona = File.applicationDirectory.resolvePath(monaServerFolder);
+			if(mona.exists){
+				checkMonaserverPort();
+			}
 		}
 		
 		private function checkMonaserverPort():void{
-			var monaInstallFolder:File = File.userDirectory.resolvePath(".atsmobilestation").resolvePath("monaserver");
+			monaInstallFolder = File.userDirectory.resolvePath(".atsmobilestation").resolvePath("monaserver");
 			var iniFile:File = monaInstallFolder.resolvePath("server").resolvePath("MonaServer.ini");
+			
+			updateMonaServerWww();
 			
 			if(iniFile.exists){
 				var iniFileLoader:URLLoader = new URLLoader();
@@ -142,41 +151,38 @@ package tools
 			netConnection.call("close", null);
 		}
 		
+		private function updateMonaServerWww():void{
+			mona.resolvePath("server").resolvePath("www").copyTo(monaInstallFolder.resolvePath("server").resolvePath("www"), true);
+		}
+		
 		//--------------------------------------------------------------------------------------------------------
 		//--------------------------------------------------------------------------------------------------------
-
+		
 		private function installMonaserver():void{
-			var mona:File = File.applicationDirectory.resolvePath(monaServerFolder);
-			if(mona.exists){
-				var monaInstallFolder:File = File.userDirectory.resolvePath(".atsmobilestation").resolvePath("monaserver");
-								
-				if (AtsMobileStation.isMacOs) {
+			
+			if (AtsMobileStation.isMacOs) {
+				mona.resolvePath("server").resolvePath("MonaServer").copyTo(monaInstallFolder.resolvePath("server").resolvePath("MonaServer"), true);
+				mona.resolvePath("MonaBase").copyTo(monaInstallFolder.resolvePath("MonaBase"), true);
+				mona.resolvePath("MonaCore").copyTo(monaInstallFolder.resolvePath("MonaCore"), true);
+				
+				monaServerBinary = monaInstallFolder.resolvePath("server").resolvePath("MonaServer");
+				if(monaServerBinary.exists){
+					var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+					procInfo.executable = new File("/bin/chmod");			
+					procInfo.workingDirectory = monaInstallFolder;
+					procInfo.arguments = new <String>["+x", "server/MonaServer"];
 					
-					mona.resolvePath("server").resolvePath("www").copyTo(monaInstallFolder.resolvePath("server").resolvePath("www"), true);
-					mona.resolvePath("server").resolvePath("MonaServer").copyTo(monaInstallFolder.resolvePath("server").resolvePath("MonaServer"), true);
-					mona.resolvePath("MonaBase").copyTo(monaInstallFolder.resolvePath("MonaBase"), true);
-					mona.resolvePath("MonaCore").copyTo(monaInstallFolder.resolvePath("MonaCore"), true);
-										
-					monaServerBinary = monaInstallFolder.resolvePath("server").resolvePath("MonaServer");
-					if(monaServerBinary.exists){
-						var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-						procInfo.executable = new File("/bin/chmod");			
-						procInfo.workingDirectory = monaInstallFolder;
-						procInfo.arguments = new <String>["+x", "server/MonaServer"];
-						
-						var proc:NativeProcess = new NativeProcess();
-						proc.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
-						proc.start(procInfo);
-					}
-				} else {
-					mona.resolvePath("server").resolvePath("www").copyTo(monaInstallFolder.resolvePath("server").resolvePath("www"), true);
-					mona.resolvePath("server").resolvePath("lua51.dll").copyTo(monaInstallFolder.resolvePath("server").resolvePath("lua51.dll"), true);
-					mona.resolvePath("server").resolvePath("MonaServer.exe").copyTo(monaInstallFolder.resolvePath("server").resolvePath("MonaServer.exe"), true);
-					
-					monaServerBinary = monaInstallFolder.resolvePath("server").resolvePath("MonaServer.exe");
-					if(monaServerBinary.exists){
-						startMonaServer();
-					}
+					var proc:NativeProcess = new NativeProcess();
+					proc.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
+					proc.start(procInfo);
+				}
+			} else {
+				mona.resolvePath("server").resolvePath("lua51.dll").copyTo(monaInstallFolder.resolvePath("server").resolvePath("lua51.dll"), true);
+				mona.resolvePath("server").resolvePath("MonaServer.exe").copyTo(monaInstallFolder.resolvePath("server").resolvePath("MonaServer.exe"), true);
+				
+				monaServerBinary = monaInstallFolder.resolvePath("server").resolvePath("MonaServer.exe");
+				if(monaServerBinary.exists){
+					startMonaServer();
 				}
 			}
 		}

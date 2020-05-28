@@ -104,5 +104,4 @@ function onConnection(client,type,...)
 end
 
 function onDisconnection(client)
-
 end
