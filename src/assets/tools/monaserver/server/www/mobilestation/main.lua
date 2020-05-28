@@ -1,4 +1,3 @@
-local inspect = require('inspect')
 local devices = {}
 
 function getDeviceIndex(ip, port)
