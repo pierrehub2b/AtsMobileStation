@@ -55,9 +55,6 @@ function onConnection(client,type,...)
 		end
 		
 		function client:deviceRemoved(device)
-		
-		print(inspect(device))
-		
 			local idx = getDeviceIndex(device["ip"], device["port"])
 			if idx ~= nil then 
 				table.remove(devices, idx)
