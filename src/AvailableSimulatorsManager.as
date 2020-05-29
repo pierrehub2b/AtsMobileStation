@@ -34,9 +34,9 @@ public class AvailableSimulatorsManager extends EventDispatcher
 		[Bindable]
 		public var collection:ArrayCollection = new ArrayCollection();
 		
-		private var process: NativeProcess;
-		private var procInfo: NativeProcessStartupInfo;
-		
+		private var iosProcess: NativeProcess;
+		private var androidProcess: NativeProcess;
+
 		public function AvailableSimulatorsManager()
 		{
 			info = "Loading simulators, please wait ...";
@@ -49,65 +49,61 @@ public class AvailableSimulatorsManager extends EventDispatcher
 		}
 		
 		public function terminate():void{
-			if(process != null && process.running){
-				process.exit(true);
+			if (iosProcess != null && iosProcess.running) {
+				iosProcess.exit(true);
 			}
 			
-			if(emulatorProcess != null && emulatorProcess.running){
-				emulatorProcess.exit(true);
+			if (androidProcess != null && androidProcess.running) {
+				androidProcess.exit(true);
 			}
 		}
 
 		protected function fetchIosSimulators():void {
-			procInfo = new NativeProcessStartupInfo();
-			process = new NativeProcess();
+			var nativeProcessStartupInfo: NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			nativeProcessStartupInfo.executable = new File("/usr/bin/env");
+			nativeProcessStartupInfo.workingDirectory = File.userDirectory;
+			nativeProcessStartupInfo.arguments = new <String>["defaults", "write" ,"com.apple.iphonesimulator", "ShowChrome", "-int", "0"];
 
-			procInfo.executable = new File("/usr/bin/env");
-			procInfo.workingDirectory = File.userDirectory;
-
-			process.addEventListener(NativeProcessExitEvent.EXIT, onSetupSimulatorExit, false, 0, true);
-
-			procInfo.arguments = new <String>["defaults", "write" ,"com.apple.iphonesimulator", "ShowChrome", "-int", "0"];
-			process.start(procInfo);
+			iosProcess = new NativeProcess();
+			iosProcess.addEventListener(NativeProcessExitEvent.EXIT, onSetupSimulatorExit, false, 0, true);
+			iosProcess.start(nativeProcessStartupInfo);
 		}
 		
 		protected function onSetupSimulatorExit(ev:NativeProcessExitEvent):void
 		{
-			process = ev.currentTarget as NativeProcess;
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onSetupSimulatorExit);
+			iosProcess = ev.currentTarget as NativeProcess;
+			iosProcess.removeEventListener(NativeProcessExitEvent.EXIT, onSetupSimulatorExit);
 			
-			process.closeInput();
-			process.exit(true);
-			
-			procInfo = new NativeProcessStartupInfo();
-			process = new NativeProcess();
-			
-			procInfo.executable = new File("/usr/bin/env");
-			procInfo.workingDirectory = File.userDirectory;
-			
+			iosProcess.closeInput();
+			iosProcess.exit(true);
+
 			output = "";
-			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onProcessOutput, false, 0, true);
-			process.addEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist, false, 0, true);
-			
-			procInfo.arguments = new <String>["xcrun", "simctl", "list", "devices", "-j"];
-			process.start(procInfo);
-			procInfo = null;
+
+			var nativeProcessStartupInfo: NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			nativeProcessStartupInfo.executable = new File("/usr/bin/env");
+			nativeProcessStartupInfo.workingDirectory = File.userDirectory;
+			nativeProcessStartupInfo.arguments = new <String>["xcrun", "simctl", "list", "devices", "-j"];
+
+			iosProcess = new NativeProcess();
+			iosProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onProcessOutput, false, 0, true);
+			iosProcess.addEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist, false, 0, true);
+			iosProcess.start(nativeProcessStartupInfo);
 		}
 		
 		protected function onProcessOutput(ev:ProgressEvent):void{
-			process = ev.currentTarget as NativeProcess;
-			output = output.concat(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
+			iosProcess = ev.currentTarget as NativeProcess;
+			output = output.concat(iosProcess.standardOutput.readUTFBytes(iosProcess.standardOutput.bytesAvailable));
 		}
 		
 		protected function onSimCtlExist(ev:NativeProcessExitEvent):void
 		{
-			process = ev.currentTarget as NativeProcess;
-			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onProcessOutput);
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist);
+			iosProcess = ev.currentTarget as NativeProcess;
+			iosProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onProcessOutput);
+			iosProcess.removeEventListener(NativeProcessExitEvent.EXIT, onSimCtlExist);
 			
-			process.closeInput();
-			process.exit(true);
-			process = null;
+			iosProcess.closeInput();
+			iosProcess.exit(true);
+			iosProcess = null;
 			
 			var obj:Object;
 			if(output.length > 0) {
@@ -140,17 +136,22 @@ public class AvailableSimulatorsManager extends EventDispatcher
 			}			
 		}
 
-		private var emulatorProcess:NativeProcess
 		private var emulatorOutputData:String
 		private var emulatorErrorData:String
 
 		protected function fetchAndroidEmulators(callback:Function = null):void {
 			var file:File
 			if (Capabilities.os.indexOf("Mac") > -1) {
+				file = File.userDirectory.resolvePath("Library/Android/sdk/emulator/emulator")
+			} else {
+				file = File.userDirectory.resolvePath("AppData/Local/Android/Sdk/emulator/emulator.exe")
+			}
+
+			/* if (Capabilities.os.indexOf("Mac") > -1) {
 				file = Settings.getInstance().androidSDKDirectory.resolvePath("emulator/emulator")
 			} else {
 				file = Settings.getInstance().androidSDKDirectory.resolvePath("emulator/emulator.exe")
-			}
+			} */
 
 			if (!file.exists) {
 				trace("No Android SDK configured")
@@ -161,25 +162,28 @@ public class AvailableSimulatorsManager extends EventDispatcher
 			info.executable = file
 			info.arguments = new <String>["-list-avds"];
 
-			emulatorProcess = new NativeProcess()
-			emulatorProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputData, false, 0, true);
-			emulatorProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onErrorData, false, 0, true);
-			emulatorProcess.addEventListener(NativeProcessExitEvent.EXIT, onExit, false, 0, true);
-			emulatorProcess.start(info)
+			androidProcess = new NativeProcess()
+			androidProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputData, false, 0, true);
+			androidProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onErrorData, false, 0, true);
+			androidProcess.addEventListener(NativeProcessExitEvent.EXIT, onExit, false, 0, true);
+			androidProcess.start(info)
 		}
 
 		private function onOutputData(event:ProgressEvent):void {
-			emulatorOutputData = emulatorProcess.standardOutput.readUTFBytes(emulatorProcess.standardOutput.bytesAvailable)
+			var process: NativeProcess = event.currentTarget as NativeProcess
+			emulatorOutputData = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable)
 		}
 
 		private function onErrorData(event:ProgressEvent):void {
-			emulatorOutputData = emulatorProcess.standardError.readUTFBytes(emulatorProcess.standardError.bytesAvailable)
+			var process: NativeProcess = event.currentTarget as NativeProcess
+			emulatorOutputData = process.standardError.readUTFBytes(process.standardError.bytesAvailable)
 		}
 
 		private function onExit(event:NativeProcessExitEvent):void {
-			emulatorProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputData);
-			emulatorProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onErrorData);
-			emulatorProcess.removeEventListener(NativeProcessExitEvent.EXIT, onExit);
+			var process: NativeProcess = event.currentTarget as NativeProcess
+			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputData);
+			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onErrorData);
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onExit);
 
 			if (emulatorErrorData != null) {
 				// handle error
