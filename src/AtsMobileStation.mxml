@@ -205,7 +205,7 @@
 				simulators.terminate();
 				peerGroup.close();
 				
-				TweenMax.delayedCall(5.00, closeApp);
+				TweenMax.delayedCall(2.00, closeApp);
 			}
 			
 			private function closeApp():void{
