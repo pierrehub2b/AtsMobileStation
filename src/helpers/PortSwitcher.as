@@ -18,16 +18,14 @@ import flash.net.ServerSocket;
 			// unknown device
 			if (port == -1) {
 				port = generateAvailablePort();
-				var devicePortSettings:DevicePortSettings = new DevicePortSettings(deviceId, port);
-				portSettings.addSettings(devicePortSettings);
+				portSettings.addSettings(new DevicePortSettings(deviceId, port));
 				return port;
 			} else {
 				var portIsAvailable:Boolean = checkPortAvailability(port);
 				if (portIsAvailable == false) {
 					if (automatic == true) {
 						port = generateAvailablePort();
-						var devicePortSettings:DevicePortSettings = new DevicePortSettings(deviceId, port);
-						portSettings.addSettings(devicePortSettings);
+						portSettings.addSettings(new DevicePortSettings(deviceId, port));
 						return port;
 					} else {
 						dispatchEvent(new Event(PORT_NOT_AVAILABLE_EVENT));
