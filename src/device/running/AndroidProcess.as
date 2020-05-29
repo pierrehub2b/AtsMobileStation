@@ -131,7 +131,7 @@ package device.running
 		
 		public function terminate():Boolean{
 			if(process != null && process.running){
-				process.exit();
+				process.exit(true);
 				return true;
 			}
 			return false;
