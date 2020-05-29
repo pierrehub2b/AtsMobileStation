@@ -21,7 +21,7 @@ public class AndroidSimulator extends Simulator {
         checkBootedDevice()
     }
 
-    private function checkBootedDevice() {
+    private function checkBootedDevice():void {
         var processInfo: NativeProcessStartupInfo = new NativeProcessStartupInfo()
         processInfo.executable = File.applicationDirectory.resolvePath("assets/tools/android/adb.exe");
         processInfo.arguments = new <String>["-s", id, "shell", "getprop", "sys.boot_completed"];
@@ -34,7 +34,7 @@ public class AndroidSimulator extends Simulator {
     }
 
     override public function startSim():void {
-        var file = Settings.getInstance().androidSDKDirectory
+        var file:File = Settings.getInstance().androidSDKDirectory
         if (Capabilities.os.indexOf("Mac") > -1) {
             file = file.resolvePath("emulator/emulator")
         } else {
@@ -59,21 +59,21 @@ public class AndroidSimulator extends Simulator {
     }
 
     private function onExit(event:NativeProcessExitEvent):void {
-        var process = event.currentTarget as NativeProcess
+        var process:NativeProcess = event.currentTarget as NativeProcess
         process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputData, false);
         process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onErrorData, false);
         process.removeEventListener(NativeProcessExitEvent.EXIT, onExit, false);
     }
 
     private function onErrorData(event:ProgressEvent):void {
-        var process = event.currentTarget as NativeProcess
+        var process:NativeProcess = event.currentTarget as NativeProcess
         errorData = process.standardError.readUTFBytes(process.standardError.bytesAvailable)
         process.exit()
         statusOff()
     }
 
     private function onOutputData(event:ProgressEvent):void {
-        var process = event.currentTarget as NativeProcess
+        var process:NativeProcess = event.currentTarget as NativeProcess
         outputData = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable)
         process.exit()
         statusOn()

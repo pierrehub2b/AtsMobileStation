@@ -112,7 +112,7 @@ package device.running
 
 		// private var adbProcess: NativeProcess
 
-		private function checkBootedDevice() {
+		private function checkBootedDevice():void {
 			var processInfo: NativeProcessStartupInfo = new NativeProcessStartupInfo()
 			processInfo.executable = File.applicationDirectory.resolvePath("assets/tools/android/adb.exe");
 			processInfo.arguments = new <String>["-s", id, "shell", "getprop", "sys.boot_completed"];
