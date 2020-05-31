@@ -98,7 +98,7 @@ package tools
 				netConnection.addEventListener(NetStatusEvent.NET_STATUS, onFirstConnect);
 				netConnection.addEventListener(IOErrorEvent.IO_ERROR, netIOError);
 				netConnection.client = this;
-				netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + port + "/mobilestation", "mobilestation");
+				netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + port + "/", "mobilestation");
 			}
 		}
 		
@@ -133,7 +133,7 @@ package tools
 			description = info.description
 			devicesManager.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
 			
-			checkDevicesTimer = new Timer(5000);
+			checkDevicesTimer = new Timer(3000);
 			checkDevicesTimer.addEventListener(TimerEvent.TIMER, checkDevices);
 			checkDevicesTimer.start();
 		}
@@ -251,7 +251,7 @@ package tools
 			netConnection.objectEncoding = 3;
 			netConnection.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 			netConnection.client = this;
-			netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + rtmpPort + "/mobilestation", "mobilestation");
+			netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + rtmpPort + "/", "mobilestation");
 		}
 		
 		private var maxTry:int = 20;
@@ -275,7 +275,7 @@ package tools
 		}
 		
 		private var devicesStack:Vector.<RunningDevice> = new Vector.<RunningDevice>();
-		private function checkDevices():void{
+		private function checkDevices(ev:TimerEvent):void{
 			if(devicesStack.length > 0){
 				netConnection.call("pushDevice", new Responder(onDevicePushed, null), devicesStack.pop().monaDevice);
 			}			
