@@ -1,4 +1,6 @@
 local devices = {}
+local pushedDevices = {}
+local removedDevices = {}
 
 function getDeviceIndex(ip, port)
 	for i, v in ipairs (devices) do 
@@ -69,9 +71,7 @@ function onConnection(client,type,...)
 			local idx = getDeviceIndex(device["ip"], device["port"])
 			if idx == nil then 
 				devices[#devices+1] = device
-				for id, cli in pairs(mona.clients) do
-					cli.writer:writeInvocation("deviceConnected", device)
-				end
+				pushedDevices[#pushedDevices+1] = device
 			end
 			return #devices
 		end
@@ -103,6 +103,14 @@ function onConnection(client,type,...)
 					client.writer:writeInvocation("deviceConnected", device)
 				end
 			end
+		end
+	end
+end
+
+function onManage()
+	if #pushedDevices > 0 then
+		for id, cli in pairs(mona.clients) do
+			cli.writer:writeInvocation("deviceConnected", table.remove(pushedDevices,#pushedDevices-1))
 		end
 	end
 end
