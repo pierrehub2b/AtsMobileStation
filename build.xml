@@ -2,6 +2,7 @@
 <project name="mobilestation" basedir="." default="package-bundle">
 	
 	<property file="build.properties" description=""/>
+	<property file="flexSdkPath.properties" description=""/>
 
 	<condition property="isMac">
 		<os family="mac"/>
