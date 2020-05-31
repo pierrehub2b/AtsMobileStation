@@ -1,8 +1,218 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:npm_and_yarn" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:npm_and_yarn" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:tools" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:npm_and_yarn" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:tools" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:android" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:npm_and_yarn" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:tools" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:android" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:macos" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:npm_and_yarn" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:tools" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:android" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:macos" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:systrace" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:npm_and_yarn" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:tools" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:android" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:macos" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:systrace" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:catapult" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:npm_and_yarn" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:tools" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:android" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:macos" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:systrace" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:catapult" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:common" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:npm_and_yarn" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:tools" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:android" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:macos" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:systrace" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:catapult" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:common" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:node_runner" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:npm_and_yarn" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:tools" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:android" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:macos" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:systrace" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:catapult" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:common" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:node_runner" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:node_runner" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:npm_and_yarn" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:tools" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:windows" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:npm_and_yarn" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:tools" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:windows" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:android" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:npm_and_yarn" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:tools" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:windows" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:android" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:systrace" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:npm_and_yarn" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:tools" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:windows" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:android" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:systrace" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:catapult" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:npm_and_yarn" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:tools" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:windows" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:android" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:systrace" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:catapult" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:common" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:npm_and_yarn" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:tools" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:windows" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:android" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:systrace" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:catapult" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:common" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:node_runner" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:npm_and_yarn" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:tools" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:windows" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:android" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:systrace" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:catapult" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:common" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:node_runner" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:node_runner" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="626996f5-b043-4012-b1c9-fd22fde0673d" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/ant.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.properties" beforeDir="false" afterPath="$PROJECT_DIR$/build.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.xml" beforeDir="false" afterPath="$PROJECT_DIR$/build.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,6 +237,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../AgilitestEditorGui" />
@@ -36,11 +247,11 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.last.edited" value="SDKs" />
     <property name="project.structure.proportion" value="0.17" />
-    <property name="project.structure.side.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.2" />
     <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="configurable.group.tools" />
+    <property name="settings.editor.selected.configurable" value="reference.projectsettings.compiler.javacompiler" />
   </component>
   <component name="RecentsManager">
     <key name="CreateActionScriptClassDialog.DESTINATION_PACKAGE_RECENT_KEY">
@@ -120,12 +331,25 @@
       <workItem from="1590503425636" duration="1612000" />
       <workItem from="1590505584101" duration="2202000" />
       <workItem from="1590525725819" duration="256000" />
-      <workItem from="1590912495312" duration="465000" />
+      <workItem from="1590912495312" duration="3187000" />
+      <workItem from="1590916118552" duration="5985000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="2" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
     <state x="788" y="251" width="587" height="579" key="#AtsMobileStation_(MobileStation)" timestamp="1590912688226">
@@ -163,65 +387,86 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1590420969617" />
-    <state width="1878" height="414" key="GridCell.Tab.0.bottom" timestamp="1590506772638">
-      <screen x="0" y="0" width="1920" height="1200" />
+    <state width="1358" height="310" key="GridCell.Tab.0.bottom" timestamp="1590916082828">
+      <screen x="0" y="23" width="1920" height="980" />
     </state>
     <state width="1877" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1590475562998" />
     <state width="1878" height="414" key="GridCell.Tab.0.bottom/0.0.1920.1200@0.0.1920.1200" timestamp="1590506772638" />
     <state width="1878" height="337" key="GridCell.Tab.0.bottom/0.23.1920.1119@0.23.1920.1119" timestamp="1590476271270" />
-    <state width="1878" height="414" key="GridCell.Tab.0.center" timestamp="1590506772637">
-      <screen x="0" y="0" width="1920" height="1200" />
+    <state width="1358" height="310" key="GridCell.Tab.0.bottom/0.23.1920.977@0.23.1920.977" timestamp="1590913898166" />
+    <state width="1358" height="310" key="GridCell.Tab.0.bottom/0.23.1920.980@0.23.1920.980" timestamp="1590916082828" />
+    <state width="1358" height="310" key="GridCell.Tab.0.center" timestamp="1590916082828">
+      <screen x="0" y="23" width="1920" height="980" />
     </state>
     <state width="1877" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1590475562998" />
     <state width="1878" height="414" key="GridCell.Tab.0.center/0.0.1920.1200@0.0.1920.1200" timestamp="1590506772637" />
     <state width="1878" height="337" key="GridCell.Tab.0.center/0.23.1920.1119@0.23.1920.1119" timestamp="1590476271268" />
-    <state width="1878" height="414" key="GridCell.Tab.0.left" timestamp="1590506772636">
-      <screen x="0" y="0" width="1920" height="1200" />
+    <state width="1358" height="310" key="GridCell.Tab.0.center/0.23.1920.977@0.23.1920.977" timestamp="1590913898166" />
+    <state width="1358" height="310" key="GridCell.Tab.0.center/0.23.1920.980@0.23.1920.980" timestamp="1590916082828" />
+    <state width="1358" height="310" key="GridCell.Tab.0.left" timestamp="1590916082827">
+      <screen x="0" y="23" width="1920" height="980" />
     </state>
     <state width="1877" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1590475562998" />
     <state width="1878" height="414" key="GridCell.Tab.0.left/0.0.1920.1200@0.0.1920.1200" timestamp="1590506772636" />
     <state width="1878" height="337" key="GridCell.Tab.0.left/0.23.1920.1119@0.23.1920.1119" timestamp="1590476271267" />
-    <state width="1878" height="414" key="GridCell.Tab.0.right" timestamp="1590506772638">
-      <screen x="0" y="0" width="1920" height="1200" />
+    <state width="1358" height="310" key="GridCell.Tab.0.left/0.23.1920.977@0.23.1920.977" timestamp="1590913898165" />
+    <state width="1358" height="310" key="GridCell.Tab.0.left/0.23.1920.980@0.23.1920.980" timestamp="1590916082827" />
+    <state width="1358" height="310" key="GridCell.Tab.0.right" timestamp="1590916082828">
+      <screen x="0" y="23" width="1920" height="980" />
     </state>
     <state width="1877" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1590475562998" />
     <state width="1878" height="414" key="GridCell.Tab.0.right/0.0.1920.1200@0.0.1920.1200" timestamp="1590506772638" />
     <state width="1878" height="337" key="GridCell.Tab.0.right/0.23.1920.1119@0.23.1920.1119" timestamp="1590476271269" />
-    <state width="1878" height="414" key="GridCell.Tab.1.bottom" timestamp="1590506772479">
-      <screen x="0" y="0" width="1920" height="1200" />
+    <state width="1358" height="310" key="GridCell.Tab.0.right/0.23.1920.977@0.23.1920.977" timestamp="1590913898166" />
+    <state width="1358" height="310" key="GridCell.Tab.0.right/0.23.1920.980@0.23.1920.980" timestamp="1590916082828" />
+    <state width="1358" height="310" key="GridCell.Tab.1.bottom" timestamp="1590916082829">
+      <screen x="0" y="23" width="1920" height="980" />
     </state>
     <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1590475567448" />
     <state width="1878" height="414" key="GridCell.Tab.1.bottom/0.0.1920.1200@0.0.1920.1200" timestamp="1590506772479" />
     <state width="1878" height="414" key="GridCell.Tab.1.bottom/0.23.1920.1119@0.23.1920.1119" timestamp="1590505936165" />
-    <state width="1878" height="414" key="GridCell.Tab.1.center" timestamp="1590506772478">
-      <screen x="0" y="0" width="1920" height="1200" />
+    <state width="1358" height="310" key="GridCell.Tab.1.bottom/0.23.1920.977@0.23.1920.977" timestamp="1590913897941" />
+    <state width="1358" height="310" key="GridCell.Tab.1.bottom/0.23.1920.980@0.23.1920.980" timestamp="1590916082829" />
+    <state width="1358" height="310" key="GridCell.Tab.1.center" timestamp="1590916082829">
+      <screen x="0" y="23" width="1920" height="980" />
     </state>
     <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1590475567448" />
     <state width="1878" height="414" key="GridCell.Tab.1.center/0.0.1920.1200@0.0.1920.1200" timestamp="1590506772478" />
     <state width="1878" height="414" key="GridCell.Tab.1.center/0.23.1920.1119@0.23.1920.1119" timestamp="1590505936164" />
-    <state width="1878" height="414" key="GridCell.Tab.1.left" timestamp="1590506772477">
-      <screen x="0" y="0" width="1920" height="1200" />
+    <state width="1358" height="310" key="GridCell.Tab.1.center/0.23.1920.977@0.23.1920.977" timestamp="1590913897940" />
+    <state width="1358" height="310" key="GridCell.Tab.1.center/0.23.1920.980@0.23.1920.980" timestamp="1590916082829" />
+    <state width="1358" height="310" key="GridCell.Tab.1.left" timestamp="1590916082829">
+      <screen x="0" y="23" width="1920" height="980" />
     </state>
     <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1590475567447" />
     <state width="1878" height="414" key="GridCell.Tab.1.left/0.0.1920.1200@0.0.1920.1200" timestamp="1590506772477" />
     <state width="1878" height="414" key="GridCell.Tab.1.left/0.23.1920.1119@0.23.1920.1119" timestamp="1590505936163" />
-    <state width="1878" height="414" key="GridCell.Tab.1.right" timestamp="1590506772478">
-      <screen x="0" y="0" width="1920" height="1200" />
+    <state width="1358" height="310" key="GridCell.Tab.1.left/0.23.1920.977@0.23.1920.977" timestamp="1590913897939" />
+    <state width="1358" height="310" key="GridCell.Tab.1.left/0.23.1920.980@0.23.1920.980" timestamp="1590916082829" />
+    <state width="1358" height="310" key="GridCell.Tab.1.right" timestamp="1590916082829">
+      <screen x="0" y="23" width="1920" height="980" />
     </state>
     <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1590475567448" />
     <state width="1878" height="414" key="GridCell.Tab.1.right/0.0.1920.1200@0.0.1920.1200" timestamp="1590506772478" />
     <state width="1878" height="414" key="GridCell.Tab.1.right/0.23.1920.1119@0.23.1920.1119" timestamp="1590505936164" />
-    <state x="461" y="178" key="SettingsEditor" timestamp="1590912811969">
+    <state width="1358" height="310" key="GridCell.Tab.1.right/0.23.1920.977@0.23.1920.977" timestamp="1590913897940" />
+    <state width="1358" height="310" key="GridCell.Tab.1.right/0.23.1920.980@0.23.1920.980" timestamp="1590916082829" />
+    <state x="834" y="149" key="SettingsEditor" timestamp="1590916626233">
       <screen x="0" y="23" width="1920" height="977" />
     </state>
     <state x="461" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1590422625229" />
     <state x="461" y="190" key="SettingsEditor/0.0.1920.1200@0.0.1920.1200" timestamp="1590504100808" />
-    <state x="461" y="178" key="SettingsEditor/0.23.1920.977@0.23.1920.977" timestamp="1590912811969" />
+    <state x="834" y="149" key="SettingsEditor/0.23.1920.977@0.23.1920.977" timestamp="1590916626233" />
+    <state x="523" y="60" key="SettingsEditor/0.23.1920.978@0.23.1920.978" timestamp="1590916038424" />
     <state width="960" height="600" key="XDebugger.FullValuePopup" timestamp="1590505957051">
       <screen x="0" y="0" width="1920" height="1200" />
     </state>
     <state width="960" height="600" key="XDebugger.FullValuePopup/0.0.1920.1200@0.0.1920.1200" timestamp="1590505957051" />
     <state width="960" height="600" key="XDebugger.FullValuePopup/0.23.1920.1119@0.23.1920.1119" timestamp="1590505788976" />
+    <state x="1088" y="285" key="antBuildFilePropertiesDialogDimension" timestamp="1590916859514">
+      <screen x="0" y="23" width="1920" height="977" />
+    </state>
+    <state x="1088" y="285" key="antBuildFilePropertiesDialogDimension/0.23.1920.977@0.23.1920.977" timestamp="1590916859514" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -233,7 +478,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="flex">
           <url>file://$PROJECT_DIR$/src/device/simulator/AndroidSimulator.as</url>
-          <line>38</line>
+          <line>40</line>
           <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>

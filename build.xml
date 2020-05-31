@@ -2,12 +2,25 @@
 <project name="mobilestation" basedir="." default="package">
 	
 	<property file="build.properties" description=""/>
+
+	<condition property="isMac">
+		<os family="mac"/>
+	</condition>
+
+	<condition property="isWindows">
+		<os family="windows" />
+	</condition>
+
+	<target name="initWindowsProperties" if="isWindows">
+		<property name="FLEX_HOME" value="${FLEX_SDK_WIN}" />
+	</target>
+
+	<target name="initMacOsProperties" if="isMac">
+		<property name="FLEX_HOME" value="${FLEX_SDK_MACOS}" />
+	</target>
 	
-	<target name="init.sdk">
-		<condition property="FLEX_HOME" value="${SDK_HOME_MACOS}">
-			<isset property="isMacos"/>
-		</condition>
-		<property name="FLEX_HOME" value="${SDK_HOME_WIN}"/>
+	<target name="init.sdk" depends="initMacOsProperties,initWindowsProperties">
+
 		<echo message="Using SDK -> ${FLEX_HOME}"/>
 		<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />
 		
@@ -100,37 +113,54 @@
 	    	<arg value="."/> 
 	    </java> 
 	</target>
-	
-	<target name="package-bundle" depends="init.sdk, compile.project, copy.tools"> 
 
+	<target name="package-bundle" depends="init.sdk, compile.project, copy.tools">
 		<delete failonerror="false">
 			<fileset dir="release">
 				<include name="${APP_NAME}.zip"/>
-		   		<include name="${APP_NAME}"/>
+				<include name="${APP_NAME}.app"/>
+				<include name="${APP_NAME}"/>
 			</fileset>
 		</delete>
-		
-	    <java jar="${FLEX_HOME}/lib/adt.jar" fork="true" failonerror="true" dir="temp"> 
-	    	<arg value="-package"/> 
-	    	<arg value="-storetype"/> 
-	        <arg value="pkcs12"/> 
-	        <arg value="-keystore"/> 
-	        <arg value="../cert.p12"/>
-	    	<arg value="-storepass"/>
-	    	<arg value="${PASSWORD}"/>
-	        <arg value="-target"/> 
-	        <arg value="bundle"/>
-	    	<arg value="../release/${APP_NAME}"/>
-	        <arg value="${APP_NAME}-app.xml"/> 
-	    	<arg value="."/> 
-	    </java> 
-		
-		<zip destfile="release/${APP_NAME}.zip"
-		     basedir="release/${APP_NAME}">
-		</zip>
-		
+
+		<java jar="${FLEX_HOME}/lib/adt.jar" fork="true" failonerror="true" dir="temp">
+			<arg value="-package"/>
+			<arg value="-storetype"/>
+			<arg value="pkcs12"/>
+			<arg value="-keystore"/>
+			<arg value="../cert.p12"/>
+			<arg value="-storepass"/>
+			<arg value="${PASSWORD}"/>
+			<arg value="-target"/>
+			<arg value="bundle"/>
+			<arg value="../release/${APP_NAME}"/>
+			<arg value="${APP_NAME}-app.xml"/>
+			<arg value="."/>
+		</java>
+
+		<antcall target="zipWindows"/>
+		<antcall target="zipMacos"/>
+
 	</target>
-	
+
+	<target name="zipWindows" if="isWindows">
+		<zip destfile="release/${APP_NAME}.zip"
+			 basedir="release" preserve0permissions="true" level="9">
+			<fileset dir="." includes="${APP_NAME}"/>
+		</zip>
+	</target>
+
+	<target name="zipMacos" if="isMac">
+		<exec executable="ditto" dir="release">
+			<arg value="-c" />
+			<arg value="-k" />
+			<arg value="--sequesterRsrc" />
+			<arg value="--keepParent" />
+			<arg value="${APP_NAME}.app" />
+			<arg value="${APP_NAME}.zip" />
+		</exec>
+	</target>
+
 	<target name="package-all"> 
 		<antcall target="package"/>
 		<antcall target="package-bundle"/>
