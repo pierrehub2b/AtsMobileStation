@@ -12,6 +12,7 @@ package tools
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.NetStatusEvent;
 	import flash.events.ProgressEvent;
+	import flash.events.TimerEvent;
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
@@ -20,6 +21,7 @@ package tools
 	import flash.net.Responder;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
+	import flash.utils.Timer;
 	
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
@@ -47,6 +49,8 @@ package tools
 		
 		private var mona:File;
 		private var monaInstallFolder:File;
+		
+		private var checkDevicesTimer:Timer;
 		
 		public function PeerGroupConnection(devManager:RunningDevicesManager, simManager:AvailableSimulatorsManager, port:int)
 		{
@@ -128,6 +132,10 @@ package tools
 			name = info.name
 			description = info.description
 			devicesManager.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
+			
+			checkDevicesTimer = new Timer(5000);
+			checkDevicesTimer.addEventListener(TimerEvent.TIMER, checkDevices);
+			checkDevicesTimer.start();
 		}
 		
 		//--------------------------------------------------------------------------------------------------------
@@ -267,14 +275,14 @@ package tools
 		}
 		
 		private var devicesStack:Vector.<RunningDevice> = new Vector.<RunningDevice>();
-		private function checkNewDevice():void{
-			netConnection.call("pushDevice", new Responder(onDevicePushed, null), devicesStack.pop().monaDevice);
+		private function checkDevices():void{
+			if(devicesStack.length > 0){
+				netConnection.call("pushDevice", new Responder(onDevicePushed, null), devicesStack.pop().monaDevice);
+			}			
 		}
 		
 		private function onDevicePushed(obj:Object=null):void{
-			if(devicesStack.length > 0){
-				TweenMax.delayedCall(2.00, checkNewDevice);
-			}
+
 		}
 		
 		private function devicesChangeHandler(ev:CollectionEvent):void{
@@ -286,9 +294,6 @@ package tools
 				dev = ev.items[0].source as RunningDevice
 				if(ev.items[0].property == "status" && ev.items[0].newValue == "ready"){
 					devicesStack.push(dev);
-					if(devicesStack.length == 1){
-						checkNewDevice();
-					}
 				}else if (ev.items[0].property == "lockedBy"){
 					netConnection.call("deviceLocked", null, dev.monaDevice);
 				}
