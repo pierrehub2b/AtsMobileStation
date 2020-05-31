@@ -1,34 +1,32 @@
 # AtsMobileStation
 PC and Mac OS application to start and install mobile drivers used by ATS test framework
 
-# Before launching the software on MacOS, please do actions below
-- Copy and paste the content of the AtsMobileStation folder "assets/tools/monaserver/macos" to "src/assets/tools/monaserver"
+# Before launching AtsMobileStation on MacOS, please do actions below
 - If not already install, launch the command: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 - Launch the command: brew install openssl@1.1
-- Copy and paste the content of the AtsMobileStation folder "assets/tools/libluajit" to your personal folder "/usr/local/lib/" 
-**After the first launch, your computer possibly tel you that le library "luajit" is not safe. For autorise it, go to your security settings and click on button "allow acess"**
+**After the first launch, your system possibly tells you that the library "luajit" is not safe. For authorize it, go to your security settings and click on button "allow acess"**
 
 ## iOS Devices
 **This procedure is useless if you're using iOS Simulators**
 ### Apple Developer settings
-To execute automated tests on physical iPhone devices, you need to create an Apple developer account and suscribe to a developer licence
+To execute automated tests on physical iPhone devices, you need to create an Apple developer account and subscribe to a developer licence
 
 ### Prerequisites 
 - Have an Xcode downloaded and **installed**
-- the device **must be in WIFI and don't have a pin code**
+- the device **must be in WIFI mode and unlock pin code disabled**
 
 ### 1/ Setup provisionning profile into Xcode
 - Open Xcode and go to 'Preferences' (Click on Xcode code in the left top corner)
 - In 'Accounts', add a new account using '+' button in the bottom left corner
 - Select 'Apple ID' in the dropdown list and enter your Apple Developer credentials in the next window
-- When you're logged, click on "Manage Certificates". If there is no certificate associated with your post (no one is enlightened), click on "+" button -> "Apple Development" and "Done"
+- When you're logged, click on "Manage Certificates". If there is no certificate associated with your workstation (no one is enlightened), click on "+" button -> "Apple Development" and "Done"
 - Save and quit xCode
 
 ### 2/ Set the Development team ID and retrieve the devices list
 - Open AtsMobileStation and plug an iPhone device
 - In the 'Connected devices' section, click on Apple logo
 - In the textbox, put your Development team ID
-- Click on 'Export device list' and save the output file to your computer
+- Click on 'Export device list' and save the output file on your disk
 
 ### 3/ Push informations to Apple Developer Website
 - Go and login to your apple dev account (https://developer.apple.com)

@@ -19,12 +19,32 @@
 	<target name="initMacOsProperties" if="isMac">
 		<property name="FLEX_HOME" value="${FLEX_SDK_MACOS}" />
 	</target>
-	
-	<target name="init.sdk" depends="initMacOsProperties,initWindowsProperties">
 
+	<target name="prepareBuildMacos" if="isMac">
+		<unzip src="tools/android/macos/adb.zip" dest="src/assets/tools/android"/>
+		<unzip src="tools/monaserver/macos/monaserver.zip" dest="src/assets/tools"/>
+		<copy file="tools/monaserver/libluajit-5.1.2.dylib" todir="src/assets/tools/monaserver"/>
+	</target>
+
+	<target name="prepareBuildWindows" if="isWindows">
+
+	</target>
+
+	<target name="configure" depends="initMacOsProperties,initWindowsProperties">
+		<echo message="Prepare OS dependent libs and components"/>
+		<delete dir="src/assets/tools/android"/>
+		<delete dir="src/assets/tools/monaserver/MonaBase"/>
+		<delete dir="src/assets/tools/monaserver/MonaCore"/>
+		<delete dir="src/assets/tools/monaserver/server/Monaserver.exe"/>
+		<delete dir="src/assets/tools/monaserver/server/MonaServer"/>
+
+		<antcall target="prepareBuildMacos"/>
+		<antcall target="prepareBuildWindows"/>
+	</target>
+
+	<target name="init.sdk" depends="configure">
 		<echo message="Using SDK -> ${FLEX_HOME}"/>
 		<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />
-		
 		<condition property="package.type" value="bundle">
 			<matches string="${ant.project.invoked-targets}" pattern="^package-bundle$"/>
 		</condition>

@@ -165,7 +165,11 @@ package tools
 				mona.resolvePath("server").resolvePath("MonaServer").copyTo(monaInstallFolder.resolvePath("server").resolvePath("MonaServer"), true);
 				mona.resolvePath("MonaBase").copyTo(monaInstallFolder.resolvePath("MonaBase"), true);
 				mona.resolvePath("MonaCore").copyTo(monaInstallFolder.resolvePath("MonaCore"), true);
-				
+
+				var lib:File = mona.resolvePath("libluajit-5.1.2.dylib");
+				var localLib:File = new File("/usr/local/lib");
+				lib.copyTo(localLib.resolvePath(lib.name));
+
 				monaServerBinary = monaInstallFolder.resolvePath("server").resolvePath("MonaServer");
 				if(monaServerBinary.exists){
 					var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
