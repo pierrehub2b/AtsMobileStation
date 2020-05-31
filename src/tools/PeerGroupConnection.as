@@ -128,7 +128,6 @@ package tools
 			name = info.name
 			description = info.description
 			devicesManager.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
-			TweenMax.delayedCall(5.00, checkNewDevice);
 		}
 		
 		//--------------------------------------------------------------------------------------------------------
@@ -269,17 +268,13 @@ package tools
 		
 		private var devicesStack:Vector.<RunningDevice> = new Vector.<RunningDevice>();
 		private function checkNewDevice():void{
-			if(devicesStack.length > 0){
-				TweenMax.killDelayedCallsTo(checkNewDevice);
-				netConnection.call("pushDevice", new Responder(onDevicePushed, null), devicesStack.pop().monaDevice);
-			}else{
-				TweenMax.delayedCall(5.00, checkNewDevice);
-			}
-			
+			netConnection.call("pushDevice", new Responder(onDevicePushed, null), devicesStack.pop().monaDevice);
 		}
 		
 		private function onDevicePushed(obj:Object=null):void{
-			TweenMax.delayedCall(5.00, checkNewDevice);
+			if(devicesStack.length > 0){
+				TweenMax.delayedCall(2.00, checkNewDevice);
+			}
 		}
 		
 		private function devicesChangeHandler(ev:CollectionEvent):void{
@@ -291,6 +286,9 @@ package tools
 				dev = ev.items[0].source as RunningDevice
 				if(ev.items[0].property == "status" && ev.items[0].newValue == "ready"){
 					devicesStack.push(dev);
+					if(devicesStack.length == 1){
+						checkNewDevice();
+					}
 				}else if (ev.items[0].property == "lockedBy"){
 					netConnection.call("deviceLocked", null, dev.monaDevice);
 				}
