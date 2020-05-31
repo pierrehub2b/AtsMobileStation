@@ -50,8 +50,6 @@ package tools
 		private var mona:File;
 		private var monaInstallFolder:File;
 		
-		private var checkDevicesTimer:Timer;
-		
 		public function PeerGroupConnection(devManager:RunningDevicesManager, simManager:AvailableSimulatorsManager, port:int)
 		{
 			devicesManager = devManager;
@@ -132,10 +130,6 @@ package tools
 			name = info.name
 			description = info.description
 			devicesManager.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
-			
-			checkDevicesTimer = new Timer(3000);
-			checkDevicesTimer.addEventListener(TimerEvent.TIMER, checkDevices);
-			checkDevicesTimer.start();
 		}
 		
 		//--------------------------------------------------------------------------------------------------------
@@ -241,7 +235,7 @@ package tools
 			trace(data)
 			
 			if(data.indexOf(rtmpProtocol + " server started") > -1){
-				monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun);
+				//monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun);
 				connectToPeerGroup();
 			}
 		}
@@ -273,18 +267,7 @@ package tools
 					break;
 			}
 		}
-		
-		private var devicesStack:Vector.<RunningDevice> = new Vector.<RunningDevice>();
-		private function checkDevices(ev:TimerEvent):void{
-			if(devicesStack.length > 0){
-				netConnection.call("pushDevice", new Responder(onDevicePushed, null), devicesStack.pop().monaDevice);
-			}			
-		}
-		
-		private function onDevicePushed(obj:Object=null):void{
 
-		}
-		
 		private function devicesChangeHandler(ev:CollectionEvent):void{
 			var dev:RunningDevice
 			if(ev.kind == CollectionEventKind.REMOVE){
@@ -293,7 +276,7 @@ package tools
 			}else if(ev.kind == CollectionEventKind.UPDATE){
 				dev = ev.items[0].source as RunningDevice
 				if(ev.items[0].property == "status" && ev.items[0].newValue == "ready"){
-					devicesStack.push(dev);
+					netConnection.call("pushDevice", null, dev.monaDevice);
 				}else if (ev.items[0].property == "lockedBy"){
 					netConnection.call("deviceLocked", null, dev.monaDevice);
 				}

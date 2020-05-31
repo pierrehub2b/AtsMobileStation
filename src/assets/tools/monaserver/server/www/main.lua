@@ -61,9 +61,7 @@ function onConnection(client,type,...)
 			if idx ~= nil then 
 				table.remove(devices, idx)
 			end
-			for id, cli in pairs(mona.clients) do
-					cli.writer:writeInvocation("deviceRemoved", device)
-			end
+			removedDevices[#removedDevices+1] = device
 			return #devices
 		end
 		
@@ -109,10 +107,18 @@ end
 
 function onManage()
 	if #pushedDevices > 0 then
+	    dev = table.remove(pushedDevices)
 		for id, cli in pairs(mona.clients) do
-			cli.writer:writeInvocation("deviceConnected", table.remove(pushedDevices,#pushedDevices-1))
+			cli.writer:writeInvocation("deviceConnected", dev)
 		end
-	end
+	else
+	    if #removedDevices > 0 then
+	        dev = table.remove(removedDevices)
+		    for id, cli in pairs(mona.clients) do
+    	        cli.writer:writeInvocation("deviceRemoved", dev)
+    	    end
+        end
+    end
 end
 
 function onDisconnection(client)
