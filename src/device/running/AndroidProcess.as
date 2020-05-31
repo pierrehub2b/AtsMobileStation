@@ -12,6 +12,7 @@ package device.running
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	import flash.globalization.DateTimeFormatter;
+	import flash.system.Capabilities;
 	
 	import mx.core.FlexGlobals;
 	
@@ -69,6 +70,8 @@ package device.running
 		public var webSocketServerPort:int;
 		public var webSocketServerError:String;
 		
+		private static var execExtension:String = Capabilities.os.indexOf("Mac")>-1?"":".exe";
+		
 		public function AndroidProcess(adbFile:File, id:String, port:String, usbMode:Boolean)
 		{
 			this.currentAdbFile = adbFile;
@@ -114,7 +117,7 @@ package device.running
 
 		private function checkBootedDevice():void {
 			var processInfo: NativeProcessStartupInfo = new NativeProcessStartupInfo()
-			processInfo.executable = File.applicationDirectory.resolvePath("assets/tools/android/adb.exe");
+			processInfo.executable = File.applicationDirectory.resolvePath("assets/tools/android/adb" + execExtension);
 			processInfo.arguments = new <String>["-s", id, "shell", "getprop", "sys.boot_completed"];
 
 			var adbProcess: NativeProcess = new NativeProcess()
