@@ -62,6 +62,7 @@ function onConnection(client,type,...)
 			for id, cli in pairs(mona.clients) do
 					cli.writer:writeInvocation("deviceRemoved", device)
 			end
+			return #devices
 		end
 		
 		function client:pushDevice(device)
