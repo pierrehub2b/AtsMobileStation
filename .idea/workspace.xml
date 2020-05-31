@@ -3,10 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="626996f5-b043-4012-b1c9-fd22fde0673d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AvailableSimulatorsManager.as" beforeDir="false" afterPath="$PROJECT_DIR$/src/AvailableSimulatorsManager.as" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/RunningDevicesManager.as" beforeDir="false" afterPath="$PROJECT_DIR$/src/RunningDevicesManager.as" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/device/simulator/AndroidSimulator.as" beforeDir="false" afterPath="$PROJECT_DIR$/src/device/simulator/AndroidSimulator.as" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/helpers/Settings.as" beforeDir="false" afterPath="$PROJECT_DIR$/src/helpers/Settings.as" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,11 +36,11 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="project.structure.last.edited" value="SDK Location" />
+    <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.17" />
     <property name="project.structure.side.proportion" value="0.0" />
     <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="AndroidSdkUpdater" />
+    <property name="settings.editor.selected.configurable" value="configurable.group.tools" />
   </component>
   <component name="RecentsManager">
     <key name="CreateActionScriptClassDialog.DESTINATION_PACKAGE_RECENT_KEY">
@@ -124,6 +120,7 @@
       <workItem from="1590503425636" duration="1612000" />
       <workItem from="1590505584101" duration="2202000" />
       <workItem from="1590525725819" duration="256000" />
+      <workItem from="1590912495312" duration="465000" />
     </task>
     <servers />
   </component>
@@ -131,15 +128,28 @@
     <option name="version" value="2" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="414" y="202" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1590503183782">
-      <screen x="0" y="0" width="1920" height="1200" />
+    <state x="788" y="251" width="587" height="579" key="#AtsMobileStation_(MobileStation)" timestamp="1590912688226">
+      <screen x="0" y="23" width="1920" height="977" />
+    </state>
+    <state x="788" y="251" width="587" height="579" key="#AtsMobileStation_(MobileStation)/0.23.1920.977@0.23.1920.977" timestamp="1590912688226" />
+    <state x="389" y="91" key="#Project_Structure" timestamp="1590912961152">
+      <screen x="0" y="23" width="1920" height="977" />
+    </state>
+    <state x="389" y="91" key="#Project_Structure/0.23.1920.977@0.23.1920.977" timestamp="1590912961152" />
+    <state x="414" y="187" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1590912652608">
+      <screen x="0" y="23" width="1920" height="977" />
     </state>
     <state x="414" y="175" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1590422641128" />
     <state x="414" y="202" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1200@0.0.1920.1200" timestamp="1590503183782" />
+    <state x="414" y="187" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.23.1920.977@0.23.1920.977" timestamp="1590912652608" />
     <state x="765" y="236" key="#com.intellij.ide.util.MemberChooser" timestamp="1590418089117">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="765" y="236" key="#com.intellij.ide.util.MemberChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1590418089117" />
+    <state x="624" y="205" key="#com.intellij.ide.util.frameworkSupport.AddFrameworkSupportDialog" timestamp="1590912757916">
+      <screen x="0" y="23" width="1920" height="977" />
+    </state>
+    <state x="624" y="205" key="#com.intellij.ide.util.frameworkSupport.AddFrameworkSupportDialog/0.23.1920.977@0.23.1920.977" timestamp="1590912757916" />
     <state x="100" y="100" width="1720" height="1000" key="AVDManager" timestamp="1590505994656">
       <screen x="0" y="0" width="1920" height="1200" />
     </state>
@@ -201,11 +211,12 @@
     <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1590475567448" />
     <state width="1878" height="414" key="GridCell.Tab.1.right/0.0.1920.1200@0.0.1920.1200" timestamp="1590506772478" />
     <state width="1878" height="414" key="GridCell.Tab.1.right/0.23.1920.1119@0.23.1920.1119" timestamp="1590505936164" />
-    <state x="461" y="190" key="SettingsEditor" timestamp="1590504100808">
-      <screen x="0" y="0" width="1920" height="1200" />
+    <state x="461" y="178" key="SettingsEditor" timestamp="1590912811969">
+      <screen x="0" y="23" width="1920" height="977" />
     </state>
     <state x="461" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1590422625229" />
     <state x="461" y="190" key="SettingsEditor/0.0.1920.1200@0.0.1920.1200" timestamp="1590504100808" />
+    <state x="461" y="178" key="SettingsEditor/0.23.1920.977@0.23.1920.977" timestamp="1590912811969" />
     <state width="960" height="600" key="XDebugger.FullValuePopup" timestamp="1590505957051">
       <screen x="0" y="0" width="1920" height="1200" />
     </state>
