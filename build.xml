@@ -27,8 +27,7 @@
 		<delete file="src/assets/tools/monaserver/libluajit-5.1.2.dylib"/>
 			
 		<unzip src="tools/android/macos/adb.zip" dest="src/assets/tools/android"/>
-		<unzip src="tools/monaserver/macos/monaserver.zip" dest="src/assets/tools"/>
-		<copy file="tools/monaserver/macos/libluajit-5.1.2.dylib" todir="src/assets/tools/monaserver"/>
+		<unzip src="tools/monaserver/macos/monaserver.zip" dest="src/assets/tools/monaserver"/>
 	</target>
 
 	<target name="prepareBuildWindows" if="isWindows">
@@ -55,10 +54,7 @@
 		</condition>
 		<property name="package.type" value="normal"/>
 	</target>
-	
-	<target name="copy.tools" description="Copy adb tools OS dependent">
-	</target>
-	
+
 	<target name="compile.project" description="" depends="init.sdk">
 
 		<delete failonerror="false" includeemptydirs="true" removeNotFollowedSymlinks="true">
@@ -123,7 +119,7 @@
 
 	</target>
 		
-	<target name="package" depends="init.sdk, compile.project, copy.tools"> 
+	<target name="package" depends="init.sdk, compile.project">
 		
 		<delete file="../release/${APP_NAME}.exe"/>
 		
@@ -143,7 +139,7 @@
 	    </java> 
 	</target>
 
-	<target name="package-bundle" depends="init.sdk, compile.project, copy.tools">
+	<target name="package-bundle" depends="init.sdk, compile.project">
 
 		<java jar="${FLEX_HOME}/lib/adt.jar" fork="true" failonerror="true" dir="temp">
 			<arg value="-package"/>

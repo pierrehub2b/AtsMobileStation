@@ -166,9 +166,12 @@ package tools
 				mona.resolvePath("MonaBase").copyTo(monaInstallFolder.resolvePath("MonaBase"), true);
 				mona.resolvePath("MonaCore").copyTo(monaInstallFolder.resolvePath("MonaCore"), true);
 
-				var lib:File = mona.resolvePath("libluajit-5.1.2.dylib");
-				var localLib:File = new File("/usr/local/lib");
-				lib.copyTo(localLib.resolvePath(lib.name));
+				const libNameString = "libluajit-5.1.2.dylib"
+				var localLib:File = new File("/usr/local/lib/" + libNameString);
+				if(!localLib.exists){
+					var lib:File = mona.resolvePath(libNameString);
+					lib.copyTo(localLib);
+				}
 
 				monaServerBinary = monaInstallFolder.resolvePath("server").resolvePath("MonaServer");
 				if(monaServerBinary.exists){
