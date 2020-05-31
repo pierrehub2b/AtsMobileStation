@@ -72,6 +72,7 @@ function onConnection(client,type,...)
 					cli.writer:writeInvocation("deviceConnected", device)
 				end
 			end
+			return #devices
 		end
 		
 		function client:deviceLocked(device)
