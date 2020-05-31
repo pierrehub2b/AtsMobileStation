@@ -35,16 +35,19 @@
 	</target>
 	
 	<target name="compile.project" description="" depends="init.sdk">
-		
+
+		<delete failonerror="false" includeemptydirs="true" removeNotFollowedSymlinks="true">
+			<fileset file="release/AtsMobileStation.app/Contents/Frameworks/Adobe AIR.framework/Resources"
+					 followsymlinks="false"/>
+			<fileset dir="release" defaultexcludes="false"/>
+			<fileset dir="temp"/>
+		</delete>
+
 		<mkdir dir="temp"/>
 		<mkdir dir="release"/>
-		
+
 		<echo message="Application type -> '${package.type}'"/>
-		
-		<delete>
-			<fileset dir="temp" includes="**/*"/>
-		</delete>
-		
+
 		<mxmlc file="src/${APP_NAME}.mxml"
             output="temp/${APP_NAME}.swf"
             static-rsls="true"
@@ -116,13 +119,6 @@
 	</target>
 
 	<target name="package-bundle" depends="init.sdk, compile.project, copy.tools">
-		<delete failonerror="false">
-			<fileset dir="release">
-				<include name="${APP_NAME}.zip"/>
-				<include name="${APP_NAME}.app"/>
-				<include name="${APP_NAME}"/>
-			</fileset>
-		</delete>
 
 		<java jar="${FLEX_HOME}/lib/adt.jar" fork="true" failonerror="true" dir="temp">
 			<arg value="-package"/>
