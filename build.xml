@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="mobilestation" basedir="." default="package">
+<project name="mobilestation" basedir="." default="package-bundle">
 	
 	<property file="build.properties" description=""/>
 
@@ -145,9 +145,7 @@
 
 	<target name="zipWindows" if="isWindows">
 		<zip destfile="release/${APP_NAME}.zip"
-			 basedir="release" preserve0permissions="true" level="9">
-			<fileset dir="." includes="${APP_NAME}"/>
-		</zip>
+				     basedir="release/${APP_NAME}"/>
 	</target>
 
 	<target name="zipMacos" if="isMac">
