@@ -282,7 +282,7 @@ package tools
 				dev = ev.items[0].source as RunningDevice
 				if(ev.items[0].property == "status" && ev.items[0].newValue == "ready"){
 					netConnection.call("pushDevice", null, dev.monaDevice);
-				}else if (ev.items[0].property == "lockedBy"){
+				}else if (ev.items[0].property == "locked"){
 					netConnection.call("deviceLocked", null, dev.monaDevice);
 				}
 			}

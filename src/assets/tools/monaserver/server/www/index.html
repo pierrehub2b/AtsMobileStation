@@ -60,7 +60,7 @@
 						break;
 					case "deviceRemoved":
 						var device = data[1];
-						var locked = device["lockedBy"];
+						var locked = device["locked"];
 						var endPoint = device["ip"] + ":" + device["port"];
 
 						var list = document.getElementById("listDevices");
@@ -74,7 +74,7 @@
 						break;
 					case "deviceLocked":
 						var device = data[1];
-						var locked = device["lockedBy"];
+						var locked = device["locked"];
 						var endPoint = device["ip"] + ":" + device["port"];
 
 						var list = document.getElementById("listDevices");
