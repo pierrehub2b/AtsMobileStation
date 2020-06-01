@@ -155,7 +155,7 @@ package tools
 		public function close():void{
 			devicesManager.collection.removeEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
 			netConnection.call("close", null);
-			netConnection.close();
+			//netConnection.close();
 		}
 		
 		private function updateMonaServerWww():void{

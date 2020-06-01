@@ -207,11 +207,12 @@
 			protected function closeHandler(event:Event):void {
 				event.preventDefault();
 				event.stopPropagation();
-				
+
+				peerGroup.close();
+
 				devices.terminate();
 				simulators.terminate();
-				peerGroup.close();
-				
+
 				infoStatus.text = "Please wait all processes to finish ..."
 				TweenMax.delayedCall(5.00, closeApp);
 			}
