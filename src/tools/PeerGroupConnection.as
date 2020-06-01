@@ -139,19 +139,14 @@ package tools
 		public function saveValues(desc:String, nm:String):void{
 			netConnection.call("updateInfo", null, nm, desc);
 		}
-		
+
+		public function devices(devices:Array, updateType:String):void{}
 		public function msStatus(type:String):void{}
-		public function deviceLocked(device:Object):void{}
-		public function deviceConnected(device:Object):void{}
-		public function deviceRemoved(device:Object):void{}
 		public function infoUpdated(nm:String, desc:String):void {
 			description = desc;
 			name = nm;
 		}
-		public function devices(devices:Array, updateType:String):void{
-			trace(devices.length)
-		}
-		
+
 		public function close():void{
 			devicesManager.collection.removeEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
 			netConnection.call("close", null);
