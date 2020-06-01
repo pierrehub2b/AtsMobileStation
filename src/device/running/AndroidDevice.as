@@ -96,7 +96,7 @@ public class AndroidDevice extends RunningDevice
 		}
 
 		protected function deviceLockStatusHandler(ev:Event):void {
-			lockedBy = process.lockedBy
+			locked = process.locked
 		}
 
 		public static function setup(id:String, adbFile:File):AndroidDevice {

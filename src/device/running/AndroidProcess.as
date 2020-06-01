@@ -55,7 +55,7 @@ package device.running
 		public var deviceIp:String;
 		public var error:String;
 		public var deviceInfo:Device;
-		public var lockedBy:String;
+		public var locked:String;
 		
 		private var process:NativeProcess;
 		private var procInfo:NativeProcessStartupInfo;
@@ -325,10 +325,10 @@ package device.running
 				} else if(data.indexOf("ATS_WIFI_STOP") > -1) {
 					dispatchEvent(new Event(WIFI_ERROR_EVENT));
 				} else if(data.indexOf("ATS_DRIVER_LOCKED_BY:") > -1) {
-					lockedBy = getDeviceOwner(data)
+					locked = getDeviceOwner(data)
 					dispatchEvent(new Event(DEVICE_LOCKED_STATUS))
 				} else if(data.indexOf("ATS_DRIVER_UNLOCKED") > -1) {
-					lockedBy = null;
+					locked = null;
 					dispatchEvent(new Event(DEVICE_LOCKED_STATUS))
 				} else if(data.indexOf("ATS_WEB_SOCKET_SERVER_START:") > -1) {
 					webSocketServerPort = getWebSocketServerPort(data);

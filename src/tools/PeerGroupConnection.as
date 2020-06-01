@@ -148,11 +148,16 @@ package tools
 			description = desc;
 			name = nm;
 		}
+		public function devices(devices:Array, updateType:String):void{
+			trace(devices.length)
+		}
 		
 		public function close():void{
 			devicesManager.collection.removeEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
-			netConnection.call("close", null);
-			netConnection.close();
+			//netConnection.call("close", null);
+			//netConnection.close();
+
+			terminate();
 		}
 		
 		private function updateMonaServerWww():void{
@@ -281,6 +286,10 @@ package tools
 					netConnection.call("deviceLocked", null, dev.monaDevice);
 				}
 			}
+		}
+
+		public function terminate():void{
+			netConnection.call("terminate", null);
 		}
 		
 		private function saveIniFile(monServerIni:File):void{

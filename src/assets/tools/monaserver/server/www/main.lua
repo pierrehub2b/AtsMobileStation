@@ -1,24 +1,30 @@
 local devices = {}
-local pushedDevices = {}
-local removedDevices = {}
+local sync = nil
 
-function getDeviceIndex(ip, port)
+function getDeviceIndex(id)
 	for i, v in ipairs (devices) do 
-		if (v.ip == ip and v.port == port) then
+		if (v.id == id) then
 			return i 
 		end
 	end
 	return nil
 end
 
-function updateDevice(ip, port, locked)
+function updateDevice(id, locked)
 	for i, v in ipairs (devices) do 
-		if (v.ip == ip and v.port == port) then
+		if (v.id == id) then
 			v.locked = locked
 			return true 
 		end
 	end
 	return false
+end
+
+function close()
+    for i=0, #devices do devices[i]=nil end
+    for id, cli in pairs(mona.clients) do
+        cli.writer:writeInvocation("msStatus", "close")
+    end
 end
 
 function onConnection(client,type,...)
@@ -57,37 +63,37 @@ function onConnection(client,type,...)
 		end
 		
 		function client:deviceRemoved(device)
-			local idx = getDeviceIndex(device["ip"], device["port"])
+			local idx = getDeviceIndex(device["id"])
 			if idx ~= nil then 
 				table.remove(devices, idx)
+				sync = "removed"
 			end
-			removedDevices[#removedDevices+1] = device
 			return #devices
 		end
 		
 		function client:pushDevice(device)
-			local idx = getDeviceIndex(device["ip"], device["port"])
+			local idx = getDeviceIndex(device["id"])
 			if idx == nil then 
 				devices[#devices+1] = device
-				pushedDevices[#pushedDevices+1] = device
+			    sync = "added"
 			end
 			return #devices
 		end
 		
 		function client:deviceLocked(device)
-			local update = updateDevice(device["ip"], device["port"], device["lockedBy"])
-			if update then 
-				for id, cli in pairs(mona.clients) do
-					cli.writer:writeInvocation("deviceLocked", device)
-				end
+			local update = updateDevice(device["id"], device["locked"])
+			if update then
+			    sync = "updated"
 			end
 		end
 		
 		function client:close()
-			for i=0, #devices do devices[i]=nil end
-			for id, cli in pairs(mona.clients) do
-				cli.writer:writeInvocation("msStatus", "close")
-			end
+            close()
+		end
+
+		function client:terminate()
+		    close()
+		    os.exit()
 		end
 
 		return {name=data["info"]["name"], description=data["info"]["description"], configs=mona.configs}
@@ -106,18 +112,11 @@ function onConnection(client,type,...)
 end
 
 function onManage()
-	if #pushedDevices > 0 then
-	    dev = table.remove(pushedDevices)
+	if sync ~= nil then
 		for id, cli in pairs(mona.clients) do
-			cli.writer:writeInvocation("deviceConnected", dev)
+			cli.writer:writeInvocation("devices", devices, sync)
 		end
-	else
-	    if #removedDevices > 0 then
-	        dev = table.remove(removedDevices)
-		    for id, cli in pairs(mona.clients) do
-    	        cli.writer:writeInvocation("deviceRemoved", dev)
-    	    end
-        end
+		sync = nil
     end
 end
 
