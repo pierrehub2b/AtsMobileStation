@@ -9,23 +9,25 @@
 		<![CDATA[
 			import com.greensock.TweenMax;
 			
+			import device.Device;
+			import device.RunningDevice;
+			import device.running.IosDevice;
+			
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.controls.Text;
 			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
-			
-			import spark.filters.DropShadowFilter;
-			
-			import device.Device;
-			import device.RunningDevice;
-			import device.running.IosDevice;
 			
 			import renderer.PhysicialDeviceSettingsWindow;
 			import renderer.RunningDeviceRenderer;
 			
 			import servers.http.HttpServer;
+			
+			import spark.components.Alert;
+			import spark.filters.DropShadowFilter;
 			
 			import tools.PeerGroupConnection;
 			
@@ -85,29 +87,33 @@
 				NativeApplication.nativeApplication.activate()
 			}
 			
+			private function restartApp(ev:Event=null):void{
+				var execFilePath:String = "AtsMobileStation.";
+				if(isMacOs){
+					execFilePath += "app";
+				}else{
+					execFilePath += "exe";
+				}
+				
+				const execFile:File = File.applicationDirectory.resolvePath(execFilePath);
+				if(execFile.exists){
+					NativeApplication.nativeApplication.exit();
+					execFile.openWithDefaultApplication();
+				}
+			}
+			
+			private function exitAppHandler(ev:Event):void{
+				NativeApplication.nativeApplication.icon.bitmaps = []; 
+				NativeApplication.nativeApplication.exit(); 
+			}
+			
 			protected function creationCompleteHandler(event:FlexEvent):void {
 				
 				var exitCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Exit")); 
-				exitCommand.addEventListener(Event.SELECT, function(event:Event):void { 
-					NativeApplication.nativeApplication.icon.bitmaps = []; 
-					NativeApplication.nativeApplication.exit(); 
-				}); 
+				exitCommand.addEventListener(Event.SELECT, exitAppHandler, false, 0, true);
 				
 				var restartCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Restart")); 
-				restartCommand.addEventListener(Event.SELECT, function(event:Event):void { 
-					var execFilePath:String = "AtsMobileStation.";
-					if(isMacOs){
-						execFilePath += "app";
-					}else{
-						execFilePath += "exe";
-					}
-					
-					var execFile:File = File.applicationDirectory.resolvePath(execFilePath);
-					if(execFile.exists){
-						NativeApplication.nativeApplication.exit();
-						execFile.openWithDefaultApplication();
-					}
-				}); 
+				restartCommand.addEventListener(Event.SELECT, restartApp, false, 0, true);
 				
 				if (NativeApplication.supportsSystemTrayIcon){
 					icon.contentLoaderInfo.addEventListener(Event.COMPLETE, iconLoadComplete); 
@@ -246,7 +252,7 @@
 			
 			protected function settings_clickHandler(event:MouseEvent):void {
 				// create and configure the TitleWindow
-				var tw:PhysicialDeviceSettingsWindow = new PhysicialDeviceSettingsWindow();
+				const tw:PhysicialDeviceSettingsWindow = new PhysicialDeviceSettingsWindow();
 				for each(var dv:RunningDevice in devices.collection) {
 					if (!dv.simulator && dv is IosDevice) {
 						tw.devices.push(dv);
@@ -256,6 +262,17 @@
 				// open the TitleWindow as a modal popup window
 				PopUpManager.addPopUp(tw, this, true);
 				PopUpManager.centerPopUp(tw);
+			}
+			
+			public function restartServer():void{
+				Alert.show("Dou you really want to restart the server ?\n(connected clients will be deconnected)", "Restart MobileStation server", Alert.YES|Alert.NO, this, alertClickHandler);
+			}
+			
+			private function alertClickHandler(evt:CloseEvent):void {
+				if (evt.detail == Alert.YES) {
+					peerGroup.terminate();
+					restartApp();
+				}
 			}
 		]]>
 	</fx:Script>
