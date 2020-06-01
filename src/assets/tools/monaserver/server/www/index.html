@@ -46,44 +46,22 @@
                 			document.getElementById("listDevices").innerHTML = "";
                 		}
                 		break;
-					case "deviceConnected":
-						
-						var device = data[1];
-						var endPoint = device["ip"] + ":" + device["port"];
-						
-						var item = document.createElement("li");
-						item.appendChild(document.createTextNode(device.modelName + " (" + endPoint + ") "));
-						item["endPoint"] = endPoint;
-						
-						document.getElementById("listDevices").appendChild(item);
-												
-						break;
-					case "deviceRemoved":
-						var device = data[1];
-						var locked = device["locked"];
-						var endPoint = device["ip"] + ":" + device["port"];
-
+					case "devices":
+						var devices = data[1];
 						var list = document.getElementById("listDevices");
-						var items = list.getElementsByTagName("li");
-						for (var i = 0; i < items.length; ++i) {
-							if(items[i]["endPoint"] == endPoint){
-								list.removeChild(items[i]);
-								break;
+						list.innerHTML = "";
+						for (var i = 0; i < devices.length; ++i) {
+							var device = devices[i];
+							var item = document.createElement("li");
+							item.appendChild(document.createTextNode(device.modelName + " (" + device["ip"] + ":" + device["port"] + ") "));
+							
+							if(device["locked"] != null){
+								var img = document.createElement("img");
+								img.src = "lock.png";
+								item.appendChild(img);
 							}
-						}
-						break;
-					case "deviceLocked":
-						var device = data[1];
-						var locked = device["locked"];
-						var endPoint = device["ip"] + ":" + device["port"];
-
-						var list = document.getElementById("listDevices");
-						var items = list.getElementsByTagName("li");
-						for (var i = 0; i < items.length; ++i) {
-							if(items[i]["endPoint"] == endPoint){
-								checkLock(items[i], locked);
-								break;
-							}
+							
+							list.appendChild(item);
 						}
 						break;
 					case "infoUpdated":

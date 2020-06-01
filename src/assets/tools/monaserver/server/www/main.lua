@@ -93,7 +93,7 @@ function onConnection(client,type,...)
 
 		function client:terminate()
 		    close()
-		    os.exit()
+			sync = "exit"
 		end
 
 		return {name=data["info"]["name"], description=data["info"]["description"], configs=mona.configs}
@@ -103,9 +103,7 @@ function onConnection(client,type,...)
 		else
 			function client:initData()
 				client.writer:writeInvocation("infoUpdated", data["info"]["name"], data["info"]["description"])
-				for i, device in pairs(devices) do
-					client.writer:writeInvocation("deviceConnected", device)
-				end
+				client.writer:writeInvocation("devices", devices)
 			end
 		end
 	end
@@ -113,10 +111,14 @@ end
 
 function onManage()
 	if sync ~= nil then
-		for id, cli in pairs(mona.clients) do
-			cli.writer:writeInvocation("devices", devices, sync)
+		if sync == "exit" then
+			os.exit()
+		else
+			for id, cli in pairs(mona.clients) do
+				cli.writer:writeInvocation("devices", devices, sync)
+			end
+			sync = nil
 		end
-		sync = nil
     end
 end
 
