@@ -22,10 +22,6 @@ package device.running
 		public static const ERROR_EVENT:String = "errorEvent";
 		public static const WIFI_ERROR_EVENT:String = "wifiErrorEvent";
 		public static const IP_ADDRESS:String = "ipAddress";
-		public static const SCREENSHOTRESPONSE:String = "screenshotResponse";
-		public static const USBACTIONRESPONSE:String = "usbResponse";
-		public static const USBSTARTRESPONSE:String = "usbResponseStart";
-		public static const USBSTARTENDEDRESPONSE:String = "usbResponseStartEnded";
 		public static const UNINSTALL_EXIT:String = "uninstallExit";
 		public static const WAITING_FOR_DEVICE:String = "waitingForDevice";
 
@@ -248,11 +244,11 @@ package device.running
 
 			var propArray:Array = output.split("\n");
 			for each (var line:String in propArray){
-				if(line.indexOf("[ro.product.brand]") == 0){
+				if(line.indexOf("[ro.product.manufacturer]") == 0){
 					deviceInfo.manufacturer = getPropValue(line)
 				}else if(line.indexOf("[ro.product.model]") == 0){
 					deviceInfo.modelId = getPropValue(line)
-				}else if(line.indexOf("[ro.semc.product.name]") == 0){
+				}else if(line.indexOf("[ro.product.name]") == 0){
 					deviceInfo.modelName = getPropValue(line)
 				}else if(line.indexOf("[def.tctfw.brandMode.name]") == 0){
 					deviceInfo.modelName = getPropValue(line)

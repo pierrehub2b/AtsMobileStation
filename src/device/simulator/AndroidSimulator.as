@@ -13,6 +13,8 @@ public class AndroidSimulator extends Simulator {
     private var outputData:String
     private var errorData:String
 
+    private var emulatorProcess: NativeProcess
+
     public function AndroidSimulator(id:String = "") {
         super(id);
 
@@ -51,11 +53,11 @@ public class AndroidSimulator extends Simulator {
         info.executable = file
         info.arguments = new <String>["-avd", id]
 
-        var process:NativeProcess = new NativeProcess()
-        process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputData, false, 0, true);
-        process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onErrorData, false, 0, true);
-        process.addEventListener(NativeProcessExitEvent.EXIT, onExit, false, 0, true);
-        process.start(info)
+        emulatorProcess = new NativeProcess()
+        emulatorProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputData, false, 0, true);
+        emulatorProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onErrorData, false, 0, true);
+        emulatorProcess.addEventListener(NativeProcessExitEvent.EXIT, onExit, false, 0, true);
+        emulatorProcess.start(info)
     }
 
     private function onExit(event:NativeProcessExitEvent):void {
@@ -68,7 +70,7 @@ public class AndroidSimulator extends Simulator {
     private function onErrorData(event:ProgressEvent):void {
         var process:NativeProcess = event.currentTarget as NativeProcess
         errorData = process.standardError.readUTFBytes(process.standardError.bytesAvailable)
-        process.exit()
+        process.exit(true)
         statusOff()
     }
 
@@ -80,7 +82,7 @@ public class AndroidSimulator extends Simulator {
     }
 
     override public function stopSim():void {
-        // var killEmulatorProcess:NativeProcess
+        emulatorProcess.exit(true)
     }
 
     private var bootCompletedError: String

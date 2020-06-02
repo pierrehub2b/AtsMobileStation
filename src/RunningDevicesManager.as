@@ -49,9 +49,7 @@ import flash.desktop.NativeProcess;
 		
 		private var adbLoop:TweenLite;
 		private var iosLoop:TweenLite;
-		
-		private var port:String = "8080";
-						
+
 		[Bindable]
 		public var collection:ArrayCollection = new ArrayCollection();
 		
