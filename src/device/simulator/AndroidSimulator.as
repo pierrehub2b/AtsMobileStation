@@ -10,6 +10,8 @@ import helpers.Settings;
 
 public class AndroidSimulator extends Simulator {
 
+	private static var execExtension:String = Capabilities.os.indexOf("Mac")>-1?"":".exe";
+	
     private var outputData:String
     private var errorData:String
 
@@ -25,7 +27,7 @@ public class AndroidSimulator extends Simulator {
 
     private function checkBootedDevice():void {
         var processInfo: NativeProcessStartupInfo = new NativeProcessStartupInfo()
-        processInfo.executable = File.applicationDirectory.resolvePath("assets/tools/android/adb.exe");
+        processInfo.executable = File.applicationDirectory.resolvePath("assets/tools/android/adb" + execExtension);
         processInfo.arguments = new <String>["-s", id, "shell", "getprop", "sys.boot_completed"];
 
         var adbProcess: NativeProcess = new NativeProcess()
@@ -37,11 +39,7 @@ public class AndroidSimulator extends Simulator {
 
     override public function startSim():void {
         var file:File = Settings.getInstance().androidSDKDirectory
-        if (Capabilities.os.indexOf("Mac") > -1) {
-            file = file.resolvePath("emulator/emulator")
-        } else {
-            file = file.resolvePath("emulator/emulator.exe")
-        }
+        file = file.resolvePath("emulator/emulator" + execExtension)
 
         if (!file.exists) {
             trace("No Android SDK found")

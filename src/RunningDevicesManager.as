@@ -102,8 +102,10 @@ import flash.desktop.NativeProcess;
 		
 		public function terminate():void{
 			adbLoop.pause();
+			TweenLite.killDelayedCallsTo(launchAdbProcess)
 			if(iosLoop != null){
 				iosLoop.pause();
+				TweenLite.killDelayedCallsTo(launchIosProcess)
 			}
 			
 			var dv:RunningDevice;

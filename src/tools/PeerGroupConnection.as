@@ -12,13 +12,16 @@ package tools
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.NetStatusEvent;
 	import flash.events.ProgressEvent;
+	import flash.events.TimerEvent;
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	import flash.net.NetConnection;
 	import flash.net.NetGroup;
+	import flash.net.Responder;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
+	import flash.utils.Timer;
 	
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
@@ -60,12 +63,12 @@ package tools
 		
 		private function checkMonaserverPort():void{
 			monaInstallFolder = File.userDirectory.resolvePath(".atsmobilestation").resolvePath("monaserver");
-			var iniFile:File = monaInstallFolder.resolvePath("server").resolvePath("MonaServer.ini");
+			const iniFile:File = monaInstallFolder.resolvePath("server").resolvePath("MonaServer.ini");
 			
 			updateMonaServerWww();
 			
 			if(iniFile.exists){
-				var iniFileLoader:URLLoader = new URLLoader();
+				const iniFileLoader:URLLoader = new URLLoader();
 				iniFileLoader.addEventListener(Event.COMPLETE, iniFileLoaded, false, 0, true);
 				iniFileLoader.load(new URLRequest(iniFile.url));
 			}else{
@@ -79,7 +82,7 @@ package tools
 			
 			for(var i:int = 0; i < data.length; ++i){
 				if(data[i] == "[" + rtmpProtocol + "]"){
-					var dataPort:Array = data[i+1].split("=");
+					const dataPort:Array = data[i+1].split("=");
 					connectToMonaserver(parseInt(dataPort[1]));
 					break;
 				}
@@ -93,7 +96,7 @@ package tools
 				netConnection.addEventListener(NetStatusEvent.NET_STATUS, onFirstConnect);
 				netConnection.addEventListener(IOErrorEvent.IO_ERROR, netIOError);
 				netConnection.client = this;
-				netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + port + "/mobilestation", "mobilestation");
+				netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + port + "/", "mobilestation");
 			}
 		}
 		
@@ -136,20 +139,18 @@ package tools
 		public function saveValues(desc:String, nm:String):void{
 			netConnection.call("updateInfo", null, nm, desc);
 		}
-		
+
+		public function devices(devices:Array, updateType:String):void{}
 		public function msStatus(type:String):void{}
-		public function deviceLocked(device:Object):void{}
-		public function deviceConnected(device:Object):void{}
-		public function deviceRemoved(device:Object):void{}
 		public function infoUpdated(nm:String, desc:String):void {
 			description = desc;
 			name = nm;
 		}
-		
+
 		public function close():void{
 			devicesManager.collection.removeEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
 			netConnection.call("close", null);
-			netConnection.close();
+			//netConnection.close();
 		}
 		
 		private function updateMonaServerWww():void{
@@ -165,15 +166,22 @@ package tools
 				mona.resolvePath("server").resolvePath("MonaServer").copyTo(monaInstallFolder.resolvePath("server").resolvePath("MonaServer"), true);
 				mona.resolvePath("MonaBase").copyTo(monaInstallFolder.resolvePath("MonaBase"), true);
 				mona.resolvePath("MonaCore").copyTo(monaInstallFolder.resolvePath("MonaCore"), true);
-				
+
+				const libName:String = "libluajit-5.1.2.dylib";
+				const localLib:File = new File("/usr/local/lib/" + libName);
+				if(!localLib.exists){
+					const lib:File = mona.resolvePath(libName);
+					lib.copyTo(localLib);
+				}
+
 				monaServerBinary = monaInstallFolder.resolvePath("server").resolvePath("MonaServer");
 				if(monaServerBinary.exists){
-					var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+					const procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 					procInfo.executable = new File("/bin/chmod");			
 					procInfo.workingDirectory = monaInstallFolder;
 					procInfo.arguments = new <String>["+x", "server/MonaServer"];
 					
-					var proc:NativeProcess = new NativeProcess();
+					const proc:NativeProcess = new NativeProcess();
 					proc.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);
 					proc.start(procInfo);
 				}
@@ -199,7 +207,7 @@ package tools
 			
 			saveIniFile(monaServerBinary.parent.resolvePath("MonaServer.ini"));
 			
-			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			const procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfo.executable = monaServerBinary;			
 			procInfo.workingDirectory = monaServerBinary.parent;
 			
@@ -223,8 +231,9 @@ package tools
 			const len:int = ev.target.standardOutput.bytesAvailable;
 			const data:String = ev.target.standardOutput.readUTFBytes(len);
 			trace(data)
+			
 			if(data.indexOf(rtmpProtocol + " server started") > -1){
-				monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun);
+				//monaServerProc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun);
 				connectToPeerGroup();
 			}
 		}
@@ -234,7 +243,7 @@ package tools
 			netConnection.objectEncoding = 3;
 			netConnection.addEventListener(NetStatusEvent.NET_STATUS, onNetStatus);
 			netConnection.client = this;
-			netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + rtmpPort + "/mobilestation", "mobilestation");
+			netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + rtmpPort + "/", "mobilestation");
 		}
 		
 		private var maxTry:int = 20;
@@ -256,11 +265,7 @@ package tools
 					break;
 			}
 		}
-		
-		private function pushDevice(dev:RunningDevice):void{
-			netConnection.call("pushDevice", null, dev.monaDevice);
-		}
-		
+
 		private function devicesChangeHandler(ev:CollectionEvent):void{
 			var dev:RunningDevice
 			if(ev.kind == CollectionEventKind.REMOVE){
@@ -269,15 +274,19 @@ package tools
 			}else if(ev.kind == CollectionEventKind.UPDATE){
 				dev = ev.items[0].source as RunningDevice
 				if(ev.items[0].property == "status" && ev.items[0].newValue == "ready"){
-					pushDevice(dev);
-				}else if (ev.items[0].property == "lockedBy"){
+					netConnection.call("pushDevice", null, dev.monaDevice);
+				}else if (ev.items[0].property == "locked"){
 					netConnection.call("deviceLocked", null, dev.monaDevice);
 				}
 			}
 		}
+
+		public function terminate():void{
+			netConnection.call("terminate", null);
+		}
 		
 		private function saveIniFile(monServerIni:File):void{
-			var stream:FileStream = new FileStream();
+			const stream:FileStream = new FileStream();
 			stream.open(monServerIni, FileMode.WRITE);
 			stream.writeUTFBytes("[RTMFP]\nport = " + rtmpPort + "\n[RTMP]\nport = " + rtmpPort + "\n[HTTP]\nport = " + httpPort + "\nindex = index.html\n[RTSP]\nport = 0");
 			stream.close();

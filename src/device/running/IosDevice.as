@@ -307,9 +307,9 @@ package device.running
 				removeReceivers();
 				testingProcess.exit();
 			} else if (data.indexOf("** DEVICE LOCKED BY : ") > -1) {
-				this.lockedBy = getDeviceOwner(data);
+				this.locked = getDeviceOwner(data);
 			} else if (data.indexOf("** DEVICE UNLOCKED **") > -1) {
-				this.lockedBy = null;
+				this.locked = null;
 			} else if (data.indexOf("** Port unavailable **") > -1) {
 				errorMessage = " - Unavailable port !";
 				removeReceivers();

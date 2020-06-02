@@ -12,6 +12,7 @@ package device.running
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	import flash.globalization.DateTimeFormatter;
+	import flash.system.Capabilities;
 	
 	import mx.core.FlexGlobals;
 	
@@ -50,7 +51,7 @@ package device.running
 		public var deviceIp:String;
 		public var error:String;
 		public var deviceInfo:Device;
-		public var lockedBy:String;
+		public var locked:String;
 		
 		private var process:NativeProcess;
 		private var procInfo:NativeProcessStartupInfo;
@@ -64,6 +65,8 @@ package device.running
 
 		public var webSocketServerPort:int;
 		public var webSocketServerError:String;
+		
+		private static var execExtension:String = Capabilities.os.indexOf("Mac")>-1?"":".exe";
 		
 		public function AndroidProcess(adbFile:File, id:String, port:String, usbMode:Boolean)
 		{
@@ -110,7 +113,7 @@ package device.running
 
 		private function checkBootedDevice():void {
 			var processInfo: NativeProcessStartupInfo = new NativeProcessStartupInfo()
-			processInfo.executable = File.applicationDirectory.resolvePath("assets/tools/android/adb.exe");
+			processInfo.executable = File.applicationDirectory.resolvePath("assets/tools/android/adb" + execExtension);
 			processInfo.arguments = new <String>["-s", id, "shell", "getprop", "sys.boot_completed"];
 
 			var adbProcess: NativeProcess = new NativeProcess()
@@ -318,10 +321,10 @@ package device.running
 				} else if(data.indexOf("ATS_WIFI_STOP") > -1) {
 					dispatchEvent(new Event(WIFI_ERROR_EVENT));
 				} else if(data.indexOf("ATS_DRIVER_LOCKED_BY:") > -1) {
-					lockedBy = getDeviceOwner(data)
+					locked = getDeviceOwner(data)
 					dispatchEvent(new Event(DEVICE_LOCKED_STATUS))
 				} else if(data.indexOf("ATS_DRIVER_UNLOCKED") > -1) {
-					lockedBy = null;
+					locked = null;
 					dispatchEvent(new Event(DEVICE_LOCKED_STATUS))
 				} else if(data.indexOf("ATS_WEB_SOCKET_SERVER_START:") > -1) {
 					webSocketServerPort = getWebSocketServerPort(data);

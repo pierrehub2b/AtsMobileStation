@@ -2,22 +2,22 @@
 <s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
-			   width="300" title="Settings"
+			   width="330" title="Settings"
 			   skinClass="skins.AppleDevWindowSkin"
 			   close="closeHandler(event)"
 			   creationComplete="creationCompleteHandler(event)">
 	<fx:Script>
 		<![CDATA[
+		import device.RunningDevice;
+		
 		import flash.net.navigateToURL;
+		
+		import helpers.Settings;
 		
 		import mx.core.FlexGlobals;
 		import mx.events.CloseEvent;
 		import mx.events.FlexEvent;
 		import mx.managers.PopUpManager;
-		
-		import device.RunningDevice;
-		
-		import helpers.Settings;
 
 		[Embed(source="/assets/icons/16/apple_site.png")]
 		private const AppleIcon:Class;
@@ -154,6 +154,12 @@
 			// save
 		}
 
+			protected function restart_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+				FlexGlobals.topLevelApplication.restartServer();
+			}
+			
 		]]>
 	</fx:Script>
 
@@ -204,7 +210,8 @@
 		</s:Rect>
 
 		<s:HGroup left="5" right="5" gap="2" horizontalAlign="center" verticalCenter="0">
-			<s:Button label="Export device list" icon="assets/icons/16/copy.png" click="copyId_clickHandler(event)"/>
+			<s:Button label="Restart Server" icon="assets/icons/16/restart_services.png" click="restart_clickHandler(event)"/>
+			<s:Button label="Export devices" icon="assets/icons/16/copy.png" click="copyId_clickHandler(event)"/>
 			<s:Button label="Finish" click="save_clickHandler(event)" fontSize="11"
 					  icon="assets/icons/16/tick.png"/>
 		</s:HGroup>
