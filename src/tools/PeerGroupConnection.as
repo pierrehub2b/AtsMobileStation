@@ -288,7 +288,7 @@ package tools
 		private function saveIniFile(monServerIni:File):void{
 			const stream:FileStream = new FileStream();
 			stream.open(monServerIni, FileMode.WRITE);
-			stream.writeUTFBytes("[RTMFP]\nport = " + rtmpPort + "\n[RTMP]\nport = " + rtmpPort + "\n[HTTP]\nport = " + httpPort + "\nindex = index.html\n[RTSP]\nport = 0");
+			stream.writeUTFBytes("[RTMFP]\nport = " + rtmpPort + "\n[RTMP]\nport = " + rtmpPort + "\n[HTTP]\nport = " + httpPort + "\nindex = index.html\n[RTSP]\nport = 0\n[WebSocket]\ntimeout = 120");
 			stream.close();
 		}
 	}
