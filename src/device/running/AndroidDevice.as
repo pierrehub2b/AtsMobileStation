@@ -161,13 +161,15 @@ public class AndroidDevice extends RunningDevice
 			if (processError) {
 				status = ERROR
 				trace("BOOT CHECK ERROR - " + id + " : " + processError)
-				// check if device unlocked or not
 
 				if (processError.indexOf("device unauthorized") != -1) {
 					authorized = false
 					error = "Device not authorized"
 					errorMessage = "Check for a confirmation dialog on your device"
-					trace("Device not autorized")
+				} else if (processError.indexOf("device offline") != -1) {
+					error = "Device not started"
+					errorMessage = "Please wait until the device is started"
+					booted = false
 				}
 
 				return
@@ -198,12 +200,8 @@ public class AndroidDevice extends RunningDevice
 			if (!modelName) modelName = modelId
 
 			if (bootInfo && bootInfo == "1") {
-				trace(id + " booted")
 				fetchIpAddress()
 			} else {
-				// dispatchEvent(new Event(ERROR_EVENT));
-				// status : not booted
-				// errorMessage : not booted
 				error = "Device not started"
 				errorMessage = "Please wait until the device is started"
 				booted = false
