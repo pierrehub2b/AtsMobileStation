@@ -15,7 +15,7 @@ package device.running
 	import mx.core.FlexGlobals;
 	
 	import device.Device;
-	import device.RunningDevice;
+	import device.running.RunningDevice;
 	import device.simulator.Simulator;
 	
 	import helpers.DeviceSettings;
@@ -71,9 +71,7 @@ package device.running
 			
 			var fileStream:FileStream = new FileStream();
 			var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
-			
-			
-			
+
 			var deviceSettingsHelper:DeviceSettingsHelper = DeviceSettingsHelper.shared;
 			var deviceSettings:DeviceSettings = deviceSettingsHelper.getSettingsForDevice(id);
 			if (deviceSettings == null) {
@@ -344,6 +342,7 @@ package device.running
 			addLineToLogs(data);
 			
 			if (noProvisionningProfileError.test(data)) {
+				error = "No provisioning profiles"
 				errorMessage = "No provisioning profiles\nMore informations in our Github page";
 				testingProcess.exit();
 				removeReceivers();
@@ -351,6 +350,7 @@ package device.running
 			}
 			
 			if (noCertificatesError.test(data)) {
+				error = "Certificate error"
 				errorMessage = "Certificate error\nMore informations in our Github page";
 				testingProcess.exit();
 				removeReceivers();
@@ -358,6 +358,7 @@ package device.running
 			}
 			
 			if (startInfoLocked.test(data)) {
+				error = "Locked with passcode"
 				errorMessage = "Locked with passcode. Please disable code\n and auto-lock in device settings";
 				testingProcess.exit();
 				removeReceivers();
@@ -365,6 +366,7 @@ package device.running
 			}
 			
 			if (noXcodeInstalled.test(data)) {
+				error = "No XCode founded on this computer"
 				errorMessage = "No XCode founded on this computer\nGo to AppStore for download it";
 				testingProcess.exit();
 				removeReceivers();
@@ -372,6 +374,7 @@ package device.running
 			}
 			
 			if (wrongVersionofxCode.test(data)) {
+				error = "Your device need a more recent version of Xcode"
 				errorMessage = "Your device need a more recent version\n of xCode. Go to AppStore for download it";
 				testingProcess.exit();
 				removeReceivers();

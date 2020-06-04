@@ -1,7 +1,5 @@
 package device.running
 {
-	import device.Device;
-	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -50,7 +48,7 @@ package device.running
 		public var ipAddress:String;
 		public var deviceIp:String;
 		public var error:String;
-		public var deviceInfo:Device;
+		public var deviceInfo:AndroidDevice;
 		public var locked:String;
 		
 		private var process:NativeProcess;
@@ -73,7 +71,7 @@ package device.running
 			this.currentAdbFile = adbFile;
 			this.id = id;
 			this.port = port;
-			this.deviceInfo = new Device(id);
+			this.deviceInfo = new AndroidDevice(id, false);
 			this.usbMode = usbMode;
 
 			//---------------------------------------------------------------------------------------
@@ -86,9 +84,6 @@ package device.running
 			logStream.close();
 			
 			//---------------------------------------------------------------------------------------
-
-			// check if device booted
-			// checkBootedDevice()
 
 			process = new NativeProcess();
 			procInfo = new NativeProcessStartupInfo();
@@ -203,8 +198,6 @@ package device.running
 			}
 		}
 
-
-
 		protected function onUninstallExit(event:NativeProcessExitEvent):void
 		{
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
@@ -249,16 +242,14 @@ package device.running
 			for each (var line:String in propArray){
 				if(line.indexOf("[ro.product.manufacturer]") == 0){
 					deviceInfo.manufacturer = getPropValue(line)
-				}else if(line.indexOf("[ro.product.model]") == 0){
+				} else if(line.indexOf("[ro.product.model]") == 0){
 					deviceInfo.modelId = getPropValue(line)
-				}else if(line.indexOf("[ro.product.name]") == 0){
+				} else if(line.indexOf("[ro.product.name]") == 0){
 					deviceInfo.modelName = getPropValue(line)
-				}else if(line.indexOf("[def.tctfw.brandMode.name]") == 0){
-					deviceInfo.modelName = getPropValue(line)
-				}else if(line.indexOf("[ro.build.version.release]") == 0){
+				} else if(line.indexOf("[ro.build.version.release]") == 0) {
 					deviceInfo.osVersion = getPropValue(line)
-				}else if(line.indexOf("[ro.build.version.sdk]") == 0){
-					deviceInfo.sdkVersion = getPropValue(line)
+				} else if(line.indexOf("[ro.build.version.sdk]") == 0) {
+					deviceInfo.androidSdk = getPropValue(line)
 				}
 			}
 

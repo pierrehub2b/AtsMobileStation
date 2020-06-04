@@ -1,20 +1,22 @@
 package device.running {
-import flash.events.Event;
+
+import flash.desktop.NativeProcess;
+import flash.desktop.NativeProcessStartupInfo;
+import flash.events.NativeProcessExitEvent;
+import flash.events.ProgressEvent;
 import flash.filesystem.File;
 
 public class AndroidWirelessDevice extends AndroidDevice {
 
-    public function AndroidWirelessDevice(id:String, adbFile:File, automaticPort:Boolean, port:int) {
-        super(adbFile, id);
+    public function AndroidWirelessDevice(id:String, automaticPort:Boolean, port:int) {
+        super(id, false);
 
         this.automaticPort = automaticPort;
         this.port = port.toString();
         this.usbMode = false;
-
-        setupAdbProcess();
     }
 
-    protected function setupAdbProcess():void {
+    /* protected function setupAdbProcess():void {
 
         process = new AndroidProcess(currentAdbFile, id, this.port, usbMode);
 
@@ -23,26 +25,6 @@ public class AndroidWirelessDevice extends AndroidDevice {
         process.writeInfoLogFile("USB MODE = " + usbMode + " > set port: " + this.port);
 
         installing();
-    }
-
-    override protected function addAndroidProcessEventListeners():void
-    {
-        super.addAndroidProcessEventListeners();
-        process.addEventListener(AndroidProcess.IP_ADDRESS, ipAddressHandler, false, 0, true);
-        process.addEventListener(AndroidProcess.WIFI_ERROR_EVENT, processWifiErrorHandler, false, 0, true);
-    }
-
-        override protected function removeAndroidProcessEventListeners():void
-    {
-        super.removeAndroidProcessEventListeners();
-        process.removeEventListener(AndroidProcess.WIFI_ERROR_EVENT, processWifiErrorHandler);
-        process.removeEventListener(AndroidProcess.IP_ADDRESS, ipAddressHandler);
-    }
-
-    private function ipAddressHandler(ev:Event):void{
-        process.removeEventListener(AndroidProcess.IP_ADDRESS, ipAddressHandler);
-        ip = process.ipAddress;
-        udpIpAddress = process.deviceIp;
     }
 
     override public function runningTestHandler(ev:Event):void
@@ -59,6 +41,80 @@ public class AndroidWirelessDevice extends AndroidDevice {
         status = WIFI_ERROR;
 
         process.writeErrorLogFile("WIFI error"); //TODO add more detailed info
+    } */
+
+    override protected function fetchIpAddress():void {
+        processInfo = new NativeProcessStartupInfo()
+        processInfo.executable = File.applicationDirectory.resolvePath("assets/tools/android/adb");
+        processInfo.arguments = new <String>["-s", id, "shell", "ip", "route"];
+
+        process = new NativeProcess()
+        process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
+        process.addEventListener(NativeProcessExitEvent.EXIT, onReadLanExit, false, 0, true);
+        process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData, false, 0, true);
+        process.start(processInfo)
+    }
+
+    protected function onOutputErrorShell(event:ProgressEvent):void
+    {
+        error = String(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
+    }
+
+    private var output:String = ""
+    protected function onReadLanData(event:ProgressEvent):void{
+        output = output.concat(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
+    }
+
+    protected function onReadLanExit(event:NativeProcessExitEvent):void{
+        process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell);
+        process.removeEventListener(NativeProcessExitEvent.EXIT, onReadLanExit);
+        process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadLanData);
+
+        if (error != null) {
+            // dispatchEvent(new Event(ERROR_EVENT));
+        } else {
+            var ipRouteDataUdp:Array = output.split("\r\r\n");
+            for(var i:int=0;i<ipRouteDataUdp.length;i++) {
+                if(ipRouteDataUdp[i].indexOf("dev") > -1 && ipRouteDataUdp[i].indexOf("wlan0") > -1) {
+                    var splittedString:Array = ipRouteDataUdp[i].split(/\s+/g);
+                    var idxUdp:int = splittedString.indexOf("src");
+                    if(idxUdp > -1 && (splittedString[idxUdp+1].toString().indexOf("192") == 0 || splittedString[idxUdp+1].toString().indexOf("10") == 0 || splittedString[idxUdp+1].toString().indexOf("172") == 0)){
+                        this.ip = splittedString[idxUdp+1]
+                    }
+                }
+            }
+
+            if(!ip) {
+                error = " - WIFI not connected !";
+                writeErrorLogFile("WIFI not connected");
+
+                error = "WIFI not connected !"
+                errorMessage = "Please connect the device to network"
+
+                status = WIFI_ERROR;
+                // dispatchEvent(new Event(WIFI_ERROR_EVENT));
+                return;
+            } else {
+                uninstallDriver()
+            }
+        }
+    }
+
+    override protected function onUninstallDriverExit(event:NativeProcessExitEvent):void {
+        super.onUninstallDriverExit(event)
+        installDriver()
+    }
+
+    override protected function execute():void {
+        var processInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
+        processInfo.executable = currentAdbFile
+        processInfo.arguments = new <String>["-s", id, "shell", "am", "instrument", "-w", "-e", "ipAddress", ip, "-e", "atsPort", port, "-e", "usbMode", String(usbMode), "-e", "debug", "false", "-e", "class", ANDROID_DRIVER + ".AtsRunnerWifi", ANDROID_DRIVER + "/android.support.test.runner.AndroidJUnitRunner"];
+
+        process = new NativeProcess();
+        process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteOutput, false, 0, true);
+        process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError, false, 0, true);
+        process.addEventListener(NativeProcessExitEvent.EXIT, onExecuteExit, false, 0, true);
+        process.start(processInfo);
     }
 }
 }

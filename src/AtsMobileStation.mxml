@@ -7,274 +7,273 @@
 					   title="Ats MobileStation (port:{httpPort})">
 	<fx:Script>
 		<![CDATA[
-			import com.greensock.TweenMax;
-			
-			import device.Device;
-			import device.RunningDevice;
-			import device.running.IosDevice;
-			
-			import flash.filters.BitmapFilterQuality;
-			
-			import mx.controls.Text;
-			import mx.core.FlexGlobals;
-			import mx.events.CloseEvent;
-			import mx.events.FlexEvent;
-			import mx.managers.PopUpManager;
-			
-			import renderer.PhysicialDeviceSettingsWindow;
-			import renderer.RunningDeviceRenderer;
-			
-			import servers.http.HttpServer;
-			
-			import spark.components.Alert;
-			import spark.filters.DropShadowFilter;
-			
-			import tools.PeerGroupConnection;
-			
-			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
-			
-			public static const isMacOs:Boolean = Capabilities.os.indexOf("Mac") > -1;
-			
-			private var icon:Loader = new Loader(); 
-			private var iconMenu:NativeMenu = new NativeMenu(); 
-			
-			public var peerGroup:PeerGroupConnection;
-			
-			[Bindable]
-			private var httpPort:int = 8686;
-			
-			[Bindable]
-			public var devices:RunningDevicesManager;
-			
-			[Bindable]
-			public var simulators:AvailableSimulatorsManager;
-			
-			private var httpServer:HttpServer = HttpServer.getInstance()
-			
-			public var teamId:String;
+		import com.greensock.TweenMax;
 
-			public function get logsFolder():File {
-				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/logs");
+		import device.Device;
+		import device.running.RunningDevice;
+		import device.running.IosDevice;
+
+		import flash.filters.BitmapFilterQuality;
+
+		import mx.controls.Text;
+		import mx.core.FlexGlobals;
+		import mx.events.CloseEvent;
+		import mx.events.FlexEvent;
+		import mx.managers.PopUpManager;
+
+		import renderer.PhysicialDeviceSettingsWindow;
+		import renderer.RunningDeviceRenderer;
+
+		import servers.http.HttpServer;
+
+		import spark.components.Alert;
+		import spark.filters.DropShadowFilter;
+
+		import tools.PeerGroupConnection;
+
+		public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
+
+		public static const isMacOs:Boolean = Capabilities.os.indexOf("Mac") > -1;
+
+		private var icon:Loader = new Loader();
+		private var iconMenu:NativeMenu = new NativeMenu();
+
+		public var peerGroup:PeerGroupConnection;
+
+		[Bindable]
+		private var httpPort:int = 8686;
+
+		[Bindable]
+		public var devices:RunningDevicesManager;
+
+		[Bindable]
+		public var simulators:AvailableSimulatorsManager;
+
+		private var httpServer:HttpServer = HttpServer.getInstance()
+
+		public var teamId:String;
+
+		public function get logsFolder():File {
+			return File.userDirectory.resolvePath(".actiontestscript/mobilestation/logs");
+		}
+
+		public function get devicesSettingsFile():File {
+			return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/devicesSettings.txt");
+		}
+
+		public function get devicePortSettingsFile():File {
+			return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/portSettings.txt");
+		}
+
+		public function get settingsFile():File {
+			return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/settings.txt");
+		}
+
+		public function getTeamId():String {
+			return teamId;
+		}
+
+		public function setTeamId(value:String):void {
+			teamId = value;
+		}
+
+		private function iconLoadComplete(event:Event):void {
+			NativeApplication.nativeApplication.icon.bitmaps = [event.target.content.bitmapData];
+		}
+
+		private function trayClick(ev:ScreenMouseEvent):void {
+			nativeWindow.restore();
+			NativeApplication.nativeApplication.activate()
+		}
+
+		private function restartApp(ev:Event = null):void {
+			var execFilePath:String = "AtsMobileStation.";
+			if (isMacOs) {
+				execFilePath += "app";
+			} else {
+				execFilePath += "exe";
 			}
-			
-			public function get devicesSettingsFile():File {
-				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/devicesSettings.txt");
+
+			const execFile:File = File.applicationDirectory.resolvePath(execFilePath);
+			if (execFile.exists) {
+				NativeApplication.nativeApplication.exit();
+				execFile.openWithDefaultApplication();
 			}
-			
-			public function get devicePortSettingsFile():File {
-				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/portSettings.txt");
+		}
+
+		private function exitAppHandler(ev:Event):void {
+			NativeApplication.nativeApplication.icon.bitmaps = [];
+			NativeApplication.nativeApplication.exit();
+		}
+
+		protected function creationCompleteHandler(event:FlexEvent):void {
+
+			var exitCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Exit"));
+			exitCommand.addEventListener(Event.SELECT, exitAppHandler, false, 0, true);
+
+			var restartCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Restart"));
+			restartCommand.addEventListener(Event.SELECT, restartApp, false, 0, true);
+
+			if (NativeApplication.supportsSystemTrayIcon) {
+				icon.contentLoaderInfo.addEventListener(Event.COMPLETE, iconLoadComplete);
+				icon.load(new URLRequest("assets/icons/16/ats_logo.png"));
+
+				var systray:SystemTrayIcon = NativeApplication.nativeApplication.icon as SystemTrayIcon;
+				systray.tooltip = "ATS Mobile Station";
+				systray.menu = iconMenu;
+				systray.addEventListener(ScreenMouseEvent.CLICK, trayClick);
 			}
-			
-			public function get settingsFile():File {
-				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/settings.txt");
+
+			if (NativeApplication.supportsDockIcon) {
+				icon.contentLoaderInfo.addEventListener(Event.COMPLETE, iconLoadComplete);
+				icon.load(new URLRequest("assets/icons/32/ats_logo.png"));
+				var dock:DockIcon = NativeApplication.nativeApplication.icon as DockIcon;
+				dock.menu = iconMenu;
 			}
-			
-			public function getTeamId():String {
-				return teamId;
+
+			try {
+				logsFolder.deleteDirectory(true);
+			} catch (err:IOError) {
 			}
-			
-			public function setTeamId(value:String):void {
-				teamId = value;
+
+			/* *** */
+			// files corrupted
+			var date:Date = new Date(2020, 2, 31, 18, 30, 0, 0);
+			if (devicePortSettingsFile.exists && devicePortSettingsFile.modificationDate < date) {
+				devicePortSettingsFile.deleteFile();
 			}
-						
-			private function iconLoadComplete(event:Event):void 
-			{ 
-				NativeApplication.nativeApplication.icon.bitmaps = [event.target.content.bitmapData]; 
-			} 
-			
-			private function trayClick(ev:ScreenMouseEvent):void{
-				nativeWindow.restore();
-				NativeApplication.nativeApplication.activate()
+
+			if (devicesSettingsFile.exists && devicesSettingsFile.modificationDate < date) {
+				devicesSettingsFile.deleteFile();
 			}
-			
-			private function restartApp(ev:Event=null):void{
-				var execFilePath:String = "AtsMobileStation.";
-				if(isMacOs){
-					execFilePath += "app";
-				}else{
-					execFilePath += "exe";
-				}
-				
-				const execFile:File = File.applicationDirectory.resolvePath(execFilePath);
-				if(execFile.exists){
-					NativeApplication.nativeApplication.exit();
-					execFile.openWithDefaultApplication();
-				}
+			/* *** */
+
+
+			if (!Capabilities.isDebugger) {
+				cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
 			}
-			
-			private function exitAppHandler(ev:Event):void{
-				NativeApplication.nativeApplication.icon.bitmaps = []; 
-				NativeApplication.nativeApplication.exit(); 
-			}
-			
-			protected function creationCompleteHandler(event:FlexEvent):void {
-				
-				var exitCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Exit")); 
-				exitCommand.addEventListener(Event.SELECT, exitAppHandler, false, 0, true);
-				
-				var restartCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Restart")); 
-				restartCommand.addEventListener(Event.SELECT, restartApp, false, 0, true);
-				
-				if (NativeApplication.supportsSystemTrayIcon){
-					icon.contentLoaderInfo.addEventListener(Event.COMPLETE, iconLoadComplete); 
-					icon.load(new URLRequest("assets/icons/16/ats_logo.png")); 
-					
-					var systray:SystemTrayIcon = NativeApplication.nativeApplication.icon as SystemTrayIcon; 
-					systray.tooltip = "ATS Mobile Station"; 
-					systray.menu = iconMenu; 
-					systray.addEventListener(ScreenMouseEvent.CLICK, trayClick);
-				}
-								
-				if (NativeApplication.supportsDockIcon){ 
-					icon.contentLoaderInfo.addEventListener(Event.COMPLETE,iconLoadComplete); 
-					icon.load(new URLRequest("assets/icons/32/ats_logo.png")); 
-					var dock:DockIcon = NativeApplication.nativeApplication.icon as DockIcon;  
-					dock.menu = iconMenu; 
-				} 
-				
-				try {
-					logsFolder.deleteDirectory(true);
-				} catch (err:IOError) {
-				}
-				
-				/* *** */
-				// files corrupted
-				var date:Date = new Date(2020, 2, 31, 18, 30, 0, 0);
-				if (devicePortSettingsFile.exists && devicePortSettingsFile.modificationDate < date) {
-					devicePortSettingsFile.deleteFile();
-				}
-				
-				if (devicesSettingsFile.exists && devicesSettingsFile.modificationDate < date) {
-					devicesSettingsFile.deleteFile();
-				}
-				/* *** */
-				
-				
-				if (!Capabilities.isDebugger) {
-					cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
-				}
-				
-				simulators = new AvailableSimulatorsManager();
-				devices = RunningDevicesManager.getInstance();
-				
-				if (isMacOs) {
-					var file:File = FlexGlobals.topLevelApplication.settingsFile;
-					if (file.exists) {
-						
-						var fileStream:FileStream = new FileStream();
-						fileStream.open(file, FileMode.READ);
-						
-						var settingsContent:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
-						var settingsContentArray:Array = settingsContent.split("\n");
-						
-						for each(var setting:String in settingsContentArray) {
-							if (setting != "") {
-								var key:String = setting.split("==")[0];
-								if (key == "development_team") {
-									teamId = setting.split("==")[1];
-									break;
-								}
+
+			simulators = new AvailableSimulatorsManager();
+			devices = RunningDevicesManager.getInstance();
+
+			if (isMacOs) {
+				var file:File = FlexGlobals.topLevelApplication.settingsFile;
+				if (file.exists) {
+
+					var fileStream:FileStream = new FileStream();
+					fileStream.open(file, FileMode.READ);
+
+					var settingsContent:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
+					var settingsContentArray:Array = settingsContent.split("\n");
+
+					for each(var setting:String in settingsContentArray) {
+						if (setting != "") {
+							var key:String = setting.split("==")[0];
+							if (key == "development_team") {
+								teamId = setting.split("==")[1];
+								break;
 							}
 						}
-						fileStream.close();
 					}
-				}
-				
-				// httpServer.listen(8080, handleHttpServerError);
-				peerGroup = new PeerGroupConnection(devices, simulators, httpPort);
-			}
-			
-			public function saveValues(desc:String, name:String):void {
-				peerGroup.saveValues(desc, name);
-			}
-			
-			private function handleHttpServerError(e:Error):void {
-				trace("HTTP Server Error : " + e)
-			}
-			
-			public function restartDevice(dev:Device):void {
-				devices.restartDev(dev);
-			}
-			
-			public function restartIosDevices():void {
-				for each(var dv:RunningDevice in devices.collection) {
-					if (!dv.simulator && dv is IosDevice && dv.status != Device.READY) {
-						devices.restartDev(dv);
-					}
+					fileStream.close();
 				}
 			}
-			
-			protected function closeHandler(event:Event):void {
-				event.preventDefault();
-				event.stopPropagation();
 
-				peerGroup.close();
+			httpServer.listen(10000, handleHttpServerError);
+			peerGroup = new PeerGroupConnection(devices, simulators, httpPort);
+		}
 
-				devices.terminate();
-				simulators.terminate();
+		public function saveValues(desc:String, name:String):void {
+			peerGroup.saveValues(desc, name);
+		}
 
-				infoStatus.text = "Please wait all processes to finish ..."
-				TweenMax.delayedCall(5.00, closeApp);
-			}
-			
-			private function closeApp():void{
-				NativeApplication.nativeApplication.exit(0);
-			}
-			
-			protected function cleanDirectory(directory:File):void {
-				if (directory.isDirectory) {
-					var dirArray:Array = [];
-					var files:Array = directory.getDirectoryListing();
-					for (var i:int = 0; i < files.length; i++) {
-						if (files[i].isDirectory && files[i].nativePath.indexOf("driver_") > -1) {
-							dirArray.push(files[i]);
-						}
-					}
-					
-					for each(var d:File in dirArray) {
-						d.deleteDirectory(true);
-					}
+		private function handleHttpServerError(e:Error):void {
+			trace("HTTP Server Error : " + e)
+		}
+
+		public function restartDevice(dev:Device):void {
+			devices.restartDev(dev);
+		}
+
+		public function restartIosDevices():void {
+			for each(var dv:RunningDevice in devices.collection) {
+				if (!dv.simulator && dv is IosDevice && dv.status != Device.READY) {
+					devices.restartDev(dv);
 				}
 			}
-			
-			protected function clickGroup_clickHandler(event:MouseEvent):void {
-				if (simulatorsGroup.height == 26) {
-					TweenMax.to(simulatorsGroup, 0.3, {height: height - 38})
-				} else {
-					TweenMax.to(simulatorsGroup, 0.3, {height: 26})
-				}
-			}
-			
-			protected function clickConnected_clickHandler(event:MouseEvent):void {
-				if (simulatorsGroup.height != 26) {
-					TweenMax.to(simulatorsGroup, 0.3, {height: 26})
-				}
-			}
-			
-			protected function settings_clickHandler(event:MouseEvent):void {
-				// create and configure the TitleWindow
-				const tw:PhysicialDeviceSettingsWindow = new PhysicialDeviceSettingsWindow();
-				for each(var dv:RunningDevice in devices.collection) {
-					if (!dv.simulator && dv is IosDevice) {
-						tw.devices.push(dv);
+		}
+
+		protected function closeHandler(event:Event):void {
+			event.preventDefault();
+			event.stopPropagation();
+
+			peerGroup.close();
+
+			devices.terminate();
+			simulators.terminate();
+
+			infoStatus.text = "Please wait all processes to finish ..."
+			TweenMax.delayedCall(2.00, closeApp);
+		}
+
+		private function closeApp():void {
+			NativeApplication.nativeApplication.exit(0);
+		}
+
+		protected function cleanDirectory(directory:File):void {
+			if (directory.isDirectory) {
+				var dirArray:Array = [];
+				var files:Array = directory.getDirectoryListing();
+				for (var i:int = 0; i < files.length; i++) {
+					if (files[i].isDirectory && files[i].nativePath.indexOf("driver_") > -1) {
+						dirArray.push(files[i]);
 					}
 				}
 
-				// open the TitleWindow as a modal popup window
-				PopUpManager.addPopUp(tw, this, true);
-				PopUpManager.centerPopUp(tw);
-			}
-			
-			public function restartServer():void{
-				Alert.show("Dou you really want to restart the server ?\n(connected clients will be deconnected)", "Restart MobileStation server", Alert.YES|Alert.NO, this, alertClickHandler);
-			}
-			
-			private function alertClickHandler(evt:CloseEvent):void {
-				if (evt.detail == Alert.YES) {
-					peerGroup.terminate();
-					restartApp();
+				for each(var d:File in dirArray) {
+					d.deleteDirectory(true);
 				}
 			}
+		}
+
+		protected function clickGroup_clickHandler(event:MouseEvent):void {
+			if (simulatorsGroup.height == 26) {
+				TweenMax.to(simulatorsGroup, 0.3, {height: height - 38})
+			} else {
+				TweenMax.to(simulatorsGroup, 0.3, {height: 26})
+			}
+		}
+
+		protected function clickConnected_clickHandler(event:MouseEvent):void {
+			if (simulatorsGroup.height != 26) {
+				TweenMax.to(simulatorsGroup, 0.3, {height: 26})
+			}
+		}
+
+		protected function settings_clickHandler(event:MouseEvent):void {
+			// create and configure the TitleWindow
+			const tw:PhysicialDeviceSettingsWindow = new PhysicialDeviceSettingsWindow();
+			for each(var dv:RunningDevice in devices.collection) {
+				if (!dv.simulator && dv is IosDevice) {
+					tw.devices.push(dv);
+				}
+			}
+
+			// open the TitleWindow as a modal popup window
+			PopUpManager.addPopUp(tw, this, true);
+			PopUpManager.centerPopUp(tw);
+		}
+
+		public function restartServer():void {
+			Alert.show("Dou you really want to restart the server ?\n(connected clients will be deconnected)", "Restart MobileStation server", Alert.YES | Alert.NO, this, alertClickHandler);
+		}
+
+		private function alertClickHandler(evt:CloseEvent):void {
+			if (evt.detail == Alert.YES) {
+				peerGroup.terminate();
+				restartApp();
+			}
+		}
 		]]>
 	</fx:Script>
 	

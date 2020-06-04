@@ -208,7 +208,24 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="626996f5-b043-4012-b1c9-fd22fde0673d" name="Default Changelist" comment="" />
+    <list default="true" id="626996f5-b043-4012-b1c9-fd22fde0673d" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MobileStation.iml" beforeDir="false" afterPath="$PROJECT_DIR$/MobileStation.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flexSdkPath.properties" beforeDir="false" afterPath="$PROJECT_DIR$/flexSdkPath.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AtsMobileStation.mxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/AtsMobileStation.mxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/RunningDevicesManager.as" beforeDir="false" afterPath="$PROJECT_DIR$/src/RunningDevicesManager.as" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/device/Device.as" beforeDir="false" afterPath="$PROJECT_DIR$/src/device/Device.as" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/device/RunningDevice.as" beforeDir="false" afterPath="$PROJECT_DIR$/src/device/running/RunningDevice.as" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/device/running/AndroidDevice.as" beforeDir="false" afterPath="$PROJECT_DIR$/src/device/running/AndroidDevice.as" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/device/running/AndroidProcess.as" beforeDir="false" afterPath="$PROJECT_DIR$/src/device/running/AndroidProcess.as" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/device/running/AndroidUsbDevice.as" beforeDir="false" afterPath="$PROJECT_DIR$/src/device/running/AndroidUsbDevice.as" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/device/running/AndroidWirelessDevice.as" beforeDir="false" afterPath="$PROJECT_DIR$/src/device/running/AndroidWirelessDevice.as" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/device/running/IosDevice.as" beforeDir="false" afterPath="$PROJECT_DIR$/src/device/running/IosDevice.as" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/renderer/DeviceSettingsWindow.mxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/renderer/DeviceSettingsWindow.mxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/renderer/PhysicialDeviceSettingsWindow.mxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/renderer/PhysicialDeviceSettingsWindow.mxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/renderer/RunningDeviceRenderer.mxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/renderer/RunningDeviceRenderer.mxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tools/PeerGroupConnection.as" beforeDir="false" afterPath="$PROJECT_DIR$/src/tools/PeerGroupConnection.as" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -233,6 +250,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="ToolWindowDuplicates.ShowToolbar" value="false" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../AgilitestEditorGui" />
@@ -242,7 +260,7 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="project.structure.last.edited" value="SDKs" />
+    <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.17" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="restartRequiresConfirmation" value="false" />
@@ -253,6 +271,7 @@
       <recent name="device.simulator" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/device/running" />
       <recent name="C:\Users\Anthony\Documents\GitHub\AtsMobileStation\src\helpers" />
     </key>
   </component>
@@ -328,6 +347,9 @@
       <workItem from="1590525725819" duration="256000" />
       <workItem from="1590912495312" duration="3187000" />
       <workItem from="1590916118552" duration="6842000" />
+      <workItem from="1591084500991" duration="920000" />
+      <workItem from="1591090095517" duration="9548000" />
+      <workItem from="1591189580408" duration="40429000" />
     </task>
     <servers />
   </component>
@@ -347,13 +369,15 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="788" y="251" width="587" height="579" key="#AtsMobileStation_(MobileStation)" timestamp="1590912688226">
-      <screen x="0" y="23" width="1920" height="977" />
+    <state x="788" y="280" width="587" height="579" key="#AtsMobileStation_(MobileStation)" timestamp="1591085005138">
+      <screen x="0" y="0" width="1920" height="1200" />
     </state>
+    <state x="788" y="280" key="#AtsMobileStation_(MobileStation)/0.0.1920.1200@0.0.1920.1200" timestamp="1591085005138" />
     <state x="788" y="251" width="587" height="579" key="#AtsMobileStation_(MobileStation)/0.23.1920.977@0.23.1920.977" timestamp="1590912688226" />
-    <state x="389" y="91" key="#Project_Structure" timestamp="1590912961152">
-      <screen x="0" y="23" width="1920" height="977" />
+    <state x="389" y="84" key="#Project_Structure" timestamp="1591085019937">
+      <screen x="0" y="0" width="1920" height="1200" />
     </state>
+    <state x="389" y="84" key="#Project_Structure/0.0.1920.1200@0.0.1920.1200" timestamp="1591085019937" />
     <state x="389" y="91" key="#Project_Structure/0.23.1920.977@0.23.1920.977" timestamp="1590912961152" />
     <state x="414" y="187" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1590912652608">
       <screen x="0" y="23" width="1920" height="977" />
@@ -374,76 +398,81 @@
     </state>
     <state x="100" y="100" width="1720" height="1000" key="AVDManager/0.0.1920.1200@0.0.1920.1200" timestamp="1590505994656" />
     <state x="100" y="100" width="1720" height="1000" key="AVDManager/0.23.1920.1119@0.23.1920.1119" timestamp="1590501961923" />
-    <state width="626" height="466" key="DebuggerActiveHint" timestamp="1590506243717">
+    <state width="742" height="466" key="DebuggerActiveHint" timestamp="1591272180877">
       <screen x="0" y="0" width="1920" height="1200" />
     </state>
-    <state width="626" height="466" key="DebuggerActiveHint/0.0.1920.1200@0.0.1920.1200" timestamp="1590506243717" />
+    <state width="742" height="466" key="DebuggerActiveHint/0.0.1920.1200@0.0.1920.1200" timestamp="1591272180877" />
+    <state x="100" y="100" width="1720" height="1000" key="DiffContextDialog" timestamp="1591265813100">
+      <screen x="0" y="23" width="1920" height="1119" />
+    </state>
+    <state x="100" y="100" width="1720" height="1000" key="DiffContextDialog/0.0.1920.1200@0.0.1920.1200" timestamp="1591265491232" />
+    <state x="100" y="100" width="1720" height="1000" key="DiffContextDialog/0.23.1920.1119@0.23.1920.1119" timestamp="1591265813100" />
     <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1590420969617">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1590420969617" />
-    <state width="1358" height="310" key="GridCell.Tab.0.bottom" timestamp="1590916082828">
-      <screen x="0" y="23" width="1920" height="980" />
+    <state width="1878" height="326" key="GridCell.Tab.0.bottom" timestamp="1591287566844">
+      <screen x="0" y="0" width="1920" height="1200" />
     </state>
     <state width="1877" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1590475562998" />
-    <state width="1878" height="414" key="GridCell.Tab.0.bottom/0.0.1920.1200@0.0.1920.1200" timestamp="1590506772638" />
-    <state width="1878" height="337" key="GridCell.Tab.0.bottom/0.23.1920.1119@0.23.1920.1119" timestamp="1590476271270" />
+    <state width="1878" height="326" key="GridCell.Tab.0.bottom/0.0.1920.1200@0.0.1920.1200" timestamp="1591287566844" />
+    <state width="1878" height="326" key="GridCell.Tab.0.bottom/0.23.1920.1119@0.23.1920.1119" timestamp="1591283655093" />
     <state width="1358" height="310" key="GridCell.Tab.0.bottom/0.23.1920.977@0.23.1920.977" timestamp="1590913898166" />
     <state width="1358" height="310" key="GridCell.Tab.0.bottom/0.23.1920.980@0.23.1920.980" timestamp="1590916082828" />
-    <state width="1358" height="310" key="GridCell.Tab.0.center" timestamp="1590916082828">
-      <screen x="0" y="23" width="1920" height="980" />
+    <state width="1878" height="326" key="GridCell.Tab.0.center" timestamp="1591287566843">
+      <screen x="0" y="0" width="1920" height="1200" />
     </state>
     <state width="1877" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1590475562998" />
-    <state width="1878" height="414" key="GridCell.Tab.0.center/0.0.1920.1200@0.0.1920.1200" timestamp="1590506772637" />
-    <state width="1878" height="337" key="GridCell.Tab.0.center/0.23.1920.1119@0.23.1920.1119" timestamp="1590476271268" />
+    <state width="1878" height="326" key="GridCell.Tab.0.center/0.0.1920.1200@0.0.1920.1200" timestamp="1591287566843" />
+    <state width="1878" height="326" key="GridCell.Tab.0.center/0.23.1920.1119@0.23.1920.1119" timestamp="1591283655092" />
     <state width="1358" height="310" key="GridCell.Tab.0.center/0.23.1920.977@0.23.1920.977" timestamp="1590913898166" />
     <state width="1358" height="310" key="GridCell.Tab.0.center/0.23.1920.980@0.23.1920.980" timestamp="1590916082828" />
-    <state width="1358" height="310" key="GridCell.Tab.0.left" timestamp="1590916082827">
-      <screen x="0" y="23" width="1920" height="980" />
+    <state width="1878" height="326" key="GridCell.Tab.0.left" timestamp="1591287566843">
+      <screen x="0" y="0" width="1920" height="1200" />
     </state>
     <state width="1877" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1590475562998" />
-    <state width="1878" height="414" key="GridCell.Tab.0.left/0.0.1920.1200@0.0.1920.1200" timestamp="1590506772636" />
-    <state width="1878" height="337" key="GridCell.Tab.0.left/0.23.1920.1119@0.23.1920.1119" timestamp="1590476271267" />
+    <state width="1878" height="326" key="GridCell.Tab.0.left/0.0.1920.1200@0.0.1920.1200" timestamp="1591287566843" />
+    <state width="1878" height="326" key="GridCell.Tab.0.left/0.23.1920.1119@0.23.1920.1119" timestamp="1591283655090" />
     <state width="1358" height="310" key="GridCell.Tab.0.left/0.23.1920.977@0.23.1920.977" timestamp="1590913898165" />
     <state width="1358" height="310" key="GridCell.Tab.0.left/0.23.1920.980@0.23.1920.980" timestamp="1590916082827" />
-    <state width="1358" height="310" key="GridCell.Tab.0.right" timestamp="1590916082828">
-      <screen x="0" y="23" width="1920" height="980" />
+    <state width="1878" height="326" key="GridCell.Tab.0.right" timestamp="1591287566844">
+      <screen x="0" y="0" width="1920" height="1200" />
     </state>
     <state width="1877" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1590475562998" />
-    <state width="1878" height="414" key="GridCell.Tab.0.right/0.0.1920.1200@0.0.1920.1200" timestamp="1590506772638" />
-    <state width="1878" height="337" key="GridCell.Tab.0.right/0.23.1920.1119@0.23.1920.1119" timestamp="1590476271269" />
+    <state width="1878" height="326" key="GridCell.Tab.0.right/0.0.1920.1200@0.0.1920.1200" timestamp="1591287566844" />
+    <state width="1878" height="326" key="GridCell.Tab.0.right/0.23.1920.1119@0.23.1920.1119" timestamp="1591283655093" />
     <state width="1358" height="310" key="GridCell.Tab.0.right/0.23.1920.977@0.23.1920.977" timestamp="1590913898166" />
     <state width="1358" height="310" key="GridCell.Tab.0.right/0.23.1920.980@0.23.1920.980" timestamp="1590916082828" />
-    <state width="1358" height="310" key="GridCell.Tab.1.bottom" timestamp="1590916082829">
-      <screen x="0" y="23" width="1920" height="980" />
+    <state width="1878" height="326" key="GridCell.Tab.1.bottom" timestamp="1591287566740">
+      <screen x="0" y="0" width="1920" height="1200" />
     </state>
     <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1590475567448" />
-    <state width="1878" height="414" key="GridCell.Tab.1.bottom/0.0.1920.1200@0.0.1920.1200" timestamp="1590506772479" />
-    <state width="1878" height="414" key="GridCell.Tab.1.bottom/0.23.1920.1119@0.23.1920.1119" timestamp="1590505936165" />
+    <state width="1878" height="326" key="GridCell.Tab.1.bottom/0.0.1920.1200@0.0.1920.1200" timestamp="1591287566740" />
+    <state width="1878" height="326" key="GridCell.Tab.1.bottom/0.23.1920.1119@0.23.1920.1119" timestamp="1591283654897" />
     <state width="1358" height="310" key="GridCell.Tab.1.bottom/0.23.1920.977@0.23.1920.977" timestamp="1590913897941" />
     <state width="1358" height="310" key="GridCell.Tab.1.bottom/0.23.1920.980@0.23.1920.980" timestamp="1590916082829" />
-    <state width="1358" height="310" key="GridCell.Tab.1.center" timestamp="1590916082829">
-      <screen x="0" y="23" width="1920" height="980" />
+    <state width="1878" height="326" key="GridCell.Tab.1.center" timestamp="1591287566739">
+      <screen x="0" y="0" width="1920" height="1200" />
     </state>
     <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1590475567448" />
-    <state width="1878" height="414" key="GridCell.Tab.1.center/0.0.1920.1200@0.0.1920.1200" timestamp="1590506772478" />
-    <state width="1878" height="414" key="GridCell.Tab.1.center/0.23.1920.1119@0.23.1920.1119" timestamp="1590505936164" />
+    <state width="1878" height="326" key="GridCell.Tab.1.center/0.0.1920.1200@0.0.1920.1200" timestamp="1591287566739" />
+    <state width="1878" height="326" key="GridCell.Tab.1.center/0.23.1920.1119@0.23.1920.1119" timestamp="1591283654896" />
     <state width="1358" height="310" key="GridCell.Tab.1.center/0.23.1920.977@0.23.1920.977" timestamp="1590913897940" />
     <state width="1358" height="310" key="GridCell.Tab.1.center/0.23.1920.980@0.23.1920.980" timestamp="1590916082829" />
-    <state width="1358" height="310" key="GridCell.Tab.1.left" timestamp="1590916082829">
-      <screen x="0" y="23" width="1920" height="980" />
+    <state width="1878" height="326" key="GridCell.Tab.1.left" timestamp="1591287566738">
+      <screen x="0" y="0" width="1920" height="1200" />
     </state>
     <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1590475567447" />
-    <state width="1878" height="414" key="GridCell.Tab.1.left/0.0.1920.1200@0.0.1920.1200" timestamp="1590506772477" />
-    <state width="1878" height="414" key="GridCell.Tab.1.left/0.23.1920.1119@0.23.1920.1119" timestamp="1590505936163" />
+    <state width="1878" height="326" key="GridCell.Tab.1.left/0.0.1920.1200@0.0.1920.1200" timestamp="1591287566738" />
+    <state width="1878" height="326" key="GridCell.Tab.1.left/0.23.1920.1119@0.23.1920.1119" timestamp="1591283654895" />
     <state width="1358" height="310" key="GridCell.Tab.1.left/0.23.1920.977@0.23.1920.977" timestamp="1590913897939" />
     <state width="1358" height="310" key="GridCell.Tab.1.left/0.23.1920.980@0.23.1920.980" timestamp="1590916082829" />
-    <state width="1358" height="310" key="GridCell.Tab.1.right" timestamp="1590916082829">
-      <screen x="0" y="23" width="1920" height="980" />
+    <state width="1878" height="326" key="GridCell.Tab.1.right" timestamp="1591287566739">
+      <screen x="0" y="0" width="1920" height="1200" />
     </state>
     <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1590475567448" />
-    <state width="1878" height="414" key="GridCell.Tab.1.right/0.0.1920.1200@0.0.1920.1200" timestamp="1590506772478" />
-    <state width="1878" height="414" key="GridCell.Tab.1.right/0.23.1920.1119@0.23.1920.1119" timestamp="1590505936164" />
+    <state width="1878" height="326" key="GridCell.Tab.1.right/0.0.1920.1200@0.0.1920.1200" timestamp="1591287566739" />
+    <state width="1878" height="326" key="GridCell.Tab.1.right/0.23.1920.1119@0.23.1920.1119" timestamp="1591283654897" />
     <state width="1358" height="310" key="GridCell.Tab.1.right/0.23.1920.977@0.23.1920.977" timestamp="1590913897940" />
     <state width="1358" height="310" key="GridCell.Tab.1.right/0.23.1920.980@0.23.1920.980" timestamp="1590916082829" />
     <state x="834" y="149" key="SettingsEditor" timestamp="1590916626233">
@@ -453,15 +482,35 @@
     <state x="461" y="190" key="SettingsEditor/0.0.1920.1200@0.0.1920.1200" timestamp="1590504100808" />
     <state x="834" y="149" key="SettingsEditor/0.23.1920.977@0.23.1920.977" timestamp="1590916626233" />
     <state x="523" y="60" key="SettingsEditor/0.23.1920.978@0.23.1920.978" timestamp="1590916038424" />
-    <state width="960" height="600" key="XDebugger.FullValuePopup" timestamp="1590505957051">
+    <state width="1447" height="600" key="XDebugger.FullValuePopup" timestamp="1591271735682">
       <screen x="0" y="0" width="1920" height="1200" />
     </state>
-    <state width="960" height="600" key="XDebugger.FullValuePopup/0.0.1920.1200@0.0.1920.1200" timestamp="1590505957051" />
-    <state width="960" height="600" key="XDebugger.FullValuePopup/0.23.1920.1119@0.23.1920.1119" timestamp="1590505788976" />
+    <state width="1447" height="600" key="XDebugger.FullValuePopup/0.0.1920.1200@0.0.1920.1200" timestamp="1591271735682" />
+    <state width="960" height="600" key="XDebugger.FullValuePopup/0.23.1920.1119@0.23.1920.1119" timestamp="1591104046664" />
     <state x="1088" y="285" key="antBuildFilePropertiesDialogDimension" timestamp="1590916859514">
       <screen x="0" y="23" width="1920" height="977" />
     </state>
     <state x="1088" y="285" key="antBuildFilePropertiesDialogDimension/0.23.1920.977@0.23.1920.977" timestamp="1590916859514" />
+    <state x="730" y="510" key="com.intellij.javascript.flex.refactoring.moveClass.FlexMoveClassDialog" timestamp="1591199594911">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state x="730" y="510" key="com.intellij.javascript.flex.refactoring.moveClass.FlexMoveClassDialog/0.0.1920.1200@0.0.1920.1200" timestamp="1591199594911" />
+    <state x="497" y="336" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1591282847722">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state x="497" y="336" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.0.1920.1200@0.0.1920.1200" timestamp="1591282847722" />
+    <state x="661" y="355" width="598" height="490" key="find.popup" timestamp="1591262035619">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state x="661" y="355" width="598" height="490" key="find.popup/0.0.1920.1200@0.0.1920.1200" timestamp="1591262035619" />
+    <state width="600" height="428" key="javadoc.popup" timestamp="1591258944556">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state width="600" height="428" key="javadoc.popup/0.0.1920.1200@0.0.1920.1200" timestamp="1591258944556" />
+    <state x="686" y="380" key="refactoring.ChangeSignatureDialog" timestamp="1591279276792">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state x="686" y="380" key="refactoring.ChangeSignatureDialog/0.0.1920.1200@0.0.1920.1200" timestamp="1591279276792" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -473,8 +522,143 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="flex">
           <url>file://$PROJECT_DIR$/src/device/simulator/AndroidSimulator.as</url>
-          <line>40</line>
+          <line>53</line>
           <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/RunningDevicesManager.as</url>
+          <line>263</line>
+          <option name="timeStamp" value="25" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidUsbDevice.as</url>
+          <line>189</line>
+          <option name="timeStamp" value="42" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidUsbDevice.as</url>
+          <line>239</line>
+          <option name="timeStamp" value="43" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidUsbDevice.as</url>
+          <line>242</line>
+          <option name="timeStamp" value="44" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidUsbDevice.as</url>
+          <line>246</line>
+          <option name="timeStamp" value="45" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidUsbDevice.as</url>
+          <line>224</line>
+          <option name="timeStamp" value="46" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidUsbDevice.as</url>
+          <line>199</line>
+          <option name="timeStamp" value="48" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidUsbDevice.as</url>
+          <line>102</line>
+          <option name="timeStamp" value="49" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidDevice.as</url>
+          <line>240</line>
+          <option name="timeStamp" value="55" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidDevice.as</url>
+          <line>131</line>
+          <option name="timeStamp" value="56" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidDevice.as</url>
+          <line>144</line>
+          <option name="timeStamp" value="57" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidDevice.as</url>
+          <line>153</line>
+          <option name="timeStamp" value="58" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidDevice.as</url>
+          <line>195</line>
+          <option name="timeStamp" value="59" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidDevice.as</url>
+          <line>179</line>
+          <option name="timeStamp" value="61" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidUsbDevice.as</url>
+          <line>92</line>
+          <option name="timeStamp" value="62" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidUsbDevice.as</url>
+          <line>82</line>
+          <option name="timeStamp" value="63" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidDevice.as</url>
+          <line>230</line>
+          <option name="timeStamp" value="64" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidDevice.as</url>
+          <line>199</line>
+          <option name="timeStamp" value="65" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidDevice.as</url>
+          <line>204</line>
+          <option name="timeStamp" value="66" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidUsbDevice.as</url>
+          <line>210</line>
+          <option name="timeStamp" value="67" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidDevice.as</url>
+          <line>220</line>
+          <option name="timeStamp" value="68" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidUsbDevice.as</url>
+          <line>35</line>
+          <option name="timeStamp" value="69" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidWirelessDevice.as</url>
+          <line>46</line>
+          <option name="timeStamp" value="70" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidWirelessDevice.as</url>
+          <line>59</line>
+          <option name="timeStamp" value="72" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidWirelessDevice.as</url>
+          <line>88</line>
+          <option name="timeStamp" value="73" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidWirelessDevice.as</url>
+          <line>68</line>
+          <option name="timeStamp" value="74" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="flex">
+          <url>file://$PROJECT_DIR$/src/device/running/AndroidDevice.as</url>
+          <line>164</line>
+          <option name="timeStamp" value="75" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

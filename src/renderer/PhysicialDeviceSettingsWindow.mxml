@@ -8,159 +8,157 @@
 			   creationComplete="creationCompleteHandler(event)">
 	<fx:Script>
 		<![CDATA[
-		import device.RunningDevice;
-		
-		import flash.net.navigateToURL;
-		
-		import helpers.Settings;
-		
-		import mx.core.FlexGlobals;
-		import mx.events.CloseEvent;
-		import mx.events.FlexEvent;
-		import mx.managers.PopUpManager;
+        import device.running.RunningDevice;
 
-		[Embed(source="/assets/icons/16/apple_site.png")]
-		private const AppleIcon:Class;
+        import flash.net.navigateToURL;
 
-		[Embed(source="/assets/icons/16/info.png")]
-		private const InfoIcon:Class;
+        import helpers.Settings;
 
-		public var dev:RunningDevice;
-		public var arrayString:Array;
-		public var arrayStringDevTeam:Array;
+        import mx.core.FlexGlobals;
+        import mx.events.CloseEvent;
+        import mx.events.FlexEvent;
+        import mx.managers.PopUpManager;
 
-		public var devices:Array = [];
+        [Embed(source="/assets/icons/16/apple_site.png")]
+        private const AppleIcon:Class;
+
+        [Embed(source="/assets/icons/16/info.png")]
+        private const InfoIcon:Class;
+
+        public var dev:RunningDevice;
+        public var arrayString:Array;
+        public var arrayStringDevTeam:Array;
+
+        public var devices:Array = [];
 
 
-		protected function creationCompleteHandler(event:FlexEvent):void {
-			devTeamId.text = FlexGlobals.topLevelApplication.getTeamId();
-			desc.text = FlexGlobals.topLevelApplication.peerGroup.description;
-			nm.text = FlexGlobals.topLevelApplication.peerGroup.name;
-		}
+        protected function creationCompleteHandler(event:FlexEvent):void {
+            devTeamId.text = FlexGlobals.topLevelApplication.getTeamId();
+            desc.text = FlexGlobals.topLevelApplication.peerGroup.description;
+            nm.text = FlexGlobals.topLevelApplication.peerGroup.name;
+        }
 
-		private function closeHandler(event:CloseEvent):void {
-			PopUpManager.removePopUp(this);
-		}
+        private function closeHandler(event:CloseEvent):void {
+            PopUpManager.removePopUp(this);
+        }
 
-		protected function save_clickHandler(event:MouseEvent):void {
-			var file:File = FlexGlobals.topLevelApplication.settingsFile;
-			var fileStream:FileStream = new FileStream();
-			fileStream.open(file, FileMode.WRITE);
-			fileStream.writeUTFBytes("development_team==" + devTeamId.text + "\n");
-			fileStream.close();
-			FlexGlobals.topLevelApplication.setTeamId(devTeamId.text);
-			FlexGlobals.topLevelApplication.restartIosDevices();
+        protected function save_clickHandler(event:MouseEvent):void {
+            var file:File = FlexGlobals.topLevelApplication.settingsFile;
+            var fileStream:FileStream = new FileStream();
+            fileStream.open(file, FileMode.WRITE);
+            fileStream.writeUTFBytes("development_team==" + devTeamId.text + "\n");
+            fileStream.close();
+            FlexGlobals.topLevelApplication.setTeamId(devTeamId.text);
+            FlexGlobals.topLevelApplication.restartIosDevices();
 
-			FlexGlobals.topLevelApplication.saveValues(desc.text, nm.text);
+            FlexGlobals.topLevelApplication.saveValues(desc.text, nm.text);
 
-			PopUpManager.removePopUp(this);
-		}
+            PopUpManager.removePopUp(this);
+        }
 
-		private var userDir:File;
+        private var userDir:File;
 
-		protected function install_clickHandler(event:MouseEvent):void {
-			userDir = File.userDirectory;
-			var typeFilter:FileFilter = new FileFilter("App file", "*.apk; *.app");
+        protected function install_clickHandler(event:MouseEvent):void {
+            userDir = File.userDirectory;
+            var typeFilter:FileFilter = new FileFilter("App file", "*.apk; *.app");
 
-			userDir.addEventListener(Event.SELECT, fileSelected, false, 0, true);
-			userDir.browse([typeFilter]);
-		}
+            userDir.addEventListener(Event.SELECT, fileSelected, false, 0, true);
+            userDir.browse([typeFilter]);
+        }
 
-		private function fileSelected(ev:Event):void {
-			userDir.removeEventListener(Event.SELECT, fileSelected);
+        private function fileSelected(ev:Event):void {
+            userDir.removeEventListener(Event.SELECT, fileSelected);
 
-			process = new NativeProcess();
-			procInfo = new NativeProcessStartupInfo();
+            process = new NativeProcess();
+            procInfo = new NativeProcessStartupInfo();
 
-			procInfo.executable = new File("/usr/bin/xcrun");
-			procInfo.workingDirectory = File.userDirectory;
+            procInfo.executable = new File("/usr/bin/xcrun");
+            procInfo.workingDirectory = File.userDirectory;
 
-			process.addEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
-			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputError, false, 0, true);
-			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutput, false, 0, true);
+            process.addEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
+            process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputError, false, 0, true);
+            process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutput, false, 0, true);
 
-			procInfo.arguments = new <String>["simctl", "install", dev.id, userDir.nativePath];
-			process.start(procInfo);
+            procInfo.arguments = new <String>["simctl", "install", dev.id, userDir.nativePath];
+            process.start(procInfo);
 
-			enabled = false;
-		}
+            enabled = false;
+        }
 
-		protected function onOutputError(event:ProgressEvent):void {
-			trace(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
-		}
+        protected function onOutputError(event:ProgressEvent):void {
+            trace(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
+        }
 
-		protected function onOutput(event:ProgressEvent):void {
-			trace(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
-		}
+        protected function onOutput(event:ProgressEvent):void {
+            trace(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
+        }
 
-		protected function onInstallExit(event:NativeProcessExitEvent):void {
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallExit);
-			process = null;
-			procInfo = null;
-			userDir = null;
+        protected function onInstallExit(event:NativeProcessExitEvent):void {
+            process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallExit);
+            process = null;
+            procInfo = null;
+            userDir = null;
 
-			enabled = true;
-		}
+            enabled = true;
+        }
 
-		private var process:NativeProcess;
-		private var procInfo:NativeProcessStartupInfo;
+        private var process:NativeProcess;
+        private var procInfo:NativeProcessStartupInfo;
 
-		protected function copyId_clickHandler(event:MouseEvent):void {
-			var file:FileReference = new FileReference();
-			var txtInput:String = "Device ID\tDevice Name\tDevice Platform\n";
-			for each(var d:RunningDevice in devices) {
-				if (d.manufacturer == "Apple") {
-					txtInput += d.id + "\t" + d.modelName + "\tios\n";
-				}
-			}
-			file.save(txtInput, "devices.txt")
-		}
+        protected function copyId_clickHandler(event:MouseEvent):void {
+            var file:FileReference = new FileReference();
+            var txtInput:String = "Device ID\tDevice Name\tDevice Platform\n";
+            for each(var d:RunningDevice in devices) {
+                if (d.manufacturer == "Apple") {
+                    txtInput += d.id + "\t" + d.modelName + "\tios\n";
+                }
+            }
+            file.save(txtInput, "devices.txt")
+        }
 
-		protected function linkbutton_clickHandler(event:MouseEvent):void {
-			navigateToURL(new URLRequest("https://developer.apple.com/account/"));
-		}
+        protected function linkbutton_clickHandler(event:MouseEvent):void {
+            navigateToURL(new URLRequest("https://developer.apple.com/account/"));
+        }
 
-		protected function linkbuttonAts_clickHandler(event:MouseEvent):void {
-			navigateToURL(new URLRequest("https://github.com/pierrehub2b/AtsMobileStation#ios-devices"));
-		}
+        protected function linkbuttonAts_clickHandler(event:MouseEvent):void {
+            navigateToURL(new URLRequest("https://github.com/pierrehub2b/AtsMobileStation#ios-devices"));
+        }
 
-		/*protected function setAutomaticPort(event:MouseEvent):void {
-			var availablePort:int = PortSwitcher.getAvailableLocalPort()
-			HttpServer.getInstance().listen(availablePort, handleHttpServerError)
-		}
+        /*protected function setAutomaticPort(event:MouseEvent):void {
+            var availablePort:int = PortSwitcher.getAvailableLocalPort()
+            HttpServer.getInstance().listen(availablePort, handleHttpServerError)
+        }
 
-		protected function setSpecificPort(event:MouseEvent):void {
-			webServerErrorLabel.visible = false
+        protected function setSpecificPort(event:MouseEvent):void {
+            webServerErrorLabel.visible = false
 
-			var specificPort:int = int(webServerPort.text)
-			HttpServer.getInstance().listen(specificPort, handleHttpServerError)
-		}
+            var specificPort:int = int(webServerPort.text)
+            HttpServer.getInstance().listen(specificPort, handleHttpServerError)
+        }
 
-		protected function handleHttpServerError(error:Error):void {
-			webServerErrorLabel.visible = true
-			webServerErrorLabel.text = error.message
-		}*/
+        protected function handleHttpServerError(error:Error):void {
+            webServerErrorLabel.visible = true
+            webServerErrorLabel.text = error.message
+        }*/
 
-		protected function searchDirectory(event:MouseEvent):void {
-			var directory:File = File.documentsDirectory;
-			directory.addEventListener(Event.SELECT, directorySelected);
-			directory.browseForDirectory("Select directory");
-		}
+        protected function searchDirectory(event:MouseEvent):void {
+            var directory:File = File.documentsDirectory;
+            directory.addEventListener(Event.SELECT, directorySelected);
+            directory.browseForDirectory("Select directory");
+        }
 
-		protected function directorySelected(event:Event):void {
-			var directory:File = event.target as File
-			Settings.getInstance().androidSDKDirectory = directory
-			androidSDKDirectory.text = directory.nativePath
-			// save
-		}
+        protected function directorySelected(event:Event):void {
+            var directory:File = event.target as File
+            Settings.getInstance().androidSDKDirectory = directory
+            androidSDKDirectory.text = directory.nativePath
+            // save
+        }
 
-			protected function restart_clickHandler(event:MouseEvent):void
-			{
-				PopUpManager.removePopUp(this);
-				FlexGlobals.topLevelApplication.restartServer();
-			}
-			
-		]]>
+        protected function restart_clickHandler(event:MouseEvent):void {
+            PopUpManager.removePopUp(this);
+            FlexGlobals.topLevelApplication.restartServer();
+        }
+        ]]>
 	</fx:Script>
 
 	<s:VGroup left="6" right="6" top="10" bottom="36" gap="2" horizontalAlign="left"

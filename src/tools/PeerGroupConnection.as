@@ -2,7 +2,7 @@ package tools
 {
 	import com.greensock.TweenMax;
 	
-	import device.RunningDevice;
+	import device.running.RunningDevice;
 	
 	import flash.desktop.NativeApplication;
 	import flash.desktop.NativeProcess;

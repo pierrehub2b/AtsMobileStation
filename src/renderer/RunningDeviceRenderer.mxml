@@ -7,84 +7,80 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import com.greensock.TweenLite;
-			
-			import device.Device;
-			import device.RunningDevice;
-			import device.running.IosDevice;
-			
-			import mx.core.DragSource;
-			import mx.managers.DragManager;
-			import mx.managers.PopUpManager;
-			import flash.filters.BitmapFilterQuality;
-			
-			import spark.filters.DropShadowFilter;
-			
-			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
-			
-			private function showWindow(event:MouseEvent, dev:RunningDevice):void{
-				var tw:DeviceSettingsWindow = new DeviceSettingsWindow();
-				tw.dev = dev;
-				PopUpManager.addPopUp(tw, parentApplication as DisplayObject, true);
-				PopUpManager.centerPopUp(tw);
-			}
-			
-			private function goHome(event:MouseEvent, dev:RunningDevice):void{
-				var urlLoader:URLLoader = new URLLoader();
-				var request:URLRequest = new URLRequest("http://" + dev.ip + ":" + dev.port + "/button");
-				request.data = "home";
-				request.method = URLRequestMethod.POST;
-				request.contentType = "application/x-www-form-urlencoded";
-				request.requestHeaders.push(new URLRequestHeader("Content-Length", "home".length+""));
-				urlLoader.load(request);
-			}
-			
-			protected function restart_clickHandler(event:MouseEvent):void
-			{
-				restartButton.visible = false;
-				(data as RunningDevice).close();
-			}
-			
-			protected function mainGroup_rollOverHandler(event:MouseEvent):void
-			{
-				restartButton.visible = true;
-				TweenLite.fromTo([restartButton], 0.3, {alpha:0.0}, {alpha:1.0});
-				TweenLite.fromTo([settingsButton], 0.3, {alpha:0.0}, {alpha:1.0, delay:0.1});
-				TweenLite.fromTo([homeButton], 0.3, {alpha:0.0}, {alpha:1.0, delay:0.2});
-				//iosButtons.visible = data is IosDevice;
-			}
-			
-			protected function mainGroup_rollOutHandler(event:MouseEvent):void
-			{
-				restartButton.visible = false;
-				TweenLite.killTweensOf([homeButton, settingsButton, restartButton]);
-				TweenLite.fromTo(restartButton, 0.3, {alpha:1.0}, {alpha:0.0});
-				TweenLite.set([homeButton, settingsButton], {alpha:0.0});
-			}
-			
-			protected function removedFromStageHandler(event:Event):void
-			{
-				mainGroup.filters = []
-			}
-			
-			protected function mouseDownHandler(event:MouseEvent):void
-			{
-				if((data as RunningDevice).status == Device.READY){
-					firstGroup.addEventListener(MouseEvent.MOUSE_MOVE, mouseDownForDragHandler, false, 0, true);
-				}
-			}
-			
-			protected function mouseDownForDragHandler(event:MouseEvent):void{
-				firstGroup.removeEventListener(MouseEvent.MOUSE_MOVE, mouseDownForDragHandler);
-				
-				var dragSource:DragSource = new DragSource();
-				dragSource.addData("", "mobile");
-				
-				Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, (data as RunningDevice).ip + ":" + (data as RunningDevice).port, false);
-				
-				DragManager.doDrag(this, dragSource, event, firstGroup, mouseX - 20, mouseY + 10, 1.0);
-			}
-		]]>
+        import com.greensock.TweenLite;
+
+        import device.Device;
+        import device.running.RunningDevice;
+        import device.running.IosDevice;
+
+        import mx.core.DragSource;
+        import mx.managers.DragManager;
+        import mx.managers.PopUpManager;
+
+        import flash.filters.BitmapFilterQuality;
+
+        import spark.filters.DropShadowFilter;
+
+        public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
+
+        private function showWindow(event:MouseEvent, dev:RunningDevice):void {
+            var tw:DeviceSettingsWindow = new DeviceSettingsWindow();
+            tw.dev = dev;
+            PopUpManager.addPopUp(tw, parentApplication as DisplayObject, true);
+            PopUpManager.centerPopUp(tw);
+        }
+
+        private function goHome(event:MouseEvent, dev:RunningDevice):void {
+            var urlLoader:URLLoader = new URLLoader();
+            var request:URLRequest = new URLRequest("http://" + dev.ip + ":" + dev.port + "/button");
+            request.data = "home";
+            request.method = URLRequestMethod.POST;
+            request.contentType = "application/x-www-form-urlencoded";
+            request.requestHeaders.push(new URLRequestHeader("Content-Length", "home".length + ""));
+            urlLoader.load(request);
+        }
+
+        protected function restart_clickHandler(event:MouseEvent):void {
+            restartButton.visible = false;
+            (data as RunningDevice).close();
+        }
+
+        protected function mainGroup_rollOverHandler(event:MouseEvent):void {
+            restartButton.visible = true;
+            TweenLite.fromTo([restartButton], 0.3, {alpha: 0.0}, {alpha: 1.0});
+            TweenLite.fromTo([settingsButton], 0.3, {alpha: 0.0}, {alpha: 1.0, delay: 0.1});
+            TweenLite.fromTo([homeButton], 0.3, {alpha: 0.0}, {alpha: 1.0, delay: 0.2});
+            //iosButtons.visible = data is IosDevice;
+        }
+
+        protected function mainGroup_rollOutHandler(event:MouseEvent):void {
+            restartButton.visible = false;
+            TweenLite.killTweensOf([homeButton, settingsButton, restartButton]);
+            TweenLite.fromTo(restartButton, 0.3, {alpha: 1.0}, {alpha: 0.0});
+            TweenLite.set([homeButton, settingsButton], {alpha: 0.0});
+        }
+
+        protected function removedFromStageHandler(event:Event):void {
+            mainGroup.filters = []
+        }
+
+        protected function mouseDownHandler(event:MouseEvent):void {
+            if ((data as RunningDevice).status == Device.READY) {
+                firstGroup.addEventListener(MouseEvent.MOUSE_MOVE, mouseDownForDragHandler, false, 0, true);
+            }
+        }
+
+        protected function mouseDownForDragHandler(event:MouseEvent):void {
+            firstGroup.removeEventListener(MouseEvent.MOUSE_MOVE, mouseDownForDragHandler);
+
+            var dragSource:DragSource = new DragSource();
+            dragSource.addData("", "mobile");
+
+            Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, (data as RunningDevice).ip + ":" + (data as RunningDevice).port, false);
+
+            DragManager.doDrag(this, dragSource, event, firstGroup, mouseX - 20, mouseY + 10, 1.0);
+        }
+        ]]>
 	</fx:Script>
 	<s:Group id="mainGroup" width="100%" verticalCenter="0" filters="{dropShadowFilterMiddle}"
 			 rollOver="mainGroup_rollOverHandler(event)" rollOut="mainGroup_rollOutHandler(event)">
@@ -93,19 +89,29 @@
 			<s:BitmapImage  id="mobile" source="assets/icons/32/{(data is IosDevice)?'ios':'android'}.png" smooth="true" smoothingQuality="high"/>
 			<s:Spacer width="18"/>
 			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
-				<s:Label visible="{(data as RunningDevice).ip==null}" includeInLayout="{(data as RunningDevice).ip==null}"
-						 text="Unable to get local ip !" fontStyle="italic" color="0x8a844a"/>
-								
-				<s:HGroup visible="{(data as RunningDevice).ip!=null}" includeInLayout="{(data as RunningDevice).ip!=null}" gap="0">
+				<!-- <s:Label visible="{(data as RunningDevice).booted == false}" includeInLayout="{(data as RunningDevice).booted == false}"
+						 text="Device not booted" fontStyle="italic" color="0x8a844a"/>
+				<s:Label visible="{(data as RunningDevice).authorized == false}" includeInLayout="{(data as RunningDevice).authorized == false}"
+						 text="Device not authorized" fontStyle="italic" color="0x8a844a"/>
+				<s:Label visible="{!(data as RunningDevice).ip}" includeInLayout="{!(data as RunningDevice).ip}"
+						 text="Unable to get local ip !" fontStyle="italic" color="0x8a844a"/> -->
+
+				<s:Label visible="{(data as RunningDevice).error}" text="{(data as RunningDevice).error}" includeInLayout="{(data as RunningDevice).error}"
+						 fontStyle="italic" fontSize="10" color="0x8a844a"/>
+
+				<s:Label visible="{(data as RunningDevice).errorMessage}" text="{(data as RunningDevice).errorMessage}" includeInLayout="{(data as RunningDevice).errorMessage}"
+						 fontSize="10" fontStyle="italic" color="#FF0000"/>
+
+				<s:HGroup visible="{!(data as RunningDevice).errorMessage}" includeInLayout="{!(data as RunningDevice).errorMessage}" gap="0">
 					<s:Label text="{(data as RunningDevice).ip}" fontWeight="bold" color="0x113b55"/>
 					<s:Label text=":{(data as RunningDevice).port}" color="0x113b55"/>
-					<s:Label text=" {(data as RunningDevice).errorMessage}" fontSize="11" fontStyle="italic" color="#FF0000"/>
 				</s:HGroup>
 				
-				<s:Label visible="{(data as RunningDevice).status!=Device.WIFI_ERROR}" includeInLayout="{(data as RunningDevice).status!=Device.WIFI_ERROR}"
-					text="{(data as RunningDevice).manufacturer}{(data as RunningDevice).simulator?' (Simulator)':''} - {(data as RunningDevice).modelName}" fontSize="11" fontStyle="italic" color="#758696"/>
-				<s:Label visible="{(data as RunningDevice).status==Device.WIFI_ERROR}" includeInLayout="{(data as RunningDevice).status==Device.WIFI_ERROR}" 
-						 text="The device is not connected to local network" fontStyle="italic" color="0xbc0000" fontSize="11"/>
+				<s:Label visible="{(data as RunningDevice).authorized == true}" includeInLayout="{(data as RunningDevice).authorized== true}"
+						 text="{(data as RunningDevice).manufacturer}{(data as RunningDevice).simulator?' (Simulator)':''} - {(data as RunningDevice).modelName}"
+						 fontSize="11" fontStyle="italic" color="#758696"/>
+				<!-- <s:Label visible="{(data as RunningDevice).status==Device.WIFI_ERROR}" includeInLayout="{(data as RunningDevice).status==Device.WIFI_ERROR}"
+						 text="The device is not connected to local network" fontStyle="italic" color="0xbc0000" fontSize="11"/> -->
 			</s:VGroup>
 		</s:HGroup>
 		<s:BitmapImage source="assets/icons/20/{(data as RunningDevice).usbMode?'usb':'wifi'}.png" top="{(data as RunningDevice).usbMode?NaN:0}" bottom="{(data as RunningDevice).usbMode?2:NaN}" left="{(data as RunningDevice).usbMode?28:27}"/>

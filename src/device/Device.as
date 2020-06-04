@@ -14,14 +14,14 @@ package device
 		public static const FAIL:String = "fail";
 		public static const WIFI_ERROR:String = "wifiError";
 		public static const USB_ERROR:String = "usbError";
+		public static const ERROR:String = "error";
 
 		public var id:String = "";
 		public var manufacturer:String = "";
 		public var modelId:String = "";
 		public var modelName:String = "";
 		public var osVersion:String = "";
-		public var sdkVersion:String = "";
-		
+
 		public var status:String = START;
 		
 		[Transient]

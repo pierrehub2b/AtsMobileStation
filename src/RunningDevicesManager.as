@@ -16,7 +16,7 @@ import flash.desktop.NativeProcess;
 	import mx.core.FlexGlobals;
 	
 	import device.Device;
-	import device.RunningDevice;
+	import device.running.RunningDevice;
 	import device.running.AndroidDevice;
 	import device.running.IosDevice;
 	import device.running.IosDeviceInfo;
@@ -168,7 +168,7 @@ import flash.desktop.NativeProcess;
 								dev.close();
 							}
 						} else {
-							dev = AndroidDevice.setup(runningId, adbFile);
+							dev = AndroidDevice.setup(runningId);
 							dev.addEventListener(Device.STOPPED_EVENT, deviceStoppedHandler, false, 0, true);
 							dev.start();
 							

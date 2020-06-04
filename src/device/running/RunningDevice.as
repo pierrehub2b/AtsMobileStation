@@ -1,6 +1,10 @@
-package device
+package device.running
 {
+import device.*;
+
 import avmplus.getQualifiedClassName;
+
+import device.running.AndroidDevice;
 
 import mx.utils.UIDUtil;
 
@@ -9,7 +13,9 @@ import mx.utils.UIDUtil;
 public class RunningDevice extends Device
 {
 	public var locked:String = null;
-	public var ip:String = "";
+	public var booted:Boolean = true;
+	public var authorized:Boolean = true
+	public var ip:String;// = "";
 	public var port:String = "";
 
 	public var runningId:String = UIDUtil.createUID();
@@ -30,8 +36,19 @@ public class RunningDevice extends Device
 
 	public function start():void{}
 
-	public function get monaDevice():Object{
-		return {id:runningId, ip:ip, port:port, locked:locked ,manufacturer:manufacturer, modelId:modelId, modelName:modelName, osVersion:osVersion, sdkVersion:sdkVersion, status:status};
+	public function get monaDevice():Object {
+		return {
+			id: runningId,
+			ip: ip,
+			port: port,
+			locked: locked,
+			manufacturer: manufacturer,
+			modelId: modelId,
+			modelName: modelName,
+			osVersion: osVersion,
+			sdkVersion: (this is AndroidDevice) ? (this as AndroidDevice).androidSdk : null,
+			status: status
+		}
 	}
 
 	protected function installing():void{
