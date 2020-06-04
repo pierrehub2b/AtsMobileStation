@@ -16,6 +16,9 @@
 		}
     </style>
     <script type="text/javascript">
+
+        setTimeout("window.open(self.location, '_self');", 110000);
+
 		var socket;
 		
 		function showInfos(name, description){
@@ -53,7 +56,7 @@
 						for (var i = 0; i < devices.length; ++i) {
 							var device = devices[i];
 							var item = document.createElement("li");
-							item.appendChild(document.createTextNode(device.modelName + " (" + device["ip"] + ":" + device["port"] + ") "));
+							item.appendChild(document.createTextNode(device.modelName + " (" + device["ip"] + ":" + device["port"] + ") " + device["osVersion"]));
 							
 							if(device["locked"] != null){
 								var img = document.createElement("img");

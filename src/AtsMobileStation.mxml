@@ -4,7 +4,7 @@
 					   showStatusBar="false" frameRate="60"
 					   creationComplete="creationCompleteHandler(event)"
 					   closing="closeHandler(event)" backgroundColor="0xefefef"
-					   title="Ats MobileStation (port:{httpPort})">
+					   >
 	<fx:Script>
 		<![CDATA[
 			import com.greensock.TweenMax;
@@ -108,7 +108,16 @@
 			}
 			
 			protected function creationCompleteHandler(event:FlexEvent):void {
-				
+
+				var appXml:XML = NativeApplication.nativeApplication.applicationDescriptor;
+				var ns:Namespace = NativeApplication.nativeApplication.applicationDescriptor.namespace();
+				const appVersion:String = appXml.ns::versionNumber[0];
+				//appName = appXml.ns::filename[0];
+				System.disposeXML(appXml);
+
+				title = "Ats MobileStation ("+appVersion+") - port:" + httpPort
+
+
 				var exitCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Exit")); 
 				exitCommand.addEventListener(Event.SELECT, exitAppHandler, false, 0, true);
 				
