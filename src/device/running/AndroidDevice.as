@@ -8,6 +8,7 @@ import flash.filesystem.File;
 import flash.filesystem.FileMode;
 import flash.filesystem.FileStream;
 import flash.globalization.DateTimeFormatter;
+import flash.system.Capabilities;
 
 import helpers.DeviceSettings;
 import helpers.DeviceSettingsHelper;
@@ -23,7 +24,8 @@ public class AndroidDevice extends RunningDevice
 		[Transient] public var androidSdk:String//  = "0";
 		[Transient] public var settings:DeviceSettings;
 
-		[Transient] protected var currentAdbFile:File = File.applicationDirectory.resolvePath("assets/tools/android/adb");
+		private static var execExtension:String = Capabilities.os.indexOf("Mac")>-1?"":".exe";
+		[Transient] protected var currentAdbFile:File = File.applicationDirectory.resolvePath("assets/tools/android/adb" + execExtension);
 
 		private var logFile:File;
 		private var logStream:FileStream = new FileStream();
