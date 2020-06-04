@@ -15,7 +15,7 @@ public class AndroidWirelessDevice extends AndroidDevice {
         this.usbMode = false;
     }
 
-    /* 
+    /*
     override public function runningTestHandler(ev:Event):void
     {
         super.runningTestHandler(ev);

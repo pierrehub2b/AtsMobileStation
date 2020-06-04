@@ -57,26 +57,7 @@ public class AndroidUsbDevice extends AndroidDevice {
 
         super.close();
     }
-
-    // -- Android Process Events
-
-    /* private function webSocketServerStarted(port:int):void {
-        trace("WebSocketServer started -> " + getQualifiedClassName(this) + id);
-
-        webSocketServerPort = port
-        setupPortForwarding();
-    }
-
-    private function webSocketServerStoppedHandler(event:Event):void {
-        trace("WebSocketServer stopped -> " + getQualifiedClassName(this) + id);
-        // usbError("Device server unavailable")
-    }
-
-    private function webSocketServerErrorHandler(event:Event):void {
-        // trace("WebSocketServer error -> " + getQualifiedClassName(this) + " " + id + " " + process.webSocketServerError);
-        // usbError("Device server unavailable")
-    } */
-
+    
     // -- Network Utils Events
 
     private function localAddressFoundHandler(event:NetworkEvent):void {
@@ -170,12 +151,11 @@ public class AndroidUsbDevice extends AndroidDevice {
         this.captureServerPort = captureServer.getLocalPort();
 
         installDriver()
-        // process.executeUsb(ip, webServerPort, captureServerPort);
     }
 
     private function captureServerStartedHandler(event:Event):void {
         captureServer.removeEventListener(CaptureServer.CAPTURE_SERVER_STARTED, webServerInitializedHandler);
-        started();
+        // end of process
     }
 
     private function captureServerErrorHandler(event:Event):void {
