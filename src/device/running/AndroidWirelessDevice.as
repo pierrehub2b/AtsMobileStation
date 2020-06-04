@@ -4,7 +4,6 @@ import flash.desktop.NativeProcess;
 import flash.desktop.NativeProcessStartupInfo;
 import flash.events.NativeProcessExitEvent;
 import flash.events.ProgressEvent;
-import flash.filesystem.File;
 
 public class AndroidWirelessDevice extends AndroidDevice {
 
@@ -16,17 +15,7 @@ public class AndroidWirelessDevice extends AndroidDevice {
         this.usbMode = false;
     }
 
-    /* protected function setupAdbProcess():void {
-
-        process = new AndroidProcess(currentAdbFile, id, this.port, usbMode);
-
-        addAndroidProcessEventListeners();
-
-        process.writeInfoLogFile("USB MODE = " + usbMode + " > set port: " + this.port);
-
-        installing();
-    }
-
+    /* 
     override public function runningTestHandler(ev:Event):void
     {
         super.runningTestHandler(ev);
@@ -35,17 +24,11 @@ public class AndroidWirelessDevice extends AndroidDevice {
         tooltip = "Android " + androidVersion + ", API " + androidSdk + " [" + id + "]\nready and waiting testing actions";
         started();
     }
-
-    private function processWifiErrorHandler(ev:Event):void{
-        removeAndroidProcessEventListeners();
-        status = WIFI_ERROR;
-
-        process.writeErrorLogFile("WIFI error"); //TODO add more detailed info
-    } */
+ */
 
     override protected function fetchIpAddress():void {
         processInfo = new NativeProcessStartupInfo()
-        processInfo.executable = File.applicationDirectory.resolvePath("assets/tools/android/adb");
+        processInfo.executable = currentAdbFile
         processInfo.arguments = new <String>["-s", id, "shell", "ip", "route"];
 
         process = new NativeProcess()
@@ -85,15 +68,10 @@ public class AndroidWirelessDevice extends AndroidDevice {
             }
 
             if(!ip) {
-                error = " - WIFI not connected !";
                 writeErrorLogFile("WIFI not connected");
-
-                error = "WIFI not connected !"
+                error = "WIFI not connected"
                 errorMessage = "Please connect the device to network"
-
                 status = WIFI_ERROR;
-                // dispatchEvent(new Event(WIFI_ERROR_EVENT));
-                return;
             } else {
                 uninstallDriver()
             }
