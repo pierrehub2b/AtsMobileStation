@@ -74,7 +74,7 @@ public class AndroidDevice extends RunningDevice
 		public override function start():void {
 			dateFormatter.setDateTimePattern("yyyy-MM-dd hh:mm:ss");
 
-			logFile = FlexGlobals.topLevelApplication.logsFolder.resolvePath("android_" /*+ id.replace(/\./g, "")*/ + "_" + new Date().time + ".log");
+			logFile = FlexGlobals.topLevelApplication.logsFolder.resolvePath("android_" + id.replace(/\./g, "").replace(":", "") + "_" + new Date().time + ".log");
 			trace(logFile.nativePath)
 			logStream.open(logFile, FileMode.WRITE);
 			logStream.writeUTFBytes("Start Android process");
