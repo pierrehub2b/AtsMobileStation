@@ -175,6 +175,7 @@ public class AndroidDevice extends RunningDevice
 					error = "Device not started"
 					errorMessage = "Please wait until the device is started"
 					booted = false
+					status = BOOT
 				}
 
 				return
@@ -217,10 +218,14 @@ public class AndroidDevice extends RunningDevice
 
 			if (bootInfo && bootInfo == "1") {
 				fetchIpAddress()
+				status = INSTALL
+				error = null
+				errorMessage = null
 			} else {
 				error = "Device not started"
 				errorMessage = "Please wait until the device is started"
 				booted = false
+				status = BOOT
 			}
 		}
 
