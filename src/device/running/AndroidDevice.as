@@ -338,7 +338,7 @@ public class AndroidDevice extends RunningDevice
 			return null;
 		}
 
-		var executeError:String
+		private var executeError:String
 		protected function onExecuteError(event:ProgressEvent):void {
 			var data:String = process.standardError.readUTFBytes(process.standardError.bytesAvailable);
 			trace("err -> " + data);
