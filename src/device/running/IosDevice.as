@@ -48,7 +48,11 @@ package device.running
 		private static const iosMobileDeviceTools:File = File.applicationDirectory.resolvePath("assets/tools/ios");
 		
 		private var resultDir: File;
-		
+
+		override public function get modelName():String {
+			return simulator ? "Simulator " + _modelName : _modelName;
+		}
+
 		public function IosDevice(id:String, name:String, simulator:Boolean, ip:String)
 		{
 			this.id = id;

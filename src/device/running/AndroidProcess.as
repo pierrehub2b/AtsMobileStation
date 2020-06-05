@@ -104,8 +104,6 @@ package device.running
 			}
 		}
 
-		// private var adbProcess: NativeProcess
-
 		private function checkBootedDevice():void {
 			var processInfo: NativeProcessStartupInfo = new NativeProcessStartupInfo()
 			processInfo.executable = File.applicationDirectory.resolvePath("assets/tools/android/adb" + execExtension);
@@ -119,7 +117,6 @@ package device.running
 		}
 
 		public function start():void{
-			// process.start(procInfo);
 			checkBootedDevice()
 		}
 		

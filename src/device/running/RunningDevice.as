@@ -24,7 +24,6 @@ public class RunningDevice extends Device
 	[Transient]public var automaticPort:Boolean = true;
 	[Transient]public var error:String = null;
 	[Transient]public var errorMessage:String = "";
-	[Transient]public var simulator:Boolean = false;
 	[Transient]public var usbMode:Boolean = false;
 	[Transient]public var udpIpAddress:String;
 

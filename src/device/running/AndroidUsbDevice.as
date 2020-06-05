@@ -57,7 +57,7 @@ public class AndroidUsbDevice extends AndroidDevice {
 
         super.close();
     }
-    
+
     // -- Network Utils Events
 
     private function localAddressFoundHandler(event:NetworkEvent):void {

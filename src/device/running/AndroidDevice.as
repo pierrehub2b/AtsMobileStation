@@ -34,6 +34,10 @@ public class AndroidDevice extends RunningDevice
 		protected var process:NativeProcess
 		protected var processInfo:NativeProcessStartupInfo
 
+		override public function get modelName():String {
+			return simulator ? "Emulator " + _modelName : _modelName;
+		}
+
 		public function AndroidDevice(id:String, simulator:Boolean) {
 			this.id = id;
 			this.simulator = simulator;
@@ -135,11 +139,11 @@ public class AndroidDevice extends RunningDevice
 			processInfo.executable = currentAdbFile
 			processInfo.arguments = new <String>["-s", id, "shell", "getprop"];
 
-			var adbProcess: NativeProcess = new NativeProcess()
-			adbProcess.addEventListener(NativeProcessExitEvent.EXIT, onDeviceInfoExit, false, 0, true);
-			adbProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onDeviceInfoError, false, 0, true);
-			adbProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onDeviceInfoOutput, false, 0, true);
-			adbProcess.start(processInfo)
+			process = new NativeProcess()
+			process.addEventListener(NativeProcessExitEvent.EXIT, onDeviceInfoExit, false, 0, true);
+			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onDeviceInfoError, false, 0, true);
+			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onDeviceInfoOutput, false, 0, true);
+			process.start(processInfo)
 		}
 
 		private function onDeviceInfoOutput(event:ProgressEvent):void {
@@ -182,18 +186,24 @@ public class AndroidDevice extends RunningDevice
 			{
 				if (line.indexOf("[sys.boot_completed]") == 0) {
 					bootInfo = getPropValue(line)
-				} else if (line.indexOf("[ro.product.brand]") == 0) {
-					manufacturer = getPropValue(line)
 				} else if (line.indexOf("[ro.product.model]") == 0) {
 					modelId = getPropValue(line)
 				} else if (line.indexOf("[ro.build.version.release]") == 0) {
 					osVersion = getPropValue(line)
 				} else if (line.indexOf("[ro.build.version.sdk]") == 0) {
 					androidSdk = getPropValue(line)
-				} else if (line.indexOf("[ro.semc.product.name]") == 0) {
-					modelName = getPropValue(line)
-				} else if(line.indexOf("[def.tctfw.brandMode.name]") == 0) {
-					modelName = getPropValue(line)
+				} else if (line.indexOf("[ro.product.manufacturer]") == 0) {
+					manufacturer = getPropValue(line)
+				}
+
+				if (simulator) {
+					if (line.indexOf("[ro.product.cpu.abi]") == 0) {
+						modelName = getPropValue(line)
+					}
+				} else {
+					 if (line.indexOf("[def.tctfw.brandMode.name]") == 0) {
+						modelName = getPropValue(line)
+					 }
 				}
 			}
 
@@ -263,6 +273,8 @@ public class AndroidDevice extends RunningDevice
 		private function onInstallDriverOutput():void {}
 		private function onInstallDriverError():void {}
 		private function onInstallDriverExit(event:NativeProcessExitEvent):void {
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallDriverExit)
+
 			execute()
 		}
 
@@ -330,8 +342,8 @@ public class AndroidDevice extends RunningDevice
 			process = null;
 
 			if (error) {
-				trace("err -> " + error);
 				status = FAIL;
+				trace("ATSDroid Execution error : " + error);
 				writeErrorLogFile("Failure on android process");
 			} else {
 				close()

@@ -19,8 +19,9 @@ package device
 		public var id:String = "";
 		public var manufacturer:String = "";
 		public var modelId:String = "";
-		public var modelName:String = "";
+		protected var _modelName:String = "";
 		public var osVersion:String = "";
+		public var simulator:Boolean = false;
 
 		public var status:String = START;
 		
@@ -31,10 +32,11 @@ package device
 		{
 			this.id = id;
 		}
-		
+
+
 		public function checkName():void{
-			if(modelName == ""){
-				modelName = modelId;
+			if(_modelName == ""){
+				_modelName = modelId;
 			}
 		}
 		
@@ -46,6 +48,14 @@ package device
 			if(!dispose()){
 				dispatchEvent(new Event(STOPPED_EVENT));
 			}
+		}
+
+		public function get modelName():String {
+			return  _modelName;
+		}
+
+		public function set modelName(value:String):void {
+			_modelName = value;
 		}
 	}
 }
