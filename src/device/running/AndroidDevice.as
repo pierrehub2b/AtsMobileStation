@@ -180,7 +180,7 @@ public class AndroidDevice extends RunningDevice
 			}
 
 			var bootInfo:String
-
+			var modelName:String
 			var propArray:Array = processOutput.split("\n")
 			for each (var line:String in propArray)
 			{
@@ -201,13 +201,21 @@ public class AndroidDevice extends RunningDevice
 						modelName = getPropValue(line)
 					}
 				} else {
-					 if (line.indexOf("[def.tctfw.brandMode.name]") == 0) {
+				 	if (line.indexOf("[ro.semc.product.name]") == 0) {
 						modelName = getPropValue(line)
-					 }
+					} else if(line.indexOf("[def.tctfw.brandMode.name]") == 0) {
+						modelName = getPropValue(line)
+					}
 				}
 			}
 
 			if (!modelName) modelName = modelId
+
+			modelName = modelName.toUpperCase().replace(manufacturer.toUpperCase(), "");
+			if (modelName.charAt(0) == " ") {
+				modelName = modelName.substr(1)
+			}
+			this.modelName = modelName
 
 			if (bootInfo && bootInfo == "1") {
 				fetchIpAddress()

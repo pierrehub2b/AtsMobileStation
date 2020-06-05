@@ -250,7 +250,7 @@ package device.running
 				}
 			}
 
-			deviceInfo.checkName();
+			// deviceInfo.checkName();
 			dispatchEvent(new Event(DEVICE_INFO));
 				
 			process = new NativeProcess();
