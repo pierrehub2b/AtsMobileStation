@@ -56,9 +56,18 @@
 						for (var i = 0; i < devices.length; ++i) {
 							var device = devices[i];
 							var item = document.createElement("li");
-							item.appendChild(document.createTextNode(device.modelName + " (" + device["ip"] + ":" + device["port"] + ") " + device["osVersion"]));
+
+                            var osIcon = document.createElement("img");
+                            if(device.manufacturer == "Apple"){
+                                osIcon.src = "apple.png";
+                            }else{
+                                osIcon.src = "android.png";
+                            }
+                            item.appendChild(osIcon);
+
+							item.appendChild(document.createTextNode(device.modelName + " (v" + device.osVersion + ") - " + device.ip + ":" + device.port));
 							
-							if(device["locked"] != null){
+							if(device.locked != null){
 								var img = document.createElement("img");
 								img.src = "lock.png";
 								item.appendChild(img);
