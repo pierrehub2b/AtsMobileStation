@@ -338,11 +338,12 @@ public class AndroidDevice extends RunningDevice
 			return null;
 		}
 
+		private var executeError:String
 		protected function onExecuteError(event:ProgressEvent):void {
 			var data:String = process.standardError.readUTFBytes(process.standardError.bytesAvailable);
 			trace("err -> " + data);
 			writeErrorLogFile(data);
-			error = data;
+			executeError = data;
 		}
 
 		protected function onExecuteExit(event:NativeProcessExitEvent):void {
@@ -351,7 +352,7 @@ public class AndroidDevice extends RunningDevice
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteOutput);
 			process = null;
 
-			if (error) {
+			if (executeError) {
 				status = FAIL;
 				trace("ATSDroid Execution error : " + error);
 				writeErrorLogFile("Failure on android process");
