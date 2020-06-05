@@ -56,7 +56,7 @@
 						for (var i = 0; i < devices.length; ++i) {
 							var device = devices[i];
 							var item = document.createElement("li");
-							item.appendChild(document.createTextNode(device.modelName + " (" + device["ip"] + ":" + device["port"] + ") " + device["osVersion"]));
+							item.appendChild(document.createTextNode(device.modelName + " (v" + device["osVersion"] + ") (" + device["ip"] + ":" + device["port"] + ")"));
 							
 							if(device["locked"] != null){
 								var img = document.createElement("img");
