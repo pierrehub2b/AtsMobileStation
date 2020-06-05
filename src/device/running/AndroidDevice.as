@@ -73,8 +73,9 @@ public class AndroidDevice extends RunningDevice
 
 		public override function start():void {
 			dateFormatter.setDateTimePattern("yyyy-MM-dd hh:mm:ss");
-			logFile = FlexGlobals.topLevelApplication.logsFolder.resolvePath("android_" + id + "_" + new Date().time + ".log");
 
+			logFile = FlexGlobals.topLevelApplication.logsFolder.resolvePath("android_" /*+ id.replace(/\./g, "")*/ + "_" + new Date().time + ".log");
+			trace(logFile.nativePath)
 			logStream.open(logFile, FileMode.WRITE);
 			logStream.writeUTFBytes("Start Android process");
 			logStream.close();
@@ -333,11 +334,12 @@ public class AndroidDevice extends RunningDevice
 			return null;
 		}
 
+		var executeError:String
 		protected function onExecuteError(event:ProgressEvent):void {
 			var data:String = process.standardError.readUTFBytes(process.standardError.bytesAvailable);
 			trace("err -> " + data);
 			writeErrorLogFile(data);
-			error = data;
+			executeError = data;
 		}
 
 		protected function onExecuteExit(event:NativeProcessExitEvent):void {
@@ -346,9 +348,9 @@ public class AndroidDevice extends RunningDevice
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteOutput);
 			process = null;
 
-			if (error) {
+			if (executeError) {
 				status = FAIL;
-				trace("ATSDroid Execution error : " + error);
+				trace("ATSDroid Execution error : " + executeError);
 				writeErrorLogFile("Failure on android process");
 			} else {
 				close()
