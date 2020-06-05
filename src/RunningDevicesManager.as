@@ -166,6 +166,9 @@ import flash.desktop.NativeProcess;
 						if (dev != null) {
 							if (dev.status == Device.FAIL) {
 								dev.close();
+							} else if (dev.status == Device.BOOT) {
+								trace("je start again")
+								dev.start()
 							}
 						} else {
 							dev = AndroidDevice.setup(runningId);

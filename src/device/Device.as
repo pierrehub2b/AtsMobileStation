@@ -11,6 +11,7 @@ package device
 		public static const INSTALL:String = "install";
 		public static const START:String = "start";
 		public static const READY:String = "ready";
+		public static const BOOT:String = "boot";
 		public static const FAIL:String = "fail";
 		public static const WIFI_ERROR:String = "wifiError";
 		public static const USB_ERROR:String = "usbError";
