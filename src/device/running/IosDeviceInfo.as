@@ -48,7 +48,7 @@ package device.running
 				proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadData);
 				
 				proc.start(procInfo);
-			}else{
+			} else{
 				dispatchEvent(new Event(Event.COMPLETE));
 			}
 		}
@@ -68,7 +68,7 @@ package device.running
 		}
 		
 		public function get device():IosDevice{
-			return new IosDevice(id, name + " (" + os +")", false, "0.0.0.0");
+			return new IosDevice(id, name, os, false, "0.0.0.0");
 		}
 	}
 }

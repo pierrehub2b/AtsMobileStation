@@ -53,10 +53,11 @@ package device.running
 			return simulator ? "Simulator " + _modelName : _modelName;
 		}
 
-		public function IosDevice(id:String, name:String, simulator:Boolean, ip:String)
+		public function IosDevice(id:String, name:String, osVersion:String, simulator:Boolean, ip:String)
 		{
 			this.id = id;
 			this.ip = ip;
+			this.osVersion = osVersion
 			this.modelName = name;
 			this.manufacturer = "Apple";
 			this.simulator = simulator;
