@@ -211,11 +211,8 @@ public class AndroidDevice extends RunningDevice
 
 			if (!modelName) modelName = modelId
 
-			modelName = modelName.toUpperCase().replace(manufacturer.toUpperCase(), "");
-			if (modelName.charAt(0) == " ") {
-				modelName = modelName.substr(1)
-			}
-			this.modelName = modelName
+			var myRegexPattern:RegExp = new RegExp(manufacturer + "\\s?", "i")
+			this.modelName = modelName.replace(myRegexPattern, "");
 
 			if (bootInfo && bootInfo == "1") {
 				fetchIpAddress()
