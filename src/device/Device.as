@@ -33,13 +33,6 @@ package device
 			this.id = id;
 		}
 
-
-		public function checkName():void{
-			if(_modelName == ""){
-				_modelName = modelId;
-			}
-		}
-		
 		public function dispose():Boolean{
 			return true;
 		}
@@ -51,7 +44,7 @@ package device
 		}
 
 		public function get modelName():String {
-			return  _modelName;
+			return _modelName;
 		}
 
 		public function set modelName(value:String):void {
