@@ -1,6 +1,5 @@
 package
 {
-	import com.adobe.utils.StringUtil;
 	import com.ats.device.simulator.GenymotionDevice;
 	import com.ats.helpers.Settings;
 	
@@ -12,11 +11,11 @@ package
 	
 	import mx.collections.ArrayCollection;
 	
-	public class GenymotionSimulatorsManager
+	public class GenymotionManager
 	{
 		private static const dataRegexp:RegExp = /(^.{36})\s*(.{29})\s*((\.?\d+)+)\s*(\d+) x (\d+)\s*dpi (\d+).*/
 		
-		private var genyMotionLogin:String = "pierre.huber@agilitest.com"
+		private var genyMotionLogin:String = "dev@agilitest.com"
 		
 		private var pipFile:File;
 		private var gmsaasFile:File;
@@ -27,11 +26,11 @@ package
 		[Bindable]
 		public var runningDevices:ArrayCollection;
 		
-		public function GenymotionSimulatorsManager()
+		public function GenymotionManager()
 		{
 			//TODO check Genymotion account defined
 			
-			if(Settings.getInstance().androidSdkFolder.exists){
+			if(Settings.getInstance().androidSdkPath != null){
 				
 				var pythonFileName:String = "python";
 				var pipFileName:String = "pip3";
@@ -74,7 +73,7 @@ package
 			
 			var proc:NativeProcess = event.currentTarget as NativeProcess
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, upgradePipExit);
-						
+			
 			var args:Vector.<String> = new Vector.<String>();
 			args.push("install");
 			args.push("--upgrade");
@@ -93,29 +92,48 @@ package
 		private function gmInstallExit(event:NativeProcessExitEvent):void{
 			var proc:NativeProcess = event.currentTarget as NativeProcess
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, gmInstallExit);
-	
+			
+			defineAndroidSdk();
 			loadRecipesList();
+		}
+		
+		public function defineAndroidSdk():void{
+			
+			var args:Vector.<String> = new Vector.<String>();
+			args.push("config");
+			args.push("set");
+			args.push("android-sdk-path");
+			args.push(Settings.getInstance().androidSdkPath);
+			
+			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			procInfo.executable = gmsaasFile;
+			procInfo.arguments = args;
+			
+			var proc:NativeProcess = new NativeProcess();
+			proc.start(procInfo);
 		}
 		
 		public function loadRecipesList():void{
 			if(gmsaasFile != null && gmsaasFile.exists){
-				
-				devices = new ArrayCollection();
-				loadData = "";
-				
-				var args:Vector.<String> = new Vector.<String>();
-				args.push("recipes");
-				args.push("list");
-				
-				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-				procInfo.executable = gmsaasFile;
-				procInfo.arguments = args;
-				
-				var proc:NativeProcess = new NativeProcess();
-				proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, gmsaasRecipesList);
-				proc.addEventListener(NativeProcessExitEvent.EXIT, gmsaasRecipesListExit);
-				
-				proc.start(procInfo);
+				if(Settings.getInstance().androidSdkPath != null){
+					
+					devices = new ArrayCollection();
+					loadData = "";
+					
+					var args:Vector.<String> = new Vector.<String>();
+					args.push("recipes");
+					args.push("list");
+					
+					var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+					procInfo.executable = gmsaasFile;
+					procInfo.arguments = args;
+					
+					var proc:NativeProcess = new NativeProcess();
+					proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, gmsaasRecipesList);
+					proc.addEventListener(NativeProcessExitEvent.EXIT, gmsaasRecipesListExit);
+					
+					proc.start(procInfo);
+				}
 			}
 		}
 		
@@ -138,7 +156,6 @@ package
 			loadInstancesList();
 		}
 		
-		
 		public function loadInstancesList():void{
 			if(gmsaasFile != null && gmsaasFile.exists){
 				
@@ -148,7 +165,7 @@ package
 				var args:Vector.<String> = new Vector.<String>();
 				args.push("instances");
 				args.push("list");
-
+				
 				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 				procInfo.executable = gmsaasFile;
 				procInfo.arguments = args;
@@ -182,7 +199,7 @@ package
 			if(data.length > 0){
 				const dataArray:Array = data.split(dataRegexp);
 				if(dataArray.length > 6){
-					list.addItem(new GenymotionDevice(dataArray, gmsaasFile));
+					list.addItemAt(new GenymotionDevice(dataArray, gmsaasFile), 0);
 				}
 			}
 		}

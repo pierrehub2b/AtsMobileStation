@@ -80,11 +80,22 @@ package com.ats.device.simulator
 				procInfo.arguments = args;
 								
 				var newProc:NativeProcess = new NativeProcess();
-				//pythonProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, gmsaasInstanceStartOutput);
-				//pythonProcess.addEventListener(NativeProcessExitEvent.EXIT, gmsaasInstanceStartExit);
+				newProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, adbConnectOutput);
+				newProc.addEventListener(NativeProcessExitEvent.EXIT, adbConnectExit);
 				
 				newProc.start(procInfo);
 			}
+		}
+		
+		private function adbConnectOutput(ev:ProgressEvent):void{
+			var proc:NativeProcess = ev.currentTarget as NativeProcess
+			trace(proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable));
+		}
+		
+		private function adbConnectExit(event:NativeProcessExitEvent):void{
+			var proc:NativeProcess = event.currentTarget as NativeProcess
+			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, adbConnectOutput);
+			proc.removeEventListener(NativeProcessExitEvent.EXIT, adbConnectExit);
 		}
 	}
 }

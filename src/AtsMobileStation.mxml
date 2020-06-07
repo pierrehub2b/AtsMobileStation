@@ -40,7 +40,7 @@
 			public var peerGroup:PeerGroupConnection;
 			
 			[Bindable]
-			public var genymotionManager:GenymotionSimulatorsManager;
+			public var genymotionManager:GenymotionManager;
 			
 			[Bindable]
 			private var httpPort:int = 8686;
@@ -191,7 +191,7 @@
 				
 				//httpServer.listen(10000, handleHttpServerError);
 				peerGroup = new PeerGroupConnection(devices, simulators, httpPort);
-				genymotionManager = new GenymotionSimulatorsManager();
+				genymotionManager = new GenymotionManager();
 			}
 			
 			public function saveValues(desc:String, name:String):void {
