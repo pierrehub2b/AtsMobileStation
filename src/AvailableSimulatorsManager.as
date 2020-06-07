@@ -1,6 +1,6 @@
 package 
 {
-import device.simulator.AndroidSimulator;
+import com.ats.device.simulator.AndroidSimulator;
 
 import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
@@ -10,11 +10,11 @@ import flash.desktop.NativeProcess;
 	import flash.filesystem.File;
 	import flash.system.Capabilities;
 
-import helpers.Settings;
+import com.ats.helpers.Settings;
 
 import mx.collections.ArrayCollection;
 	
-	import device.simulator.IosSimulator;
+	import com.ats.device.simulator.IosSimulator;
 
 import mx.utils.UIDUtil;
 
