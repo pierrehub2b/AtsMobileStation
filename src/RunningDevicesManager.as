@@ -33,7 +33,7 @@ import flash.desktop.NativeProcess;
 		
 		private const sysprofilerArgs:Vector.<String> = new <String>["system_profiler", "SPUSBDataType", "-xml"];
 		private const simCtlArgs:Vector.<String> = new <String>["xcrun", "simctl", "list", "devices", "-j"];
-		private const adbArgs:Vector.<String> = new <String>["devices"];
+		private const adbArgs:Vector.<String> = new <String>["devices", "-l"];
 						
 		public static const adbPath:String = "assets/tools/android/adb";
 		public static const endOfMessage:String = "<$ATSDROID_endOfMessage$>";
@@ -157,7 +157,11 @@ import flash.desktop.NativeProcess;
 					
 					const info:Array = data[i].split(/\s+/g);
 					const runningId:String = info[0];
-					
+					const deviceName = String(info[4]).replace("device:", "")
+					const isEmulator:Boolean = deviceName.indexOf("generic") == 0 || deviceName.indexOf("vbox") == 0
+
+					// var test = /([^\s]+)\s.*device:([^\s]+).*/.exec(data[i])
+
 					runningIds.push(runningId);
 										
 					if(info.length >= 2 && runningId.length > 0){
@@ -170,7 +174,7 @@ import flash.desktop.NativeProcess;
 								dev.start()
 							}
 						} else {
-							dev = AndroidDevice.setup(runningId);
+							dev = AndroidDevice.setup(runningId, isEmulator);
 							dev.addEventListener(Device.STOPPED_EVENT, deviceStoppedHandler, false, 0, true);
 							dev.start();
 							

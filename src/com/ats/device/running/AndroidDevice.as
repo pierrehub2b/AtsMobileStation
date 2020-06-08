@@ -16,9 +16,6 @@ import com.ats.helpers.DeviceSettings;
 import com.ats.helpers.DeviceSettingsHelper;
 
 import mx.core.FlexGlobals;
-import mx.utils.ObjectUtil;
-
-import org.osmf.utils.Version;
 
 public class AndroidDevice extends RunningDevice
 	{
@@ -52,11 +49,9 @@ public class AndroidDevice extends RunningDevice
 			installing()
 		}
 
-		public static function setup(id:String):AndroidDevice {
+		public static function setup(id:String, isEmulator:Boolean):AndroidDevice {
 			var deviceSettingsHelper:DeviceSettingsHelper = DeviceSettingsHelper.shared;
 			var deviceSettings:DeviceSettings = deviceSettingsHelper.getSettingsForDevice(id);
-
-			var isEmulator:Boolean = id.indexOf("emulator") >= 0
 
 			if (deviceSettings == null) {
 				deviceSettings = new DeviceSettings(id, true, isEmulator);
