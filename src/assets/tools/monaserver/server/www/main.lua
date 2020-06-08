@@ -10,6 +10,15 @@ function getDeviceIndex(id)
 	return nil
 end
 
+function getDevice(id)
+	for i, d in ipairs (devices) do 
+		if (d.id == id) then
+			return d 
+		end
+	end
+	return nil
+end
+
 function updateDevice(id, locked)
 	for i, v in ipairs (devices) do 
 		if (v.id == id) then
@@ -47,8 +56,7 @@ function onConnection(client,type,...)
 			end
 		end
 
-		count = #devices
-		for i=0, count do devices[i]=nil end
+		for i=0, #devices do devices[i]=nil end
 		
 		for id, cli in pairs(mona.clients) do
 			cli.writer:writeInvocation("msStatus", "start")
@@ -103,7 +111,12 @@ function onConnection(client,type,...)
 		else
 			function client:initData()
 				client.writer:writeInvocation("infoUpdated", data["info"]["name"], data["info"]["description"])
-				client.writer:writeInvocation("devices", devices)
+			end
+			function client:devices()
+				return devices
+			end
+			function client:device(id)
+				return getDevice(id)
 			end
 		end
 	end

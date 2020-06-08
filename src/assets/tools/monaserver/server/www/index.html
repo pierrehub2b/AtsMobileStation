@@ -2,98 +2,113 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>ATS Mobile Station</title>
     <style type="text/css">
-		ul {
-		  list-style: none;
+        ul {
+            list-style: none;
             text-align: middle;
         }
 
-		ul li::before {
-		  content: "\2022";
-		  color: blue;
-		  font-weight: bold;
-		  display: inline-block; 
-		  width: 1em;
-		  margin-left: -1em;
-		}
+        ul li::before {
+            content: "\2022";
+            color: blue;
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
     </style>
     <script type="text/javascript">
 
         setTimeout("window.open(self.location, '_self');", 110000);
 
-		var socket;
-		
-		function showInfos(name, description){
-			document.getElementById("name").innerHTML = name;
-			document.getElementById("info").innerHTML = description;
-		}
-		
-		function checkLock(item, locked){
-			if(locked == null){
-				var lockImg = item.getElementsByTagName("img");
-				if(lockImg.length > 0){
-					item.removeChild(lockImg[0]);
-				}
-			}else{
-				var img = document.createElement("img");
-				img.src = "lock.png";
-				item.appendChild(img);
-			}
-		}
-	  
+        function showDevices(devices){
+            const list = document.getElementById("listDevices");
+            list.innerHTML = "";
+            for (var i = 0; i < devices.length; ++i) {
+                const device = devices[i];
+                const item = document.createElement("li");
+
+                const osIcon = document.createElement("img");
+                if(device.manufacturer == "Apple"){
+                    osIcon.src = "apple.png";
+                }else{
+                    osIcon.src = "android.png";
+                }
+                item.appendChild(osIcon);
+
+                item.appendChild(document.createTextNode(device.modelName + " (v" + device.osVersion + ") - " + device.ip + ":" + device.port));
+
+                if(device.locked != null){
+                    const img = document.createElement("img");
+                    img.src = "lock.png";
+                    item.appendChild(img);
+                }
+
+                list.appendChild(item);
+            }
+        }
+
+        function showInfos(name, description){
+            document.getElementById("name").innerHTML = name;
+            document.getElementById("info").innerHTML = description;
+        }
+
+        function checkLock(item, locked){
+            if(locked == null){
+                const lockImg = item.getElementsByTagName("img");
+                if(lockImg.length > 0){
+                    item.removeChild(lockImg[0]);
+                }
+            }else{
+                const img = document.createElement("img");
+                img.src = "lock.png";
+                item.appendChild(img);
+            }
+        }
+
         // Reception handler
         function onMessage(msg) {
             try { // try to parse data
-                data = JSON.parse(msg.data);
+                const data = JSON.parse(msg.data);
                 switch (data[0]) {
-                	case "msStatus":
-                		if(data[1] == "close"){
-                			document.getElementById("listDevices").innerHTML = "";
-                		}
-                		break;
-					case "devices":
-						var devices = data[1];
-						var list = document.getElementById("listDevices");
-						list.innerHTML = "";
-						for (var i = 0; i < devices.length; ++i) {
-							var device = devices[i];
-							var item = document.createElement("li");
-
-                            var osIcon = document.createElement("img");
-                            if(device.manufacturer == "Apple"){
-                                osIcon.src = "apple.png";
-                            }else{
-                                osIcon.src = "android.png";
-                            }
-                            item.appendChild(osIcon);
-
-							item.appendChild(document.createTextNode(device.modelName + " (v" + device.osVersion + ") - " + device.ip + ":" + device.port));
-							
-							if(device.locked != null){
-								var img = document.createElement("img");
-								img.src = "lock.png";
-								item.appendChild(img);
-							}
-							
-							list.appendChild(item);
-						}
-						break;
-					case "infoUpdated":
-						showInfos("[ " + data[1] + " ]", data[2]);
-						break;
+                    case "msStatus":
+                        if(data[1] == "close"){
+                            document.getElementById("listDevices").innerHTML = "";
+                        }
+                        break;
+                    case "devices":
+                        showDevices(data[1]);
+                        break;
+                    case "infoUpdated":
+                        showInfos("[ " + data[1] + " ]", data[2]);
+                        break;
                 }
             } catch(exception) {}
         }
-              
+
+        const socket = createWebSocket();
+
         // Connection handler
         function onConnection() {
-			socket.send(JSON.stringify(["initData"]));
+            socket.send(JSON.stringify(["initData"]));
+
+            const xmlhttp = new XMLHttpRequest();
+            xmlhttp.open('GET', "devices", true);
+
+            xmlhttp.onreadystatechange = function () {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    var data = JSON.parse(xmlhttp.response);
+                    showDevices(data[0]);
+                }
+            }
+            xmlhttp.setRequestHeader('Content-Type', 'application/json');
+            xmlhttp.send();
         }
-        
+
         // Disconnection handler
-        function onDisconnection() { 
+        function onDisconnection() {
 
         }
-        
+
         // Socket connector
         function createWebSocket() {
             host = "ws://" + window.location.host + "/";
@@ -104,25 +119,21 @@
                 alert("Your browser don't support webSocket!");
                 return false;
             }
-            
-            socket = new WebSocket(host);
-            socket.onopen = onConnection;
-            socket.onclose = onDisconnection;
-            socket.onerror = function() { document.getElementById("info").value = 'An error occurs'; }
-            socket.onmessage = onMessage;
-            return true;
+
+            let sock = new WebSocket(host);
+            sock.onopen = onConnection;
+            sock.onclose = onDisconnection;
+            sock.onerror = function() { document.getElementById("info").value = 'An error occurs'; }
+            sock.onmessage = onMessage;
+            return sock;
         }
-        createWebSocket();
-        
     </script>
 </head>
 <body>
 <h2><span style="color: #3b3349;"><p>ATS Mobile Station <em><label id="name"/></p></span></h2>
-<b>Description : </b><span style="color: #666699;"><em><label id="info"/></span> 
-    <div style="height:95%; width:100%">
-        <div style="width:100%%; height:100%; float: left">
-            <ul id="listDevices"></ul>
-        </div>
+<b>Description : </b><span style="color: #666699;"><em><label id="info"/></span>
+<div style="height:95%; width:100%">
+    <div style="width:100%%; height:100%; float: left">
+        <ul id="listDevices"></ul>
     </div>
-</body>
-<html>
+</div></body><html>

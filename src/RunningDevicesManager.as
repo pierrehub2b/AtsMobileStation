@@ -1,10 +1,15 @@
 package 
 {
+	import com.ats.device.Device;
+	import com.ats.device.running.AndroidDevice;
+	import com.ats.device.running.IosDevice;
+	import com.ats.device.running.IosDeviceInfo;
+	import com.ats.device.running.RunningDevice;
+	import com.ats.device.simulator.IosSimulator;
+	import com.ats.device.simulator.Simulator;
 	import com.greensock.TweenLite;
-
-import com.ats.device.simulator.Simulator;
-
-import flash.desktop.NativeProcess;
+	
+	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
 	import flash.events.NativeProcessExitEvent;
@@ -14,13 +19,6 @@ import flash.desktop.NativeProcess;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.FlexGlobals;
-	
-	import com.ats.device.Device;
-	import com.ats.device.running.RunningDevice;
-	import com.ats.device.running.AndroidDevice;
-	import com.ats.device.running.IosDevice;
-	import com.ats.device.running.IosDeviceInfo;
-	import com.ats.device.simulator.IosSimulator;
 	
 	import net.tautausan.plist.PDict;
 	import net.tautausan.plist.Plist10;
@@ -35,7 +33,6 @@ import flash.desktop.NativeProcess;
 		private const simCtlArgs:Vector.<String> = new <String>["xcrun", "simctl", "list", "devices", "-j"];
 		private const adbArgs:Vector.<String> = new <String>["devices", "-l"];
 						
-		public static const adbPath:String = "assets/tools/android/adb";
 		public static const endOfMessage:String = "<$ATSDROID_endOfMessage$>";
 		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/;
 		private const jsonPattern:RegExp = /\{[^]*\}/;
@@ -57,19 +54,9 @@ import flash.desktop.NativeProcess;
 		
 		private var usbDevicesIdList:Vector.<String>;
 
-		private static var _instance: RunningDevicesManager = new RunningDevicesManager();
-
-		public static function getInstance():RunningDevicesManager {
-			return _instance;
-		}
-
-		public function RunningDevicesManager()
+		public function RunningDevicesManager(isMacos:Boolean, adbPath:String)
 		{
-			if (_instance) {
-				throw new Error("RunningDevicesManager is a singleton and can only be accessed through RunningDevicesManager.getInstance()");
-			}
-
-			if (AtsMobileStation.isMacOs) {
+			if (isMacos) {
 				
 				adbFile = File.applicationDirectory.resolvePath(adbPath);
 								
@@ -157,7 +144,7 @@ import flash.desktop.NativeProcess;
 					
 					const info:Array = data[i].split(/\s+/g);
 					const runningId:String = info[0];
-					const deviceName = String(info[4]).replace("device:", "")
+					const deviceName:String = String(info[4]).replace("device:", "")
 					const isEmulator:Boolean = deviceName.indexOf("generic") == 0 || deviceName.indexOf("vbox") == 0
 
 					// var test = /([^\s]+)\s.*device:([^\s]+).*/.exec(data[i])
