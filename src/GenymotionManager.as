@@ -30,43 +30,55 @@ package
 		{
 			//TODO check Genymotion account defined
 			
-			if(Settings.getInstance().androidSdkPath != null){
-				
-				var pythonFileName:String = "python";
-				var pipFileName:String = "pip3";
-				var gmsaasFileName:String = "gmsaas";
-				if(!Settings.isMacOs){
-					pythonFileName += ".exe";
-					pipFileName += ".exe";
-					gmsaasFileName += ".exe"
-				}
-				
-				const pythonFolder:File = Settings.getInstance().pythonFolder;
-				var pythonFile:File = pythonFolder.resolvePath(pythonFileName);
-				if(pythonFile.exists){
-					pipFile = pythonFolder.resolvePath("Scripts").resolvePath(pipFileName);
-					if(pipFile.exists){
-						
-						gmsaasFile = pythonFolder.resolvePath("Scripts").resolvePath(gmsaasFileName);
-						
-						var args:Vector.<String> = new Vector.<String>();
-						args.push("-m");
-						args.push("pip");
-						args.push("install");
-						args.push("--upgrade");
-						args.push("pip");
-						
-						var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-						procInfo.executable = pythonFile;
-						procInfo.arguments = args;
-						
-						var proc:NativeProcess = new NativeProcess();
-						proc.addEventListener(NativeProcessExitEvent.EXIT, upgradePipExit);
-						
-						proc.start(procInfo);
-					}
-				}
+			if (!Settings.getInstance().androidSdkPath) {
+				trace('WARNING : Android SDK path not set')
+				return
 			}
+				
+			var pythonFileName:String = "python";
+			var pipFileName:String = "pip3";
+			var gmsaasFileName:String = "gmsaas";
+			if (!Settings.isMacOs) {
+				pythonFileName += ".exe";
+				pipFileName += ".exe";
+				gmsaasFileName += ".exe"
+			}
+
+			const pythonFolder:File = Settings.getInstance().pythonFolder;
+			if (!pythonFolder) {
+				trace('WARNING : Python folder path not set')
+				return
+			}
+
+			var pythonFile:File = pythonFolder.resolvePath(pythonFileName);
+			if (!pythonFile.exists) {
+				trace('WARNING : Python file not found')
+				return
+			}
+
+			pipFile = pythonFolder.resolvePath("Scripts").resolvePath(pipFileName);
+			if (!pipFile.exists) {
+				trace('WARNING : PIP file not found')
+				return
+			}
+
+			gmsaasFile = pythonFolder.resolvePath("Scripts").resolvePath(gmsaasFileName);
+
+			var args:Vector.<String> = new Vector.<String>();
+			args.push("-m");
+			args.push("pip");
+			args.push("install");
+			args.push("--upgrade");
+			args.push("pip");
+						
+			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			procInfo.executable = pythonFile;
+			procInfo.arguments = args;
+						
+			var proc:NativeProcess = new NativeProcess();
+			proc.addEventListener(NativeProcessExitEvent.EXIT, upgradePipExit);
+						
+			proc.start(procInfo);
 		}
 		
 		private function upgradePipExit(event:NativeProcessExitEvent):void{
@@ -98,7 +110,6 @@ package
 		}
 		
 		public function defineAndroidSdk():void{
-			
 			var args:Vector.<String> = new Vector.<String>();
 			args.push("config");
 			args.push("set");
