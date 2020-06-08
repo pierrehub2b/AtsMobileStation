@@ -1,5 +1,7 @@
 package com.ats.device.running
 {
+import com.ats.helpers.Version;
+
 import flash.desktop.NativeProcess;
 import flash.desktop.NativeProcessStartupInfo;
 import flash.events.NativeProcessExitEvent;
@@ -33,6 +35,8 @@ public class AndroidDevice extends RunningDevice
 		private var logFile:File;
 		private var logStream:FileStream = new FileStream();
 		private var dateFormatter:DateTimeFormatter = new DateTimeFormatter("en-US");
+
+		private const supportedOsVersion = new com.ats.helpers.Version("5.1")
 
 		protected var process:NativeProcess
 		protected var processInfo:NativeProcessStartupInfo
@@ -220,11 +224,11 @@ public class AndroidDevice extends RunningDevice
 
 			// check if simulator
 
-			trace(osVersion + " 5.1")
-			if (ObjectUtil.stringCompare("10", "5.1") == -1) {
+			var deviceOsVersion = new com.ats.helpers.Version(osVersion)
+			if (deviceOsVersion.compare(supportedOsVersion) == com.ats.helpers.Version.INFERIOR) {
 				status = ERROR
 				error = "Android version not compatible"
-				errorMessage = "Android version not compatible"
+				errorMessage = "Only supports Android devices running version 5.1 or higher"
 				return
 			}
 
@@ -312,7 +316,6 @@ public class AndroidDevice extends RunningDevice
 		}
 
 		protected var executeOutput:String
-		private var executeError:String
 
 		protected function onExecuteOutput(event:ProgressEvent):void {
 			executeOutput = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
