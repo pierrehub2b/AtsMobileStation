@@ -215,6 +215,16 @@ public class AndroidDevice extends RunningDevice
 			var myRegexPattern:RegExp = new RegExp(manufacturer + "\\s?", "i")
 			this.modelName = modelName.replace(myRegexPattern, "");
 
+			// check if simulator
+
+			trace(osVersion + " 5.1")
+			if (ObjectUtil.stringCompare("10", "5.1") == -1) {
+				status = ERROR
+				error = "Android version not compatible"
+				errorMessage = "Android version not compatible"
+				return
+			}
+
 			if (bootInfo && bootInfo == "1") {
 				fetchIpAddress()
 				status = INSTALL
