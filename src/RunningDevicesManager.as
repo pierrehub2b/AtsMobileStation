@@ -2,7 +2,7 @@ package
 {
 	import com.greensock.TweenLite;
 
-import device.simulator.Simulator;
+import com.ats.device.simulator.Simulator;
 
 import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
@@ -15,12 +15,12 @@ import flash.desktop.NativeProcess;
 	import mx.collections.ArrayCollection;
 	import mx.core.FlexGlobals;
 	
-	import device.Device;
-	import device.running.RunningDevice;
-	import device.running.AndroidDevice;
-	import device.running.IosDevice;
-	import device.running.IosDeviceInfo;
-	import device.simulator.IosSimulator;
+	import com.ats.device.Device;
+	import com.ats.device.running.RunningDevice;
+	import com.ats.device.running.AndroidDevice;
+	import com.ats.device.running.IosDevice;
+	import com.ats.device.running.IosDeviceInfo;
+	import com.ats.device.simulator.IosSimulator;
 	
 	import net.tautausan.plist.PDict;
 	import net.tautausan.plist.Plist10;
