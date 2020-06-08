@@ -56,12 +56,6 @@ public class RunningDevice extends Device
 		trace("Installing driver -> " + getQualifiedClassName(this));
 	}
 
-	protected function waiting():void{
-		status = WAITING_FOR_DEVICE;
-		tooltip = "Waiting for ...";
-		trace("Waiting for device -> " + getQualifiedClassName(this));
-	}
-
 	protected function started():void{
 		status = READY;
 		tooltip = "Driver started and ready";
