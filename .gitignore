@@ -144,4 +144,3 @@ src/assets/tools/monaserver/work/lua51.dll
 src/assets/tools/monaserver/server/MonaServer
 src/assets/tools/monaserver/server/logs/log.0
 src/assets/tools/monaserver/libluajit-5.1.2.dylib
-.idea/workspace.xml
