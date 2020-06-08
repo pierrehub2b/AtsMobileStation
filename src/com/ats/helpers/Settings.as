@@ -92,6 +92,10 @@ package com.ats.helpers {
 		}
 		
 		public function get pythonFolder():File {
+			if (!pythonPath) {
+				return null
+			}
+
 			return new File(pythonPath);
 		}
 		
