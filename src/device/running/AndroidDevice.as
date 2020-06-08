@@ -14,6 +14,9 @@ import helpers.DeviceSettings;
 import helpers.DeviceSettingsHelper;
 
 import mx.core.FlexGlobals;
+import mx.utils.ObjectUtil;
+
+import org.osmf.utils.Version;
 
 public class AndroidDevice extends RunningDevice
 	{
@@ -309,16 +312,17 @@ public class AndroidDevice extends RunningDevice
 		}
 
 		protected var executeOutput:String
+		private var executeError:String
+
 		protected function onExecuteOutput(event:ProgressEvent):void {
 			executeOutput = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
+			writeErrorLogFile(executeOutput);
 
 			if (executeOutput.indexOf("Process crashed") > -1) {
-				writeErrorLogFile(executeOutput);
 				process.standardInput.writeUTFBytes("instrumentCommandLine");
 				return
 			}
 
-			writeInfoLogFile(executeOutput);
 			if (executeOutput.indexOf("ATS_DRIVER_RUNNING") > -1) {
 				started()
 			} else if (executeOutput.indexOf("ATS_DRIVER_START") > -1) {
@@ -348,10 +352,8 @@ public class AndroidDevice extends RunningDevice
 			return null;
 		}
 
-		var executeError:String
 		protected function onExecuteError(event:ProgressEvent):void {
 			var data:String = process.standardError.readUTFBytes(process.standardError.bytesAvailable);
-			trace("err -> " + data);
 			writeErrorLogFile(data);
 			executeError = data;
 		}
