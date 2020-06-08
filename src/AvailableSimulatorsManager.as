@@ -185,7 +185,7 @@ public class AvailableSimulatorsManager extends EventDispatcher
 			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onErrorData);
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onExit);
 
-			if (emulatorErrorData != null) {
+			if (emulatorErrorData != null || emulatorOutputData == null) {
 				// handle error
 				return
 			}
