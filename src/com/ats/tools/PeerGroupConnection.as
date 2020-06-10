@@ -1,8 +1,7 @@
 package com.ats.tools
 {
-	import com.greensock.TweenMax;
-	
 	import com.ats.device.running.RunningDevice;
+	import com.greensock.TweenMax;
 	
 	import flash.desktop.NativeApplication;
 	import flash.desktop.NativeProcess;
@@ -50,29 +49,25 @@ package com.ats.tools
 		private var mona:File;
 		private var monaInstallFolder:File;
 		
-		public function PeerGroupConnection(devManager:RunningDevicesManager, simManager:AvailableSimulatorsManager, port:int)
+		public function PeerGroupConnection(workFolder:File, devManager:RunningDevicesManager, simManager:AvailableSimulatorsManager, port:int)
 		{
 			devicesManager = devManager;
 			httpPort = port;
 			
 			mona = File.applicationDirectory.resolvePath(monaServerFolder);
 			if(mona.exists){
-				checkMonaserverPort();
-			}
-		}
-		
-		private function checkMonaserverPort():void{
-			monaInstallFolder = File.userDirectory.resolvePath(".atsmobilestation").resolvePath("monaserver");
-			const iniFile:File = monaInstallFolder.resolvePath("server").resolvePath("MonaServer.ini");
-			
-			updateMonaServerWww();
-			
-			if(iniFile.exists){
-				const iniFileLoader:URLLoader = new URLLoader();
-				iniFileLoader.addEventListener(Event.COMPLETE, iniFileLoaded, false, 0, true);
-				iniFileLoader.load(new URLRequest(iniFile.url));
-			}else{
-				installMonaserver();
+				monaInstallFolder = workFolder.resolvePath("monaserver");
+				const iniFile:File = monaInstallFolder.resolvePath("server").resolvePath("MonaServer.ini");
+				
+				updateMonaServerWww();
+				
+				if(iniFile.exists){
+					const iniFileLoader:URLLoader = new URLLoader();
+					iniFileLoader.addEventListener(Event.COMPLETE, iniFileLoaded, false, 0, true);
+					iniFileLoader.load(new URLRequest(iniFile.url));
+				}else{
+					installMonaserver();
+				}
 			}
 		}
 		

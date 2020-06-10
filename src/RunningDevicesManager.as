@@ -54,11 +54,11 @@ package
 		
 		private var usbDevicesIdList:Vector.<String>;
 
-		public function RunningDevicesManager(isMacos:Boolean, adbPath:String)
+		public function RunningDevicesManager(isMacos:Boolean, adbFolder:File)
 		{
 			if (isMacos) {
 				
-				adbFile = File.applicationDirectory.resolvePath(adbPath);
+				adbFile = adbFolder.resolvePath("adb");
 								
 				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 				procInfo.executable = new File("/bin/chmod");			
@@ -70,8 +70,7 @@ package
 				proc.start(procInfo);
 				
 			} else {
-				adbFile = File.applicationDirectory.resolvePath(adbPath + ".exe");
-				
+				adbFile = adbFolder.resolvePath("adb.exe");
 				// only one type of devices to find, we can do loop faster
 				adbLoop = TweenLite.delayedCall(2, launchAdbProcess);
 			}

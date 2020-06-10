@@ -72,6 +72,8 @@
 		<mxmlc file="src/${APP_NAME}.mxml"
             output="temp/${APP_NAME}.swf"
             static-rsls="true"
+			incremental="true"
+			keep-generated-actionscript="true"
             accessible="false"
             configname="air"
             debug="false"

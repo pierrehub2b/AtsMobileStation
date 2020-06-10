@@ -16,7 +16,6 @@
 			import com.ats.tools.PeerGroupConnection;
 			import com.greensock.TweenMax;
 			
-			import mx.core.FlexGlobals;
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
@@ -53,8 +52,11 @@
 			
 			public var teamId:String;
 			
+			private static const workFolder:File = File.userDirectory.resolvePath(".atsmobilestation");
+			private var workAdbFolder:File;
+			
 			public function get logsFolder():File {
-				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/logs");
+				return workFolder.resolvePath("logs");
 			}
 			
 			public function get devicesSettingsFile():File {
@@ -161,11 +163,16 @@
 					cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
 				}
 				
+				//workAdbFolder = workFolder.resolvePath("adb");
+				//File.applicationDirectory.resolvePath("assets/tools/android").copyTo(workAdbFolder, true)
+					
+				workAdbFolder = File.applicationDirectory.resolvePath("assets/tools/android");
+									
 				simulators = new AvailableSimulatorsManager();
-				devices = new RunningDevicesManager(isMacOs, "assets/tools/android/adb");
+				devices = new RunningDevicesManager(isMacOs, workAdbFolder);
 				
 				if (isMacOs) {
-					var file:File = FlexGlobals.topLevelApplication.settingsFile;
+					var file:File = settingsFile;
 					if (file.exists) {
 						
 						var fileStream:FileStream = new FileStream();
@@ -188,7 +195,7 @@
 				}
 				
 				//httpServer.listen(10000, handleHttpServerError);
-				peerGroup = new PeerGroupConnection(devices, simulators, httpPort);
+				peerGroup = new PeerGroupConnection(workFolder, devices, simulators, httpPort);
 				genymotionManager = new GenymotionManager();
 			}
 			
