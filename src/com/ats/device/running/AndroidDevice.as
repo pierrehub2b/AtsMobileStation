@@ -33,7 +33,7 @@ public class AndroidDevice extends RunningDevice
 		private var logStream:FileStream = new FileStream();
 		private var dateFormatter:DateTimeFormatter = new DateTimeFormatter("en-US");
 
-		private const supportedOsVersion = new com.ats.helpers.Version("5.1")
+		private const supportedOsVersion:Version = new com.ats.helpers.Version("5.1")
 
 		protected var process:NativeProcess
 		protected var processInfo:NativeProcessStartupInfo
@@ -133,12 +133,15 @@ public class AndroidDevice extends RunningDevice
 		//---------------------------------------------------------------------------------------------------------
 
 
-		private var processError:String = ""
-		private var processOutput:String = ""
+		private var processError:String
+		private var processOutput:String
 
 		private function fetchDeviceInfo():void {
+			processError = ""
+			processOutput = ""
+
 			var processInfo: NativeProcessStartupInfo = new NativeProcessStartupInfo()
-			processInfo.executable = currentAdbFile
+			processInfo.executable = FlexGlobals.topLevelApplication.adbFile
 			processInfo.arguments = new <String>["-s", id, "shell", "getprop"];
 
 			process = new NativeProcess()
@@ -150,12 +153,12 @@ public class AndroidDevice extends RunningDevice
 
 		private function onDeviceInfoOutput(event:ProgressEvent):void {
 			var process: NativeProcess = event.currentTarget as NativeProcess
-			processOutput = processOutput.concat(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable).replace(/\r/g, ""));
+			processOutput += process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable).replace(/\r/g, "");
 		}
 
 		private function onDeviceInfoError(event:ProgressEvent):void {
 			var process: NativeProcess = event.currentTarget as NativeProcess
-			processError = process.standardError.readUTFBytes(process.standardError.bytesAvailable)
+			processError += process.standardError.readUTFBytes(process.standardError.bytesAvailable)
 		}
 
 		private function onDeviceInfoExit(event:NativeProcessExitEvent):void {
@@ -217,9 +220,7 @@ public class AndroidDevice extends RunningDevice
 			var myRegexPattern:RegExp = new RegExp(manufacturer + "\\s?", "i")
 			this.modelName = modelName.replace(myRegexPattern, "");
 
-			// check if simulator
-
-			var deviceOsVersion = new com.ats.helpers.Version(osVersion)
+			var deviceOsVersion:Version = new com.ats.helpers.Version(osVersion)
 			if (deviceOsVersion.compare(supportedOsVersion) == com.ats.helpers.Version.INFERIOR) {
 				status = ERROR
 				error = "Android version not compatible"

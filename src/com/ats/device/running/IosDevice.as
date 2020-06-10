@@ -383,7 +383,7 @@ package com.ats.device.running
 				errorMessage = "Your device need a more recent version\n of xCode. Go to AppStore for download it";
 				testingProcess.exit();
 				removeReceivers();
-				return;
+
 			}
 		}
 

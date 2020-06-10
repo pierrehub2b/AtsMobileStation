@@ -56,12 +56,12 @@ package com.ats.tools
 			httpPort = port;
 			
 			mona = File.applicationDirectory.resolvePath(monaServerFolder);
-			if(mona.exists){
+			if (mona.exists) {
 				checkMonaserverPort();
 			}
 		}
 		
-		private function checkMonaserverPort():void{
+		private function checkMonaserverPort():void {
 			monaInstallFolder = File.userDirectory.resolvePath(".atsmobilestation").resolvePath("monaserver");
 			const iniFile:File = monaInstallFolder.resolvePath("server").resolvePath("MonaServer.ini");
 			

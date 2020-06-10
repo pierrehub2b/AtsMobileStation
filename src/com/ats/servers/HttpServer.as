@@ -13,7 +13,7 @@ package com.ats.servers {
 		
 		private var _server:ServerSocket
 		
-		private var _controllers:Object = new Object()
+		private var _controllers:Object = {}
 		
 		private var _errorCallback:Function = null
 		
