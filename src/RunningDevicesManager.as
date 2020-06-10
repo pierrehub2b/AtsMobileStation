@@ -12,6 +12,7 @@ package
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
+	import flash.events.EventDispatcher;
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
@@ -23,7 +24,7 @@ package
 	import net.tautausan.plist.PDict;
 	import net.tautausan.plist.Plist10;
 	
-	public class RunningDevicesManager
+	public class RunningDevicesManager extends EventDispatcher
 	{
 		private const mobileDevice:File = File.applicationDirectory.resolvePath("assets/tools/ios/mobiledevice");
 		private const systemProfiler:File = new File("/usr/sbin/system_profiler");
@@ -31,7 +32,8 @@ package
 		
 		private const sysprofilerArgs:Vector.<String> = new <String>["system_profiler", "SPUSBDataType", "-xml"];
 		private const simCtlArgs:Vector.<String> = new <String>["xcrun", "simctl", "list", "devices", "-j"];
-		private const adbArgs:Vector.<String> = new <String>["devices", "-l"];
+		private const adbListDevicesArgs:Vector.<String> = new <String>["devices", "-l"];
+		private const adbKillServer:Vector.<String> = new <String>["kill-server"];
 						
 		public static const endOfMessage:String = "<$ATSDROID_endOfMessage$>";
 		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/;
@@ -98,6 +100,20 @@ package
 			for each(dv in collection){
 				dv.close();
 			}
+			
+			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			procInfo.executable = adbFile;			
+			procInfo.workingDirectory = File.userDirectory;
+			procInfo.arguments = adbKillServer;
+			
+			var proc:NativeProcess = new NativeProcess();
+			proc.addEventListener(NativeProcessExitEvent.EXIT, onKillServerExit, false, 0, true);
+			proc.start(procInfo);	
+		}
+		
+		private function onKillServerExit(ev:NativeProcessExitEvent):void{
+			ev.target.removeEventListener(NativeProcessExitEvent.EXIT, onKillServerExit);
+			dispatchEvent(new Event(Event.COMPLETE));
 		}
 		
 		private function launchAdbProcess():void{
@@ -107,7 +123,7 @@ package
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfo.executable = adbFile;			
 			procInfo.workingDirectory = File.userDirectory;
-			procInfo.arguments = adbArgs;
+			procInfo.arguments = adbListDevicesArgs;
 
 			var proc:NativeProcess = new NativeProcess();
 			proc.addEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit, false, 0, true);

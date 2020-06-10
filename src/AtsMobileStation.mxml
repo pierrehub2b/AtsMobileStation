@@ -16,11 +16,12 @@
 			import com.ats.tools.PeerGroupConnection;
 			import com.greensock.TweenMax;
 			
+			import flash.filters.BitmapFilterQuality;
+			
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
 			
-			import flash.filters.BitmapFilterQuality;
 			import spark.components.Alert;
 			import spark.filters.DropShadowFilter;
 			
@@ -228,12 +229,16 @@
 				event.preventDefault();
 				event.stopPropagation();
 				
+				infoStatus.text = "Please wait all processes to finish ..."
+					
 				peerGroup.close();
-				
-				devices.terminate();
 				simulators.terminate();
 				
-				infoStatus.text = "Please wait all processes to finish ..."
+				devices.addEventListener(Event.COMPLETE, devicesTerminateComplete);
+				devices.terminate();
+			}
+			
+			private function devicesTerminateComplete(ev:Event):void{
 				TweenMax.delayedCall(2.00, closeApp);
 			}
 			

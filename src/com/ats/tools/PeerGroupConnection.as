@@ -60,7 +60,7 @@ package com.ats.tools
 				monaInstallFolder = workFolder.resolvePath("monaserver");
 				const iniFile:File = monaInstallFolder.resolvePath("server").resolvePath("MonaServer.ini");
 				
-				updateMonaServerWww();
+				updateMonaServerSiteFolder();
 				
 				if(iniFile.exists){
 					const iniFileLoader:URLLoader = new URLLoader();
@@ -149,7 +149,7 @@ package com.ats.tools
 			//netConnection.close();
 		}
 		
-		private function updateMonaServerWww():void{
+		private function updateMonaServerSiteFolder():void{
 			mona.resolvePath("server").resolvePath("www").copyTo(monaInstallFolder.resolvePath("server").resolvePath("www"), true);
 		}
 		
