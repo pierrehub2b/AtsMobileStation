@@ -55,6 +55,7 @@ package com.ats.tools
 			httpPort = port;
 			
 			mona = File.applicationDirectory.resolvePath(monaServerFolder);
+
 			if(mona.exists){
 				monaInstallFolder = workFolder.resolvePath("monaserver");
 				const iniFile:File = monaInstallFolder.resolvePath("server").resolvePath("MonaServer.ini");

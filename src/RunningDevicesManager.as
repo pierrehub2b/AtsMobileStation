@@ -171,7 +171,7 @@ package
 				}
 			}
 			
-			for each(var androidDev:RunningDevice in collection){
+			for each (var androidDev:RunningDevice in collection) {
 				if(androidDev is AndroidDevice && androidDev.simulator == false && runningIds.indexOf(androidDev.id) < 0){
 					androidDev.close()
 				}

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<renderer1:SimulatorRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
-				xmlns:s="library://ns.adobe.com/flex/spark" 
-				xmlns:mx="library://ns.adobe.com/flex/mx" 
-				xmlns:renderer="renderer.*" creationComplete="creationCompleteHandler(event)" xmlns:renderer1="com.ats.gui.renderer.*">
+<renderer:SimulatorRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"
+							xmlns:s="library://ns.adobe.com/flex/spark"
+							xmlns:renderer="com.ats.gui.renderer.*"
+							creationComplete="creationCompleteHandler(event)">
 	<fx:Script>
 		<![CDATA[
 			import com.greensock.TweenMax;
@@ -81,4 +81,4 @@
 		</s:Group>
 	</s:HGroup>
 
-</renderer1:SimulatorRenderer>
+</renderer:SimulatorRenderer>

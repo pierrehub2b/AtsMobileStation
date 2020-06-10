@@ -1,30 +1,29 @@
 package
 {
-	import com.ats.device.simulator.GenymotionDevice;
-	import com.ats.helpers.Settings;
-	
-	import flash.desktop.NativeProcess;
-	import flash.desktop.NativeProcessStartupInfo;
-	import flash.events.NativeProcessExitEvent;
-	import flash.events.ProgressEvent;
-	import flash.filesystem.File;
-	
-	import mx.collections.ArrayCollection;
-	
-	public class GenymotionManager
+import com.ats.device.GenymotionSimulator;
+import com.ats.device.simulator.GenymotionDeviceTemplate;
+import com.ats.helpers.Settings;
+
+import flash.desktop.NativeProcess;
+import flash.desktop.NativeProcessStartupInfo;
+import flash.events.Event;
+import flash.events.NativeProcessExitEvent;
+import flash.events.ProgressEvent;
+import flash.filesystem.File;
+
+import mx.collections.ArrayCollection;
+import mx.utils.StringUtil;
+
+public class GenymotionManager
 	{
-		private static const dataRegexp:RegExp = /(^.{36})\s*(.{29})\s*((\.?\d+)+)\s*(\d+) x (\d+)\s*dpi (\d+).*/
-		
-		private var genyMotionLogin:String = "dev@agilitest.com"
-		
+		private static const recipeDataRegexp:RegExp = /(^.{36})\s*(.{29})\s*((\.?\d+)+)\s*(\d+) x (\d+)\s*dpi (\d+).*/
+		// private static const instanceDataRegexp:RegExp = /(^.{36})\s*(.{29})\s*((\.?\d+)+)\s*(\d+) x (\d+)\s*dpi (\d+).*/
+
 		private var pipFile:File;
 		private var gmsaasFile:File;
 		
 		[Bindable]
-		public var devices:ArrayCollection;
-		
-		[Bindable]
-		public var runningDevices:ArrayCollection;
+		public var recipes:ArrayCollection;
 		
 		public function GenymotionManager()
 		{
@@ -128,7 +127,7 @@ package
 			if(gmsaasFile != null && gmsaasFile.exists){
 				if(Settings.getInstance().androidSdkPath != null){
 					
-					devices = new ArrayCollection();
+					recipes = new ArrayCollection();
 					loadData = "";
 					
 					var args:Vector.<String> = new Vector.<String>();
@@ -161,56 +160,92 @@ package
 			var data:Array = loadData.split(File.lineEnding);
 			
 			for(var i:int=2; i<data.length; i++){
-				addDevice(devices, data[i]);
+				addRecipe(recipes, data[i]);
 			}
 			
 			loadInstancesList();
 		}
+
+		private function addRecipe(list:ArrayCollection, data:String):void{
+			if(data.length > 0){
+				const dataArray:Array = data.split(recipeDataRegexp);
+				if(dataArray.length > 6){
+					list.addItemAt(new GenymotionDeviceTemplate(dataArray, gmsaasFile), 0);
+				}
+			}
+		}
 		
 		public function loadInstancesList():void{
 			if(gmsaasFile != null && gmsaasFile.exists){
-				
-				runningDevices = new ArrayCollection();
 				loadData = "";
-				
-				var args:Vector.<String> = new Vector.<String>();
-				args.push("instances");
-				args.push("list");
-				
+
 				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 				procInfo.executable = gmsaasFile;
-				procInfo.arguments = args;
+				procInfo.arguments = new <String>["instances", "list"];
 				
 				var proc:NativeProcess = new NativeProcess();
-				proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, gmsaasInstancesList);
+				proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, gmsaasInstancesListOutput);
+				proc.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, gmsaasInstancesListError);
 				proc.addEventListener(NativeProcessExitEvent.EXIT, gmsaasInstancesListExit);
 				
 				proc.start(procInfo);
 			}
 		}
 		
-		private function gmsaasInstancesList(ev:ProgressEvent):void{
+		private function gmsaasInstancesListOutput(ev:ProgressEvent):void{
 			var proc:NativeProcess = ev.currentTarget as NativeProcess
 			loadData += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);
+		}
+
+		private var errorData:String
+		private function gmsaasInstancesListError(ev:ProgressEvent):void{
+			var proc:NativeProcess = ev.currentTarget as NativeProcess
+			errorData += proc.standardError.readUTFBytes(proc.standardError.bytesAvailable);
 		}
 		
 		private function gmsaasInstancesListExit(event:NativeProcessExitEvent):void{
 			var proc:NativeProcess = event.currentTarget as NativeProcess
-			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, gmsaasInstancesList);
+			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, gmsaasInstancesListOutput);
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, gmsaasInstancesListExit);
-			
+
+			if (errorData) {
+				trace(errorData)
+				return
+			}
+
 			var data:Array = loadData.split(File.lineEnding);
-			
-			for(var i:int=2; i<data.length; i++){
-				addDevice(runningDevices, data[i]);
+			var delimiters:Array = data[1].split("  ")
+
+			for(var i:int=2; i<data.length; i++) {
+				var info:String = data[i]
+				if (!info) return
+
+				var uuid:String = info.substr(0, (delimiters[0] as String).length)
+				var name:String = StringUtil.trim(info.substr((delimiters[0] as String).length + 2, (delimiters[1] as String).length))
+				var adbSerial:String = StringUtil.trim(info.substr((delimiters[0] as String).length + 2 + (delimiters[1] as String).length + 2, (delimiters[2] as String).length))
+				var state:String =  StringUtil.trim(info.substr((delimiters[0] as String).length + 2 + (delimiters[1] as String).length + 2 + (delimiters[2] as String).length + 2, (delimiters[3] as String).length))
+
+				var instance:GenymotionSimulator = new GenymotionSimulator(uuid, name, adbSerial, state)
+				fetchInstanceTemplateName(instance)
 			}
 		}
-		
-		private function addDevice(list:ArrayCollection, data:String):void{
-			if(data.length > 0){
-				const dataArray:Array = data.split(dataRegexp);
-				if(dataArray.length > 6){
-					list.addItemAt(new GenymotionDevice(dataArray, gmsaasFile), 0);
+
+		private function fetchInstanceTemplateName(instance:GenymotionSimulator):void {
+			instance.addEventListener(GenymotionSimulator.EVENT_TEMPLATE_NAME_FOUND, fetchInstanceTemplateNameHandler)
+			instance.gmsaasFile = gmsaasFile
+			instance.adbConnect()
+		}
+
+		private function fetchInstanceTemplateNameHandler(event:Event):void {
+			var instance:GenymotionSimulator = event.currentTarget as GenymotionSimulator
+			attachInstance(instance)
+		}
+
+		private function attachInstance(instance:GenymotionSimulator):void {
+			for each (var recipe:GenymotionDeviceTemplate in recipes) {
+				if (recipe.name == instance.templateName) {
+					recipe.addInstance(instance)
+					break
 				}
 			}
 		}

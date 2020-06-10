@@ -70,6 +70,11 @@
 			public function get settingsFile():File {
 				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/settings.txt");
 			}
+
+			public function get adbFile():File {
+				var execExtension:String = Capabilities.os.indexOf("Mac")>-1?"":".exe";
+				return File.applicationDirectory.resolvePath("assets/tools/android/adb" + execExtension);
+			}
 			
 			public function getTeamId():String {
 				return teamId;
@@ -427,8 +432,8 @@
 					 text="---" paddingLeft="5"/>
 			<s:List width="100%" top="28" bottom="0"
 					alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
-					contentBackgroundAlpha="0.0" dataProvider="{genymotionManager.devices}"
-					itemRenderer="com.ats.gui.renderer.GenymotionDeviceRenderer" useVirtualLayout="false"/>
+					contentBackgroundAlpha="0.0" dataProvider="{genymotionManager.recipes}"
+					itemRenderer="com.ats.gui.renderer.GenymotionTemplateDeviceRenderer" useVirtualLayout="false"/>
 		</s:Group>
 	</s:VGroup>
 </s:WindowedApplication>
