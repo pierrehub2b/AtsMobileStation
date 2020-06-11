@@ -162,8 +162,6 @@ package
 					const deviceName:String = String(info[4]).replace("device:", "")
 					const isEmulator:Boolean = deviceName.indexOf("generic") == 0 || deviceName.indexOf("vbox") == 0
 
-					// var test = /([^\s]+)\s.*device:([^\s]+).*/.exec(data[i])
-
 					runningIds.push(runningId);
 										
 					if(info.length >= 2 && runningId.length > 0){

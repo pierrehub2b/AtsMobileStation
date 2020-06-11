@@ -11,9 +11,11 @@ import flash.events.ProgressEvent;
 import flash.filesystem.File;
 
 import mx.core.FlexGlobals;
-import mx.utils.StringUtil;
 
 public class GenymotionSimulator extends Simulator {
+
+    public static const GENYMOTION_ERROR_INCOMPATIBLE_VERSION_NUMBERS = "incompatible version numbers"
+    public static const GENYMOTION_ERROR_NO_NETWORK_CONNECTION = "no network connection"
 
     public static const EVENT_STOPPED:String = "stopped";
     public static const EVENT_TEMPLATE_NAME_FOUND:String = "info found";
@@ -23,11 +25,18 @@ public class GenymotionSimulator extends Simulator {
     public static const STATE_ONLINE:String = "ONLINE"
     public static const STATE_BOOTING:String = "BOOTING"
     public static const STATE_STARTING:String = "STARTING"
+    public static const STATE_CREATING:String = "CREATING"
+    public static const STATE_DELETED:String = "DELETED"
+
+    public static const ADB_TUNNEL_STATE_CONNECTED:String = "CONNECTED"
+    public static const ADB_TUNNEL_STATE_PENDING:String = "PENDING"
+    public static const ADB_TUNNEL_STATE_DISCONNECTED:String = "DISCONNECTED"
 
     public var uuid:String
     public var name:String
     public var adbSerial:String
     public var state:String
+    public var adbTunnelState:String
 
     public var templateName:String
 
@@ -35,26 +44,24 @@ public class GenymotionSimulator extends Simulator {
 
     public var gmsaasFile:File
 
-    private var errorData:String
-    private var outputData:String
+    private var errorData:String = ""
+    private var outputData:String = ""
 
     public function set template(value:GenymotionDeviceTemplate):void {
         gmsaasFile = value.gmsaasFile
         _template = value;
     }
 
-    public function GenymotionSimulator(uuid:String, name:String, adbSerial:String, state:String) {
-        this.uuid = uuid
-        this.name = name
-        this.adbSerial = adbSerial
-        this.state = state
-
-        modelName = name
+    public function GenymotionSimulator(info:Object) {
+        this.uuid = info['uuid']
+        this.name = info['name']
+        this.adbSerial = info['adb_serial']
+        this.state = info['state']
+        this.adbTunnelState = info['adbtunnel_state']
     }
 
     // ADB CONNECT
     public function adbConnect():void {
-        errorData = ""
         outputData = ""
 
         var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
@@ -65,21 +72,15 @@ public class GenymotionSimulator extends Simulator {
 
         if (!_template) {
             newProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, adbConnectOutput);
-            newProc.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, adbConnectError);
             newProc.addEventListener(NativeProcessExitEvent.EXIT, adbConnectExit);
         }
 
         newProc.start(procInfo);
     }
 
-    private function adbConnectError(ev:ProgressEvent):void{
-        var proc:NativeProcess = ev.currentTarget as NativeProcess
-        trace(proc.standardError.readUTFBytes(proc.standardError.bytesAvailable));
-    }
-
     private function adbConnectOutput(ev:ProgressEvent):void{
         var proc:NativeProcess = ev.currentTarget as NativeProcess
-        trace(proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable));
+        outputData += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable)
     }
 
     private function adbConnectExit(event:NativeProcessExitEvent):void{
@@ -87,32 +88,24 @@ public class GenymotionSimulator extends Simulator {
         proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, adbConnectOutput);
         proc.removeEventListener(NativeProcessExitEvent.EXIT, adbConnectExit);
 
-        if (errorData) {
-            trace(errorData)
-            return
-        }
+        var json:Object = JSON.parse(outputData)
+        adbSerial = json['instance']['adb_serial']
+        adbTunnelState = json['instance']['adbtunnel_state']
 
-        fetchAdbSerial()
+        fetchTemplateName()
     }
 
     public function stop():void {
         outputData = ""
-        errorData = ""
 
         var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
         procInfo.executable = gmsaasFile
         procInfo.arguments = new <String>["instances", "stop", uuid]
 
         var process:NativeProcess = new NativeProcess()
-        process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onStopStandardErrorData);
         process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onStopStandardOutputData);
         process.addEventListener(NativeProcessExitEvent.EXIT, onStopExit);
         process.start(procInfo)
-    }
-
-    private function onStopStandardErrorData(event:ProgressEvent):void {
-        var process:NativeProcess = event.currentTarget as NativeProcess
-        errorData += process.standardError.readUTFBytes(process.standardError.bytesAvailable);
     }
 
     private function onStopStandardOutputData(event:ProgressEvent):void {
@@ -122,13 +115,12 @@ public class GenymotionSimulator extends Simulator {
 
     private function onStopExit(event:NativeProcessExitEvent):void {
         var process:NativeProcess = event.currentTarget as NativeProcess
-        process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onStopStandardErrorData)
         process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onStopStandardOutputData)
         process.removeEventListener(NativeProcessExitEvent.EXIT, onStopExit)
 
-        if (errorData) {
-            trace(errorData)
-            return
+        var json:Object = JSON.parse(outputData)
+        if (json['instance']['state'] != STATE_DELETED) {
+            // handle error
         }
 
         adbDisconnect()
@@ -203,47 +195,6 @@ public class GenymotionSimulator extends Simulator {
                 dispatchEvent(new Event(EVENT_TEMPLATE_NAME_FOUND))
             }
         }
-    }
-
-    private function fetchAdbSerial():void {
-        var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
-        procInfo.executable = gmsaasFile
-        procInfo.arguments = new <String>["instances", "list"]
-
-        var process:NativeProcess = new NativeProcess()
-        process.addEventListener(NativeProcessExitEvent.EXIT, fetchAdbSerialExit)
-        process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, fetchAdbSerialError);
-        process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, fetchAdbSerialOutput);
-        process.start(procInfo)
-    }
-
-    private function fetchAdbSerialExit(event:NativeProcessExitEvent):void {
-        var process:NativeProcess = event.currentTarget as NativeProcess
-        process.removeEventListener(NativeProcessExitEvent.EXIT, fetchAdbSerialExit)
-
-        var data:Array = outputData.split(File.lineEnding);
-        var delimiters:Array = data[1].split("  ")
-
-        for(var i:int=2; i<data.length; i++) {
-            var info:String = data[i]
-            if (!info) return
-
-            var uuid:String = info.substr(0, (delimiters[0] as String).length)
-
-            if (uuid == this.uuid) {
-                adbSerial = StringUtil.trim(info.substr((delimiters[0] as String).length + 2 + (delimiters[1] as String).length + 2, (delimiters[2] as String).length))
-                fetchTemplateName()
-                break
-            }
-        }
-    }
-
-    private function fetchAdbSerialOutput(event:ProgressEvent):void {
-        var process:NativeProcess = event.currentTarget as NativeProcess
-        outputData += process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable)
-    }
-
-    private function fetchAdbSerialError(event:ProgressEvent):void {
     }
 }
 }

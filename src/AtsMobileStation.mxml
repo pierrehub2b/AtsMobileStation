@@ -12,6 +12,7 @@
 			import com.ats.gui.panel.SettingsWindow;
 			import com.ats.gui.renderer.RunningDeviceRenderer;
 			import com.ats.helpers.Settings;
+			import com.ats.helpers.Version;
 			import com.ats.servers.HttpServer;
 			import com.ats.tools.PeerGroupConnection;
 			import com.greensock.TweenMax;
@@ -28,6 +29,8 @@
 			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
 			public static const isMacOs:Boolean = Capabilities.os.indexOf("Mac") > -1;
+
+			public static const supportedAndroidOsVersion:Version = new Version("5.1")
 			
 			private var icon:Loader = new Loader();
 			private var iconMenu:NativeMenu = new NativeMenu();
@@ -48,9 +51,7 @@
 			
 			[Bindable]
 			public var simulators:AvailableSimulatorsManager;
-			
-			private var httpServer:HttpServer = HttpServer.getInstance()
-			
+
 			public var teamId:String;
 			
 			private static const workFolder:File = File.userDirectory.resolvePath(".atsmobilestation");
@@ -313,7 +314,6 @@
 			
 			protected function reloadButtons_clickHandler(event:MouseEvent):void {
 				genymotionManager.loadRecipesList();
-				genymotionManager.loadInstancesList();
 			}
 		]]>
 	</fx:Script>

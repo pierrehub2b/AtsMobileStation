@@ -1,7 +1,8 @@
 package com.ats.device.simulator
 {
-import com.adobe.utils.StringUtil;
 import com.ats.device.GenymotionSimulator;
+import com.ats.helpers.Version;
+import com.ats.helpers.Version;
 
 import flash.desktop.NativeProcess;
 import flash.desktop.NativeProcessStartupInfo;
@@ -18,24 +19,25 @@ import mx.collections.ArrayCollection;
 		public static const AVAILABLE:String = "turnon"
 		public static const LOADING:String = "starting"
 
-		public var id:String;
+		public var uuid:String;
 		public var name:String;
-		public var version:String;
+		public var version:Version;
 		public var width:int;
 		public var height:int;
-		public var dpi:int;		
-		public var status:String = AVAILABLE;
+		public var dpi:int;
+
+		public var status:String = AVAILABLE
 
 		public var instances:ArrayCollection = new ArrayCollection()
 			
-		public function GenymotionDeviceTemplate(data:Array, gmsaas:File)
+		public function GenymotionDeviceTemplate(info:Object, gmsaas:File)
 		{
-			id = data[1];
-			name = StringUtil.trim(data[2]);
-			version = data[3];
-			width = parseInt(data[5]);
-			height = parseInt(data[6]);
-			dpi = parseInt(data[7]);
+			uuid = info['uuid']
+			name = info['name']
+			version = new Version(info['android_version'])
+			width = info['screen_width']
+			height = info['screen_width']
+			dpi = info['screen_density']
 			
 			this.gmsaasFile = gmsaas;
 		}
@@ -46,21 +48,13 @@ import mx.collections.ArrayCollection;
 		public function startInstance():void{
 			status = LOADING
 			loadData = ""
-			errorData = ""
-			
-			var args:Vector.<String> = new Vector.<String>();
-			args.push("instances");
-			args.push("start");
-			args.push(id);
-			args.push(name + " (" + instances.length + ")");
-			
+
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfo.executable = gmsaasFile;
-			procInfo.arguments = args;
+			procInfo.arguments = new <String>["instances", "start", uuid, name + "_" + instances.length];
 			
 			var proc:NativeProcess = new NativeProcess();
 			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, gmsaasInstanceStartOutput);
-			proc.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, gmsaasInstanceStartError);
 			proc.addEventListener(NativeProcessExitEvent.EXIT, gmsaasInstanceStartExit);
 			proc.start(procInfo);
 		}
@@ -69,32 +63,16 @@ import mx.collections.ArrayCollection;
 			var proc:NativeProcess = ev.currentTarget as NativeProcess
 			loadData += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);
 		}
-
-		private var errorData:String
-		private function gmsaasInstanceStartError(ev:ProgressEvent):void{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess
-			errorData += proc.standardError.readUTFBytes(proc.standardError.bytesAvailable);
-		}
 		
-		private function gmsaasInstanceStartExit(event:NativeProcessExitEvent):void{
+		private function gmsaasInstanceStartExit(event:NativeProcessExitEvent):void {
 			var proc:NativeProcess = event.currentTarget as NativeProcess
 			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, gmsaasInstanceStartOutput);
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, gmsaasInstanceStartExit);
 
 			status = AVAILABLE
 
-			if (errorData) {
-				trace(errorData)
-				return
-			}
-
-			loadData = StringUtil.trim(loadData);
-			if (!loadData) {
-				trace("WARNING: Bad Genymotion instance UUID")
-				return
-			}
-
-			var instance:GenymotionSimulator = new GenymotionSimulator(loadData, name + " (" + instances.length + ")", null, null)
+			var json:Object = JSON.parse(loadData)
+			var instance:GenymotionSimulator = new GenymotionSimulator(json['instance'])
 			addInstance(instance)
 		}
 
@@ -108,7 +86,7 @@ import mx.collections.ArrayCollection;
 			instances.addItem(instance)
 			instance.template = this
 
-			if (instance.state != GenymotionSimulator.STATE_ONLINE) {
+			if (instance.adbTunnelState == GenymotionSimulator.ADB_TUNNEL_STATE_DISCONNECTED) {
 				instance.adbConnect()
 			}
 		}

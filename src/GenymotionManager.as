@@ -3,6 +3,7 @@ package
 import com.ats.device.GenymotionSimulator;
 import com.ats.device.simulator.GenymotionDeviceTemplate;
 import com.ats.helpers.Settings;
+import com.ats.helpers.Version;
 
 import flash.desktop.NativeProcess;
 import flash.desktop.NativeProcessStartupInfo;
@@ -12,19 +13,20 @@ import flash.events.ProgressEvent;
 import flash.filesystem.File;
 
 import mx.collections.ArrayCollection;
+import mx.core.FlexGlobals;
 import mx.utils.StringUtil;
 
 public class GenymotionManager
 	{
-		private static const recipeDataRegexp:RegExp = /(^.{36})\s*(.{29})\s*((\.?\d+)+)\s*(\d+) x (\d+)\s*dpi (\d+).*/
-		// private static const instanceDataRegexp:RegExp = /(^.{36})\s*(.{29})\s*((\.?\d+)+)\s*(\d+) x (\d+)\s*dpi (\d+).*/
-
 		private var pipFile:File;
 		private var gmsaasFile:File;
 		
 		[Bindable]
 		public var recipes:ArrayCollection;
-		
+
+		private var errorData:String
+		private var outputData:String
+
 		public function GenymotionManager()
 		{
 			//TODO check Genymotion account defined
@@ -62,6 +64,10 @@ public class GenymotionManager
 			}
 
 			gmsaasFile = pythonFolder.resolvePath("Scripts").resolvePath(gmsaasFileName);
+			if (!gmsaasFile.exists) {
+				trace('WARNING : gmsaas file not found')
+				return
+			}
 
 			var args:Vector.<String> = new Vector.<String>();
 			args.push("-m");
@@ -76,15 +82,13 @@ public class GenymotionManager
 						
 			var proc:NativeProcess = new NativeProcess();
 			proc.addEventListener(NativeProcessExitEvent.EXIT, upgradePipExit);
-						
 			proc.start(procInfo);
 		}
 		
 		private function upgradePipExit(event:NativeProcessExitEvent):void{
-			
 			var proc:NativeProcess = event.currentTarget as NativeProcess
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, upgradePipExit);
-			
+
 			var args:Vector.<String> = new Vector.<String>();
 			args.push("install");
 			args.push("--upgrade");
@@ -99,133 +103,90 @@ public class GenymotionManager
 			newProc.start(procInfo);
 		}
 		
-		private var loadData:String
 		private function gmInstallExit(event:NativeProcessExitEvent):void{
 			var proc:NativeProcess = event.currentTarget as NativeProcess
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, gmInstallExit);
 			
 			defineAndroidSdk();
+			defineJSONOutputFormat()
+
 			loadRecipesList();
 		}
 		
 		public function defineAndroidSdk():void{
-			var args:Vector.<String> = new Vector.<String>();
-			args.push("config");
-			args.push("set");
-			args.push("android-sdk-path");
-			args.push(Settings.getInstance().androidSdkPath);
-			
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfo.executable = gmsaasFile;
-			procInfo.arguments = args;
+			procInfo.arguments = new <String>["config", "set", "android-sdk-path", Settings.getInstance().androidSdkPath];
 			
+			var proc:NativeProcess = new NativeProcess();
+			proc.start(procInfo);
+		}
+
+		public function defineJSONOutputFormat():void{
+			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			procInfo.executable = gmsaasFile;
+			procInfo.arguments = new <String>["config", "set", "output-format", "compactjson"];
+
 			var proc:NativeProcess = new NativeProcess();
 			proc.start(procInfo);
 		}
 		
 		public function loadRecipesList():void{
-			if(gmsaasFile != null && gmsaasFile.exists){
-				if(Settings.getInstance().androidSdkPath != null){
+			recipes = new ArrayCollection();
+			outputData = "";
+
+			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			procInfo.executable = gmsaasFile;
+			procInfo.arguments = new <String>["recipes", "list"];
 					
-					recipes = new ArrayCollection();
-					loadData = "";
-					
-					var args:Vector.<String> = new Vector.<String>();
-					args.push("recipes");
-					args.push("list");
-					
-					var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-					procInfo.executable = gmsaasFile;
-					procInfo.arguments = args;
-					
-					var proc:NativeProcess = new NativeProcess();
-					proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, gmsaasRecipesList);
-					proc.addEventListener(NativeProcessExitEvent.EXIT, gmsaasRecipesListExit);
-					
-					proc.start(procInfo);
-				}
-			}
+			var proc:NativeProcess = new NativeProcess();
+			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, processOutputHandler);
+			proc.addEventListener(NativeProcessExitEvent.EXIT, gmsaasRecipesListExit);
+			proc.start(procInfo);
 		}
-		
-		private function gmsaasRecipesList(ev:ProgressEvent):void{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess
-			loadData += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);
-		}
-		
+
 		private function gmsaasRecipesListExit(event:NativeProcessExitEvent):void{
 			var proc:NativeProcess = event.currentTarget as NativeProcess
-			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, gmsaasRecipesList);
+			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, processOutputHandler);
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, gmsaasRecipesListExit);
-			
-			var data:Array = loadData.split(File.lineEnding);
-			
-			for(var i:int=2; i<data.length; i++){
-				addRecipe(recipes, data[i]);
+
+			var json:Object = JSON.parse(outputData)
+			for each (var info:Object in json.recipes) {
+				var recipe:GenymotionDeviceTemplate = new GenymotionDeviceTemplate(info, gmsaasFile)
+				if (recipe.version.compare(new Version("5.1")) != com.ats.helpers.Version.INFERIOR) {
+					recipes.addItemAt(recipe, 0)
+				}
 			}
-			
+
 			loadInstancesList();
 		}
 
-		private function addRecipe(list:ArrayCollection, data:String):void{
-			if(data.length > 0){
-				const dataArray:Array = data.split(recipeDataRegexp);
-				if(dataArray.length > 6){
-					list.addItemAt(new GenymotionDeviceTemplate(dataArray, gmsaasFile), 0);
-				}
-			}
-		}
-		
-		public function loadInstancesList():void{
-			if(gmsaasFile != null && gmsaasFile.exists){
-				loadData = "";
+		public function loadInstancesList():void {
+			outputData = ""
 
-				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-				procInfo.executable = gmsaasFile;
-				procInfo.arguments = new <String>["instances", "list"];
+			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			procInfo.executable = gmsaasFile;
+			procInfo.arguments = new <String>["instances", "list"];
 				
-				var proc:NativeProcess = new NativeProcess();
-				proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, gmsaasInstancesListOutput);
-				proc.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, gmsaasInstancesListError);
-				proc.addEventListener(NativeProcessExitEvent.EXIT, gmsaasInstancesListExit);
-				
-				proc.start(procInfo);
-			}
-		}
-		
-		private function gmsaasInstancesListOutput(ev:ProgressEvent):void{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess
-			loadData += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);
+			var proc:NativeProcess = new NativeProcess();
+			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, processOutputHandler);
+			proc.addEventListener(NativeProcessExitEvent.EXIT, gmsaasInstancesListExit);
+			proc.start(procInfo);
 		}
 
-		private var errorData:String
-		private function gmsaasInstancesListError(ev:ProgressEvent):void{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess
-			errorData += proc.standardError.readUTFBytes(proc.standardError.bytesAvailable);
+		private function processOutputHandler(event:ProgressEvent):void {
+			var proc:NativeProcess = event.currentTarget as NativeProcess
+			outputData += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);
 		}
-		
+
 		private function gmsaasInstancesListExit(event:NativeProcessExitEvent):void{
 			var proc:NativeProcess = event.currentTarget as NativeProcess
-			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, gmsaasInstancesListOutput);
+			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, processOutputHandler);
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, gmsaasInstancesListExit);
 
-			if (errorData) {
-				trace(errorData)
-				return
-			}
-
-			var data:Array = loadData.split(File.lineEnding);
-			var delimiters:Array = data[1].split("  ")
-
-			for(var i:int=2; i<data.length; i++) {
-				var info:String = data[i]
-				if (!info) return
-
-				var uuid:String = info.substr(0, (delimiters[0] as String).length)
-				var name:String = StringUtil.trim(info.substr((delimiters[0] as String).length + 2, (delimiters[1] as String).length))
-				var adbSerial:String = StringUtil.trim(info.substr((delimiters[0] as String).length + 2 + (delimiters[1] as String).length + 2, (delimiters[2] as String).length))
-				var state:String =  StringUtil.trim(info.substr((delimiters[0] as String).length + 2 + (delimiters[1] as String).length + 2 + (delimiters[2] as String).length + 2, (delimiters[3] as String).length))
-
-				var instance:GenymotionSimulator = new GenymotionSimulator(uuid, name, adbSerial, state)
+			var json = JSON.parse(outputData)
+			for each (var info:Object in json.instances) {
+				var instance:GenymotionSimulator = new GenymotionSimulator(info)
 				fetchInstanceTemplateName(instance)
 			}
 		}
@@ -242,8 +203,10 @@ public class GenymotionManager
 		}
 
 		private function attachInstance(instance:GenymotionSimulator):void {
+			var searchName:String = instance.templateName.split("_")[0]
+
 			for each (var recipe:GenymotionDeviceTemplate in recipes) {
-				if (recipe.name == instance.templateName) {
+				if (recipe.name == searchName) {
 					recipe.addInstance(instance)
 					break
 				}

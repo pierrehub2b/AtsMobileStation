@@ -33,8 +33,6 @@ public class AndroidDevice extends RunningDevice
 		private var logStream:FileStream = new FileStream();
 		private var dateFormatter:DateTimeFormatter = new DateTimeFormatter("en-US");
 
-		private const supportedOsVersion:Version = new com.ats.helpers.Version("5.1")
-
 		protected var process:NativeProcess
 		protected var processInfo:NativeProcessStartupInfo
 
@@ -221,7 +219,7 @@ public class AndroidDevice extends RunningDevice
 			this.modelName = modelName.replace(myRegexPattern, "");
 
 			var deviceOsVersion:Version = new com.ats.helpers.Version(osVersion)
-			if (deviceOsVersion.compare(supportedOsVersion) == com.ats.helpers.Version.INFERIOR) {
+			if (deviceOsVersion.compare(new Version("5.1")) == com.ats.helpers.Version.INFERIOR) {
 				status = ERROR
 				error = "Android version not compatible"
 				errorMessage = "Only supports Android devices running version 5.1 or higher"
