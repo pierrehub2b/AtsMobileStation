@@ -3,7 +3,8 @@
 		xmlns:fx="http://ns.adobe.com/mxml/2009"
 		xmlns:s="library://ns.adobe.com/flex/spark"
 		xmlns:renderer="com.ats.gui.renderer.*"
-		creationComplete="creationCompleteHandler(event)">
+		creationComplete="creationCompleteHandler(event)"
+		left="1" right="1">
 
 	<fx:Script>
 		<![CDATA[
@@ -42,8 +43,8 @@
 		]]>
 	</fx:Script>
 
-	<s:VGroup>
-		<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" verticalCenter="0" enabled="{data.status == GenymotionDeviceTemplate.AVAILABLE}"
+	<s:VGroup width="100%" verticalAlign="middle">
+		<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" enabled="{data.status == GenymotionDeviceTemplate.AVAILABLE}"
 				  paddingRight="6" paddingLeft="5" filters="{dropShadowFilterMiddle}">
 			<s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true" gap="0">
 				<s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high" source="assets/icons/32/android.png"/>
@@ -60,10 +61,10 @@
 				<s:BitmapImage id="iconStatus" source="assets/icons/24/{data.status}.png" smooth="true" smoothingQuality="high"/>
 			</s:Group>
 		</s:HGroup>
-		<s:List width="100%" height="100%" alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
+		<s:List alternatingItemColors="[#efefef, #dedede]" borderVisible="false" width="100%"
+				includeInLayout="{(data as GenymotionDeviceTemplate).instances.length&gt;0}" visible="{(data as GenymotionDeviceTemplate).instances.length&gt;0}"
 				contentBackgroundAlpha="0.0" dataProvider="{(data as GenymotionDeviceTemplate).instances}"
-				itemRenderer="com.ats.gui.renderer.GenymotionRunningInstanceRenderer" useVirtualLayout="false"
-		/>
+				itemRenderer="com.ats.gui.renderer.GenymotionRunningInstanceRenderer" useVirtualLayout="false"/>
 	</s:VGroup>
 
 </renderer:SimulatorRenderer>

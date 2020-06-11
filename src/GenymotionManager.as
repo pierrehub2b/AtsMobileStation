@@ -1,6 +1,6 @@
 package
 {
-import com.ats.device.GenymotionSimulator;
+import com.ats.device.simulator.GenymotionSimulator;
 import com.ats.device.simulator.GenymotionDeviceTemplate;
 import com.ats.helpers.Settings;
 import com.ats.helpers.Version;
@@ -184,7 +184,7 @@ public class GenymotionManager
 			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, processOutputHandler);
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, gmsaasInstancesListExit);
 
-			var json = JSON.parse(outputData)
+			var json:Object = JSON.parse(outputData)
 			for each (var info:Object in json.instances) {
 				var instance:GenymotionSimulator = new GenymotionSimulator(info)
 				fetchInstanceTemplateName(instance)

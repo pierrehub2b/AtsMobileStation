@@ -435,7 +435,7 @@
 			
 			<s:Label fontStyle="italic" fontSize="11" top="36"
 					 text="---" paddingLeft="5"/>
-			<s:List width="100%" top="28" bottom="0"
+			<s:List left="0" right="0" top="28" bottom="0"
 					alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
 					contentBackgroundAlpha="0.0" dataProvider="{genymotionManager.recipes}"
 					itemRenderer="com.ats.gui.renderer.GenymotionTemplateDeviceRenderer" useVirtualLayout="false"/>

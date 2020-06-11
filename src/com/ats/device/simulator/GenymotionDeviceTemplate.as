@@ -1,6 +1,5 @@
 package com.ats.device.simulator
 {
-import com.ats.device.GenymotionSimulator;
 import com.ats.helpers.Version;
 import com.ats.helpers.Version;
 

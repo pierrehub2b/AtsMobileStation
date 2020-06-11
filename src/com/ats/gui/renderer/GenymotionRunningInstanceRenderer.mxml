@@ -3,11 +3,12 @@
         xmlns:fx="http://ns.adobe.com/mxml/2009"
         xmlns:renderer="com.ats.gui.renderer.*"
         xmlns:s="library://ns.adobe.com/flex/spark"
-        creationComplete="creationCompleteHandler(event)">
+        creationComplete="creationCompleteHandler(event)"
+		autoDrawBackground="false" right="1" left="1" height="20">
 
     <fx:Script>
         <![CDATA[
-        import com.ats.device.GenymotionSimulator;
+        import com.ats.device.simulator.GenymotionSimulator;
 
         import flash.filters.BitmapFilterQuality;
 
@@ -27,18 +28,19 @@
     </fx:Script>
 
     <s:HGroup id="mainGroup" width="100%" verticalAlign="middle" verticalCenter="0" enabled="{data.status!='loading'}"
-              paddingRight="6" paddingLeft="5" filters="{dropShadowFilterMiddle}">
+              paddingRight="10" paddingLeft="32" filters="{dropShadowFilterMiddle}">
         <s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true" gap="0">
-            <s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high" source="assets/icons/32/android.png"/>
+            <s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high" source="assets/icons/16/process_marked_headers.png"/>
             <s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
-                <s:Label text="{data.name}" fontWeight="bold" maxWidth="234" maxDisplayedLines="1"/>
+                <s:Label text="{data.name}" maxWidth="234" maxDisplayedLines="1"/>
             </s:VGroup>
         </s:HGroup>
 
         <s:Spacer width="100%"/>
 
-        <s:Group buttonMode="true" click="stopButton_clickHandler(event)" height="24" width="24">
-            <s:BitmapImage id="iconStatus" source="assets/icons/24/turnoff.png" smooth="true" smoothingQuality="high"/>
+        <s:Group buttonMode="true" click="stopButton_clickHandler(event)" height="16" width="16"
+				 toolTip="Stop running instance">
+            <s:BitmapImage id="iconStatus" source="assets/icons/16/stop.png" smooth="true" smoothingQuality="high"/>
         </s:Group>
     </s:HGroup>
 

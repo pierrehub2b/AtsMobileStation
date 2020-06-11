@@ -1,7 +1,5 @@
-package com.ats.device {
+package com.ats.device.simulator {
 
-import com.ats.device.simulator.GenymotionDeviceTemplate;
-import com.ats.device.simulator.Simulator;
 
 import flash.desktop.NativeProcess;
 import flash.desktop.NativeProcessStartupInfo;
@@ -14,8 +12,8 @@ import mx.core.FlexGlobals;
 
 public class GenymotionSimulator extends Simulator {
 
-    public static const GENYMOTION_ERROR_INCOMPATIBLE_VERSION_NUMBERS = "incompatible version numbers"
-    public static const GENYMOTION_ERROR_NO_NETWORK_CONNECTION = "no network connection"
+    public static const GENYMOTION_ERROR_INCOMPATIBLE_VERSION_NUMBERS:String = "incompatible version numbers"
+    public static const GENYMOTION_ERROR_NO_NETWORK_CONNECTION:String = "no network connection"
 
     public static const EVENT_STOPPED:String = "stopped";
     public static const EVENT_TEMPLATE_NAME_FOUND:String = "info found";
@@ -30,10 +28,13 @@ public class GenymotionSimulator extends Simulator {
 
     public static const ADB_TUNNEL_STATE_CONNECTED:String = "CONNECTED"
     public static const ADB_TUNNEL_STATE_PENDING:String = "PENDING"
-    public static const ADB_TUNNEL_STATE_DISCONNECTED:String = "DISCONNECTED"
+    public static const ADB_TUNNEL_STATE_DISCONNECTED:String = "DISCONNECTED";
 
+	[Bindable]
+	public var name:String
+	
     public var uuid:String
-    public var name:String
+
     public var adbSerial:String
     public var state:String
     public var adbTunnelState:String
