@@ -27,12 +27,12 @@
         ]]>
     </fx:Script>
 
-    <s:HGroup id="mainGroup" width="100%" verticalAlign="middle" verticalCenter="0" enabled="{data.status!='loading'}"
+    <s:HGroup id="mainGroup" width="100%" verticalAlign="middle" verticalCenter="0" enabled="{data.state==GenymotionSimulator.STATE_ONLINE}"
               paddingRight="10" paddingLeft="32" filters="{dropShadowFilterMiddle}">
         <s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true">
             <s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high" source="assets/icons/16/bullet_blue.png"/>
             <s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
-                <s:Label text="{data.name}" maxWidth="234" maxDisplayedLines="1"/>
+                <s:Label text="Instance {data.instanceNumber}" maxWidth="234" maxDisplayedLines="1"/>
             </s:VGroup>
         </s:HGroup>
 
