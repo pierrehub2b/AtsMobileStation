@@ -13,15 +13,17 @@
 			import com.ats.gui.renderer.RunningDeviceRenderer;
 			import com.ats.helpers.Settings;
 			import com.ats.helpers.Version;
+			import com.ats.servers.HttpServer;
 			import com.ats.tools.PeerGroupConnection;
 			import com.greensock.TweenMax;
+			
+			import flash.filters.BitmapFilterQuality;
 			
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
 			
 			import spark.components.Alert;
-			import flash.filters.BitmapFilterQuality;
 			import spark.filters.DropShadowFilter;
 			
 			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
@@ -168,9 +170,10 @@
 					cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
 				}
 				
-				workAdbFolder = File.applicationDirectory.resolvePath("assets/tools/android");
 				//workAdbFolder = workFolder.resolvePath("adb");
 				//File.applicationDirectory.resolvePath("assets/tools/android").copyTo(workAdbFolder, true)
+					
+				workAdbFolder = File.applicationDirectory.resolvePath("assets/tools/android");
 									
 				simulators = new AvailableSimulatorsManager();
 				devices = new RunningDevicesManager(isMacOs, workAdbFolder);
@@ -232,11 +235,6 @@
 				peerGroup.close();
 				simulators.terminate();
 				
-				genymotionManager.addEventListener(Event.COMPLETE, genymotionTerminateComplete);
-				genymotionManager.terminate();
-			}
-			
-			private function genymotionTerminateComplete(ev:Event):void{
 				devices.addEventListener(Event.COMPLETE, devicesTerminateComplete);
 				devices.terminate();
 			}

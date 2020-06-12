@@ -4,7 +4,7 @@
         xmlns:renderer="com.ats.gui.renderer.*"
         xmlns:s="library://ns.adobe.com/flex/spark"
         creationComplete="creationCompleteHandler(event)"
-		autoDrawBackground="false" height="20">
+		autoDrawBackground="false" right="1" left="1" height="20">
 
     <fx:Script>
         <![CDATA[
@@ -29,8 +29,8 @@
 
     <s:HGroup id="mainGroup" width="100%" verticalAlign="middle" verticalCenter="0" enabled="{data.state==GenymotionSimulator.STATE_ONLINE}"
               paddingRight="10" paddingLeft="32" filters="{dropShadowFilterMiddle}">
-        <s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true">
-            <s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high" source="assets/icons/16/bullet_blue.png"/>
+        <s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true" gap="0">
+            <s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high" source="assets/icons/16/process_marked_headers.png"/>
             <s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
                 <s:Label text="Instance {data.instanceNumber}" maxWidth="234" maxDisplayedLines="1"/>
             </s:VGroup>
