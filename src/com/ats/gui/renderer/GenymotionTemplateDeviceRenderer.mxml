@@ -44,8 +44,7 @@
 	</fx:Script>
 
 	<s:VGroup width="100%" verticalAlign="middle">
-		<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" enabled="{data.status == GenymotionDeviceTemplate.AVAILABLE}"
-				  paddingRight="6" paddingLeft="5" filters="{dropShadowFilterMiddle}">
+		<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" paddingRight="6" paddingLeft="5" filters="{dropShadowFilterMiddle}">
 			<s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true" gap="0">
 				<s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high" source="assets/icons/32/android.png"/>
 				<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
@@ -58,7 +57,7 @@
 			</s:HGroup>
 			<s:Spacer width="100%"/>
 			<s:Group buttonMode="true" click="startStopButton_clickHandler(event)" height="24" width="24">
-				<s:BitmapImage id="iconStatus" source="assets/icons/24/{data.status}.png" smooth="true" smoothingQuality="high"/>
+				<s:BitmapImage id="iconStatus" source="assets/icons/24/turnon.png" smooth="true" smoothingQuality="high"/>
 			</s:Group>
 		</s:HGroup>
 		<s:List alternatingItemColors="[#efefef, #dedede]" borderVisible="false" width="100%"
