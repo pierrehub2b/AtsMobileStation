@@ -24,7 +24,6 @@ public class GenymotionSimulator extends Simulator {
     public static const STATE_BOOTING:String = "BOOTING"
     public static const STATE_STARTING:String = "STARTING"
     public static const STATE_CREATING:String = "CREATING"
-    public static const STATE_STOPPING:String = "STOPPING"
     public static const STATE_DELETED:String = "DELETED"
 
     public static const ADB_TUNNEL_STATE_CONNECTED:String = "CONNECTED"
@@ -37,33 +36,24 @@ public class GenymotionSimulator extends Simulator {
     public var uuid:String
 
     public var adbSerial:String
-
-    [Bindable]
     public var state:String
-
     public var adbTunnelState:String
 
     public var templateName:String
 
-    [Bindable]
-    public var instanceNumber:int = 0
+    private var _template:GenymotionDeviceTemplate
 
-    public var template:GenymotionDeviceTemplate
     public var gmsaasFile:File
 
     private var errorData:String = ""
     private var outputData:String = ""
 
-
-    public function GenymotionSimulator(info:Object) {
-        this.uuid = info['uuid']
-        this.name = info['name']
-        this.adbSerial = info['adb_serial']
-        this.state = info['state']
-        this.adbTunnelState = info['adbtunnel_state']
+    public function set template(value:GenymotionDeviceTemplate):void {
+        gmsaasFile = value.gmsaasFile
+        _template = value;
     }
 
-    public function update(info:Object) {
+    public function GenymotionSimulator(info:Object) {
         this.uuid = info['uuid']
         this.name = info['name']
         this.adbSerial = info['adb_serial']
@@ -77,11 +67,11 @@ public class GenymotionSimulator extends Simulator {
 
         var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
         procInfo.executable = gmsaasFile;
-        procInfo.arguments = new <String>["--format", "compactjson", "instances", "adbconnect", uuid];
+        procInfo.arguments = new <String>["instances", "adbconnect", uuid];
 
         var newProc:NativeProcess = new NativeProcess();
 
-        if (!template) {
+        if (!_template) {
             newProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, adbConnectOutput);
             newProc.addEventListener(NativeProcessExitEvent.EXIT, adbConnectExit);
         }
@@ -108,11 +98,10 @@ public class GenymotionSimulator extends Simulator {
 
     public function stop():void {
         outputData = ""
-        state = STATE_STOPPING
 
         var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
         procInfo.executable = gmsaasFile
-        procInfo.arguments = new <String>["--format", "compactjson", "instances", "stop", uuid]
+        procInfo.arguments = new <String>["instances", "stop", uuid]
 
         var process:NativeProcess = new NativeProcess()
         process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onStopStandardOutputData);
@@ -142,7 +131,7 @@ public class GenymotionSimulator extends Simulator {
     public function adbDisconnect():void {
         var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
         procInfo.executable = gmsaasFile;
-        procInfo.arguments = new <String>["--format", "compactjson", "instances", "adbdisconnect", uuid];
+        procInfo.arguments = new <String>["instances", "adbdisconnect", uuid];
 
         var proc:NativeProcess = new NativeProcess();
         proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, adbDisconnectOutput);
