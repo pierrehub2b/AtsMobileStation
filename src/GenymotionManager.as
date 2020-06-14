@@ -1,14 +1,13 @@
 package
 {
-	import com.ats.device.simulator.GenymotionDeviceTemplate;
 	import com.ats.device.simulator.GenymotionSimulator;
+	import com.ats.device.simulator.GenymotionDeviceTemplate;
 	import com.ats.helpers.Settings;
 	import com.ats.helpers.Version;
 	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
-	import flash.events.EventDispatcher;
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
@@ -17,31 +16,24 @@ package
 	import mx.core.FlexGlobals;
 	import mx.utils.StringUtil;
 	
-	public class GenymotionManager extends EventDispatcher
+	public class GenymotionManager
 	{
-		private const pythonFolder:File = Settings.getInstance().pythonFolder;
-		private const androidSdkFolder:File = Settings.getInstance().androidSdkFolder;
-		
 		private var pipFile:File;
-		private var gmsaasFile:File;
+		public var gmsaasFile:File;
 		
 		[Bindable]
-		public var recipes:ArrayCollection;
+		public var recipes:ArrayCollection
+		private var existingInstances:ArrayCollection
 		
-		private var errorData:String
-		private var outputData:String
+		[Bindable]
+		public var loading:Boolean
 		
 		public function GenymotionManager()
 		{
 			//TODO check Genymotion account defined
 			
-			if (!androidSdkFolder) {
+			if (!Settings.getInstance().androidSdkPath) {
 				trace('WARNING : Android SDK path not set')
-				return
-			}
-			
-			if (!pythonFolder) {
-				trace('WARNING : Python folder path not set')
 				return
 			}
 			
@@ -52,6 +44,12 @@ package
 				pythonFileName += ".exe";
 				pipFileName += ".exe";
 				gmsaasFileName += ".exe"
+			}
+			
+			const pythonFolder:File = Settings.getInstance().pythonFolder;
+			if (!pythonFolder) {
+				trace('WARNING : Python folder path not set')
+				return
 			}
 			
 			var pythonFile:File = pythonFolder.resolvePath(pythonFileName);
@@ -72,46 +70,34 @@ package
 				return
 			}
 			
+			var args:Vector.<String> = new Vector.<String>();
+			args.push("-m");
+			args.push("pip");
+			args.push("install");
+			args.push("--upgrade");
+			args.push("pip");
+			
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfo.executable = pythonFile;
-			procInfo.arguments = new <String>["-m", "pip", "install", "--upgrade", "pip"];
+			procInfo.arguments = args;
 			
 			var proc:NativeProcess = new NativeProcess();
 			proc.addEventListener(NativeProcessExitEvent.EXIT, upgradePipExit);
 			proc.start(procInfo);
 		}
 		
-		public function terminate():void{
-			var gmTunnelFilePath:String = "Lib/site-packages/gmsaas/adbtunnel/gmadbtunneld/gmadbtunneld";
-			if (!Settings.isMacOs){
-				gmTunnelFilePath += ".exe"
-			}
-			
-			const gmTunnelFile:File = pythonFolder.resolvePath(gmTunnelFilePath);
-			if (gmTunnelFile.exists){
-				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-				procInfo.executable = gmTunnelFile;
-				procInfo.arguments = new <String>["stop"];
-				
-				var newProc:NativeProcess = new NativeProcess();
-				newProc.addEventListener(NativeProcessExitEvent.EXIT, gmTunnelStop);
-				newProc.start(procInfo);
-			}else{
-				dispatchEvent(new Event(Event.COMPLETE));
-			}
-		}
-		
-		private function gmTunnelStop(event:NativeProcessExitEvent):void{
-			dispatchEvent(new Event(Event.COMPLETE));
-		}
-		
 		private function upgradePipExit(event:NativeProcessExitEvent):void{
 			var proc:NativeProcess = event.currentTarget as NativeProcess
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, upgradePipExit);
 			
+			var args:Vector.<String> = new Vector.<String>();
+			args.push("install");
+			args.push("--upgrade");
+			args.push("gmsaas");
+			
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfo.executable = pipFile;
-			procInfo.arguments = new <String>["install", "--upgrade", "gmsaas"];
+			procInfo.arguments = args;
 			
 			var newProc:NativeProcess = new NativeProcess();
 			newProc.addEventListener(NativeProcessExitEvent.EXIT, gmInstallExit);
@@ -122,16 +108,23 @@ package
 			var proc:NativeProcess = event.currentTarget as NativeProcess
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, gmInstallExit);
 			
+			// defineJSONOutputFormat()
 			defineAndroidSdk();
-			defineJSONOutputFormat()
 			
-			loadRecipesList();
+			fetchContent()
+		}
+		
+		public function fetchContent():void {
+			loading = true
+			
+			fetchRecipesList()
+			fetchInstancesList()
 		}
 		
 		public function defineAndroidSdk():void{
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfo.executable = gmsaasFile;
-			procInfo.arguments = new <String>["config", "set", "android-sdk-path", androidSdkFolder.nativePath];
+			procInfo.arguments = new <String>["config", "set", "android-sdk-path", Settings.getInstance().androidSdkPath];
 			
 			var proc:NativeProcess = new NativeProcess();
 			proc.start(procInfo);
@@ -146,64 +139,97 @@ package
 			proc.start(procInfo);
 		}
 		
-		public function loadRecipesList():void{
+		private var fetchingRecipes:Boolean = false
+		public function fetchRecipesList():void{
+			fetchingRecipes = true
 			recipes = new ArrayCollection();
-			outputData = "";
 			
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfo.executable = gmsaasFile;
-			procInfo.arguments = new <String>["recipes", "list"];
+			procInfo.arguments = new <String>["--format", "compactjson", "recipes", "list"];
 			
 			var proc:NativeProcess = new NativeProcess();
-			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, processOutputHandler);
-			proc.addEventListener(NativeProcessExitEvent.EXIT, gmsaasRecipesListExit);
+			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, fetchRecipesOutputData);
+			proc.addEventListener(NativeProcessExitEvent.EXIT, fetchRecipesListExit);
 			proc.start(procInfo);
 		}
 		
-		private function gmsaasRecipesListExit(event:NativeProcessExitEvent):void{
+		private var recipesOutputData:String = ""
+		private function fetchRecipesOutputData(event:ProgressEvent):void {
 			var proc:NativeProcess = event.currentTarget as NativeProcess
-			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, processOutputHandler);
-			proc.removeEventListener(NativeProcessExitEvent.EXIT, gmsaasRecipesListExit);
+			recipesOutputData += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);
+		}
+		
+		private function fetchRecipesListExit(event:NativeProcessExitEvent):void{
+			var proc:NativeProcess = event.currentTarget as NativeProcess
+			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, fetchRecipesOutputData);
+			proc.removeEventListener(NativeProcessExitEvent.EXIT, fetchRecipesListExit);
 			
-			var json:Object = JSON.parse(outputData)
+			fetchingRecipes = false
+			
+			var json:Object = JSON.parse(recipesOutputData)
 			for each (var info:Object in json.recipes) {
-				var recipe:GenymotionDeviceTemplate = new GenymotionDeviceTemplate(info, gmsaasFile)
+				var recipe:GenymotionDeviceTemplate = new GenymotionDeviceTemplate(info, this)
 				if (recipe.version.compare(new Version("5.1")) != com.ats.helpers.Version.INFERIOR) {
 					recipes.addItemAt(recipe, 0)
 				}
 			}
 			
-			loadInstancesList();
+			if (existingInstances && !fetchingInstances) {
+				exec()
+			}
 		}
 		
-		public function loadInstancesList():void {
-			outputData = ""
+		private var fetchingInstances:Boolean = false
+		private function fetchInstancesList():void {
+			fetchingInstances = true
+			existingInstances = new ArrayCollection()
 			
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfo.executable = gmsaasFile;
-			procInfo.arguments = new <String>["instances", "list"];
+			procInfo.arguments = new <String>["--format", "compactjson", "instances", "list"];
 			
 			var proc:NativeProcess = new NativeProcess();
-			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, processOutputHandler);
+			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, fetchInstancesOutputHandler);
 			proc.addEventListener(NativeProcessExitEvent.EXIT, gmsaasInstancesListExit);
 			proc.start(procInfo);
 		}
 		
-		private function processOutputHandler(event:ProgressEvent):void {
+		private var fetchInstancesOutputData:String = ""
+		private function fetchInstancesOutputHandler(event:ProgressEvent):void {
 			var proc:NativeProcess = event.currentTarget as NativeProcess
-			outputData += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);
+			fetchInstancesOutputData += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);
 		}
 		
 		private function gmsaasInstancesListExit(event:NativeProcessExitEvent):void{
 			var proc:NativeProcess = event.currentTarget as NativeProcess
-			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, processOutputHandler);
+			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, fetchInstancesOutputHandler);
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, gmsaasInstancesListExit);
 			
-			var json:Object = JSON.parse(outputData)
+			fetchingInstances = false
+			
+			var json:Object = JSON.parse(fetchInstancesOutputData)
 			for each (var info:Object in json.instances) {
 				var instance:GenymotionSimulator = new GenymotionSimulator(info)
-				fetchInstanceTemplateName(instance)
+				existingInstances.addItem(instance)
 			}
+			
+			if (recipes && !fetchingRecipes) {
+				exec()
+			}
+		}
+		
+		private function exec():void {
+			var instance:GenymotionSimulator; 
+			for each (instance in existingInstances) {
+				attachInstance(instance)
+			}
+			
+			for each (instance in existingInstances) {
+				if (!instance.template) fetchInstanceTemplateName(instance)
+			}
+			
+			loading = false
 		}
 		
 		private function fetchInstanceTemplateName(instance:GenymotionSimulator):void {
@@ -218,14 +244,28 @@ package
 		}
 		
 		private function attachInstance(instance:GenymotionSimulator):void {
-			var searchName:String = instance.templateName.split("_")[0]
+			// to refactor
+			var searchName:String
+			if (instance.templateName) searchName = instance.templateName.split("_")[0]
+			if (instance.name) searchName = instance.name.split("_")[0]
 			
 			for each (var recipe:GenymotionDeviceTemplate in recipes) {
 				if (recipe.name == searchName) {
 					recipe.addInstance(instance)
+					instance.adbConnect()
+					// existingInstances.removeItem(instance)
 					break
 				}
 			}
+		}
+		
+		public function numberOfInstances():int {
+			var count:int = 0
+			for each (var recipe:GenymotionDeviceTemplate in recipes) {
+				count += recipe.instances.length
+			}
+			
+			return count
 		}
 	}
 }

@@ -1,51 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<renderer:SimulatorRenderer
-		xmlns:fx="http://ns.adobe.com/mxml/2009"
-		xmlns:s="library://ns.adobe.com/flex/spark"
-		xmlns:renderer="com.ats.gui.renderer.*"
-		creationComplete="creationCompleteHandler(event)"
-		left="1" right="1">
-
+<s:ItemRenderer
+	xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:s="library://ns.adobe.com/flex/spark"
+	xmlns:renderer="com.ats.gui.renderer.*"
+	creationComplete="creationCompleteHandler(event)"
+	width="356" rollOver="simulatorrenderer1_rollOverHandler(event)"
+	rollOut="simulatorrenderer1_rollOutHandler(event)"
+	click="itemrenderer1_clickHandler(event)">
+	
 	<fx:Script>
 		<![CDATA[
-		import com.ats.device.simulator.GenymotionDeviceTemplate;
-
-		import flash.filters.BitmapFilterQuality;
-
-		import mx.collections.ArrayCollection;
-		import mx.events.CollectionEvent;
-		import mx.events.FlexEvent;
-
-		import spark.filters.ColorMatrixFilter;
-		import spark.filters.DropShadowFilter;
-
-		public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
-		private static const greyFilter:ColorMatrixFilter = new ColorMatrixFilter([0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0, 0, 0, 1, 0])
-
-		protected function startStopButton_clickHandler(event:MouseEvent):void {
-			(data as GenymotionDeviceTemplate).startInstance()
-		}
-
-		protected function removedFromStageHandler(event:Event):void {
-			mainGroup.filters = []
-		}
-
-		protected function creationCompleteHandler(event:FlexEvent):void {
-			(data as GenymotionDeviceTemplate).instances.addEventListener(CollectionEvent.COLLECTION_CHANGE, collectionChangeHandler);
-
-			height = 40 + (data as GenymotionDeviceTemplate).instances.length * 40
-		}
-
-		private function collectionChangeHandler(event:CollectionEvent):void {
-			var collection:ArrayCollection = event.currentTarget as ArrayCollection
-			height = 40 + collection.length * 40
-		}
+			import com.ats.device.simulator.GenymotionDeviceTemplate;
+			import com.ats.device.simulator.Simulator;
+			import com.greensock.TweenMax;
+			
+			import flash.filters.BitmapFilterQuality;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CollectionEvent;
+			import mx.events.FlexEvent;
+			
+			import spark.filters.ColorMatrixFilter;
+			import spark.filters.DropShadowFilter;
+			
+			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
+			private static const greyFilter:ColorMatrixFilter = new ColorMatrixFilter([0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0, 0, 0, 1, 0])
+			
+			override public function set data(value:Object):void
+			{
+				if(super.data == null || super.data != value){
+					super.data = value;
+					dispatchEvent(new Event("updateDataEvent"))
+				}
+			}
+			
+			[Bindable(event="updateDataEvent")]
+			public function get sim():Simulator{
+				return data as Simulator
+			}
+				
+				
+			protected function startStopButton_clickHandler(event:MouseEvent):void {
+				(data as GenymotionDeviceTemplate).startInstance()
+			}
+			
+			protected function removedFromStageHandler(event:Event):void {
+				mainGroup.filters = []
+			}
+			
+			protected function creationCompleteHandler(event:FlexEvent):void {
+				(data as GenymotionDeviceTemplate).instances.addEventListener(CollectionEvent.COLLECTION_CHANGE, collectionChangeHandler);
+				
+				height = 40 + (data as GenymotionDeviceTemplate).instances.length * 20
+			}
+			
+			private function collectionChangeHandler(event:CollectionEvent):void {
+				var collection:ArrayCollection = event.currentTarget as ArrayCollection
+				height = 40 + collection.length * 20
+			}
+			
+			protected function simulatorrenderer1_rollOverHandler(event:MouseEvent):void
+			{
+				plusButton.visible = true;
+				if(selected){
+					TweenMax.fromTo(plusButton, 0.3, {alpha:0.5}, {alpha:1.0})
+				}
+			}
+			
+			protected function simulatorrenderer1_rollOutHandler(event:MouseEvent):void
+			{
+				plusButton.visible = false;
+				plusButton.alpha = 0.5;
+			}
+			
+			protected function itemrenderer1_clickHandler(event:MouseEvent):void
+			{
+				TweenMax.fromTo(plusButton, 0.3, {alpha:0.5}, {alpha:1.0})
+			}
+			
 		]]>
 	</fx:Script>
-
-	<s:VGroup width="100%" verticalAlign="middle">
-		<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" enabled="{data.status == GenymotionDeviceTemplate.AVAILABLE}"
-				  paddingRight="6" paddingLeft="5" filters="{dropShadowFilterMiddle}">
+	
+	<s:VGroup width="100%" verticalAlign="middle" paddingBottom="4">
+		<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" paddingRight="6" paddingLeft="5" filters="{dropShadowFilterMiddle}">
 			<s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true" gap="0">
 				<s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high" source="assets/icons/32/android.png"/>
 				<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
@@ -57,8 +94,9 @@
 				</s:VGroup>
 			</s:HGroup>
 			<s:Spacer width="100%"/>
-			<s:Group buttonMode="true" click="startStopButton_clickHandler(event)" height="24" width="24">
-				<s:BitmapImage id="iconStatus" source="assets/icons/24/{data.status}.png" smooth="true" smoothingQuality="high"/>
+			<s:Group id="plusButton" buttonMode="true" click="startStopButton_clickHandler(event)" height="24" width="24"
+					 toolTip="Start new instance" visible="false" alpha="0.5">
+				<s:BitmapImage id="iconStatus" source="assets/icons/24/plus0.png" smooth="true" smoothingQuality="high"/>
 			</s:Group>
 		</s:HGroup>
 		<s:List alternatingItemColors="[#efefef, #dedede]" borderVisible="false" width="100%"
@@ -66,5 +104,5 @@
 				contentBackgroundAlpha="0.0" dataProvider="{(data as GenymotionDeviceTemplate).instances}"
 				itemRenderer="com.ats.gui.renderer.GenymotionRunningInstanceRenderer" useVirtualLayout="false"/>
 	</s:VGroup>
-
-</renderer:SimulatorRenderer>
+	
+</s:ItemRenderer>

@@ -13,21 +13,23 @@
 			import com.ats.gui.renderer.RunningDeviceRenderer;
 			import com.ats.helpers.Settings;
 			import com.ats.helpers.Version;
+			import com.ats.servers.HttpServer;
 			import com.ats.tools.PeerGroupConnection;
 			import com.greensock.TweenMax;
+			
+			import flash.filters.BitmapFilterQuality;
 			
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
 			
 			import spark.components.Alert;
-			import flash.filters.BitmapFilterQuality;
 			import spark.filters.DropShadowFilter;
 			
 			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 45, 0x000000, 0.1, 10.0, 10.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			
 			public static const isMacOs:Boolean = Capabilities.os.indexOf("Mac") > -1;
-
+			
 			public static const supportedAndroidOsVersion:Version = new Version("5.1")
 			
 			private var icon:Loader = new Loader();
@@ -49,7 +51,7 @@
 			
 			[Bindable]
 			public var simulators:AvailableSimulatorsManager;
-
+			
 			public var teamId:String;
 			
 			private static const workFolder:File = File.userDirectory.resolvePath(".atsmobilestation");
@@ -70,9 +72,9 @@
 			public function get settingsFile():File {
 				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/settings.txt");
 			}
-
+			
 			public function get adbFile():File {
-				var execExtension:String = Capabilities.os.indexOf("Mac")>-1?"":".exe";
+				var execExtension:String = Capabilities.os.indexOf("Mac") > -1 ? "" : ".exe";
 				return File.applicationDirectory.resolvePath("assets/tools/android/adb" + execExtension);
 			}
 			
@@ -168,10 +170,11 @@
 					cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
 				}
 				
-				workAdbFolder = File.applicationDirectory.resolvePath("assets/tools/android");
 				//workAdbFolder = workFolder.resolvePath("adb");
 				//File.applicationDirectory.resolvePath("assets/tools/android").copyTo(workAdbFolder, true)
-									
+				
+				workAdbFolder = File.applicationDirectory.resolvePath("assets/tools/android");
+				
 				simulators = new AvailableSimulatorsManager();
 				devices = new RunningDevicesManager(isMacOs, workAdbFolder);
 				
@@ -228,20 +231,15 @@
 				event.stopPropagation();
 				
 				infoStatus.text = "Please wait all processes to finish ..."
-					
+				
 				peerGroup.close();
 				simulators.terminate();
 				
-				genymotionManager.addEventListener(Event.COMPLETE, genymotionTerminateComplete);
-				genymotionManager.terminate();
-			}
-			
-			private function genymotionTerminateComplete(ev:Event):void{
 				devices.addEventListener(Event.COMPLETE, devicesTerminateComplete);
 				devices.terminate();
 			}
 			
-			private function devicesTerminateComplete(ev:Event):void{
+			private function devicesTerminateComplete(ev:Event):void {
 				TweenMax.delayedCall(2.00, closeApp);
 			}
 			
@@ -315,7 +313,7 @@
 			}
 			
 			protected function reloadButtons_clickHandler(event:MouseEvent):void {
-				genymotionManager.loadRecipesList();
+				genymotionManager.fetchContent();
 			}
 		]]>
 	</fx:Script>
@@ -437,10 +435,11 @@
 			
 			<s:Label fontStyle="italic" fontSize="11" top="36"
 					 text="---" paddingLeft="5"/>
-			<s:List left="0" right="0" top="28" bottom="0"
+			<s:List left="0" right="0" top="28" bottom="0" visible="{genymotionManager.loading == false}"
 					alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
 					contentBackgroundAlpha="0.0" dataProvider="{genymotionManager.recipes}"
-					itemRenderer="com.ats.gui.renderer.GenymotionTemplateDeviceRenderer" useVirtualLayout="false"/>
+					itemRenderer="com.ats.gui.renderer.GenymotionTemplateDeviceRenderer" useVirtualLayout="false"
+					horizontalScrollPolicy="off"/>
 		</s:Group>
 	</s:VGroup>
 </s:WindowedApplication>
