@@ -27,6 +27,8 @@ package
 		
 		[Bindable]
 		public var loading:Boolean
+
+		public var enabled:Boolean = false
 		
 		public function GenymotionManager()
 		{
@@ -69,7 +71,9 @@ package
 				trace('WARNING : gmsaas file not found')
 				return
 			}
-			
+
+			enabled = true
+
 			var args:Vector.<String> = new Vector.<String>();
 			args.push("-m");
 			args.push("pip");

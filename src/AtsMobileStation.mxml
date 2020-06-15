@@ -397,7 +397,7 @@
 					itemRenderer="com.ats.gui.renderer.SimulatorDeviceRenderer" useVirtualLayout="false"/>
 		</s:Group>
 		
-		<s:Group id="genymotionGroup" width="100%" height="26" clipAndEnableScrolling="true">
+		<s:Group id="genymotionGroup" width="100%" height="{genymotionManager.enabled ? 26 : 0}" clipAndEnableScrolling="true" visible="{genymotionManager.enabled}">
 			
 			<s:Group height="26" width="100%">
 				
