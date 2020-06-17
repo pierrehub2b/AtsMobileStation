@@ -1,4 +1,4 @@
-package 
+package com.ats.managers
 {
 	import com.ats.device.Device;
 	import com.ats.device.running.AndroidDevice;

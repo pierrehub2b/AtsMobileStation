@@ -1,7 +1,9 @@
 package com.ats.device.simulator {
-	
-	
-	import flash.desktop.NativeProcess;
+
+
+import com.ats.managers.gmsaas.GmsaasManager;
+
+import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
 	import flash.events.NativeProcessExitEvent;
@@ -48,13 +50,12 @@ package com.ats.device.simulator {
 		[Bindable]
 		public var instanceNumber:int = 0
 		
-		public var template:GenymotionDeviceTemplate
+		public var template:GenymotionRecipe
 		public var gmsaasFile:File
 		
 		private var errorData:String = ""
 		private var outputData:String = ""
-		
-		
+
 		public function GenymotionSimulator(info:Object) {
 			this.uuid = info['uuid']
 			this.name = info['name']
@@ -62,7 +63,7 @@ package com.ats.device.simulator {
 			this.state = info['state']
 			this.adbTunnelState = info['adbtunnel_state']
 		}
-		
+
 		public function update(info:Object):void {
 			this.uuid = info['uuid']
 			this.name = info['name']
@@ -73,95 +74,48 @@ package com.ats.device.simulator {
 		
 		// ADB CONNECT
 		public function adbConnect():void {
-			outputData = ""
-			
-			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			procInfo.executable = gmsaasFile;
-			procInfo.arguments = new <String>["--format", "compactjson", "instances", "adbconnect", uuid];
-			
-			var newProc:NativeProcess = new NativeProcess();
-			
-			if (!template) {
-				newProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, adbConnectOutput);
-				newProc.addEventListener(NativeProcessExitEvent.EXIT, adbConnectExit);
-			}
-			
-			newProc.start(procInfo);
-		}
-		
-		private function adbConnectOutput(ev:ProgressEvent):void{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess
-			outputData += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable)
-		}
-		
-		private function adbConnectExit(event:NativeProcessExitEvent):void{
-			var proc:NativeProcess = event.currentTarget as NativeProcess
-			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, adbConnectOutput);
-			proc.removeEventListener(NativeProcessExitEvent.EXIT, adbConnectExit);
-			
-			var json:Object = JSON.parse(outputData)
-			adbSerial = json['instance']['adb_serial']
-			adbTunnelState = json['instance']['adbtunnel_state']
-			
-			fetchTemplateName()
+			GmsaasManager.getInstance().adbConnect(uuid, function(result:GenymotionSimulator, error:String):void {
+				if (error) {
+					trace(error)
+					return
+				}
+
+				if (!template) {
+					adbSerial = result.adbSerial
+					adbTunnelState = result.adbTunnelState
+
+					fetchTemplateName()
+				}
+			})
 		}
 		
 		public function stop():void {
-			outputData = ""
 			state = STATE_STOPPING
-			
-			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
-			procInfo.executable = gmsaasFile
-			procInfo.arguments = new <String>["--format", "compactjson", "instances", "stop", uuid]
-			
-			var process:NativeProcess = new NativeProcess()
-			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onStopStandardOutputData);
-			process.addEventListener(NativeProcessExitEvent.EXIT, onStopExit);
-			process.start(procInfo)
-		}
-		
-		private function onStopStandardOutputData(event:ProgressEvent):void {
-			var process:NativeProcess = event.currentTarget as NativeProcess
-			outputData += process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
-		}
-		
-		private function onStopExit(event:NativeProcessExitEvent):void {
-			var process:NativeProcess = event.currentTarget as NativeProcess
-			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onStopStandardOutputData)
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onStopExit)
-			
-			var json:Object = JSON.parse(outputData)
-			if (json['instance']['state'] != STATE_DELETED) {
-				// handle error
-			}
-			
-			adbDisconnect()
-			dispatchEvent(new Event(EVENT_STOPPED))
+
+			GmsaasManager.getInstance().stopInstance(uuid, function(result:GenymotionSimulator, error:String):void {
+				if (error) {
+					trace(error)
+					return
+				}
+
+				if (result.state != STATE_DELETED) {
+					// handle error
+				}
+
+				adbDisconnect()
+				dispatchEvent(new Event(EVENT_STOPPED))
+			})
 		}
 		
 		public function adbDisconnect():void {
-			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
-			procInfo.executable = gmsaasFile;
-			procInfo.arguments = new <String>["--format", "compactjson", "instances", "adbdisconnect", uuid];
-			
-			var proc:NativeProcess = new NativeProcess();
-			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, adbDisconnectOutput);
-			proc.addEventListener(NativeProcessExitEvent.EXIT, adbDisconnectExit);
-			
-			proc.start(procInfo);
-		}
-		
-		private function adbDisconnectOutput(ev:ProgressEvent):void{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess
-			trace(proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable));
-		}
-		
-		private function adbDisconnectExit(event:NativeProcessExitEvent):void{
-			var proc:NativeProcess = event.currentTarget as NativeProcess
-			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, adbDisconnectOutput);
-			proc.removeEventListener(NativeProcessExitEvent.EXIT, adbDisconnectExit);
-			
-			dispatchEvent(new Event(EVENT_ADB_DISCONNECTED))
+			GmsaasManager.getInstance().adbDisconnect(uuid, function(result:GenymotionSimulator, error:String):void {
+				if (error) {
+					trace(error)
+					return
+				}
+
+				dispatchEvent(new Event(EVENT_ADB_DISCONNECTED))
+			})
 		}
 		
 		public function fetchTemplateName():void {
@@ -203,7 +157,7 @@ package com.ats.device.simulator {
 			var propArray:Array = outputData.split(File.lineEnding)
 			for each (var line:String in propArray) {
 				if (line.indexOf("[ro.product.model]") == 0) {
-					templateName = /.*:.*\[(.*)\]/.exec(line)[1];
+					templateName = /.*:.*\[(.*)]/.exec(line)[1];
 					dispatchEvent(new Event(EVENT_TEMPLATE_NAME_FOUND))
 				}
 			}

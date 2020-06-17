@@ -1,4 +1,4 @@
-package 
+package com.ats.managers
 {
 import com.ats.device.simulator.AndroidSimulator;
 

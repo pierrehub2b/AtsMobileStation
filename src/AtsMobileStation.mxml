@@ -13,6 +13,9 @@
 			import com.ats.gui.renderer.RunningDeviceRenderer;
 			import com.ats.helpers.Settings;
 			import com.ats.helpers.Version;
+			import com.ats.managers.AvailableSimulatorsManager;
+			import com.ats.managers.GenymotionManager;
+			import com.ats.managers.RunningDevicesManager;
 			import com.ats.servers.HttpServer;
 			import com.ats.tools.PeerGroupConnection;
 			import com.greensock.TweenMax;

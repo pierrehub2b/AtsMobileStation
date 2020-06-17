@@ -1,7 +1,9 @@
 package com.ats.tools
 {
 	import com.ats.device.running.RunningDevice;
-	import com.greensock.TweenMax;
+import com.ats.managers.AvailableSimulatorsManager;
+import com.ats.managers.RunningDevicesManager;
+import com.greensock.TweenMax;
 	
 	import flash.desktop.NativeApplication;
 	import flash.desktop.NativeProcess;

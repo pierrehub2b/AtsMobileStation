@@ -1,22 +1,22 @@
-package
+package com.ats.managers
 {
-	import com.ats.device.simulator.GenymotionSimulator;
-	import com.ats.device.simulator.GenymotionDeviceTemplate;
-	import com.ats.helpers.Settings;
-	import com.ats.helpers.Version;
-	
-	import flash.desktop.NativeProcess;
-	import flash.desktop.NativeProcessStartupInfo;
-	import flash.events.Event;
-	import flash.events.NativeProcessExitEvent;
-	import flash.events.ProgressEvent;
-	import flash.filesystem.File;
-	
-	import mx.collections.ArrayCollection;
-	import mx.core.FlexGlobals;
-	import mx.utils.StringUtil;
-	
-	public class GenymotionManager
+import com.ats.device.simulator.GenymotionRecipe;
+import com.ats.device.simulator.GenymotionSimulator;
+import com.ats.managers.gmsaas.GmsaasManager;
+import com.ats.managers.gmsaas.GmsaasManager;
+import com.ats.helpers.Settings;
+import com.ats.helpers.Version;
+
+import flash.desktop.NativeProcess;
+import flash.desktop.NativeProcessStartupInfo;
+import flash.events.Event;
+import flash.events.NativeProcessExitEvent;
+import flash.events.ProgressEvent;
+import flash.filesystem.File;
+
+import mx.collections.ArrayCollection;
+
+public class GenymotionManager
 	{
 		private var pipFile:File;
 		public var gmsaasFile:File;
@@ -33,7 +33,7 @@ package
 		public function GenymotionManager()
 		{
 			//TODO check Genymotion account defined
-			
+
 			if (!Settings.getInstance().androidSdkPath) {
 				trace('WARNING : Android SDK path not set')
 				return
@@ -144,85 +144,43 @@ package
 		}
 		
 		private var fetchingRecipes:Boolean = false
-		public function fetchRecipesList():void{
+		public function fetchRecipesList():void {
 			fetchingRecipes = true
-			recipes = new ArrayCollection();
-			
-			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			procInfo.executable = gmsaasFile;
-			procInfo.arguments = new <String>["--format", "compactjson", "recipes", "list"];
-			
-			var proc:NativeProcess = new NativeProcess();
-			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, fetchRecipesOutputData);
-			proc.addEventListener(NativeProcessExitEvent.EXIT, fetchRecipesListExit);
-			proc.start(procInfo);
-		}
-		
-		private var recipesOutputData:String = ""
-		private function fetchRecipesOutputData(event:ProgressEvent):void {
-			var proc:NativeProcess = event.currentTarget as NativeProcess
-			recipesOutputData += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);
-		}
-		
-		private function fetchRecipesListExit(event:NativeProcessExitEvent):void{
-			var proc:NativeProcess = event.currentTarget as NativeProcess
-			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, fetchRecipesOutputData);
-			proc.removeEventListener(NativeProcessExitEvent.EXIT, fetchRecipesListExit);
-			
-			fetchingRecipes = false
-			
-			var json:Object = JSON.parse(recipesOutputData)
-			for each (var info:Object in json.recipes) {
-				var recipe:GenymotionDeviceTemplate = new GenymotionDeviceTemplate(info, this)
-				if (recipe.version.compare(new Version("5.1")) != com.ats.helpers.Version.INFERIOR) {
-					recipes.addItemAt(recipe, 0)
+			GmsaasManager.getInstance().fetchRecipes(function(results:Array, error:String):void {
+				fetchingRecipes = false
+
+				if (error) {
+					trace(error);
+					return
 				}
-			}
-			
-			if (existingInstances && !fetchingInstances) {
-				exec()
-			}
+
+				recipes = new ArrayCollection(results)
+
+				if (existingInstances && !fetchingInstances) {
+					exec()
+				}
+			})
 		}
 		
 		private var fetchingInstances:Boolean = false
 		private function fetchInstancesList():void {
 			fetchingInstances = true
-			existingInstances = new ArrayCollection()
-			
-			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			procInfo.executable = gmsaasFile;
-			procInfo.arguments = new <String>["--format", "compactjson", "instances", "list"];
-			
-			var proc:NativeProcess = new NativeProcess();
-			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, fetchInstancesOutputHandler);
-			proc.addEventListener(NativeProcessExitEvent.EXIT, gmsaasInstancesListExit);
-			proc.start(procInfo);
+			GmsaasManager.getInstance().fetchInstances(function(results:Array, error:String):void {
+				fetchingInstances = false
+
+				if (error) {
+					trace(error)
+					return
+				}
+
+				existingInstances = new ArrayCollection(results)
+
+				if (recipes && !fetchingRecipes) {
+					exec()
+				}
+			})
 		}
-		
-		private var fetchInstancesOutputData:String = ""
-		private function fetchInstancesOutputHandler(event:ProgressEvent):void {
-			var proc:NativeProcess = event.currentTarget as NativeProcess
-			fetchInstancesOutputData += proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable);
-		}
-		
-		private function gmsaasInstancesListExit(event:NativeProcessExitEvent):void{
-			var proc:NativeProcess = event.currentTarget as NativeProcess
-			proc.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, fetchInstancesOutputHandler);
-			proc.removeEventListener(NativeProcessExitEvent.EXIT, gmsaasInstancesListExit);
-			
-			fetchingInstances = false
-			
-			var json:Object = JSON.parse(fetchInstancesOutputData)
-			for each (var info:Object in json.instances) {
-				var instance:GenymotionSimulator = new GenymotionSimulator(info)
-				existingInstances.addItem(instance)
-			}
-			
-			if (recipes && !fetchingRecipes) {
-				exec()
-			}
-		}
-		
+
 		private function exec():void {
 			var instance:GenymotionSimulator; 
 			for each (instance in existingInstances) {
@@ -253,7 +211,7 @@ package
 			if (instance.templateName) searchName = instance.templateName.split("_")[0]
 			if (instance.name) searchName = instance.name.split("_")[0]
 			
-			for each (var recipe:GenymotionDeviceTemplate in recipes) {
+			for each (var recipe:GenymotionRecipe in recipes) {
 				if (recipe.name == searchName) {
 					recipe.addInstance(instance)
 					instance.adbConnect()
@@ -265,7 +223,7 @@ package
 		
 		public function numberOfInstances():int {
 			var count:int = 0
-			for each (var recipe:GenymotionDeviceTemplate in recipes) {
+			for each (var recipe:GenymotionRecipe in recipes) {
 				count += recipe.instances.length
 			}
 			

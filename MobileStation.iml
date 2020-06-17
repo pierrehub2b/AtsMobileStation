@@ -55,7 +55,7 @@
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/testLineCommand.rtf" path-in-package="assets/drivers/ios/testLineCommand.rtf" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/atsdroid.apk" path-in-package="assets/drivers/atsdroid.apk" />
           </files-to-package>
-          <AirSigningOptions keystore-path="$MODULE_DIR$/cert_ats.p12" use-temp-certificate="false" />
+          <AirSigningOptions keystore-path="$MODULE_DIR$/cert.p12" use-temp-certificate="false" />
         </packaging-air-desktop>
         <packaging-android />
         <packaging-ios />
