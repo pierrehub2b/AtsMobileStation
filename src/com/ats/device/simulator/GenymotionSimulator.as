@@ -84,7 +84,7 @@ import flash.desktop.NativeProcess;
 		public function stop():void {
 			state = STATE_STOPPING
 
-			var gmsaasManager = GmsaasManager.getInstance()
+			var gmsaasManager:GmsaasManager = GmsaasManager.getInstance()
 
 			gmsaasManager.adbDisconnect(uuid, function(result:GenymotionSimulator, error:String):void {
 				if (error) {
