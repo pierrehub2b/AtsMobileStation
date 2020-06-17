@@ -63,14 +63,6 @@ import flash.desktop.NativeProcess;
 			this.state = info['state']
 			this.adbTunnelState = info['adbtunnel_state']
 		}
-
-		public function update(info:Object):void {
-			this.uuid = info['uuid']
-			this.name = info['name']
-			this.adbSerial = info['adb_serial']
-			this.state = info['state']
-			this.adbTunnelState = info['adbtunnel_state']
-		}
 		
 		// ADB CONNECT
 		public function adbConnect():void {
@@ -92,32 +84,29 @@ import flash.desktop.NativeProcess;
 		public function stop():void {
 			state = STATE_STOPPING
 
-			GmsaasManager.getInstance().stopInstance(uuid, function(result:GenymotionSimulator, error:String):void {
+			var gmsaasManager = GmsaasManager.getInstance()
+
+			gmsaasManager.adbDisconnect(uuid, function(result:GenymotionSimulator, error:String):void {
 				if (error) {
 					trace(error)
 					return
 				}
 
-				if (result.state != STATE_DELETED) {
-					// handle error
-				}
+				gmsaasManager.stopInstance(uuid, function(result:GenymotionSimulator, error:String):void {
+					if (error) {
+						trace(error)
+						return
+					}
 
-				adbDisconnect()
-				dispatchEvent(new Event(EVENT_STOPPED))
+					if (result.state != STATE_DELETED) {
+						// handle error
+					}
+
+					dispatchEvent(new Event(EVENT_STOPPED))
+				})
 			})
 		}
-		
-		public function adbDisconnect():void {
-			GmsaasManager.getInstance().adbDisconnect(uuid, function(result:GenymotionSimulator, error:String):void {
-				if (error) {
-					trace(error)
-					return
-				}
 
-				dispatchEvent(new Event(EVENT_ADB_DISCONNECTED))
-			})
-		}
-		
 		public function fetchTemplateName():void {
 			outputData = ""
 			errorData = ""
