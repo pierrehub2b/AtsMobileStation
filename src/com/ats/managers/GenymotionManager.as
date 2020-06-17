@@ -2,19 +2,18 @@ package com.ats.managers
 {
 import com.ats.device.simulator.GenymotionRecipe;
 import com.ats.device.simulator.GenymotionSimulator;
-import com.ats.managers.gmsaas.GmsaasManager;
-import com.ats.managers.gmsaas.GmsaasManager;
 import com.ats.helpers.Settings;
-import com.ats.helpers.Version;
+import com.ats.managers.gmsaas.GmsaasManager;
 
 import flash.desktop.NativeProcess;
 import flash.desktop.NativeProcessStartupInfo;
 import flash.events.Event;
 import flash.events.NativeProcessExitEvent;
-import flash.events.ProgressEvent;
 import flash.filesystem.File;
 
 import mx.collections.ArrayCollection;
+import mx.collections.Sort;
+import mx.collections.SortField;
 
 public class GenymotionManager
 	{
@@ -155,6 +154,12 @@ public class GenymotionManager
 				}
 
 				recipes = new ArrayCollection(results)
+				var srt:Sort = new Sort();
+				srt.compareFunction = function(a:GenymotionRecipe, b:GenymotionRecipe, array:Array = null):int {
+					return b.version.compare(a.version)
+				}
+				recipes.sort = srt;
+				recipes.refresh();
 
 				if (existingInstances && !fetchingInstances) {
 					exec()
