@@ -1,7 +1,7 @@
 package com.ats.managers.gmsaas {
 
-import com.ats.device.simulator.GenymotionRecipe;
-import com.ats.device.simulator.GenymotionSimulator;
+import com.ats.device.simulator.genymotion.GenymotionRecipe;
+import com.ats.device.simulator.genymotion.GenymotionInstance;
 import com.ats.helpers.Settings;
 import com.ats.helpers.Version;
 
@@ -44,7 +44,7 @@ public class GmsaasManager {
             if (!json) return;
 
             try {
-                var recipes:Array = new Array()
+                var recipes:Array = []
                 var recipesInfo:Array = json['recipes']
                 for each (var info:Object in recipesInfo) {
                     var recipe:GenymotionRecipe = new GenymotionRecipe(info)
@@ -70,10 +70,10 @@ public class GmsaasManager {
             if (!json) return;
 
             try {
-                var instances:Array = new Array()
+                var instances:Array = []
                 var instancesInfo:Array = json['instances']
                 for each (var info:Object in instancesInfo) {
-                    var instance:GenymotionSimulator = new GenymotionSimulator(info)
+                    var instance:GenymotionInstance = new GenymotionInstance(info)
                     instances.push(instance)
                 }
                 process.callback(instances, null)
@@ -95,7 +95,7 @@ public class GmsaasManager {
 
             try {
                 var info:Object = json['instance']
-                var instance:GenymotionSimulator = new GenymotionSimulator(info)
+                var instance:GenymotionInstance = new GenymotionInstance(info)
                 process.callback(instance, null)
             } catch (error:Error) {
                 process.callback(null, error.message)
@@ -115,7 +115,7 @@ public class GmsaasManager {
 
             try {
                 var info:Object = json['instance']
-                var instance:GenymotionSimulator = new GenymotionSimulator(info)
+                var instance:GenymotionInstance = new GenymotionInstance(info)
                 process.callback(instance, null)
             } catch (error:Error) {
                 process.callback(null, error.message)
@@ -135,7 +135,7 @@ public class GmsaasManager {
 
             try {
                 var info:Object = json['instance']
-                var instance:GenymotionSimulator = new GenymotionSimulator(info)
+                var instance:GenymotionInstance = new GenymotionInstance(info)
                 process.callback(instance, null)
             } catch (error:Error) {
                 process.callback(null, error.message)
@@ -155,7 +155,7 @@ public class GmsaasManager {
 
             try {
                 var info:Object = json['instance']
-                var instance:GenymotionSimulator = new GenymotionSimulator(info)
+                var instance:GenymotionInstance = new GenymotionInstance(info)
                 process.callback(instance, null)
             } catch (error:Error) {
                 process.callback(null, error.message)
@@ -222,7 +222,7 @@ public class GmsaasManager {
         process.start(processInfo)
     }
 
-    private function fetchRecipesDataHandler(event:ProgressEvent):void {
+    private static function fetchRecipesDataHandler(event:ProgressEvent):void {
         var process:GmsaasProcess = event.currentTarget as GmsaasProcess
 
         switch (event.type) {
@@ -235,7 +235,7 @@ public class GmsaasManager {
         }
     }
 
-    private function handleOutput(outputData:String, callback:Function):Object {
+    private static function handleOutput(outputData:String, callback:Function):Object {
         try {
             var json:Object = JSON.parse(outputData)
 
@@ -252,7 +252,7 @@ public class GmsaasManager {
         return null
     }
 
-    private function removeProcess(event:NativeProcessExitEvent):void {
+    private static function removeProcess(event:NativeProcessExitEvent):void {
         var process:GmsaasProcess = event.currentTarget as GmsaasProcess
         process.removeEventListener(event.type, arguments.callee)
         process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, fetchRecipesDataHandler)

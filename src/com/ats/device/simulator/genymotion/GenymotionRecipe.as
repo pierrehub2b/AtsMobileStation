@@ -1,19 +1,13 @@
-package com.ats.device.simulator
+package com.ats.device.simulator.genymotion
 {
-	import com.ats.helpers.Version;
-import com.ats.managers.GenymotionManager;
+import com.ats.helpers.Version;
 import com.ats.managers.gmsaas.GmsaasManager;
 
-import flash.desktop.NativeProcess;
-	import flash.desktop.NativeProcessStartupInfo;
-	import flash.events.Event;
-	import flash.events.NativeProcessExitEvent;
-	import flash.events.ProgressEvent;
-	import flash.filesystem.File;
-	
-	import mx.collections.ArrayCollection;
-	
-	[Bindable]
+import flash.events.Event;
+
+import mx.collections.ArrayCollection;
+
+[Bindable]
 	public class GenymotionRecipe
 	{
 		public var uuid:String;
@@ -44,10 +38,10 @@ import flash.desktop.NativeProcess;
 			var instanceName:String = generateInstanceName()
 			var info:Object = new Object()
 			info['name'] = instanceName
-			var newInstance:GenymotionSimulator = new GenymotionSimulator(info)
+			var newInstance:GenymotionInstance = new GenymotionInstance(info)
 			addInstance(newInstance)
 
-			GmsaasManager.getInstance().startInstance(uuid, instanceName, function(result:GenymotionSimulator, error:String):void {
+			GmsaasManager.getInstance().startInstance(uuid, instanceName, function(result:GenymotionInstance, error:String):void {
 				if (error) {
 					trace(error)
 					return
@@ -55,7 +49,7 @@ import flash.desktop.NativeProcess;
 
 				var name:String = result.name
 				var instanceFound:Boolean = false
-				for each (var instance:GenymotionSimulator in instances) {
+				for each (var instance:GenymotionInstance in instances) {
 					if (instance.name == name) {
 						instanceFound = true
 
@@ -77,12 +71,12 @@ import flash.desktop.NativeProcess;
 		}
 		
 		public function stoppedInstanceHandler(event:Event):void {
-			var instance:GenymotionSimulator = event.currentTarget as GenymotionSimulator
+			var instance:GenymotionInstance = event.currentTarget as GenymotionInstance
 			removeInstance(instance)
 		}
 		
-		public function addInstance(instance:GenymotionSimulator):void {
-			instance.addEventListener(GenymotionSimulator.EVENT_STOPPED, stoppedInstanceHandler, false, 0, true)
+		public function addInstance(instance:GenymotionInstance):void {
+			instance.addEventListener(GenymotionInstance.EVENT_STOPPED, stoppedInstanceHandler, false, 0, true)
 			instance.template = this
 			instance.instanceNumber = attributeInstanceNumber()
 			instances.addItem(instance)
@@ -90,15 +84,15 @@ import flash.desktop.NativeProcess;
 		
 		private function attributeInstanceNumber():int {
 			var number:int = 0
-			for each (var instance:GenymotionSimulator in instances) {
+			for each (var instance:GenymotionInstance in instances) {
 				if (number == instance.instanceNumber) number++
 			}
 			
 			return number
 		}
 		
-		public function removeInstance(instance:GenymotionSimulator):void {
-			instance.removeEventListener(GenymotionSimulator.EVENT_STOPPED, stoppedInstanceHandler)
+		public function removeInstance(instance:GenymotionInstance):void {
+			instance.removeEventListener(GenymotionInstance.EVENT_STOPPED, stoppedInstanceHandler)
 			instances.removeItem(instance)
 		}
 	}

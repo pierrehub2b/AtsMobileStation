@@ -1,7 +1,7 @@
 package com.ats.managers
 {
-import com.ats.device.simulator.GenymotionRecipe;
-import com.ats.device.simulator.GenymotionSimulator;
+import com.ats.device.simulator.genymotion.GenymotionRecipe;
+import com.ats.device.simulator.genymotion.GenymotionInstance;
 import com.ats.helpers.Settings;
 import com.ats.managers.gmsaas.GmsaasManager;
 
@@ -13,7 +13,6 @@ import flash.filesystem.File;
 
 import mx.collections.ArrayCollection;
 import mx.collections.Sort;
-import mx.collections.SortField;
 
 public class GenymotionManager
 	{
@@ -144,6 +143,7 @@ public class GenymotionManager
 		
 		private var fetchingRecipes:Boolean = false
 		public function fetchRecipesList():void {
+			recipes = new ArrayCollection()
 			fetchingRecipes = true
 			GmsaasManager.getInstance().fetchRecipes(function(results:Array, error:String):void {
 				fetchingRecipes = false
@@ -161,14 +161,19 @@ public class GenymotionManager
 				recipes.sort = srt;
 				recipes.refresh();
 
-				if (existingInstances && !fetchingInstances) {
+				if (!fetchingInstances) {
 					exec()
 				}
+
+
+
+
 			})
 		}
-		
+
 		private var fetchingInstances:Boolean = false
 		private function fetchInstancesList():void {
+			existingInstances = new ArrayCollection()
 			fetchingInstances = true
 			GmsaasManager.getInstance().fetchInstances(function(results:Array, error:String):void {
 				fetchingInstances = false
@@ -180,14 +185,14 @@ public class GenymotionManager
 
 				existingInstances = new ArrayCollection(results)
 
-				if (recipes && !fetchingRecipes) {
+				if (!fetchingRecipes) {
 					exec()
 				}
 			})
 		}
 
 		private function exec():void {
-			var instance:GenymotionSimulator; 
+			var instance:GenymotionInstance;
 			for each (instance in existingInstances) {
 				attachInstance(instance)
 			}
@@ -199,18 +204,18 @@ public class GenymotionManager
 			loading = false
 		}
 		
-		private function fetchInstanceTemplateName(instance:GenymotionSimulator):void {
-			instance.addEventListener(GenymotionSimulator.EVENT_TEMPLATE_NAME_FOUND, fetchInstanceTemplateNameHandler)
+		private function fetchInstanceTemplateName(instance:GenymotionInstance):void {
+			instance.addEventListener(GenymotionInstance.EVENT_TEMPLATE_NAME_FOUND, fetchInstanceTemplateNameHandler)
 			instance.gmsaasFile = gmsaasFile
 			instance.adbConnect()
 		}
 		
 		private function fetchInstanceTemplateNameHandler(event:Event):void {
-			var instance:GenymotionSimulator = event.currentTarget as GenymotionSimulator
+			var instance:GenymotionInstance = event.currentTarget as GenymotionInstance
 			attachInstance(instance)
 		}
 		
-		private function attachInstance(instance:GenymotionSimulator):void {
+		private function attachInstance(instance:GenymotionInstance):void {
 			// to refactor
 			var searchName:String
 			if (instance.templateName) searchName = instance.templateName.split("_")[0]

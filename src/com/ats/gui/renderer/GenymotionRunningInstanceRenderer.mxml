@@ -9,36 +9,35 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import com.ats.device.simulator.GenymotionSimulator;
-			
-			import flash.filters.BitmapFilterQuality;
-			
-			import mx.events.FlexEvent;
-			
-			import spark.filters.DropShadowFilter;
-			
-			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
-			
-			private function creationCompleteHandler(event:FlexEvent):void {}
-			
-			private function stopButton_clickHandler(event:MouseEvent):void {
-				(data as GenymotionSimulator).stop()
-			}
-			
-			protected function rollOutHandler(event:MouseEvent):void
-			{
-				stopButton.visible = false;
-			}
-			
-			protected function rollOverHandler(event:MouseEvent):void
-			{
-				stopButton.visible = true;
-			}
-			
+		import com.ats.device.simulator.genymotion.GenymotionInstance;
+		import com.ats.device.simulator.genymotion.GenymotionInstance;
+
+		import flash.filters.BitmapFilterQuality;
+
+		import mx.events.FlexEvent;
+
+		import spark.filters.DropShadowFilter;
+
+		public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
+
+		private function creationCompleteHandler(event:FlexEvent):void {
+		}
+
+		private function stopButton_clickHandler(event:MouseEvent):void {
+			(data as GenymotionInstance).stop()
+		}
+
+		protected function rollOutHandler(event:MouseEvent):void {
+			stopButton.visible = false;
+		}
+
+		protected function rollOverHandler(event:MouseEvent):void {
+			stopButton.visible = true;
+		}
 		]]>
 	</fx:Script>
 	
-	<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" verticalCenter="0" enabled="{data.state==GenymotionSimulator.STATE_ONLINE}"
+	<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" verticalCenter="0" enabled="{data.state==GenymotionInstance.STATE_ONLINE}"
 			  paddingRight="10" paddingLeft="36" filters="{dropShadowFilterMiddle}">
 <!--		<s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true">
 			<s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high" source="assets/icons/16/bullet_blue.png"/>

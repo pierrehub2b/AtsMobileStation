@@ -117,8 +117,7 @@ package com.ats.managers
 		}
 		
 		private function launchAdbProcess():void{
-			
-			androidOutput = String("");
+			androidOutput = ""
 
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfo.executable = adbFile;			
@@ -134,7 +133,7 @@ package com.ats.managers
 		protected function onReadAndroidDevicesData(ev:ProgressEvent):void{
 			const len:int = ev.target.standardOutput.bytesAvailable;
 			const data:String = ev.target.standardOutput.readUTFBytes(len);
-			androidOutput = String(androidOutput.concat(data));
+			androidOutput += data
 		}
 		
 		protected function onReadAndroidDevicesExit(ev:NativeProcessExitEvent):void
@@ -148,7 +147,7 @@ package com.ats.managers
 			var data:Array = androidOutput.split("\n");
 			var runningIds:Vector.<String> = new Vector.<String>();
 			
-			if(data.length > 1){
+			if (data.length > 1) {
 				
 				data.shift();
 				
@@ -156,11 +155,9 @@ package com.ats.managers
 				var dev:RunningDevice;
 				
 				for(var i:int=0; i<len; i++){
-					
 					const info:Array = data[i].split(/\s+/g);
 					const runningId:String = info[0];
-					const deviceName:String = String(info[4]).replace("device:", "")
-					const isEmulator:Boolean = deviceName.indexOf("generic") == 0 || deviceName.indexOf("vbox") == 0
+					const isEmulator:Boolean = isSimulator(info)
 
 					runningIds.push(runningId);
 										
@@ -193,6 +190,18 @@ package com.ats.managers
 			
 			System.gc();
 			adbLoop.restart(true);
+		}
+
+		private function isSimulator(info:Array):Boolean {
+			var isSimulator:Boolean = false
+			for each (var line:String in info) {
+				if (line.indexOf("device:") == 0) {
+					var deviceName:String = line.replace("device:", "")
+					return deviceName.indexOf("generic") == 0 || deviceName.indexOf("vbox") == 0
+				}
+			}
+
+			return isSimulator
 		}
 		
 		//---------------------------------------------------------------------------------------------------------

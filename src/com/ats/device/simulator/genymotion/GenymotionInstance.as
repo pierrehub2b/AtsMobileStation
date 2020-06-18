@@ -1,18 +1,19 @@
-package com.ats.device.simulator {
+package com.ats.device.simulator.genymotion {
+import com.ats.device.simulator.*;
 
 
 import com.ats.managers.gmsaas.GmsaasManager;
 
 import flash.desktop.NativeProcess;
-	import flash.desktop.NativeProcessStartupInfo;
-	import flash.events.Event;
-	import flash.events.NativeProcessExitEvent;
-	import flash.events.ProgressEvent;
-	import flash.filesystem.File;
-	
-	import mx.core.FlexGlobals;
-	
-	public class GenymotionSimulator extends Simulator {
+import flash.desktop.NativeProcessStartupInfo;
+import flash.events.Event;
+import flash.events.NativeProcessExitEvent;
+import flash.events.ProgressEvent;
+import flash.filesystem.File;
+
+import mx.core.FlexGlobals;
+
+public class GenymotionInstance extends Simulator {
 		
 		public static const GENYMOTION_ERROR_INCOMPATIBLE_VERSION_NUMBERS:String = "incompatible version numbers"
 		public static const GENYMOTION_ERROR_NO_NETWORK_CONNECTION:String = "no network connection"
@@ -56,7 +57,7 @@ import flash.desktop.NativeProcess;
 		private var errorData:String = ""
 		private var outputData:String = ""
 
-		public function GenymotionSimulator(info:Object) {
+		public function GenymotionInstance(info:Object) {
 			this.uuid = info['uuid']
 			this.name = info['name']
 			this.adbSerial = info['adb_serial']
@@ -66,7 +67,7 @@ import flash.desktop.NativeProcess;
 		
 		// ADB CONNECT
 		public function adbConnect():void {
-			GmsaasManager.getInstance().adbConnect(uuid, function(result:GenymotionSimulator, error:String):void {
+			GmsaasManager.getInstance().adbConnect(uuid, function(result:GenymotionInstance, error:String):void {
 				if (error) {
 					trace(error)
 					return
@@ -86,13 +87,13 @@ import flash.desktop.NativeProcess;
 
 			var gmsaasManager:GmsaasManager = GmsaasManager.getInstance()
 
-			gmsaasManager.adbDisconnect(uuid, function(result:GenymotionSimulator, error:String):void {
+			gmsaasManager.adbDisconnect(uuid, function(result:GenymotionInstance, error:String):void {
 				if (error) {
 					trace(error)
 					return
 				}
 
-				gmsaasManager.stopInstance(uuid, function(result:GenymotionSimulator, error:String):void {
+				gmsaasManager.stopInstance(uuid, function(result:GenymotionInstance, error:String):void {
 					if (error) {
 						trace(error)
 						return
