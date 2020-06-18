@@ -164,10 +164,6 @@ public class GenymotionManager
 				if (!fetchingInstances) {
 					exec()
 				}
-
-
-
-
 			})
 		}
 
@@ -207,7 +203,12 @@ public class GenymotionManager
 		private function fetchInstanceTemplateName(instance:GenymotionInstance):void {
 			instance.addEventListener(GenymotionInstance.EVENT_TEMPLATE_NAME_FOUND, fetchInstanceTemplateNameHandler)
 			instance.gmsaasFile = gmsaasFile
-			instance.adbConnect()
+
+			if (instance.adbTunnelState == GenymotionInstance.ADB_TUNNEL_STATE_CONNECTED) {
+				instance.fetchTemplateName()
+			} else {
+				instance.adbConnect()
+			}
 		}
 		
 		private function fetchInstanceTemplateNameHandler(event:Event):void {
