@@ -15,7 +15,7 @@ public class RunningDevice extends Device
 	public var locked:String = null;
 	public var booted:Boolean = true;
 	public var authorized:Boolean = true
-	public var ip:String;// = "";
+	public var ip:String;
 	public var port:String = "";
 
 	public var runningId:String = UIDUtil.createUID();

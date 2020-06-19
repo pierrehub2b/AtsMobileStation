@@ -103,8 +103,8 @@
 						 fontSize="10" fontStyle="italic" color="#FF0000"/>
 
 				<s:HGroup visible="{!(data as RunningDevice).errorMessage}" includeInLayout="{!(data as RunningDevice).errorMessage}" gap="0">
-					<s:Label text="{(data as RunningDevice).ip}" fontWeight="bold" color="0x113b55"/>
-					<s:Label text=":{(data as RunningDevice).port}" color="0x113b55"/>
+					<s:Label text="{(data as RunningDevice).ip?(data as RunningDevice).ip+':':'Fetching data...'}" fontWeight="bold" color="0x113b55"/>
+					<s:Label text="{(data as RunningDevice).port}" color="0x113b55"/>
 				</s:HGroup>
 				
 				<s:Label visible="{(data as RunningDevice).authorized == true}" includeInLayout="{(data as RunningDevice).authorized== true}"
