@@ -36,8 +36,8 @@
 		}
 		]]>
 	</fx:Script>
-	
-	<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" verticalCenter="0" enabled="{data.state==GenymotionInstance.STATE_ONLINE}"
+	<!-- enabled="{data.state==GenymotionInstance.STATE_ONLINE}" -->
+	<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" verticalCenter="0" enabled="{data.enabled==true}"
 			  paddingRight="10" paddingLeft="36" filters="{dropShadowFilterMiddle}">
 <!--		<s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true">
 			<s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high" source="assets/icons/16/bullet_blue.png"/>

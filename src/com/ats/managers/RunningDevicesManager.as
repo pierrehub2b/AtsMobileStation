@@ -157,11 +157,13 @@ package com.ats.managers
 				for(var i:int=0; i<len; i++){
 					const info:Array = data[i].split(/\s+/g);
 					const runningId:String = info[0];
+					const deviceState:String = info[1]
+
 					const isEmulator:Boolean = isSimulator(info)
 
 					runningIds.push(runningId);
 										
-					if(info.length >= 2 && runningId.length > 0){
+					if (info.length > 2 && runningId.length > 0 && deviceState == "device") {
 						dev = findDevice(runningId);
 						
 						if (dev != null) {

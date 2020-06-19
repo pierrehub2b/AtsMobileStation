@@ -47,6 +47,7 @@ import com.greensock.TweenMax;
 		
 		public var description:String = "";
 		public var name:String = "";
+		public var identifier:String = "";
 		
 		private var mona:File;
 		private var monaInstallFolder:File;
@@ -127,6 +128,7 @@ import com.greensock.TweenMax;
 		private function initData(info:Object):void{
 			name = info.name
 			description = info.description
+			identifier = info.identifier
 			devicesManager.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
 		}
 		

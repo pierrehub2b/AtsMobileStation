@@ -6,6 +6,7 @@
 	
 	<fx:Script>
 		<![CDATA[
+        import com.ats.gui.panel.DeviceSettingsWindow;
         import com.greensock.TweenLite;
 
         import com.ats.device.Device;

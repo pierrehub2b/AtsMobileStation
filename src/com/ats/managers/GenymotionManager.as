@@ -13,6 +13,7 @@ import flash.filesystem.File;
 
 import mx.collections.ArrayCollection;
 import mx.collections.Sort;
+import mx.core.FlexGlobals;
 
 public class GenymotionManager
 	{
@@ -140,11 +141,12 @@ public class GenymotionManager
 			var proc:NativeProcess = new NativeProcess();
 			proc.start(procInfo);
 		}
-		
+
 		private var fetchingRecipes:Boolean = false
 		public function fetchRecipesList():void {
 			recipes = new ArrayCollection()
 			fetchingRecipes = true
+
 			GmsaasManager.getInstance().fetchRecipes(function(results:Array, error:String):void {
 				fetchingRecipes = false
 
@@ -154,6 +156,7 @@ public class GenymotionManager
 				}
 
 				recipes = new ArrayCollection(results)
+
 				var srt:Sort = new Sort();
 				srt.compareFunction = function(a:GenymotionRecipe, b:GenymotionRecipe, array:Array = null):int {
 					return b.version.compare(a.version)
@@ -193,40 +196,18 @@ public class GenymotionManager
 				attachInstance(instance)
 			}
 			
-			for each (instance in existingInstances) {
-				if (!instance.template) fetchInstanceTemplateName(instance)
-			}
-			
 			loading = false
 		}
 		
-		private function fetchInstanceTemplateName(instance:GenymotionInstance):void {
-			instance.addEventListener(GenymotionInstance.EVENT_TEMPLATE_NAME_FOUND, fetchInstanceTemplateNameHandler)
-			instance.gmsaasFile = gmsaasFile
-
-			if (instance.adbTunnelState == GenymotionInstance.ADB_TUNNEL_STATE_CONNECTED) {
-				instance.fetchTemplateName()
-			} else {
-				instance.adbConnect()
-			}
-		}
-		
-		private function fetchInstanceTemplateNameHandler(event:Event):void {
-			var instance:GenymotionInstance = event.currentTarget as GenymotionInstance
-			attachInstance(instance)
-		}
-		
 		private function attachInstance(instance:GenymotionInstance):void {
-			// to refactor
-			var searchName:String
-			if (instance.templateName) searchName = instance.templateName.split("_")[0]
-			if (instance.name) searchName = instance.name.split("_")[0]
-			
 			for each (var recipe:GenymotionRecipe in recipes) {
-				if (recipe.name == searchName) {
+				if (recipe.uuid == instance.recipeUuid) {
 					recipe.addInstance(instance)
-					instance.adbConnect()
-					// existingInstances.removeItem(instance)
+
+					if (instance.isMS) {
+						instance.adbConnect()
+					}
+
 					break
 				}
 			}

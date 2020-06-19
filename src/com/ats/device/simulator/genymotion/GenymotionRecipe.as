@@ -6,6 +6,7 @@ import com.ats.managers.gmsaas.GmsaasManager;
 import flash.events.Event;
 
 import mx.collections.ArrayCollection;
+import mx.core.FlexGlobals;
 
 [Bindable]
 	public class GenymotionRecipe
@@ -31,7 +32,8 @@ import mx.collections.ArrayCollection;
 		
 		private function generateInstanceName():String {
 			var date:Date = new Date()
-			return name + "_" + date.time
+			var msIdentifier = FlexGlobals.topLevelApplication.peerGroup.identifier
+			return ["GM", uuid, msIdentifier, date.time].join("_")
 		}
 		
 		public function startInstance():void {
@@ -44,20 +46,20 @@ import mx.collections.ArrayCollection;
 			GmsaasManager.getInstance().startInstance(uuid, instanceName, function(result:GenymotionInstance, error:String):void {
 				if (error) {
 					trace(error)
+
 					return
 				}
 
-				var name:String = result.name
+				var instanceName:String = result.name
 				var instanceFound:Boolean = false
 				for each (var instance:GenymotionInstance in instances) {
-					if (instance.name == name) {
+					if (instance.name == instanceName) {
 						instanceFound = true
 
-						instance.uuid = result.uuid
-						instance.name = result.name
 						instance.adbSerial = result.adbSerial
 						instance.state = result.state
 						instance.adbTunnelState = result.adbTunnelState
+						instance.uuid = result.uuid
 
 						instance.adbConnect()
 						break
@@ -77,7 +79,7 @@ import mx.collections.ArrayCollection;
 		
 		public function addInstance(instance:GenymotionInstance):void {
 			instance.addEventListener(GenymotionInstance.EVENT_STOPPED, stoppedInstanceHandler, false, 0, true)
-			instance.template = this
+			instance.recipeUuid = uuid
 			instance.instanceNumber = attributeInstanceNumber()
 			instances.addItem(instance)
 		}
