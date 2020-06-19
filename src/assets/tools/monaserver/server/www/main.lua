@@ -36,6 +36,14 @@ function close()
     end
 end
 
+function RandomVariable(length)
+	local res = ""
+	for i = 1, length do
+		res = res .. string.char(math.random(97, 122))
+	end
+	return res
+end
+
 function onConnection(client,type,...)
 	if type == "mobilestation" then
 		
@@ -54,6 +62,10 @@ function onConnection(client,type,...)
 				data["info"]["os"] = "linux"
 				data["info"]["name"] = "MS-" .. os.getenv("HOME")
 			end
+		end
+
+		if data["info"]["identifier"] == nil then
+			data["info"]["identifier"] = RandomVariable(6)
 		end
 
 		for i=0, #devices do devices[i]=nil end
@@ -104,7 +116,7 @@ function onConnection(client,type,...)
 			sync = "exit"
 		end
 
-		return {name=data["info"]["name"], description=data["info"]["description"], configs=mona.configs}
+		return {name=data["info"]["name"], description=data["info"]["description"], identifier=data["info"]["identifier"], configs=mona.configs}
 	else
 		if type == "editor" then
 			return {devices=devices, name=data["info"]["name"], description=data["info"]["description"], httpPort=mona.configs.HTTP.port}
