@@ -36,6 +36,8 @@ public class GenymotionInstance extends Simulator {
 	public var adbTunnelState:String
 
 	public var recipeUuid:String
+
+	[Bindable]
 	public var mobileStationIndentifer:String
 
 	[Bindable]

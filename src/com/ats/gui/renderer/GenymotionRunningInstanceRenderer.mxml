@@ -45,7 +45,7 @@
 				<s:Label text="- Instance #{data.instanceNumber}" maxWidth="234" maxDisplayedLines="1"/>
 			</s:VGroup>
 		</s:HGroup>-->
-		<s:Label text="- Instance #{data.instanceNumber}" maxWidth="234" maxDisplayedLines="1"/>
+		<s:Label text="- Instance #{data.instanceNumber} (MS:{data.mobileStationIndentifer})" maxWidth="234" maxDisplayedLines="1"/>
 		<s:Group id="stopButton" buttonMode="true" click="stopButton_clickHandler(event)" height="16" width="16"
 				 toolTip="Stop running instance" visible="false">
 			<s:BitmapImage id="iconStatus" source="assets/icons/16/stop.png" smooth="true" smoothingQuality="high"/>
