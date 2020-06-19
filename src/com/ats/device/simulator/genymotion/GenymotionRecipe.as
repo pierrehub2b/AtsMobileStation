@@ -45,30 +45,29 @@ import mx.core.FlexGlobals;
 
 			GmsaasManager.getInstance().startInstance(uuid, instanceName, function(result:GenymotionInstance, error:String):void {
 				if (error) {
+					removeInstance(newInstance)
 					trace(error)
-
 					return
 				}
 
 				var instanceName:String = result.name
-				var instanceFound:Boolean = false
+				var instanceFound:GenymotionInstance
 				for each (var instance:GenymotionInstance in instances) {
 					if (instance.name == instanceName) {
-						instanceFound = true
-
-						instance.adbSerial = result.adbSerial
-						instance.state = result.state
-						instance.adbTunnelState = result.adbTunnelState
-						instance.uuid = result.uuid
-
-						instance.adbConnect()
+						instanceFound = instance
 						break
 					}
 				}
 
 				if (!instanceFound) {
-					/* handle error */
+					return
 				}
+
+				instance.adbSerial = result.adbSerial
+				instance.state = result.state
+				instance.adbTunnelState = result.adbTunnelState
+				instance.uuid = result.uuid
+				instance.adbConnect()
 			})
 		}
 		

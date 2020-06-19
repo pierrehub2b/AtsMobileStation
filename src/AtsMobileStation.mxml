@@ -204,17 +204,12 @@
 					}
 				}
 				
-				//httpServer.listen(10000, handleHttpServerError);
 				peerGroup = new PeerGroupConnection(workFolder, devices, simulators, httpPort);
 				genymotionManager = new GenymotionManager();
 			}
 			
 			public function saveValues(desc:String, name:String):void {
 				peerGroup.saveValues(desc, name);
-			}
-			
-			private function handleHttpServerError(e:Error):void {
-				trace("HTTP Server Error : " + e)
 			}
 			
 			public function restartDevice(dev:Device):void {
@@ -240,6 +235,8 @@
 				
 				devices.addEventListener(Event.COMPLETE, devicesTerminateComplete);
 				devices.terminate();
+
+				genymotionManager.terminate()
 			}
 			
 			private function devicesTerminateComplete(ev:Event):void {

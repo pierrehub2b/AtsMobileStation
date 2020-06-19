@@ -73,6 +73,17 @@ public class GenymotionInstance extends Simulator {
 		})
 	}
 
+	public function adbDisconnect():void {
+		enabled = false
+
+		GmsaasManager.getInstance().adbDisconnect(uuid, function(result:GenymotionInstance, error:String):void {
+			if (error) {
+				trace("GM - ADB Connect Error : " + error)
+				return
+			}
+		})
+	}
+
 	public function stop():void {
 		state = STATE_STOPPING
 		enabled = false
