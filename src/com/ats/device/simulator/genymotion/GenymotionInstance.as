@@ -59,7 +59,7 @@ public class GenymotionInstance extends Simulator {
 
 		var properties:Array = name.split("_")
 		recipeUuid = properties[1]
-		mobileStationIndentifer = properties[2]
+		mobileStationIndentifer = properties[3]
 	}
 
 	public function adbConnect():void {

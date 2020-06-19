@@ -27,7 +27,6 @@ public class GenymotionManager {
 	public var enabled:Boolean = false
 
 	public function GenymotionManager() {
-		//TODO check Genymotion account defined
 
 		if (!Settings.getInstance().androidSdkPath) {
 			trace('WARNING : Android SDK path not set')
@@ -107,7 +106,6 @@ public class GenymotionManager {
 		var proc:NativeProcess = event.currentTarget as NativeProcess
 		proc.removeEventListener(NativeProcessExitEvent.EXIT, gmInstallExit);
 
-		// defineJSONOutputFormat()
 		defineAndroidSdk();
 
 		fetchContent()
@@ -218,8 +216,6 @@ public class GenymotionManager {
 			}
 		}
 	}
-
 }
-
 
 }

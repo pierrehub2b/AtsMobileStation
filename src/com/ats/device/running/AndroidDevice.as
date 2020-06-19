@@ -201,9 +201,15 @@ public class AndroidDevice extends RunningDevice
 				}
 
 				if (simulator) {
-					if (line.indexOf("[ro.product.cpu.abi]") == 0) {
-						modelName = getPropValue(line)
+					if (modelId.indexOf("GM") == 0) {
+						var parameters:Array = modelId.split("_")
+						modelName = parameters[2]
+					} else {
+						if (line.indexOf("[ro.product.cpu.abi]") == 0) {
+							modelName = getPropValue(line)
+						}
 					}
+
 				} else {
 				 	if (line.indexOf("[ro.semc.product.name]") == 0) {
 						modelName = getPropValue(line)

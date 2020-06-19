@@ -33,7 +33,7 @@ import mx.core.FlexGlobals;
 		private function generateInstanceName():String {
 			var date:Date = new Date()
 			var msIdentifier:String = FlexGlobals.topLevelApplication.peerGroup.identifier
-			return ["GM", uuid, msIdentifier, date.time].join("_")
+			return ["GM", uuid, name, msIdentifier, date.time].join("_")
 		}
 		
 		public function startInstance():void {
