@@ -1,19 +1,17 @@
 package com.ats.managers
 {
-import com.ats.device.simulator.genymotion.GenymotionRecipe;
 import com.ats.device.simulator.genymotion.GenymotionInstance;
+import com.ats.device.simulator.genymotion.GenymotionRecipe;
 import com.ats.helpers.Settings;
 import com.ats.managers.gmsaas.GmsaasManager;
 
 import flash.desktop.NativeProcess;
 import flash.desktop.NativeProcessStartupInfo;
-import flash.events.Event;
 import flash.events.NativeProcessExitEvent;
 import flash.filesystem.File;
 
 import mx.collections.ArrayCollection;
 import mx.collections.Sort;
-import mx.core.FlexGlobals;
 
 public class GenymotionManager {
 	private var pipFile:File;
@@ -211,15 +209,6 @@ public class GenymotionManager {
 				break
 			}
 		}
-	}
-
-	public function numberOfInstances():int {
-		var count:int = 0
-		for each (var recipe:GenymotionRecipe in recipes) {
-			count += recipe.instances.length
-		}
-
-		return count
 	}
 
 	public function terminate():void {

@@ -32,15 +32,13 @@ import mx.core.FlexGlobals;
 		
 		private function generateInstanceName():String {
 			var date:Date = new Date()
-			var msIdentifier = FlexGlobals.topLevelApplication.peerGroup.identifier
+			var msIdentifier:String = FlexGlobals.topLevelApplication.peerGroup.identifier
 			return ["GM", uuid, msIdentifier, date.time].join("_")
 		}
 		
 		public function startInstance():void {
 			var instanceName:String = generateInstanceName()
-			var info:Object = new Object()
-			info['name'] = instanceName
-			var newInstance:GenymotionInstance = new GenymotionInstance(info)
+			var newInstance:GenymotionInstance = new GenymotionInstance({'name':instanceName})
 			addInstance(newInstance)
 
 			GmsaasManager.getInstance().startInstance(uuid, instanceName, function(result:GenymotionInstance, error:String):void {
@@ -57,31 +55,31 @@ import mx.core.FlexGlobals;
 				newInstance.adbConnect()
 			})
 		}
-		
-		public function stoppedInstanceHandler(event:Event):void {
-			var instance:GenymotionInstance = event.currentTarget as GenymotionInstance
-			removeInstance(instance)
-		}
-		
+
 		public function addInstance(instance:GenymotionInstance):void {
 			instance.addEventListener(GenymotionInstance.EVENT_STOPPED, stoppedInstanceHandler, false, 0, true)
 			instance.recipeUuid = uuid
 			instance.instanceNumber = attributeInstanceNumber()
 			instances.addItem(instance)
 		}
-		
+
+		public function removeInstance(instance:GenymotionInstance):void {
+			instance.removeEventListener(GenymotionInstance.EVENT_STOPPED, stoppedInstanceHandler)
+			instances.removeItem(instance)
+		}
+
+		private function stoppedInstanceHandler(event:Event):void {
+			var instance:GenymotionInstance = event.currentTarget as GenymotionInstance
+			removeInstance(instance)
+		}
+
 		private function attributeInstanceNumber():int {
 			var number:int = 0
 			for each (var instance:GenymotionInstance in instances) {
 				if (number == instance.instanceNumber) number++
 			}
-			
+
 			return number
-		}
-		
-		public function removeInstance(instance:GenymotionInstance):void {
-			instance.removeEventListener(GenymotionInstance.EVENT_STOPPED, stoppedInstanceHandler)
-			instances.removeItem(instance)
 		}
 	}
 }

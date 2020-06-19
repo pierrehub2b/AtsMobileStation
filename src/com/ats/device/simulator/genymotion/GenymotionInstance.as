@@ -68,7 +68,6 @@ public class GenymotionInstance extends Simulator {
 		GmsaasManager.getInstance().adbConnect(uuid, function(result:GenymotionInstance, error:String):void {
 			if (error) {
 				trace("GM - ADB Connect Error : " + error)
-				return
 			}
 		})
 	}
@@ -79,7 +78,6 @@ public class GenymotionInstance extends Simulator {
 		GmsaasManager.getInstance().adbDisconnect(uuid, function(result:GenymotionInstance, error:String):void {
 			if (error) {
 				trace("GM - ADB Connect Error : " + error)
-				return
 			}
 		})
 	}
