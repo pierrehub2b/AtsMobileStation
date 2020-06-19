@@ -50,24 +50,11 @@ import mx.core.FlexGlobals;
 					return
 				}
 
-				var instanceName:String = result.name
-				var instanceFound:GenymotionInstance
-				for each (var instance:GenymotionInstance in instances) {
-					if (instance.name == instanceName) {
-						instanceFound = instance
-						break
-					}
-				}
-
-				if (!instanceFound) {
-					return
-				}
-
-				instance.adbSerial = result.adbSerial
-				instance.state = result.state
-				instance.adbTunnelState = result.adbTunnelState
-				instance.uuid = result.uuid
-				instance.adbConnect()
+				newInstance.adbSerial = result.adbSerial
+				newInstance.state = result.state
+				newInstance.adbTunnelState = result.adbTunnelState
+				newInstance.uuid = result.uuid
+				newInstance.adbConnect()
 			})
 		}
 		
