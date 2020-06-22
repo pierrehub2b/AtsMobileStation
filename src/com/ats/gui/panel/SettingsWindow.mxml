@@ -8,164 +8,208 @@
 			   creationComplete="creationCompleteHandler(event)">
 	<fx:Script>
 		<![CDATA[
-			import com.ats.device.running.RunningDevice;
-			import com.ats.helpers.Settings;
-			
-			import flash.net.navigateToURL;
-			
-			import mx.core.FlexGlobals;
-			import mx.events.CloseEvent;
-			import mx.events.FlexEvent;
-			import mx.managers.PopUpManager;
-			
-			[Embed(source="/assets/icons/16/apple_site.png")]
-			private const AppleIcon:Class;
-			
-			[Embed(source="/assets/icons/16/info.png")]
-			private const InfoIcon:Class;
-			
-			public var dev:RunningDevice;
-			public var arrayString:Array;
-			public var arrayStringDevTeam:Array;
-			
-			public var devices:Array = [];
-			
-			
-			protected function creationCompleteHandler(event:FlexEvent):void {
-				devTeamId.text = FlexGlobals.topLevelApplication.getTeamId();
-				desc.text = FlexGlobals.topLevelApplication.peerGroup.description;
-				nm.text = FlexGlobals.topLevelApplication.peerGroup.name;
-			}
-			
-			private function closeHandler(event:CloseEvent):void {
-				PopUpManager.removePopUp(this);
-			}
-			
-			protected function save_clickHandler(event:MouseEvent):void {
-				var file:File = FlexGlobals.topLevelApplication.settingsFile;
-				var fileStream:FileStream = new FileStream();
-				fileStream.open(file, FileMode.WRITE);
-				fileStream.writeUTFBytes("development_team==" + devTeamId.text + "\n");
-				fileStream.close();
-				FlexGlobals.topLevelApplication.setTeamId(devTeamId.text);
-				FlexGlobals.topLevelApplication.restartIosDevices();
-				
-				FlexGlobals.topLevelApplication.saveValues(desc.text, nm.text);
-				
-				PopUpManager.removePopUp(this);
-			}
-			
-			private var userDir:File;
-			
-			protected function install_clickHandler(event:MouseEvent):void {
-				userDir = File.userDirectory;
-				var typeFilter:FileFilter = new FileFilter("App file", "*.apk; *.app");
-				
-				userDir.addEventListener(Event.SELECT, fileSelected, false, 0, true);
-				userDir.browse([typeFilter]);
-			}
-			
-			private function fileSelected(ev:Event):void {
-				userDir.removeEventListener(Event.SELECT, fileSelected);
-				
-				process = new NativeProcess();
-				procInfo = new NativeProcessStartupInfo();
-				
-				procInfo.executable = new File("/usr/bin/xcrun");
-				procInfo.workingDirectory = File.userDirectory;
-				
-				process.addEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
-				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputError, false, 0, true);
-				process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutput, false, 0, true);
-				
-				procInfo.arguments = new <String>["simctl", "install", dev.id, userDir.nativePath];
-				process.start(procInfo);
-				
-				enabled = false;
-			}
-			
-			protected function onOutputError(event:ProgressEvent):void {
-				trace(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
-			}
-			
-			protected function onOutput(event:ProgressEvent):void {
-				trace(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
-			}
-			
-			protected function onInstallExit(event:NativeProcessExitEvent):void {
-				process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallExit);
-				process = null;
-				procInfo = null;
-				userDir = null;
-				
-				enabled = true;
-			}
-			
-			private var process:NativeProcess;
-			private var procInfo:NativeProcessStartupInfo;
-			
-			protected function copyId_clickHandler(event:MouseEvent):void {
-				var file:FileReference = new FileReference();
-				var txtInput:String = "Device ID\tDevice Name\tDevice Platform\n";
-				for each(var d:RunningDevice in devices) {
-					if (d.manufacturer == "Apple") {
-						txtInput += d.id + "\t" + d.modelName + "\tios\n";
-					}
+		import com.ats.device.running.RunningDevice;
+		import com.ats.gui.alert.CredentialsAlert;
+		import com.ats.helpers.Settings;
+		import com.ats.managers.gmsaas.GmsaasInstaller;
+
+		import flash.net.navigateToURL;
+
+		import mx.core.FlexGlobals;
+		import mx.events.CloseEvent;
+		import mx.events.FlexEvent;
+		import mx.managers.PopUpManager;
+
+		import spark.components.richTextEditorClasses.BoldTool;
+
+		[Embed(source="/assets/icons/16/apple_site.png")]
+		private const AppleIcon:Class;
+
+		[Embed(source="/assets/icons/16/info.png")]
+		private const InfoIcon:Class;
+
+		public var dev:RunningDevice;
+		public var arrayString:Array;
+		public var arrayStringDevTeam:Array;
+
+		public var devices:Array = [];
+
+		protected function creationCompleteHandler(event:FlexEvent):void {
+			devTeamId.text = FlexGlobals.topLevelApplication.getTeamId();
+			desc.text = FlexGlobals.topLevelApplication.peerGroup.description;
+			nm.text = FlexGlobals.topLevelApplication.peerGroup.name;
+
+			const isGmsaasInstalled:Boolean = GmsaasInstaller.isInstalled()
+			updateGenymotionGroup(isGmsaasInstalled)
+		}
+
+		private function updateGenymotionGroup(value:Boolean):void {
+			gmsaasUninstallButton.enabled = value
+			gmsaasInstallButton.enabled = !value
+			gmsaasCredentialsButton.enabled = value
+		}
+
+		private function closeHandler(event:CloseEvent):void {
+			PopUpManager.removePopUp(this);
+		}
+
+		protected function save_clickHandler(event:MouseEvent):void {
+			var file:File = FlexGlobals.topLevelApplication.settingsFile;
+			var fileStream:FileStream = new FileStream();
+			fileStream.open(file, FileMode.WRITE);
+			fileStream.writeUTFBytes("development_team==" + devTeamId.text + "\n");
+			fileStream.close();
+			FlexGlobals.topLevelApplication.setTeamId(devTeamId.text);
+			FlexGlobals.topLevelApplication.restartIosDevices();
+
+			FlexGlobals.topLevelApplication.saveValues(desc.text, nm.text);
+
+			PopUpManager.removePopUp(this);
+		}
+
+		private var userDir:File;
+
+		protected function install_clickHandler(event:MouseEvent):void {
+			userDir = File.userDirectory;
+			var typeFilter:FileFilter = new FileFilter("App file", "*.apk; *.app");
+
+			userDir.addEventListener(Event.SELECT, fileSelected, false, 0, true);
+			userDir.browse([typeFilter]);
+		}
+
+		private function fileSelected(ev:Event):void {
+			userDir.removeEventListener(Event.SELECT, fileSelected);
+
+			process = new NativeProcess();
+			procInfo = new NativeProcessStartupInfo();
+
+			procInfo.executable = new File("/usr/bin/xcrun");
+			procInfo.workingDirectory = File.userDirectory;
+
+			process.addEventListener(NativeProcessExitEvent.EXIT, onInstallExit, false, 0, true);
+			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputError, false, 0, true);
+			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutput, false, 0, true);
+
+			procInfo.arguments = new <String>["simctl", "install", dev.id, userDir.nativePath];
+			process.start(procInfo);
+
+			enabled = false;
+		}
+
+		protected function onOutputError(event:ProgressEvent):void {
+			trace(process.standardError.readUTFBytes(process.standardError.bytesAvailable));
+		}
+
+		protected function onOutput(event:ProgressEvent):void {
+			trace(process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable));
+		}
+
+		protected function onInstallExit(event:NativeProcessExitEvent):void {
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallExit);
+			process = null;
+			procInfo = null;
+			userDir = null;
+
+			enabled = true;
+		}
+
+		private var process:NativeProcess;
+		private var procInfo:NativeProcessStartupInfo;
+
+		protected function copyId_clickHandler(event:MouseEvent):void {
+			var file:FileReference = new FileReference();
+			var txtInput:String = "Device ID\tDevice Name\tDevice Platform\n";
+			for each(var d:RunningDevice in devices) {
+				if (d.manufacturer == "Apple") {
+					txtInput += d.id + "\t" + d.modelName + "\tios\n";
 				}
-				file.save(txtInput, "devices.txt")
 			}
-			
-			protected function linkbutton_clickHandler(event:MouseEvent):void {
-				navigateToURL(new URLRequest("https://developer.apple.com/account/"));
+			file.save(txtInput, "devices.txt")
+		}
+
+		protected function linkbutton_clickHandler(event:MouseEvent):void {
+			navigateToURL(new URLRequest("https://developer.apple.com/account/"));
+		}
+
+		protected function linkbuttonAts_clickHandler(event:MouseEvent):void {
+			navigateToURL(new URLRequest("https://github.com/pierrehub2b/AtsMobileStation#ios-devices"));
+		}
+
+		protected function searchAndroidSdkDirectory(event:MouseEvent):void {
+			var directory:File = Settings.defaultAppFolder;
+			directory.addEventListener(Event.SELECT, androidFolderSelected);
+			directory.browseForDirectory("Select Android SDK directory");
+		}
+
+		protected function androidFolderSelected(event:Event):void {
+			Settings.getInstance().androidSdkFolder = event.target as File
+		}
+
+		protected function restart_clickHandler(event:MouseEvent):void {
+			PopUpManager.removePopUp(this);
+			FlexGlobals.topLevelApplication.restartServer();
+		}
+
+		protected function searchPythonDirectory_clickHandler(event:MouseEvent):void {
+			var directory:File = Settings.defaultAppFolder;
+			directory.addEventListener(Event.SELECT, pythonFolderSelected);
+			directory.browseForDirectory("Select Python directory");
+		}
+
+		protected function pythonFolderSelected(event:Event):void {
+			Settings.getInstance().pythonFolder = event.target as File
+		}
+
+		protected function installGmsaas(event:Event):void {
+			try {
+				var installer:GmsaasInstaller = new GmsaasInstaller()
+				genymotionInfoLabel.text = "Installing..."
+				installer.install(function (error:String=null):void {
+					genymotionInfoLabel.text = null
+
+					if (error) {
+						trace(error)
+						return
+					}
+
+					updateGenymotionGroup(true)
+					FlexGlobals.topLevelApplication.genymotionManager.visible = true
+				})
+			} catch (error:Error) {
+				trace(error)
 			}
-			
-			protected function linkbuttonAts_clickHandler(event:MouseEvent):void {
-				navigateToURL(new URLRequest("https://github.com/pierrehub2b/AtsMobileStation#ios-devices"));
+		}
+
+		protected function uninstallGmsaas(event:Event):void {
+			try {
+				var installer:GmsaasInstaller = new GmsaasInstaller()
+				genymotionInfoLabel.text = "Uninstalling..."
+				installer.uninstall(function (error:String=null):void {
+					genymotionInfoLabel.text = null
+
+					if (error) {
+						trace(error)
+						return
+					}
+
+					updateGenymotionGroup(false)
+					FlexGlobals.topLevelApplication.genymotionManager.visible = false
+				})
+			} catch (error:Error) {
+				trace(error)
 			}
-			
-			/*protected function setAutomaticPort(event:MouseEvent):void {
-			var availablePort:int = PortSwitcher.getAvailableLocalPort()
-			HttpServer.getInstance().listen(availablePort, handleHttpServerError)
-			}
-			
-			protected function setSpecificPort(event:MouseEvent):void {
-			webServerErrorLabel.visible = false
-			
-			var specificPort:int = int(webServerPort.text)
-			HttpServer.getInstance().listen(specificPort, handleHttpServerError)
-			}
-			
-			protected function handleHttpServerError(error:Error):void {
-			webServerErrorLabel.visible = true
-			webServerErrorLabel.text = error.message
-			}*/
-			
-			protected function searchAndroidSdkDirectory(event:MouseEvent):void {
-				var directory:File = Settings.defaultAppFolder;
-				directory.addEventListener(Event.SELECT, androidFolderSelected);
-				directory.browseForDirectory("Select Android SDK directory");
-			}
-			
-			protected function androidFolderSelected(event:Event):void {
-				Settings.getInstance().androidSdkFolder = event.target as File
-			}
-			
-			protected function restart_clickHandler(event:MouseEvent):void {
-				PopUpManager.removePopUp(this);
-				FlexGlobals.topLevelApplication.restartServer();
-			}
-			
-			protected function searchPythonDirectory_clickHandler(event:MouseEvent):void
-			{
-				var directory:File = Settings.defaultAppFolder;
-				directory.addEventListener(Event.SELECT, pythonFolderSelected);
-				directory.browseForDirectory("Select Python directory");
-			}
-			
-			protected function pythonFolderSelected(event:Event):void {
-				Settings.getInstance().pythonFolder = event.target as File
-			}
-			
+		}
+
+		protected function editCredentials(event:Event):void {
+			const credentialsAlert:CredentialsAlert = new CredentialsAlert();
+			credentialsAlert.successCallback = credentialsCompleteHandler
+			PopUpManager.addPopUp(credentialsAlert, this, true);
+			PopUpManager.centerPopUp(credentialsAlert);
+		}
+
+		private function credentialsCompleteHandler(alert:CredentialsAlert):void {
+			PopUpManager.removePopUp(alert)
+		}
 		]]>
 	</fx:Script>
 	
@@ -199,6 +243,18 @@
 			<s:Button width="30" label="..." click="searchPythonDirectory_clickHandler(event)" fontSize="10"
 					  fontStyle="normal"/>
 		</s:HGroup>
+
+		<mx:HRule height="24" width="100%"/>
+		<s:Label fontWeight="bold" text="Genymotion Cloud"/>
+		<s:HGroup id="genymotionGroup" width="100%">
+			<s:Button id="gmsaasInstallButton" width="100%" label="Setup Genymotion Cloud" click="installGmsaas(event)" fontSize="10"
+				  fontStyle="italic" enabled="true"/>
+			<s:Button id="gmsaasUninstallButton" width="100%" label="Uninstall Genymotion Cloud" click="uninstallGmsaas(event)" fontSize="10"
+				  fontStyle="normal"/>
+			<s:Button id="gmsaasCredentialsButton" width="100%" label="Edit credidentials" click="editCredentials(event)" fontSize="10"
+					  fontStyle="normal"/>
+		</s:HGroup>
+		<s:Label id="genymotionInfoLabel"/>
 		<mx:HRule height="24" width="100%"/>
 		
 		<s:HGroup width="100%" gap="3" paddingLeft="5" verticalAlign="middle" verticalCenter="0">

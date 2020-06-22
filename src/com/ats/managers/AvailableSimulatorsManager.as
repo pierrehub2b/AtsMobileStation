@@ -147,12 +147,6 @@ public class AvailableSimulatorsManager extends EventDispatcher
 				file = File.userDirectory.resolvePath("AppData/Local/Android/Sdk/emulator/emulator.exe")
 			}
 
-			/* if (Capabilities.os.indexOf("Mac") > -1) {
-				file = Settings.getInstance().androidSDKDirectory.resolvePath("emulator/emulator")
-			} else {
-				file = Settings.getInstance().androidSDKDirectory.resolvePath("emulator/emulator.exe")
-			} */
-
 			if (!file.exists) {
 				trace("No Android SDK configured")
 				return
