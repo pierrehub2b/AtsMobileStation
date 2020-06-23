@@ -33,12 +33,12 @@
 				return
 			}
 
-			instance.stop()
+			// instance.stop()
 		}
 
 		private function alertClickHandler(evt:CloseEvent):void {
 			if (evt.detail == Alert.YES) {
-				(data as GenymotionInstance).stop()
+				// (data as GenymotionInstance).stop()
 			}
 		}
 

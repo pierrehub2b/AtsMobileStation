@@ -60,12 +60,16 @@ import mx.core.FlexGlobals;
 			instance.addEventListener(GenymotionInstance.EVENT_STOPPED, stoppedInstanceHandler, false, 0, true)
 			instance.recipeUuid = uuid
 			instance.instanceNumber = attributeInstanceNumber()
+			instance.modelName = name
+			instance.osVersion = version.stringValue
 			instances.addItem(instance)
+			FlexGlobals.topLevelApplication.simulators.collection.addItem(instance)
 		}
 
 		public function removeInstance(instance:GenymotionInstance):void {
 			instance.removeEventListener(GenymotionInstance.EVENT_STOPPED, stoppedInstanceHandler)
 			instances.removeItem(instance)
+			FlexGlobals.topLevelApplication.simulators.collection.removeItem(instance)
 		}
 
 		private function stoppedInstanceHandler(event:Event):void {

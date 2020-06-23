@@ -6,7 +6,7 @@ import flash.events.Event;
 
 import mx.core.FlexGlobals;
 
-public class GenymotionInstance extends Simulator {
+public class GenymotionInstance extends AndroidSimulator {
 
 	public static const GENYMOTION_ERROR_INCOMPATIBLE_VERSION_NUMBERS:String = "incompatible version numbers"
 	public static const GENYMOTION_ERROR_NO_NETWORK_CONNECTION:String = "no network connection"
@@ -64,6 +64,7 @@ public class GenymotionInstance extends Simulator {
 
 	public function adbConnect():void {
 		enabled = true
+		statusOn()
 
 		GmsaasManager.getInstance().adbConnect(uuid, function(result:GenymotionInstance, error:String):void {
 			if (error) {
@@ -74,6 +75,7 @@ public class GenymotionInstance extends Simulator {
 
 	public function adbDisconnect():void {
 		enabled = false
+		statusOff()
 
 		GmsaasManager.getInstance().adbDisconnect(uuid, function(result:GenymotionInstance, error:String):void {
 			if (error) {
@@ -82,7 +84,12 @@ public class GenymotionInstance extends Simulator {
 		})
 	}
 
-	public function stop():void {
+	override public function startSim():void {
+
+	}
+
+	override public function stopSim():void {
+	// public function stop():void {
 		state = STATE_STOPPING
 		enabled = false
 

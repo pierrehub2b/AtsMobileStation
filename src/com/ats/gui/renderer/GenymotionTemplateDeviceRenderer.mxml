@@ -52,12 +52,6 @@
 
 		protected function creationCompleteHandler(event:FlexEvent):void {
 			(data as GenymotionRecipe).instances.addEventListener(CollectionEvent.COLLECTION_CHANGE, collectionChangeHandler);
-			height = 40 + (data as GenymotionRecipe).instances.length * 20
-		}
-
-		private function collectionChangeHandler(event:CollectionEvent):void {
-			var collection:ArrayCollection = event.currentTarget as ArrayCollection
-			height = 40 + collection.length * 20
 		}
 
 		protected function simulatorrenderer1_rollOverHandler(event:MouseEvent):void {
@@ -88,6 +82,8 @@
 						<s:Label text="({data.version.stringValue})" fontSize="11" fontStyle="italic"/>
 					</s:HGroup>
 					<s:Label text="{data.width} x {data.height}  (dpi:{data.dpi})" fontSize="11" fontStyle="italic" color="#758696"/>
+					<s:Label id="instancesCountLabel" text="(Current running instances : {data.instances.length})"
+							 visible="{data.instances.length > 0}" includeInLayout="{data.instances.length > 0}"/>
 				</s:VGroup>
 			</s:HGroup>
 			<s:Spacer width="100%"/>
@@ -96,10 +92,10 @@
 				<s:BitmapImage id="iconStatus" source="assets/icons/24/plus0.png" smooth="true" smoothingQuality="high"/>
 			</s:Group>
 		</s:HGroup>
-		<s:List alternatingItemColors="[#efefef, #dedede]" borderVisible="false" width="100%"
+		<!-- <s:List alternatingItemColors="[#efefef, #dedede]" borderVisible="false" width="100%"
                 includeInLayout="{(data as GenymotionRecipe).instances.length&gt;0}" visible="{(data as GenymotionRecipe).instances.length&gt;0}"
                 contentBackgroundAlpha="0.0" dataProvider="{(data as GenymotionRecipe).instances}"
-                itemRenderer="com.ats.gui.renderer.GenymotionRunningInstanceRenderer" useVirtualLayout="false"/>
+                itemRenderer="com.ats.gui.renderer.GenymotionRunningInstanceRenderer" useVirtualLayout="false"/> -->
 	</s:VGroup>
 	
 </s:ItemRenderer>
