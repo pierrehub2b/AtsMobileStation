@@ -88,7 +88,7 @@ import mx.core.FlexGlobals;
 			return number
 		}
 
-		public function stopAllInstances() {
+		public function stopAllInstances():void {
 			for each (var instance:GenymotionInstance in instances) {
 				instance.stopSim()
 			}

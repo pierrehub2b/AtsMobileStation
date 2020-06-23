@@ -1,5 +1,6 @@
 package com.ats.managers
 {
+import com.ats.device.simulator.Simulator;
 import com.ats.device.simulator.genymotion.GenymotionInstance;
 import com.ats.device.simulator.genymotion.GenymotionRecipe;
 import com.ats.managers.gmsaas.GmsaasInstaller;
@@ -29,13 +30,13 @@ public class GenymotionManager {
 		fetchInstancesList()
 	}
 
-	private function cleanGenymotionInstances() {
+	private function cleanGenymotionInstances():void {
 		var allSimulators:ArrayCollection = FlexGlobals.topLevelApplication.simulators.collection
 		var genymotionInstances:ArrayCollection = new ArrayCollection(allSimulators.toArray())
 		genymotionInstances.filterFunction = function(item:Object):Boolean { return item is GenymotionInstance }
 		genymotionInstances.refresh()
 
-		for each (var instance in genymotionInstances) { allSimulators.removeItem(instance) }
+		for each (var instance:Simulator in genymotionInstances) { allSimulators.removeItem(instance) }
 	}
 
 	private var fetchingRecipes:Boolean = false
