@@ -6,7 +6,7 @@ import flash.events.Event;
 
 import mx.core.FlexGlobals;
 
-public class GenymotionInstance extends AndroidSimulator {
+public class GenymotionInstance extends Simulator {
 
 	public static const GENYMOTION_ERROR_INCOMPATIBLE_VERSION_NUMBERS:String = "incompatible version numbers"
 	public static const GENYMOTION_ERROR_NO_NETWORK_CONNECTION:String = "no network connection"
