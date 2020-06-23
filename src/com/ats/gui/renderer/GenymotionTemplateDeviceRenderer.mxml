@@ -52,6 +52,15 @@
 
 		protected function creationCompleteHandler(event:FlexEvent):void {
 			(data as GenymotionRecipe).instances.addEventListener(CollectionEvent.COLLECTION_CHANGE, collectionChangeHandler);
+			calculateRowHeight()
+		}
+
+		private function collectionChangeHandler(event:CollectionEvent):void {
+			calculateRowHeight()
+		}
+
+		private function calculateRowHeight():void {
+			height = (data as GenymotionRecipe).instances.length > 0 ? 50 : 40
 		}
 
 		protected function simulatorrenderer1_rollOverHandler(event:MouseEvent):void {
@@ -82,7 +91,7 @@
 						<s:Label text="({data.version.stringValue})" fontSize="11" fontStyle="italic"/>
 					</s:HGroup>
 					<s:Label text="{data.width} x {data.height}  (dpi:{data.dpi})" fontSize="11" fontStyle="italic" color="#758696"/>
-					<s:Label id="instancesCountLabel" text="(Current running instances : {data.instances.length})"
+					<s:Label id="instancesCountLabel" text="(Current running instances : {data.instances.length})" fontSize="11"
 							 visible="{data.instances.length > 0}" includeInLayout="{data.instances.length > 0}"/>
 				</s:VGroup>
 			</s:HGroup>
