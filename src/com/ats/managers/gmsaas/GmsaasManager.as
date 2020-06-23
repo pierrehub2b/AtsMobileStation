@@ -73,8 +73,10 @@ public class GmsaasManager {
                 var instances:Array = []
                 var instancesInfo:Array = json['instances']
                 for each (var info:Object in instancesInfo) {
-                    var instance:GenymotionInstance = new GenymotionInstance(info)
-                    instances.push(instance)
+                    try {
+                        var instance:GenymotionInstance = new GenymotionInstance(info)
+                        instances.push(instance)
+                    } catch (error:Error) { trace(error.message) }
                 }
                 process.callback(instances, null)
             } catch (error:Error) {

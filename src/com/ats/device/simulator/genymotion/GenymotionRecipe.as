@@ -52,6 +52,7 @@ import mx.core.FlexGlobals;
 				newInstance.state = result.state
 				newInstance.adbTunnelState = result.adbTunnelState
 				newInstance.uuid = result.uuid
+				newInstance.statusOn()
 				newInstance.adbConnect()
 			})
 		}
@@ -63,6 +64,7 @@ import mx.core.FlexGlobals;
 			instance.modelName = name
 			instance.osVersion = version.stringValue
 			instances.addItem(instance)
+
 			FlexGlobals.topLevelApplication.simulators.collection.addItem(instance)
 		}
 
@@ -84,6 +86,12 @@ import mx.core.FlexGlobals;
 			}
 
 			return number
+		}
+
+		public function stopAllInstances() {
+			for each (var instance:GenymotionInstance in instances) {
+				instance.stopSim()
+			}
 		}
 	}
 }

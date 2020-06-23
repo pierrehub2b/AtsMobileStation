@@ -7,6 +7,7 @@ import com.ats.managers.gmsaas.GmsaasManager;
 
 import mx.collections.ArrayCollection;
 import mx.collections.Sort;
+import mx.core.FlexGlobals;
 
 public class GenymotionManager {
 
@@ -23,8 +24,18 @@ public class GenymotionManager {
 	public function fetchContent():void {
 		loading = true
 
+		cleanGenymotionInstances()
 		fetchRecipesList()
 		fetchInstancesList()
+	}
+
+	private function cleanGenymotionInstances() {
+		var allSimulators:ArrayCollection = FlexGlobals.topLevelApplication.simulators.collection
+		var genymotionInstances:ArrayCollection = new ArrayCollection(allSimulators.toArray())
+		genymotionInstances.filterFunction = function(item:Object):Boolean { return item is GenymotionInstance }
+		genymotionInstances.refresh()
+
+		for each (var instance in genymotionInstances) { allSimulators.removeItem(instance) }
 	}
 
 	private var fetchingRecipes:Boolean = false
@@ -88,8 +99,13 @@ public class GenymotionManager {
 	private function attachInstance(instance:GenymotionInstance):void {
 		for each (var recipe:GenymotionRecipe in recipes) {
 			if (recipe.uuid == instance.recipeUuid) {
+				instance.statusOn()
 				recipe.addInstance(instance)
-				instance.adbConnect()
+
+				if (instance.isMS) {
+					instance.adbConnect()
+				}
+
 				break
 			}
 		}
@@ -100,6 +116,12 @@ public class GenymotionManager {
 			for each (var instance:GenymotionInstance in recipe.instances) {
 				instance.adbDisconnect()
 			}
+		}
+	}
+
+	public function stopAllInstances():void {
+		for each (var recipe:GenymotionRecipe in recipes) {
+			recipe.stopAllInstances()
 		}
 	}
 }

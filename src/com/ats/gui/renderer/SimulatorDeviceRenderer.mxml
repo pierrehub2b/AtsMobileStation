@@ -5,7 +5,8 @@
 							creationComplete="creationCompleteHandler(event)">
 	<fx:Script>
 		<![CDATA[
-			import com.greensock.TweenMax;
+		import com.ats.device.simulator.genymotion.GenymotionInstance;
+		import com.greensock.TweenMax;
 			
 			import flash.filters.BitmapFilterQuality;
 			
@@ -68,7 +69,10 @@
 						   filters="{(data as Simulator).status==Simulator.RUNNING?[]:[greyFilter]}"/>
 			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
 				<s:Label text="{sim.modelName}" fontWeight="bold" color="{(data as Simulator).status==Simulator.OFF?0x968ca3:0x113b55}" maxWidth="234" maxDisplayedLines="1"/>
-				<s:Label text="{sim.osVersion}" fontSize="11" fontStyle="italic" color="#758696"/>
+				<s:HGroup>
+					<s:Label text="{sim.osVersion}" fontSize="11" fontStyle="italic" color="#758696"/>
+					<s:Label text="- Genymotion" fontSize="11" fontStyle="italic" color="#758696" visible="{data is GenymotionInstance}"/>
+				</s:HGroup>
 			</s:VGroup>
 		</s:HGroup>
 		

@@ -58,13 +58,20 @@ public class GenymotionInstance extends AndroidSimulator {
 		adbTunnelState = info['adbtunnel_state']
 
 		var properties:Array = name.split("_")
+		if (properties.length != 5) {
+			throw new Error('Unreadable name')
+		}
+
+		if (properties[0] != 'GM') {
+			throw new Error('Unknow instance')
+		}
+
 		recipeUuid = properties[1]
 		mobileStationIndentifer = properties[3]
 	}
 
 	public function adbConnect():void {
 		enabled = true
-		statusOn()
 
 		GmsaasManager.getInstance().adbConnect(uuid, function(result:GenymotionInstance, error:String):void {
 			if (error) {
