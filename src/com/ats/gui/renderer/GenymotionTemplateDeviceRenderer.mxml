@@ -91,7 +91,7 @@
 						<s:Label text="({data.version.stringValue})" fontSize="11" fontStyle="italic"/>
 					</s:HGroup>
 					<s:Label text="{data.width} x {data.height}  (dpi:{data.dpi})" fontSize="11" fontStyle="italic" color="#758696"/>
-					<s:Label id="instancesCountLabel" text="(Current running instances : {data.instances.length})" fontSize="11"
+					<s:Label id="instancesCountLabel" text="(Current running instances count : {data.instances.length})" fontSize="11"
 							 visible="{data.instances.length > 0}" includeInLayout="{data.instances.length > 0}"/>
 				</s:VGroup>
 			</s:HGroup>
