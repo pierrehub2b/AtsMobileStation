@@ -24,7 +24,10 @@ public class GmsaasInstaller {
     private var gmsaasFile:File
 
     static public function isInstalled():Boolean {
-        if(!pythonFolder) return false;
+        if (!pythonFolder) {
+            return false;
+        }
+
         return pythonFolder.resolvePath("Scripts").resolvePath(gmsaasFileName).exists
     }
 

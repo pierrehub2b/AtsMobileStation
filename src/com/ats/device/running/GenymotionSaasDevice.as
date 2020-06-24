@@ -9,27 +9,19 @@ import flash.events.ProgressEvent;
 public class GenymotionSaasDevice extends AndroidUsbDevice {
 
     private static const atsdroidRemoteFilePath:String = "http://actiontestscript.com/drivers/mobile/atsdroid.apk"
+    private static const apkOutputPath:String = "/sdcard/" + ANDROID_DRIVER
 
     public function GenymotionSaasDevice(id:String, settings:DeviceSettings) {
         super(id, true, settings);
     }
 
-    override protected function uninstallDriver():void {
-        var info:NativeProcessStartupInfo = new NativeProcessStartupInfo()
-        info.executable = currentAdbFile
-        info.arguments = new <String>["-s", id, "shell", "rm", "/sdcard/atsdroid.apk"]
-
-        var process:NativeProcess = new NativeProcess()
-        process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallDriverExit);
-        process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, downloadError);
-        process.start(info)
-    }
-
-
     override protected function installDriver():void {
         var info:NativeProcessStartupInfo = new NativeProcessStartupInfo()
         info.executable = currentAdbFile
-        info.arguments = new <String>["-s", id, "shell", "wget", "-P", "/sdcard/", atsdroidRemoteFilePath]
+
+        // -q (quiet): delete output logs interpreted as errors
+        // -O (output document): always overwrites file
+        info.arguments = new <String>["-s", id, "shell", "wget", "-q", atsdroidRemoteFilePath, "-O", apkOutputPath]
 
         var process:NativeProcess = new NativeProcess()
         process.addEventListener(NativeProcessExitEvent.EXIT, downloadApkExit);
@@ -37,7 +29,7 @@ public class GenymotionSaasDevice extends AndroidUsbDevice {
         process.start(info)
     }
 
-    var errorData: String
+    var errorData:String = ""
     private function downloadError(event:ProgressEvent):void {
         var process:NativeProcess = event.currentTarget as NativeProcess
         errorData += process.standardError.readUTFBytes(process.standardError.bytesAvailable)
@@ -47,11 +39,17 @@ public class GenymotionSaasDevice extends AndroidUsbDevice {
         var process:NativeProcess = event.currentTarget as NativeProcess
         process.removeEventListener(NativeProcessExitEvent.EXIT, downloadApkExit)
 
+        if (errorData) {
+            status = ERROR
+            errorMessage = errorData
+            return
+        }
+
         var info:NativeProcessStartupInfo = new NativeProcessStartupInfo()
         info.executable = currentAdbFile
-        info.arguments = new <String>["-s", id, "shell", "pm", "install", "/sdcard/atsdroid.apk"]
+        info.arguments = new <String>["-s", id, "shell", "pm", "install", apkOutputPath]
 
-        var process:NativeProcess = new NativeProcess()
+        process = new NativeProcess()
         process.addEventListener(NativeProcessExitEvent.EXIT, onInstallDriverExit);
         process.start(info)
     }

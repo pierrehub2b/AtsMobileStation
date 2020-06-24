@@ -2,19 +2,18 @@ package com.ats.device.running {
 
 import avmplus.getQualifiedClassName;
 
+import com.ats.helpers.DeviceSettings;
+import com.ats.helpers.NetworkEvent;
+import com.ats.helpers.NetworkUtils;
+import com.ats.helpers.PortSwitcher;
+import com.ats.servers.tcp.ProxyServer;
+import com.ats.servers.udp.CaptureServer;
+
 import flash.desktop.NativeProcess;
 import flash.desktop.NativeProcessStartupInfo;
 import flash.events.Event;
 import flash.events.NativeProcessExitEvent;
 import flash.events.ProgressEvent;
-
-import com.ats.helpers.DeviceSettings;
-import com.ats.helpers.NetworkEvent;
-import com.ats.helpers.NetworkUtils;
-import com.ats.helpers.PortSwitcher;
-
-import com.ats.servers.tcp.ProxyServer;
-import com.ats.servers.udp.CaptureServer;
 
 public class AndroidUsbDevice extends AndroidDevice {
 
@@ -202,16 +201,21 @@ public class AndroidUsbDevice extends AndroidDevice {
     override protected function execute():void {
         var processInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
         processInfo.executable = currentAdbFile
-        processInfo.arguments = new <String>["-s", id, "shell"]
+        processInfo.arguments = new <String>[
+            "-s", id, "shell", "am", "instrument", "-w",
+            "-e", "ipAddress", ip,
+            "-e", "atsPort", port,
+            "-e", "usbMode", String(usbMode),
+            "-e", "udpPort", String(captureServerPort),
+            "-e", "debug", "false",
+            "-e", "class", ANDROID_DRIVER + ".AtsRunnerUsb", ANDROID_DRIVER + "/android.support.test.runner.AndroidJUnitRunner"
+        ]
 
         process = new NativeProcess();
         process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteOutput, false, 0, true);
         process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError, false, 0, true);
         process.addEventListener(NativeProcessExitEvent.EXIT, onExecuteExit, false, 0, true);
         process.start(processInfo);
-
-        process.standardInput.writeUTFBytes("am instrument -w -e ipAddress " + ip + " -e atsPort " + port +" -e usbMode " + usbMode + " -e udpPort " + captureServerPort + " -e debug false -e class " + ANDROID_DRIVER + ".AtsRunnerUsb " + ANDROID_DRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n")
-        trace("am instrument -w -e ipAddress " + ip + " -e atsPort " + port +" -e usbMode " + usbMode + " -e udpPort " + captureServerPort + " -e debug false -e class " + ANDROID_DRIVER + ".AtsRunnerUsb " + ANDROID_DRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n")
     }
 
     override protected function onExecuteOutput(event:ProgressEvent):void {
@@ -230,8 +234,7 @@ public class AndroidUsbDevice extends AndroidDevice {
         }
     }
 
-    private function getWebSocketServerPort(data:String):int
-    {
+    private function getWebSocketServerPort(data:String):int {
         var array:Array = data.split("\n");
         for each(var line:String in array) {
             if (line.indexOf("ATS_WEB_SOCKET_SERVER_START") > -1) {
@@ -244,8 +247,7 @@ public class AndroidUsbDevice extends AndroidDevice {
         return -1;
     }
 
-    private function getWebSocketServerError(data:String):String
-    {
+    private function getWebSocketServerError(data:String):String {
         var array:Array = data.split("\n");
         for each(var line:String in array) {
             if (line.indexOf("ATS_WEB_SOCKET_SERVER_ERROR") > -1) {
