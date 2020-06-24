@@ -3,6 +3,7 @@ package com.ats.tools
 	import com.ats.device.running.RunningDevice;
 import com.ats.managers.AvailableSimulatorsManager;
 import com.ats.managers.RunningDevicesManager;
+import com.ats.managers.gmsaas.GmsaasInstaller;
 import com.greensock.TweenMax;
 	
 	import flash.desktop.NativeApplication;
@@ -23,8 +24,10 @@ import com.greensock.TweenMax;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.utils.Timer;
-	
-	import mx.events.CollectionEvent;
+
+import mx.core.FlexGlobals;
+
+import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
 	
 	public class PeerGroupConnection
@@ -129,6 +132,11 @@ import com.greensock.TweenMax;
 			name = info.name
 			description = info.description
 			identifier = info.identifier
+
+			if (GmsaasInstaller.isInstalled()) {
+				FlexGlobals.topLevelApplication.genymotionManager.fetchContent()
+			}
+
 			devicesManager.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
 		}
 		

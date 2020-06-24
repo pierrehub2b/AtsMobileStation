@@ -204,11 +204,8 @@
 				}
 			}
 
-			peerGroup = new PeerGroupConnection(workFolder, devices, simulators, httpPort);
 			genymotionManager = new GenymotionManager();
-			if (GmsaasInstaller.isInstalled()) {
-				genymotionManager.fetchContent()
-			}
+			peerGroup = new PeerGroupConnection(workFolder, devices, simulators, httpPort);
 		}
 
 		public function saveValues(desc:String, name:String):void {
