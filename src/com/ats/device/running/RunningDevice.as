@@ -33,6 +33,18 @@ public class RunningDevice extends Device
 		trace("Starting driver -> " + getQualifiedClassName(this));
 	}
 
+	public function get type():String {
+		if (simulator) {
+			if (this is GenymotionSaasDevice) {
+				return "GenymotionCloud"
+			} else {
+				return "Simulator"
+			}
+		} else {
+			return "Physical"
+		}
+	}
+
 	public function start():void{}
 
 	public function get monaDevice():Object {
@@ -46,7 +58,8 @@ public class RunningDevice extends Device
 			modelName: modelName,
 			osVersion: osVersion,
 			sdkVersion: (this is AndroidDevice) ? (this as AndroidDevice).androidSdk : null,
-			status: status
+			status: status,
+			type: type
 		}
 	}
 
