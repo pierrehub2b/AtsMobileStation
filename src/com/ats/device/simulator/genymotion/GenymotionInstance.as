@@ -5,6 +5,9 @@ import com.ats.managers.gmsaas.GmsaasManager;
 import flash.events.Event;
 
 import mx.core.FlexGlobals;
+import mx.events.CloseEvent;
+
+import spark.components.Alert;
 
 public class GenymotionInstance extends Simulator {
 
@@ -95,9 +98,33 @@ public class GenymotionInstance extends Simulator {
 
 	}
 
+	override public function startStop():void{
+		stopSim();
+	}
+
 	override public function stopSim():void {
+		if (!isMS) {
+			Alert.show(
+					"This instance is owned by another MobileStation.\nAre you sure you want to stop this instance ?",
+					"Stop Genymotion instance",
+					Alert.YES | Alert.NO,
+					FlexGlobals.topLevelApplication as AtsMobileStation,
+					function(event:CloseEvent):void {
+						if (event.detail == Alert.YES) {
+							stop()
+						}
+					})
+			return
+		}
+
+		stop()
+	}
+
+	private function stop() {
 		state = STATE_STOPPING
+		status = SHUTDOWN;
 		enabled = false
+		tooltip = "Simulator is terminating ...";
 
 		var gmsaasManager:GmsaasManager = GmsaasManager.getInstance()
 

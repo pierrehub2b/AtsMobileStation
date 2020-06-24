@@ -15,6 +15,10 @@ public class GenymotionSaasDevice extends AndroidUsbDevice {
         super(id, true, settings);
     }
 
+    override public function get modelName():String {
+        return _modelName;
+    }
+
     override protected function installDriver():void {
         var info:NativeProcessStartupInfo = new NativeProcessStartupInfo()
         info.executable = currentAdbFile
