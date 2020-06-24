@@ -206,7 +206,7 @@
 
 			peerGroup = new PeerGroupConnection(workFolder, devices, simulators, httpPort);
 			genymotionManager = new GenymotionManager();
-			if (GmsaasInstaller.isInstalled) {
+			if (GmsaasInstaller.isInstalled()) {
 				genymotionManager.fetchContent()
 			}
 		}
