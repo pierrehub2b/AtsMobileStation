@@ -211,6 +211,7 @@ public class AndroidUsbDevice extends AndroidDevice {
         process.start(processInfo);
 
         process.standardInput.writeUTFBytes("am instrument -w -e ipAddress " + ip + " -e atsPort " + port +" -e usbMode " + usbMode + " -e udpPort " + captureServerPort + " -e debug false -e class " + ANDROID_DRIVER + ".AtsRunnerUsb " + ANDROID_DRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n")
+        trace("am instrument -w -e ipAddress " + ip + " -e atsPort " + port +" -e usbMode " + usbMode + " -e udpPort " + captureServerPort + " -e debug false -e class " + ANDROID_DRIVER + ".AtsRunnerUsb " + ANDROID_DRIVER + "/android.support.test.runner.AndroidJUnitRunner &\r\n")
     }
 
     override protected function onExecuteOutput(event:ProgressEvent):void {

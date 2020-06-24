@@ -96,7 +96,6 @@ public class GenymotionInstance extends Simulator {
 	}
 
 	override public function stopSim():void {
-	// public function stop():void {
 		state = STATE_STOPPING
 		enabled = false
 

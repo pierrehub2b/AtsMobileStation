@@ -22,8 +22,8 @@ public class AndroidDevice extends RunningDevice
 		protected static const ANDROID_DRIVER:String = "com.ats.atsdroid";
 		private static const atsdroidFilePath:String = File.applicationDirectory.resolvePath("assets/drivers/atsdroid.apk").nativePath;
 
-		[Transient] public var androidVersion:String//  = "0";
-		[Transient] public var androidSdk:String//  = "0";
+		[Transient] public var androidVersion:String
+		[Transient] public var androidSdk:String
 		[Transient] public var settings:DeviceSettings;
 
 		private static var execExtension:String = Capabilities.os.indexOf("Mac")>-1?"":".exe";
@@ -59,7 +59,11 @@ public class AndroidDevice extends RunningDevice
 			var usbMode:Boolean = deviceSettings.usbMode;
 
 			if (usbMode) {
-				return new AndroidUsbDevice(id, isEmulator, deviceSettings);
+				if (id.indexOf("localhost") == 0) {
+					return new GenymotionSaasDevice(id, deviceSettings)
+				} else {
+					return new AndroidUsbDevice(id, isEmulator, deviceSettings);
+				}
 			} else {
 				var port:int = deviceSettings.port;
 				return new AndroidWirelessDevice(id, automaticPort, port);
@@ -299,7 +303,7 @@ public class AndroidDevice extends RunningDevice
 
 		private function onInstallDriverOutput():void {}
 		private function onInstallDriverError():void {}
-		private function onInstallDriverExit(event:NativeProcessExitEvent):void {
+		protected function onInstallDriverExit(event:NativeProcessExitEvent):void {
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallDriverExit)
 
 			execute()
