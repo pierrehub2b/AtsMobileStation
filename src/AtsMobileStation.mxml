@@ -238,7 +238,7 @@
 				infoStatus.text = "Please wait all processes to finish ..."
 				
 				peerGroup.close();
-				// genymotionManager.terminate()
+				genymotionManager.terminate()
 
 				simulators.terminate();
 				
