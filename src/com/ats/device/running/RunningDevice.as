@@ -4,8 +4,6 @@ import com.ats.device.*;
 
 import avmplus.getQualifiedClassName;
 
-import com.ats.device.running.AndroidDevice;
-
 import mx.utils.UIDUtil;
 
 [Bindable]
@@ -86,6 +84,10 @@ public class RunningDevice extends Device
 		errorMessage = " - " + error;
 		tooltip = "Problem when installing driver ...";
 		trace("USB install error" + getQualifiedClassName(this));
+	}
+
+	protected function writeDebugLogs(message:String):void {
+		trace("[INFO][" + new Date().toString() + "]" + "[" + id + " | " + modelName + "]" + "[" + (usbMode ? "USB" : "WIFI") + "]" + " " + message)
 	}
 }
 }

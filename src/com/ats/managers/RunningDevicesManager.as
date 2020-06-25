@@ -176,9 +176,7 @@ package com.ats.managers
 						} else {
 							dev = AndroidDevice.setup(runningId, isEmulator);
 							dev.addEventListener(Device.STOPPED_EVENT, deviceStoppedHandler, false, 0, true);
-							
-							TweenMax.delayedCall(2*i, dev.start)
-							//dev.start();
+							dev.start();
 							
 							collection.addItem(dev);
 							collection.refresh();

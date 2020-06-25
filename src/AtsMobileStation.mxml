@@ -238,16 +238,18 @@
 				infoStatus.text = "Please wait all processes to finish ..."
 				
 				peerGroup.close();
+				// genymotionManager.terminate()
+
 				simulators.terminate();
 				
 				devices.addEventListener(Event.COMPLETE, devicesTerminateComplete);
 				devices.terminate();
-				
-				genymotionManager.terminate()
+
+				// TweenMax.delayedCall(5.00, closeApp);
 			}
 			
 			private function devicesTerminateComplete(ev:Event):void {
-				TweenMax.delayedCall(2.00, closeApp);
+				TweenMax.delayedCall(5.00, closeApp);
 			}
 			
 			private function closeApp():void {

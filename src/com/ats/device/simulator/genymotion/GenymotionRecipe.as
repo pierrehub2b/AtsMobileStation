@@ -38,10 +38,10 @@ import mx.core.FlexGlobals;
 		
 		public function startInstance():void {
 			var instanceName:String = generateInstanceName()
-			var newInstance:GenymotionInstance = new GenymotionInstance({'name':instanceName})
+			var newInstance:GenymotionSaasSimulator = new GenymotionSaasSimulator({'name':instanceName})
 			addInstance(newInstance)
 
-			GmsaasManager.getInstance().startInstance(uuid, instanceName, function(result:GenymotionInstance, error:String):void {
+			GmsaasManager.getInstance().startInstance(uuid, instanceName, function(result:GenymotionSaasSimulator, error:String):void {
 				if (error) {
 					removeInstance(newInstance)
 					trace(error)
@@ -57,8 +57,8 @@ import mx.core.FlexGlobals;
 			})
 		}
 
-		public function addInstance(instance:GenymotionInstance):void {
-			instance.addEventListener(GenymotionInstance.EVENT_STOPPED, stoppedInstanceHandler, false, 0, true)
+		public function addInstance(instance:GenymotionSaasSimulator):void {
+			instance.addEventListener(GenymotionSaasSimulator.EVENT_STOPPED, stoppedInstanceHandler, false, 0, true)
 			instance.recipeUuid = uuid
 			instance.instanceNumber = attributeInstanceNumber()
 			instance.modelName = name
@@ -68,20 +68,20 @@ import mx.core.FlexGlobals;
 			FlexGlobals.topLevelApplication.simulators.collection.addItem(instance)
 		}
 
-		public function removeInstance(instance:GenymotionInstance):void {
-			instance.removeEventListener(GenymotionInstance.EVENT_STOPPED, stoppedInstanceHandler)
+		public function removeInstance(instance:GenymotionSaasSimulator):void {
+			instance.removeEventListener(GenymotionSaasSimulator.EVENT_STOPPED, stoppedInstanceHandler)
 			instances.removeItem(instance)
 			FlexGlobals.topLevelApplication.simulators.collection.removeItem(instance)
 		}
 
 		private function stoppedInstanceHandler(event:Event):void {
-			var instance:GenymotionInstance = event.currentTarget as GenymotionInstance
+			var instance:GenymotionSaasSimulator = event.currentTarget as GenymotionSaasSimulator
 			removeInstance(instance)
 		}
 
 		private function attributeInstanceNumber():int {
 			var number:int = 0
-			for each (var instance:GenymotionInstance in instances) {
+			for each (var instance:GenymotionSaasSimulator in instances) {
 				if (number == instance.instanceNumber) number++
 			}
 
@@ -89,7 +89,7 @@ import mx.core.FlexGlobals;
 		}
 
 		public function stopAllInstances():void {
-			for each (var instance:GenymotionInstance in instances) {
+			for each (var instance:GenymotionSaasSimulator in instances) {
 				instance.stopSim()
 			}
 		}

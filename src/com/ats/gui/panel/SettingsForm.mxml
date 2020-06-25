@@ -7,13 +7,15 @@
 			>
 	<fx:Script>
 		<![CDATA[
-			import com.ats.helpers.Settings;
-			import com.ats.managers.gmsaas.GmsaasInstaller;
-			import com.ats.tools.PeerGroupConnection;
-			
-			import mx.events.FlexEvent;
-			
-			public function reload(peer:PeerGroupConnection):void
+		import com.ats.gui.alert.CredentialsAlert;
+		import com.ats.helpers.Settings;
+		import com.ats.managers.gmsaas.GmsaasInstaller;
+		import com.ats.tools.PeerGroupConnection;
+
+		import mx.core.FlexGlobals;
+		import mx.managers.PopUpManager;
+
+		public function reload(peer:PeerGroupConnection):void
 			{
 				msName.text = peer.name;
 				msDescription.text = peer.description;
@@ -29,6 +31,58 @@
 				gmsaasInstallButton.enabled = !value
 				gmsaasCredentialsButton.enabled = value
 			}
+
+			protected function installGmsaas(event:Event):void {
+				try {
+					var installer:GmsaasInstaller = new GmsaasInstaller()
+					genymotionInfoLabel.text = "Installing..."
+					installer.install(function (error:String=null):void {
+						genymotionInfoLabel.text = null
+
+						if (error) {
+							trace(error)
+							return
+						}
+
+						gmsaas = true
+						FlexGlobals.topLevelApplication.genymotionManager.visible = true
+					})
+				} catch (error:Error) {
+					trace(error)
+				}
+			}
+
+			protected function uninstallGmsaas(event:Event):void {
+				try {
+					var installer:GmsaasInstaller = new GmsaasInstaller()
+					genymotionInfoLabel.text = "Uninstalling..."
+					installer.uninstall(function (error:String=null):void {
+						genymotionInfoLabel.text = null
+
+						if (error) {
+							trace(error)
+							return
+						}
+
+						gmsaas = false
+						FlexGlobals.topLevelApplication.genymotionManager.visible = false
+					})
+				} catch (error:Error) {
+					trace(error)
+				}
+			}
+
+			protected function editCredentials(event:Event):void {
+				const credentialsAlert:CredentialsAlert = new CredentialsAlert();
+				credentialsAlert.successCallback = credentialsCompleteHandler
+				PopUpManager.addPopUp(credentialsAlert, this, true);
+				PopUpManager.centerPopUp(credentialsAlert);
+			}
+
+			private function credentialsCompleteHandler(alert:CredentialsAlert):void {
+				PopUpManager.removePopUp(alert)
+			}
+
 		]]>
 	</fx:Script>
 	<text:InputText id="msName" label="Mobile Station name" width="100%"/>
@@ -48,11 +102,11 @@
 		<panels:InsetPanel label="Genymotion Cloud" width="100%" height="100%"/>
 		<s:HGroup width="100%" top="26" paddingLeft="7" paddingRight="5" paddingBottom="5"
 				  horizontalAlign="center">
-			<buttons:SmallButton id="gmsaasInstallButton" label="Install components" fontSize="12"/>
-			<buttons:SmallButton id="gmsaasCredentialsButton" label="Set credentials" fontSize="12"/>
-			<buttons:SmallButton id="gmsaasUninstallButton" label="Uninstall" fontSize="12"/>
-			
+			<buttons:SmallButton id="gmsaasInstallButton" label="Install components" click="installGmsaas(event)" fontSize="12"/>
+			<buttons:SmallButton id="gmsaasCredentialsButton" label="Set credentials" click="editCredentials(event)" fontSize="12"/>
+			<buttons:SmallButton id="gmsaasUninstallButton" label="Uninstall" click="uninstallGmsaas(event)" fontSize="12"/>
 		</s:HGroup>
+		<s:Label id="genymotionInfoLabel" color="white"/>
 	</s:Group>
 	<s:Spacer height="10"/>
 	<text:InputText label="Apple development team ID" width="100%" enabled="false"/>

@@ -1,7 +1,7 @@
 package com.ats.managers.gmsaas {
 
 import com.ats.device.simulator.genymotion.GenymotionRecipe;
-import com.ats.device.simulator.genymotion.GenymotionInstance;
+import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
 import com.ats.helpers.Settings;
 import com.ats.helpers.Version;
 
@@ -74,7 +74,7 @@ public class GmsaasManager {
                 var instancesInfo:Array = json['instances']
                 for each (var info:Object in instancesInfo) {
                     try {
-                        var instance:GenymotionInstance = new GenymotionInstance(info)
+                        var instance:GenymotionSaasSimulator = new GenymotionSaasSimulator(info)
                         instances.push(instance)
                     } catch (error:Error) { trace(error.message) }
                 }
@@ -97,7 +97,7 @@ public class GmsaasManager {
 
             try {
                 var info:Object = json['instance']
-                var instance:GenymotionInstance = new GenymotionInstance(info)
+                var instance:GenymotionSaasSimulator = new GenymotionSaasSimulator(info)
                 process.callback(instance, null)
             } catch (error:Error) {
                 process.callback(null, error.message)
@@ -117,7 +117,7 @@ public class GmsaasManager {
 
             try {
                 var info:Object = json['instance']
-                var instance:GenymotionInstance = new GenymotionInstance(info)
+                var instance:GenymotionSaasSimulator = new GenymotionSaasSimulator(info)
                 process.callback(instance, null)
             } catch (error:Error) {
                 process.callback(null, error.message)
@@ -137,7 +137,7 @@ public class GmsaasManager {
 
             try {
                 var info:Object = json['instance']
-                var instance:GenymotionInstance = new GenymotionInstance(info)
+                var instance:GenymotionSaasSimulator = new GenymotionSaasSimulator(info)
                 process.callback(instance, null)
             } catch (error:Error) {
                 process.callback(null, error.message)
@@ -157,7 +157,7 @@ public class GmsaasManager {
 
             try {
                 var info:Object = json['instance']
-                var instance:GenymotionInstance = new GenymotionInstance(info)
+                var instance:GenymotionSaasSimulator = new GenymotionSaasSimulator(info)
                 process.callback(instance, null)
             } catch (error:Error) {
                 process.callback(null, error.message)

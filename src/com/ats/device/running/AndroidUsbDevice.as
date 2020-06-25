@@ -80,6 +80,8 @@ public class AndroidUsbDevice extends AndroidDevice {
     // ----
 
     private function fetchLocalPort():void {
+        writeDebugLogs("Fetching local port")
+
         var portSwitcher:PortSwitcher = new PortSwitcher();
         portSwitcher.addEventListener(PortSwitcher.PORT_NOT_AVAILABLE_EVENT, portSwitcherErrorHandler, false, 0, true);
 
@@ -187,6 +189,8 @@ public class AndroidUsbDevice extends AndroidDevice {
     }
 
     override protected function fetchIpAddress():void {
+        writeDebugLogs("Fetching ip address")
+
         networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_FOUND, localAddressFoundHandler, false, 0, true);
         networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, localAddressNotFoundHandler, false, 0, true);
 
@@ -199,6 +203,9 @@ public class AndroidUsbDevice extends AndroidDevice {
     }
 
     override protected function execute():void {
+        writeDebugLogs("Starting driver")
+
+
         var processInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
         processInfo.executable = currentAdbFile
         processInfo.arguments = new <String>[
