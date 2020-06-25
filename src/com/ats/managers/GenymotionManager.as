@@ -1,7 +1,7 @@
 package com.ats.managers
 {
 import com.ats.device.simulator.Simulator;
-import com.ats.device.simulator.genymotion.GenymotionInstance;
+import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
 import com.ats.device.simulator.genymotion.GenymotionRecipe;
 import com.ats.managers.gmsaas.GmsaasInstaller;
 import com.ats.managers.gmsaas.GmsaasManager;
@@ -33,7 +33,7 @@ public class GenymotionManager {
 	private function cleanGenymotionInstances():void {
 		var allSimulators:ArrayCollection = FlexGlobals.topLevelApplication.simulators.collection
 		var genymotionInstances:ArrayCollection = new ArrayCollection(allSimulators.toArray())
-		genymotionInstances.filterFunction = function(item:Object):Boolean { return item is GenymotionInstance }
+		genymotionInstances.filterFunction = function(item:Object):Boolean { return item is GenymotionSaasSimulator }
 		genymotionInstances.refresh()
 
 		for each (var instance:Simulator in genymotionInstances) { allSimulators.removeItem(instance) }
@@ -89,7 +89,7 @@ public class GenymotionManager {
 	}
 
 	private function exec():void {
-		var instance:GenymotionInstance;
+		var instance:GenymotionSaasSimulator;
 		for each (instance in existingInstances) {
 			attachInstance(instance)
 		}
@@ -97,7 +97,7 @@ public class GenymotionManager {
 		loading = false
 	}
 
-	private function attachInstance(instance:GenymotionInstance):void {
+	private function attachInstance(instance:GenymotionSaasSimulator):void {
 		for each (var recipe:GenymotionRecipe in recipes) {
 			if (recipe.uuid == instance.recipeUuid) {
 				instance.statusOn()
@@ -114,7 +114,7 @@ public class GenymotionManager {
 
 	public function terminate():void {
 		for each (var recipe:GenymotionRecipe in recipes) {
-			for each (var instance:GenymotionInstance in recipe.instances) {
+			for each (var instance:GenymotionSaasSimulator in recipe.instances) {
 				instance.adbDisconnect()
 			}
 		}

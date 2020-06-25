@@ -5,59 +5,54 @@
 							creationComplete="creationCompleteHandler(event)">
 	<fx:Script>
 		<![CDATA[
-		import com.ats.device.simulator.genymotion.GenymotionInstance;
-		import com.greensock.TweenMax;
-			
-			import flash.filters.BitmapFilterQuality;
-			
-			import mx.events.FlexEvent;
-			
-			import spark.filters.ColorMatrixFilter;
-			import spark.filters.DropShadowFilter;
-			
-			import com.ats.device.Device;
-			import com.ats.device.simulator.IosSimulator;
-			import com.ats.device.simulator.Simulator;
-			
-			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
-			private static const greyFilter:ColorMatrixFilter = new ColorMatrixFilter([0.3,0.59,0.11,0, 0,0.3,0.59,0.11,0,0,0.3,0.59,0.11,0,0,0,0,0,1,0]);
-			
-			protected function startStopButton_clickHandler(event:MouseEvent):void
-			{
-				sim.startStop()
-			}
-			
-			protected function button_rollOverHandler(event:MouseEvent):void
-			{
-				if(sim.status == Simulator.RUNNING){
-					showOverButton("turnoff");
-				}else if(sim.status == Simulator.OFF){
-					showOverButton("turnon");
-				}
-			}
-			
-			private function showOverButton(value:String):void{
-				overButton.source = "assets/icons/24/" + value + ".png";
-				overButton.visible = true;
-				TweenMax.fromTo(overButton, 0.2, {alpha:0.0}, {alpha:1.0})
-			}
-			
-			protected function button_rollOutHandler(event:MouseEvent):void
-			{
-				overButton.visible = false;
-			}
-			
-			protected function removedFromStageHandler(event:Event):void
-			{
-				mainGroup.filters = []
-			}
-			
-			protected function creationCompleteHandler(event:FlexEvent):void
-			{
-				overButton.visible = false;
-			}
-			
-		]]>
+        import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
+        import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
+        import com.greensock.TweenMax;
+
+        import flash.filters.BitmapFilterQuality;
+
+        import mx.events.FlexEvent;
+
+        import spark.filters.ColorMatrixFilter;
+        import spark.filters.DropShadowFilter;
+
+        import com.ats.device.Device;
+        import com.ats.device.simulator.IosSimulator;
+        import com.ats.device.simulator.Simulator;
+
+        public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
+        private static const greyFilter:ColorMatrixFilter = new ColorMatrixFilter([0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0, 0, 0, 1, 0]);
+
+        protected function startStopButton_clickHandler(event:MouseEvent):void {
+            sim.startStop()
+        }
+
+        protected function button_rollOverHandler(event:MouseEvent):void {
+            if (sim.status == Simulator.RUNNING) {
+                showOverButton("turnoff");
+            } else if (sim.status == Simulator.OFF) {
+                showOverButton("turnon");
+            }
+        }
+
+        private function showOverButton(value:String):void {
+            overButton.source = "assets/icons/24/" + value + ".png";
+            overButton.visible = true;
+            TweenMax.fromTo(overButton, 0.2, {alpha: 0.0}, {alpha: 1.0})
+        }
+
+        protected function button_rollOutHandler(event:MouseEvent):void {
+            overButton.visible = false;
+        }
+
+        protected function removedFromStageHandler(event:Event):void {
+            mainGroup.filters = []
+        }
+
+        protected function creationCompleteHandler(event:FlexEvent):void {
+            overButton.visible = false;
+        }
+        ]]>
 	</fx:Script>
 	<s:Rect	left="0" right="0" top="1" bottom="1" alpha="0.2" radiusX="0" radiusY="0">
 		<s:fill>
@@ -82,9 +77,11 @@
 						   filters="{(data as Simulator).status==Simulator.RUNNING?[]:[greyFilter]}"/>
 			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
 				<s:Label text="{sim.modelName}" fontWeight="bold" color="{(data as Simulator).status==Simulator.OFF?0x968ca3:0x113b55}" maxWidth="234" maxDisplayedLines="1"/>
-				<s:HGroup color="#e4e7e9">
-					<s:Label text="{sim.osVersion}" fontSize="11" fontStyle="italic"/>
-					<s:Label text="- Genymotion" fontSize="11" fontStyle="italic" visible="{data is GenymotionInstance}"/>
+
+				<s:HGroup>
+					<s:Label text="{sim.osVersion}" fontSize="11" fontStyle="italic" color="#758696"/>
+					<s:Label text="- Genymotion" fontSize="11" fontStyle="italic" color="#758696" visible="{data is GenymotionSaasSimulator}"/>
+
 				</s:HGroup>
 			</s:VGroup>
 		</s:HGroup>

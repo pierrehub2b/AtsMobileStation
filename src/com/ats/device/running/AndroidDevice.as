@@ -139,6 +139,8 @@ public class AndroidDevice extends RunningDevice
 		private var processOutput:String
 
 		private function fetchDeviceInfo():void {
+			writeDebugLogs("Fetching device info")
+
 			processError = ""
 			processOutput = ""
 
@@ -182,6 +184,9 @@ public class AndroidDevice extends RunningDevice
 					errorMessage = "Please wait until the device is started"
 					booted = false
 					status = BOOT
+				} else {
+					error = "Unknow error"
+					errorMessage = "Please wait until the device is started"
 				}
 
 				return
@@ -229,6 +234,10 @@ public class AndroidDevice extends RunningDevice
 			this.modelName = modelName.replace(myRegexPattern, "");
 
 			var deviceOsVersion:Version = new com.ats.helpers.Version(osVersion)
+			trace("Device version : " + deviceOsVersion.stringValue)
+
+
+
 			if (deviceOsVersion.compare(new Version("5.1")) == com.ats.helpers.Version.INFERIOR) {
 				status = ERROR
 				error = "Android version not compatible"
@@ -269,6 +278,8 @@ public class AndroidDevice extends RunningDevice
 
 
 		protected function uninstallDriver():void {
+			writeDebugLogs("Uninstall driver")
+
 			var processInfo: NativeProcessStartupInfo = new NativeProcessStartupInfo()
 			processInfo.executable = currentAdbFile
 			processInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", ANDROID_DRIVER];

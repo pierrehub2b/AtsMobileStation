@@ -9,7 +9,7 @@ import mx.events.CloseEvent;
 
 import spark.components.Alert;
 
-public class GenymotionInstance extends Simulator {
+public class GenymotionSaasSimulator extends Simulator {
 
 	public static const GENYMOTION_ERROR_INCOMPATIBLE_VERSION_NUMBERS:String = "incompatible version numbers"
 	public static const GENYMOTION_ERROR_NO_NETWORK_CONNECTION:String = "no network connection"
@@ -53,7 +53,7 @@ public class GenymotionInstance extends Simulator {
 	[Bindable]
 	public var enabled:Boolean = false
 
-	public function GenymotionInstance(info:Object) {
+	public function GenymotionSaasSimulator(info:Object) {
 		uuid = info['uuid']
 		name = info['name']
 		adbSerial = info['adb_serial']
@@ -76,7 +76,7 @@ public class GenymotionInstance extends Simulator {
 	public function adbConnect():void {
 		enabled = true
 
-		GmsaasManager.getInstance().adbConnect(uuid, function(result:GenymotionInstance, error:String):void {
+		GmsaasManager.getInstance().adbConnect(uuid, function(result:GenymotionSaasSimulator, error:String):void {
 			if (error) {
 				trace("GM - ADB Connect Error : " + error)
 			}
@@ -87,7 +87,7 @@ public class GenymotionInstance extends Simulator {
 		enabled = false
 		statusOff()
 
-		GmsaasManager.getInstance().adbDisconnect(uuid, function(result:GenymotionInstance, error:String):void {
+		GmsaasManager.getInstance().adbDisconnect(uuid, function(result:GenymotionSaasSimulator, error:String):void {
 			if (error) {
 				trace("GM - ADB Connect Error : " + error)
 			}
@@ -128,13 +128,13 @@ public class GenymotionInstance extends Simulator {
 
 		var gmsaasManager:GmsaasManager = GmsaasManager.getInstance()
 
-		gmsaasManager.adbDisconnect(uuid, function(result:GenymotionInstance, error:String):void {
+		/* gmsaasManager.adbDisconnect(uuid, function(result:GenymotionSaasSimulator, error:String):void {
 			if (error) {
 				trace(error)
 				return
-			}
+			} */
 
-			gmsaasManager.stopInstance(uuid, function(result:GenymotionInstance, error:String):void {
+			gmsaasManager.stopInstance(uuid, function(result:GenymotionSaasSimulator, error:String):void {
 				if (error) {
 					trace(error)
 					return
@@ -146,7 +146,7 @@ public class GenymotionInstance extends Simulator {
 
 				dispatchEvent(new Event(EVENT_STOPPED))
 			})
-		})
+		// })
 	}
 }
 }

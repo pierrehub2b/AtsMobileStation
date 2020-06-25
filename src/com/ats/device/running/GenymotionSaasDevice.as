@@ -9,7 +9,7 @@ import flash.events.ProgressEvent;
 public class GenymotionSaasDevice extends AndroidUsbDevice {
 
     private static const atsdroidRemoteFilePath:String = "http://actiontestscript.com/drivers/mobile/atsdroid.apk"
-    private static const apkOutputPath:String = "/sdcard/" + ANDROID_DRIVER
+    private static const apkOutputPath:String = "/sdcard/atsdroid.apk"
 
     public function GenymotionSaasDevice(id:String, settings:DeviceSettings) {
         super(id, true, settings);
@@ -20,6 +20,8 @@ public class GenymotionSaasDevice extends AndroidUsbDevice {
     }
 
     override protected function installDriver():void {
+        writeDebugLogs("Downloading APK")
+
         var info:NativeProcessStartupInfo = new NativeProcessStartupInfo()
         info.executable = currentAdbFile
 
@@ -48,6 +50,8 @@ public class GenymotionSaasDevice extends AndroidUsbDevice {
             errorMessage = errorData
             return
         }
+
+        writeDebugLogs("Installing driver")
 
         var info:NativeProcessStartupInfo = new NativeProcessStartupInfo()
         info.executable = currentAdbFile
