@@ -7,7 +7,7 @@ package com.ats.gui.renderer
 		public function DeviceRenderer()
 		{
 			super();
-			autoDrawBackground = true;
+			autoDrawBackground = false;
 			height = 40;
 		}
 		

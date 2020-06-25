@@ -3,7 +3,6 @@
 						 xmlns:s="library://ns.adobe.com/flex/spark" 
 						 removedFromStage="removedFromStageHandler(event)"
 						 xmlns:renderer="com.ats.gui.renderer.*">
-	
 	<fx:Script>
 		<![CDATA[
         import com.ats.gui.panel.DeviceSettingsWindow;
@@ -82,6 +81,20 @@
         }
         ]]>
 	</fx:Script>
+	<s:Rect	left="0" right="0" top="1" bottom="1" alpha="0.2" radiusX="0" radiusY="0">
+		<s:fill>
+			<s:LinearGradient id="grad" rotation="-90">
+				<s:GradientEntry id="colorTop" color="0x5a636c"/>
+				<s:GradientEntry id="colorBottom" color="0x171e28"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:LinearGradientStroke rotation="90">
+				<s:GradientEntry id="stroke1" color="0x6e7780"/>
+				<s:GradientEntry id="stroke2" color="0x0f1217"/>
+			</s:LinearGradientStroke>
+		</s:stroke>
+	</s:Rect>
 	<s:Group id="mainGroup" width="100%" verticalCenter="0" filters="{dropShadowFilterMiddle}"
 			 rollOver="mainGroup_rollOverHandler(event)" rollOut="mainGroup_rollOutHandler(event)">
 		<s:HGroup id="firstGroup" verticalAlign="middle" mouseDown="mouseDownHandler(event)" gap="0"

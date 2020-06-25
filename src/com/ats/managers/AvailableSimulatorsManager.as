@@ -129,9 +129,9 @@ public class AvailableSimulatorsManager extends EventDispatcher
 				}
 				
 				if (collection.length == 0) {
-					info = String("No simulators found !\n(Xcode may not be installed on this station !)");
+					info = "No simulators found !\n(Xcode may not be installed on this station !)";
 				} else {
-					info = String("");
+					info = "";
 				}
 			}			
 		}

@@ -59,7 +59,20 @@
 			
 		]]>
 	</fx:Script>
-		
+	<s:Rect	left="0" right="0" top="1" bottom="1" alpha="0.2" radiusX="0" radiusY="0">
+		<s:fill>
+			<s:LinearGradient id="grad" rotation="-90">
+				<s:GradientEntry id="colorTop" color="0x5a636c"/>
+				<s:GradientEntry id="colorBottom" color="0x171e28"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:LinearGradientStroke rotation="90">
+				<s:GradientEntry id="stroke1" color="0x6e7780"/>
+				<s:GradientEntry id="stroke2" color="0x0f1217"/>
+			</s:LinearGradientStroke>
+		</s:stroke>
+	</s:Rect>
 	<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" verticalCenter="0"
 			  paddingRight="6" paddingLeft="5" filters="{dropShadowFilterMiddle}"
 			  rollOver="button_rollOverHandler(event)" rollOut="button_rollOutHandler(event)">
@@ -69,9 +82,9 @@
 						   filters="{(data as Simulator).status==Simulator.RUNNING?[]:[greyFilter]}"/>
 			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
 				<s:Label text="{sim.modelName}" fontWeight="bold" color="{(data as Simulator).status==Simulator.OFF?0x968ca3:0x113b55}" maxWidth="234" maxDisplayedLines="1"/>
-				<s:HGroup>
-					<s:Label text="{sim.osVersion}" fontSize="11" fontStyle="italic" color="#758696"/>
-					<s:Label text="- Genymotion" fontSize="11" fontStyle="italic" color="#758696" visible="{data is GenymotionInstance}"/>
+				<s:HGroup color="#e4e7e9">
+					<s:Label text="{sim.osVersion}" fontSize="11" fontStyle="italic"/>
+					<s:Label text="- Genymotion" fontSize="11" fontStyle="italic" visible="{data is GenymotionInstance}"/>
 				</s:HGroup>
 			</s:VGroup>
 		</s:HGroup>
