@@ -59,10 +59,10 @@
 		<!-- <title></title> -->
 
 		<!-- The type of system chrome to use (either "standard" or "none"). Optional. Default standard. -->
-		<!-- <systemChrome></systemChrome> -->
+		<systemChrome>none</systemChrome>
 
 		<!-- Whether the window is transparent. Only applicable when systemChrome is none. Optional. Default false. -->
-		<!-- <transparent></transparent> -->
+		<transparent>true</transparent>
 
 		<!-- Whether the window is initially visible. Optional. Default false. -->
 		<!-- <visible></visible> -->
@@ -77,10 +77,10 @@
 		<resizable>false</resizable>
 
 		<!-- The window's initial width in pixels. Optional. -->
-		<width>400</width>
+		<width>460</width>
 
 		<!-- The window's initial height in pixels. Optional. -->
-		<height>600</height>
+		<height>640</height>
 
 		<!-- The window's initial x position. Optional. -->
 		<x>10</x>

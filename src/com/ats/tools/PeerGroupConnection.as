@@ -129,6 +129,7 @@ import mx.events.CollectionEvent;
 		}
 		
 		private function initData(info:Object):void{
+			
 			name = info.name
 			description = info.description
 			identifier = info.identifier

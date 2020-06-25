@@ -8,6 +8,7 @@ package com.ats.managers
 	import com.ats.device.simulator.IosSimulator;
 	import com.ats.device.simulator.Simulator;
 	import com.greensock.TweenLite;
+	import com.greensock.TweenMax;
 	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
@@ -34,13 +35,13 @@ package com.ats.managers
 		private const simCtlArgs:Vector.<String> = new <String>["xcrun", "simctl", "list", "devices", "-j"];
 		private const adbListDevicesArgs:Vector.<String> = new <String>["devices", "-l"];
 		private const adbKillServer:Vector.<String> = new <String>["kill-server"];
-						
+		
 		public static const endOfMessage:String = "<$ATSDROID_endOfMessage$>";
 		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/;
 		private const jsonPattern:RegExp = /\{[^]*\}/;
 		private const newlineTabPattern:RegExp = /[\n\t]/g;
 		public static const responseSplitter:String = "<$atsDroid_ResponseSPLIITER$>";
-				
+		
 		private var adbFile:File;
 		
 		private var androidOutput:String;
@@ -48,20 +49,20 @@ package com.ats.managers
 		
 		private var adbLoop:TweenLite;
 		private var iosLoop:TweenLite;
-
+		
 		[Bindable]
 		public var collection:ArrayCollection = new ArrayCollection();
 		
 		public static var devTeamId:String = "";
 		
 		private var usbDevicesIdList:Vector.<String>;
-
+		
 		public function RunningDevicesManager(isMacos:Boolean, adbFolder:File)
 		{
 			if (isMacos) {
 				
 				adbFile = adbFolder.resolvePath("adb");
-								
+				
 				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 				procInfo.executable = new File("/bin/chmod");			
 				procInfo.workingDirectory = File.applicationDirectory.resolvePath("assets/tools");
@@ -118,12 +119,12 @@ package com.ats.managers
 		
 		private function launchAdbProcess():void{
 			androidOutput = ""
-
+			
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfo.executable = adbFile;			
 			procInfo.workingDirectory = File.userDirectory;
 			procInfo.arguments = adbListDevicesArgs;
-
+			
 			var proc:NativeProcess = new NativeProcess();
 			proc.addEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit, false, 0, true);
 			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData, false, 0, true);
@@ -141,7 +142,7 @@ package com.ats.managers
 			ev.target.removeEventListener(NativeProcessExitEvent.EXIT, onReadAndroidDevicesExit);
 			ev.target.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadAndroidDevicesData);
 			ev.target.closeInput();
-						
+			
 			//------------------------------------------------------------------------------------------
 			
 			var data:Array = androidOutput.split("\n");
@@ -158,11 +159,11 @@ package com.ats.managers
 					const info:Array = data[i].split(/\s+/g);
 					const runningId:String = info[0];
 					const deviceState:String = info[1]
-
+					
 					const isEmulator:Boolean = isSimulator(info)
-
+					
 					runningIds.push(runningId);
-										
+					
 					if (info.length > 2 && runningId.length > 0 && deviceState == "device") {
 						dev = findDevice(runningId);
 						
@@ -175,7 +176,9 @@ package com.ats.managers
 						} else {
 							dev = AndroidDevice.setup(runningId, isEmulator);
 							dev.addEventListener(Device.STOPPED_EVENT, deviceStoppedHandler, false, 0, true);
-							dev.start();
+							
+							TweenMax.delayedCall(2*i, dev.start)
+							//dev.start();
 							
 							collection.addItem(dev);
 							collection.refresh();
@@ -193,7 +196,7 @@ package com.ats.managers
 			System.gc();
 			adbLoop.restart(true);
 		}
-
+		
 		private function isSimulator(info:Array):Boolean {
 			var isSimulator:Boolean = false
 			for each (var line:String in info) {
@@ -202,7 +205,7 @@ package com.ats.managers
 					return deviceName.indexOf("generic") == 0 || deviceName.indexOf("vbox") == 0
 				}
 			}
-
+			
 			return isSimulator
 		}
 		
@@ -231,7 +234,7 @@ package com.ats.managers
 		}
 		
 		private function onUsbDeviceExit(ev:NativeProcessExitEvent):void{
-						
+			
 			ev.target.removeEventListener(NativeProcessExitEvent.EXIT, onUsbDeviceExit);
 			ev.target.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
 			ev.target.closeInput();
@@ -245,7 +248,7 @@ package com.ats.managers
 				output = output.substr(plistNodeIndex + 21, output.length - plistNodeIndex - 29);
 				
 				usbDevicesIdList = new Vector.<String>();
-					
+				
 				var plist:Plist10 = new Plist10(output);
 				const usbPorts:Array = plist.root._items.object as Array;
 				
@@ -321,7 +324,7 @@ package com.ats.managers
 			//dev.dispose();
 			dev.close();
 		}
-				
+		
 		public function findDevice(id:String):RunningDevice{
 			for each(var dv:RunningDevice in collection) {
 				if(dv.id == id){
@@ -349,14 +352,14 @@ package com.ats.managers
 							dev = (sim as IosSimulator).GetDevice;
 							dev.start();
 							dev.addEventListener(Device.STOPPED_EVENT, deviceStoppedHandler, false, 0, true);
-
+							
 							collection.addItem(dev);
 							collection.refresh();
 						}
 					}
 				}
 			}
-
+			
 			iosLoop.restart(true);
 		}
 	}
