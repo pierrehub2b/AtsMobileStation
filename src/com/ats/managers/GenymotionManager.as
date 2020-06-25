@@ -14,7 +14,9 @@ public class GenymotionManager {
 
 	[Bindable]
 	public var recipes:ArrayCollection
-	private var existingInstances:ArrayCollection
+	
+	[Bindable]
+	public var instances:ArrayCollection
 
 	[Bindable]
 	public var loading:Boolean = false;
@@ -69,7 +71,7 @@ public class GenymotionManager {
 
 	private var fetchingInstances:Boolean = false
 	private function fetchInstancesList():void {
-		existingInstances = new ArrayCollection()
+		instances = new ArrayCollection()
 		fetchingInstances = true
 
 		GmsaasManager.getInstance().fetchInstances(function (results:Array, error:String):void {
@@ -80,7 +82,7 @@ public class GenymotionManager {
 				return
 			}
 
-			existingInstances = new ArrayCollection(results)
+			instances = new ArrayCollection(results)
 
 			if (!fetchingRecipes) {
 				exec()
@@ -90,7 +92,7 @@ public class GenymotionManager {
 
 	private function exec():void {
 		var instance:GenymotionSaasSimulator;
-		for each (instance in existingInstances) {
+		for each (instance in instances) {
 			attachInstance(instance)
 		}
 

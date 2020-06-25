@@ -5,77 +5,79 @@
 	xmlns:renderer="com.ats.gui.renderer.*"
 	width="100%" rollOver="simulatorrenderer1_rollOverHandler(event)"
 	rollOut="simulatorrenderer1_rollOutHandler(event)"
-	click="itemrenderer1_clickHandler(event)">
+	click="itemrenderer1_clickHandler(event)" xmlns:buttons="com.caipture.gui.buttons.*">
 	
 	<fx:Script>
 		<![CDATA[
-		import com.ats.device.simulator.genymotion.GenymotionRecipe;
-		import com.ats.device.simulator.genymotion.GenymotionRecipe;
-		import com.ats.device.simulator.genymotion.GenymotionRecipe;
-		import com.ats.device.simulator.genymotion.GenymotionRecipe;
-		import com.ats.device.simulator.Simulator;
-		import com.greensock.TweenMax;
-
-		import flash.filters.BitmapFilterQuality;
-
-		import mx.collections.ArrayCollection;
-		import mx.events.CollectionEvent;
-		import mx.events.FlexEvent;
-
-		import spark.filters.ColorMatrixFilter;
-		import spark.filters.DropShadowFilter;
-
-		public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
-		private static const greyFilter:ColorMatrixFilter = new ColorMatrixFilter([0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0, 0, 0, 1, 0])
-
-		override public function set data(value:Object):void {
-			if (super.data == null || super.data != value) {
-				super.data = value;
-				dispatchEvent(new Event("updateDataEvent"))
+			import com.ats.device.simulator.genymotion.GenymotionRecipe;
+			import com.ats.device.simulator.genymotion.GenymotionRecipe;
+			import com.ats.device.simulator.genymotion.GenymotionRecipe;
+			import com.ats.device.simulator.genymotion.GenymotionRecipe;
+			import com.ats.device.simulator.Simulator;
+			import com.greensock.TweenMax;
+			
+			import flash.filters.BitmapFilterQuality;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CollectionEvent;
+			import mx.events.FlexEvent;
+			
+			import spark.filters.ColorMatrixFilter;
+			import spark.filters.DropShadowFilter;
+			
+			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
+			private static const greyFilter:ColorMatrixFilter = new ColorMatrixFilter([0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0, 0, 0, 1, 0])
+			
+			override public function set data(value:Object):void {
+				if (super.data == null || super.data != value) {
+					super.data = value;
+					dispatchEvent(new Event("updateDataEvent"))
+				}
 			}
-		}
-
-		[Bindable(event="updateDataEvent")]
-		public override function get sim():Simulator {
-			return data as Simulator
-		}
-
-		protected function startStopButton_clickHandler(event:MouseEvent):void {
-			(data as GenymotionRecipe).startInstance()
-		}
-
-		protected function removedFromStageHandler(event:Event):void {
-			mainGroup.filters = []
-		}
-
-		/*protected function creationCompleteHandler(event:FlexEvent):void {
+			
+			[Bindable(event="updateDataEvent")]
+			public override function get sim():Simulator {
+				return data as Simulator
+			}
+			
+			protected function removedFromStageHandler(event:Event):void {
+				mainGroup.filters = []
+			}
+			
+			/*protected function creationCompleteHandler(event:FlexEvent):void {
 			(data as GenymotionRecipe).instances.addEventListener(CollectionEvent.COLLECTION_CHANGE, collectionChangeHandler);
 			calculateRowHeight()
-		}
-
-		private function collectionChangeHandler(event:CollectionEvent):void {
-			calculateRowHeight()
-		}
-
-		private function calculateRowHeight():void {
-			height = (data as GenymotionRecipe).instances.length > 0 ? 50 : 40
-		}*/
-
-		protected function simulatorrenderer1_rollOverHandler(event:MouseEvent):void {
-			plusButton.visible = true;
-			if (selected) {
-				TweenMax.fromTo(plusButton, 0.3, {alpha: 0.5}, {alpha: 1.0})
 			}
-		}
-
-		protected function simulatorrenderer1_rollOutHandler(event:MouseEvent):void {
-			plusButton.visible = false;
-			plusButton.alpha = 0.5;
-		}
-
-		protected function itemrenderer1_clickHandler(event:MouseEvent):void {
-			TweenMax.fromTo(plusButton, 0.3, {alpha: 0.5}, {alpha: 1.0})
-		}
+			
+			private function collectionChangeHandler(event:CollectionEvent):void {
+			calculateRowHeight()
+			}
+			
+			private function calculateRowHeight():void {
+			height = (data as GenymotionRecipe).instances.length > 0 ? 50 : 40
+			}*/
+			
+			protected function simulatorrenderer1_rollOverHandler(event:MouseEvent):void {
+				startButton.visible = true;
+				//if (selected) {
+				//	TweenMax.fromTo(plusButton, 0.3, {alpha: 0.5}, {alpha: 1.0})
+				//}
+			}
+			
+			protected function simulatorrenderer1_rollOutHandler(event:MouseEvent):void {
+				startButton.visible = false;
+				//plusButton.alpha = 0.5;
+			}
+			
+			protected function itemrenderer1_clickHandler(event:MouseEvent):void {
+				//TweenMax.fromTo(plusButton, 0.3, {alpha: 0.5}, {alpha: 1.0})
+			}
+			
+			protected function startButton_clickHandler(event:MouseEvent):void
+			{
+				(data as GenymotionRecipe).startInstance()
+			}
+			
 		]]>
 	</fx:Script>
 	
@@ -93,28 +95,36 @@
 			</s:LinearGradientStroke>
 		</s:stroke>
 	</s:Rect>
-	<s:VGroup width="100%" height="100%" verticalAlign="middle">
-		<s:HGroup id="mainGroup" width="100%" verticalAlign="middle" paddingRight="6" paddingLeft="5" filters="{dropShadowFilterMiddle}">
-			<s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true" gap="0">
-				<s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high" source="assets/icons/32/android.png"/>
-				<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
-					<s:HGroup>
-						<s:Label text="{data.name}" fontWeight="bold" maxWidth="234" maxDisplayedLines="1"/>
-						<s:Label text="({data.version.stringValue})" fontSize="11" fontStyle="italic"/>
-					</s:HGroup>
-					<s:Label text="{data.width} x {data.height}  (dpi:{data.dpi})" fontSize="11" fontStyle="italic" color="#e4e7e9"/>
-				</s:VGroup>
-			</s:HGroup>
-			<s:Spacer width="100%"/>
-			<s:Group id="plusButton" buttonMode="true" click="startStopButton_clickHandler(event)" height="24" width="24"
-					 toolTip="Start new instance" visible="false" alpha="0.5">
-				<s:BitmapImage id="iconStatus" source="assets/icons/24/plus0.png" smooth="true" smoothingQuality="high"/>
-			</s:Group>
+	
+	<s:HGroup id="mainGroup" width="100%" height="100%" verticalAlign="middle" paddingRight="6" paddingLeft="5" filters="{dropShadowFilterMiddle}">
+		<s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true" gap="0" width="100%">
+			<s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high" source="assets/icons/32/android.png"/>
+			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
+				<s:HGroup>
+					<s:Label text="{data.name}" fontWeight="bold" maxWidth="234" maxDisplayedLines="1"/>
+					<s:Label text="({data.version.stringValue})" fontSize="11" fontStyle="italic"/>
+				</s:HGroup>
+				<s:Label text="{data.width} x {data.height}  (dpi:{data.dpi})" fontSize="11" fontStyle="italic" color="#e4e7e9"/>
+			</s:VGroup>
 		</s:HGroup>
-		<!-- <s:List alternatingItemColors="[#efefef, #dedede]" borderVisible="false" width="100%"
-                includeInLayout="{(data as GenymotionRecipe).instances.length&gt;0}" visible="{(data as GenymotionRecipe).instances.length&gt;0}"
-                contentBackgroundAlpha="0.0" dataProvider="{(data as GenymotionRecipe).instances}"
-                itemRenderer="com.ats.gui.renderer.GenymotionRunningInstanceRenderer" useVirtualLayout="false"/> -->
-	</s:VGroup>
+
+		<s:Group height="100%">
+			<s:Label text="{(data as GenymotionRecipe).instances.length==0?'':(data as GenymotionRecipe).instances.length+' instance'}{(data as GenymotionRecipe).instances.length&gt;1?'s':''}" 
+					 top="7" fontSize="10" fontStyle="italic" color="#e4e7e9" right="0"/>
+			<buttons:SimpleButton id="startButton" label="start instance" fontSize="11" visible="false" bottom="4" right="0"
+								  click="startButton_clickHandler(event)"/>
+<!--			<s:Group id="plusButton" buttonMode="true" click="startStopButton_clickHandler(event)" height="16" width="16"
+					 toolTip="Start new instance" visible="false">
+				<s:BitmapImage id="iconStatus" source="assets/icons/16/plus.png" smooth="true" smoothingQuality="high"/>
+			</s:Group>-->
+
+		</s:Group>
+
+	</s:HGroup>
+	<!-- <s:List alternatingItemColors="[#efefef, #dedede]" borderVisible="false" width="100%"
+	includeInLayout="{(data as GenymotionRecipe).instances.length&gt;0}" visible="{(data as GenymotionRecipe).instances.length&gt;0}"
+	contentBackgroundAlpha="0.0" dataProvider="{(data as GenymotionRecipe).instances}"
+	itemRenderer="com.ats.gui.renderer.GenymotionRunningInstanceRenderer" useVirtualLayout="false"/> -->
+	
 	
 </renderer:SimulatorRenderer>

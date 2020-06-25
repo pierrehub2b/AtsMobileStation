@@ -120,7 +120,7 @@ public class GenymotionSaasSimulator extends Simulator {
 		stop()
 	}
 
-	private function stop() {
+	private function stop():void {
 		state = STATE_STOPPING
 		status = SHUTDOWN;
 		enabled = false

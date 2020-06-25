@@ -122,7 +122,7 @@
 				
 				<s:Label visible="{(data as RunningDevice).authorized == true}" includeInLayout="{(data as RunningDevice).authorized== true}"
 						 text="{(data as RunningDevice).manufacturer} - {(data as RunningDevice).modelName}"
-						 fontSize="11" fontStyle="italic" color="#758696"/>
+						 fontSize="11" fontStyle="italic" color="#e4e7e9"/>
 				<!-- <s:Label visible="{(data as RunningDevice).status==Device.WIFI_ERROR}" includeInLayout="{(data as RunningDevice).status==Device.WIFI_ERROR}"
 						 text="The device is not connected to local network" fontStyle="italic" color="0xbc0000" fontSize="11"/> -->
 			</s:VGroup>

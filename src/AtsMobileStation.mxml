@@ -274,8 +274,12 @@
 			
 			protected function clickGroup_clickHandler(event:MouseEvent):void {
 				if (simulatorsGroup.height == 26) {
-					TweenMax.to(simulatorsGroup, 0.3, {height: height - 120})
-					TweenMax.to(genymotionGroup, 0.3, {height: 26})
+					var newHeight:Object = {height: height - 96};
+					if(genymotionManager.visible){
+						newHeight.height -= 26
+						TweenMax.to(genymotionGroup, 0.3, {height: 26})
+					}
+					TweenMax.to(simulatorsGroup, 0.3, newHeight)
 					TweenMax.to(connectedGroup, 0.3, {height: 26})
 				}
 			}
@@ -290,8 +294,12 @@
 			
 			protected function clickConnected_clickHandler(event:MouseEvent):void {
 				if (connectedGroup.height == 26) {
-					TweenMax.to(connectedGroup, 0.3, {height: height - 120})
-					TweenMax.to(genymotionGroup, 0.3, {height: 26})
+					var newHeight:Object = {height: height - 96};
+					if(genymotionManager.visible){
+						newHeight.height -= 26
+						TweenMax.to(genymotionGroup, 0.3, {height: 26})
+					}
+					TweenMax.to(connectedGroup, 0.3, newHeight)
 					TweenMax.to(simulatorsGroup, 0.3, {height: 26})
 				}
 			}
@@ -345,6 +353,7 @@
 			
 			protected function finish_clickHandler(event:MouseEvent):void
 			{
+				saveValues(settingsForm.description, settingsForm.localName);
 				TweenLite.to(settingsGroup, 0.3, {x:-width-10, onComplete:hideSettingsComplete});
 			}
 			
@@ -408,8 +417,8 @@
 				</s:Rect>
 				<s:Label verticalCenter="0" paddingLeft="7" fontSize="13" color="0xc8cdd2" text="Connected Devices" fontWeight="bold"/>
 			</s:Group>
-			
-			<s:VGroup top="23" left="0" right="0" bottom="30" gap="3">
+			<s:BitmapImage source="assets/icons/240/network.png" top="100" horizontalCenter="0"/>
+			<s:VGroup top="21" left="0" right="0" bottom="30" gap="3">
 				<s:VGroup filters="{RunningDeviceRenderer.dropShadowFilterMiddle}" gap="3" paddingTop="12" paddingLeft="2" paddingRight="2"
 						  visible="{devices.collection.length==0}" includeInLayout="{devices.collection.length==0}">
 					<s:Label fontWeight="bold" 
@@ -449,7 +458,8 @@
 			</s:Group>
 			<s:Label fontStyle="italic" fontSize="11" top="38"
 					 text="{simulators.collection.length==0?simulators.info:''}" paddingLeft="5"/>
-			<s:List width="100%" top="30" bottom="0"
+			<s:BitmapImage source="assets/icons/240/mobiles.png" top="100" horizontalCenter="0"/>
+			<s:List width="100%" top="28" bottom="1"
 					alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
 					contentBackgroundAlpha="0.0" dataProvider="{simulators.collection}"
 					itemRenderer="com.ats.gui.renderer.SimulatorDeviceRenderer" useVirtualLayout="false"/>
@@ -474,19 +484,20 @@
 							</s:LinearGradientStroke>
 						</s:stroke>
 					</s:Rect>
-					<s:HGroup width="100%" paddingLeft="7" paddingRight="7" verticalCenter="0" verticalAlign="middle" gap="3">
-						<s:Label fontSize="13" text="Genymotion Models" fontWeight="bold" color="0xc8cdd2"
-								 filters="{RunningDeviceRenderer.dropShadowFilterMiddle}" width="100%"/>
-						<s:Group id="reloadButtons" visible="true" alpha="0.4" buttonMode="true" click="reloadButtons_clickHandler(event)"
-								 height="20" width="20">
+					<s:HGroup width="100%" paddingLeft="7" color="#c8cdd2" paddingRight="7" verticalCenter="0" verticalAlign="middle" gap="3"
+							  filters="{RunningDeviceRenderer.dropShadowFilterMiddle}">
+						<s:Label fontSize="13" text="Genymotion Cloud" fontWeight="bold"/>
+						<s:Label fontSize="11" width="100%" text="{genymotionManager.instances.length==0?'':'- '+genymotionManager.instances.length+' running instance(s)'}"/>
+						<s:Group id="reloadButtons" alpha="0.4" buttonMode="true" click="reloadButtons_clickHandler(event)"
+								 height="20" width="20" toolTip="Reload Genymotion instances">
 							<s:BitmapImage source="assets/icons/20/reload.png" smooth="true" smoothingQuality="high"/>
 						</s:Group>
 					</s:HGroup>
 				</s:Group>
 			</s:Group>
-			
-			<s:List left="0" right="0" top="30" bottom="0" visible="{!genymotionManager.loading}"
-					alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
+			<s:BitmapImage source="assets/icons/240/genymotion.png" top="100" horizontalCenter="0"/>
+			<s:List left="0" right="0" top="28" bottom="1" visible="{!genymotionManager.loading}"
+					borderVisible="false"
 					contentBackgroundAlpha="0.0" dataProvider="{genymotionManager.recipes}"
 					itemRenderer="com.ats.gui.renderer.GenymotionTemplateDeviceRenderer" useVirtualLayout="false"
 					horizontalScrollPolicy="off"/>

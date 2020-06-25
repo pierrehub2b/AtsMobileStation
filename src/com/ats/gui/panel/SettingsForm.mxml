@@ -11,7 +11,7 @@
 		import com.ats.helpers.Settings;
 		import com.ats.managers.gmsaas.GmsaasInstaller;
 		import com.ats.tools.PeerGroupConnection;
-
+		
 		import mx.core.FlexGlobals;
 		import mx.managers.PopUpManager;
 
@@ -83,6 +83,40 @@
 				PopUpManager.removePopUp(alert)
 			}
 
+			public function get localName():String{
+				return msName.text
+			}
+			
+			public function get description():String{
+				return msDescription.text
+			}
+			
+			protected function loadAndroidPath_clickHandler(event:MouseEvent):void
+			{
+				var directory:File = Settings.defaultAppFolder;
+				directory.addEventListener(Event.SELECT, androidFolderSelected);
+				directory.browseForDirectory("Select Android SDK directory");
+			}
+			
+			protected function androidFolderSelected(event:Event):void {
+				event.currentTarget.removeEventListener(Event.SELECT, androidFolderSelected);
+				Settings.getInstance().androidSdkFolder = event.target as File
+				androidSdkFolderPath.text = Settings.getInstance().androidSdkPath
+			}
+			
+			protected function loadPythonPath_clickHandler(event:MouseEvent):void
+			{
+				var directory:File = Settings.defaultAppFolder;
+				directory.addEventListener(Event.SELECT, pythonFolderSelected);
+				directory.browseForDirectory("Select Python directory");
+			}
+			
+			protected function pythonFolderSelected(event:Event):void {
+				event.currentTarget.removeEventListener(Event.SELECT, pythonFolderSelected);
+				Settings.getInstance().pythonFolder = event.target as File
+				pythonFolderPath.text = Settings.getInstance().pythonPath
+			}
+			
 		]]>
 	</fx:Script>
 	<text:InputText id="msName" label="Mobile Station name" width="100%"/>
@@ -90,12 +124,12 @@
 	
 	<s:HGroup width="100%" verticalAlign="bottom">
 		<text:InputText id="androidSdkFolderPath" label="Android SDK folder" width="100%"/>
-		<buttons:SmallButton/>
+		<buttons:SmallButton click="loadAndroidPath_clickHandler(event)"/>
 	</s:HGroup>
 	
 	<s:HGroup width="100%" verticalAlign="bottom">
 		<text:InputText id="pythonFolderPath" label="Python folder" width="100%"/>
-		<buttons:SmallButton/>
+		<buttons:SmallButton click="loadPythonPath_clickHandler(event)"/>
 	</s:HGroup>
 	<s:Spacer height="10"/>
 	<s:Group width="100%">
