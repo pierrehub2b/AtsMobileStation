@@ -10,99 +10,107 @@
 		import com.ats.gui.alert.CredentialsAlert;
 		import com.ats.helpers.Settings;
 		import com.ats.managers.gmsaas.GmsaasInstaller;
+		import com.ats.managers.gmsaas.GmsaasInstallerErrorEvent;
+		import com.ats.managers.gmsaas.GmsaasInstallerProgressEvent;
 		import com.ats.tools.PeerGroupConnection;
-		
+
 		import mx.core.FlexGlobals;
 		import mx.managers.PopUpManager;
 
-		public function reload(peer:PeerGroupConnection):void
-			{
-				msName.text = peer.name;
-				msDescription.text = peer.description;
-				
-				pythonFolderPath.text = Settings.getInstance().pythonPath
-				
-				gmsaas = GmsaasInstaller.isInstalled()
-			}
-			
-			private function set gmsaas(value:Boolean):void{
-				gmsaasUninstallButton.enabled = value
-				gmsaasInstallButton.enabled = !value
-				gmsaasCredentialsButton.enabled = value
-			}
+		public function reload(peer:PeerGroupConnection):void {
+			msName.text = peer.name;
+			msDescription.text = peer.description;
 
-			protected function installGmsaas(event:Event):void {
-				try {
-					var installer:GmsaasInstaller = new GmsaasInstaller()
-					genymotionInfoLabel.text = "Installing..."
-					installer.install(function (error:String=null):void {
-						genymotionInfoLabel.text = null
+			pythonFolderPath.text = Settings.getInstance().pythonPath
 
-						if (error) {
-							trace(error)
-							return
-						}
+			gmsaas = GmsaasInstaller.isInstalled()
+		}
 
-						gmsaas = true
-						FlexGlobals.topLevelApplication.genymotionManager.visible = true
-					})
-				} catch (error:Error) {
-					trace(error)
-				}
-			}
+		private function set gmsaas(value:Boolean):void {
+			gmsaasUninstallButton.enabled = value
+			gmsaasInstallButton.enabled = !value
+			gmsaasCredentialsButton.enabled = value
+		}
 
-			protected function uninstallGmsaas(event:Event):void {
-				try {
-					var installer:GmsaasInstaller = new GmsaasInstaller()
-					genymotionInfoLabel.text = "Uninstalling..."
-					installer.uninstall(function (error:String=null):void {
-						genymotionInfoLabel.text = null
+		protected function installGmsaas(event:Event):void {
+			genymotionInfoLabel.text = "Installing..."
 
-						if (error) {
-							trace(error)
-							return
-						}
+			var installer:GmsaasInstaller = new GmsaasInstaller()
+			installer.addEventListener(GmsaasInstallerErrorEvent.ERROR, installerErrorHandler);
+			installer.addEventListener(GmsaasInstallerProgressEvent.PROGRESS, installerProgressHandler);
+			installer.install()
+		}
 
-						gmsaas = false
-						FlexGlobals.topLevelApplication.genymotionManager.visible = false
-					})
-				} catch (error:Error) {
-					trace(error)
-				}
-			}
+		protected function uninstallGmsaas(event:Event):void {
+			genymotionInfoLabel.text = "Uninstalling..."
 
-			protected function editCredentials(event:Event):void {
-				const credentialsAlert:CredentialsAlert = new CredentialsAlert();
-				credentialsAlert.successCallback = credentialsCompleteHandler
-				PopUpManager.addPopUp(credentialsAlert, this, true);
-				PopUpManager.centerPopUp(credentialsAlert);
-			}
+			var installer:GmsaasInstaller = new GmsaasInstaller()
+			installer.addEventListener(GmsaasInstallerErrorEvent.ERROR, installerErrorHandler);
+			installer.addEventListener(GmsaasInstallerProgressEvent.PROGRESS, installerProgressHandler);
+			installer.uninstall()
+		}
 
-			private function credentialsCompleteHandler(alert:CredentialsAlert):void {
-				PopUpManager.removePopUp(alert)
-			}
+		private function installerErrorHandler(event:GmsaasInstallerErrorEvent):void {
+			var installer:GmsaasInstaller = event.currentTarget as GmsaasInstaller
+			installer.removeEventListener(GmsaasInstallerErrorEvent.ERROR, installerErrorHandler);
+			installer.removeEventListener(GmsaasInstallerProgressEvent.PROGRESS, installerProgressHandler);
 
-			public function get localName():String{
-				return msName.text
+			genymotionInfoLabel.text = null
+		}
+
+		private function installerProgressHandler(event:GmsaasInstallerProgressEvent):void {
+			var installer:GmsaasInstaller = event.currentTarget as GmsaasInstaller
+
+			switch (event.state) {
+				case GmsaasInstaller.GMSAAS_INSTALLER_STATE_INSTALL_COMPLETED:
+					installer.removeEventListener(GmsaasInstallerErrorEvent.ERROR, installerErrorHandler);
+					installer.removeEventListener(GmsaasInstallerProgressEvent.PROGRESS, installerProgressHandler);
+
+					genymotionInfoLabel.text = null
+					gmsaas = true
+					FlexGlobals.topLevelApplication.genymotionManager.visible = true
+					break;
+				case GmsaasInstaller.GMSAAS_INSTALLER_STATE_UNINSTALL_COMPLETED:
+					installer.removeEventListener(GmsaasInstallerErrorEvent.ERROR, installerErrorHandler);
+					installer.removeEventListener(GmsaasInstallerProgressEvent.PROGRESS, installerProgressHandler);
+
+					genymotionInfoLabel.text = null
+					gmsaas = false
+					FlexGlobals.topLevelApplication.genymotionManager.visible = false
+					break
 			}
-			
-			public function get description():String{
-				return msDescription.text
-			}
-						
-			protected function loadPythonPath_clickHandler(event:MouseEvent):void
-			{
-				var directory:File = Settings.defaultAppFolder;
-				directory.addEventListener(Event.SELECT, pythonFolderSelected);
-				directory.browseForDirectory("Select Python directory");
-			}
-			
-			protected function pythonFolderSelected(event:Event):void {
-				event.currentTarget.removeEventListener(Event.SELECT, pythonFolderSelected);
-				Settings.getInstance().pythonFolder = event.target as File
-				pythonFolderPath.text = Settings.getInstance().pythonPath
-			}
-			
+		}
+
+		protected function editCredentials(event:Event):void {
+			const credentialsAlert:CredentialsAlert = new CredentialsAlert();
+			credentialsAlert.successCallback = credentialsCompleteHandler
+			PopUpManager.addPopUp(credentialsAlert, this, true);
+			PopUpManager.centerPopUp(credentialsAlert);
+		}
+
+		private function credentialsCompleteHandler(alert:CredentialsAlert):void {
+			PopUpManager.removePopUp(alert)
+		}
+
+		public function get localName():String {
+			return msName.text
+		}
+
+		public function get description():String {
+			return msDescription.text
+		}
+
+		protected function loadPythonPath_clickHandler(event:MouseEvent):void {
+			var directory:File = Settings.defaultAppFolder;
+			directory.addEventListener(Event.SELECT, pythonFolderSelected);
+			directory.browseForDirectory("Select Python directory");
+		}
+
+		protected function pythonFolderSelected(event:Event):void {
+			event.currentTarget.removeEventListener(Event.SELECT, pythonFolderSelected);
+			Settings.getInstance().pythonFolder = event.target as File
+			pythonFolderPath.text = Settings.getInstance().pythonPath
+		}
 		]]>
 	</fx:Script>
 	<text:InputText id="msName" label="Mobile Station name" width="100%"/>
