@@ -111,7 +111,7 @@ package com.ats.managers
 			
 			var proc:NativeProcess = new NativeProcess();
 			proc.addEventListener(NativeProcessExitEvent.EXIT, onKillServerExit, false, 0, true);
-			proc.start(procInfo);	
+			proc.start(procInfo);
 		}
 		
 		private function onKillServerExit(ev:NativeProcessExitEvent):void{

@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  filters="{dropShadow}" xmlns:panels="com.caipture.gui.panels.*" 
+		  xmlns:buttons="com.caipture.gui.buttons.*"
+		  gap="0" width="260" height="140"
+		  creationComplete="creationCompleteHandler(event)">
+	
+	<panels:TitlePanel id="inputPanel" label="Ats Mobile Station" height="100%" width="100%"/>
+	
+	<panels:BottomButtons width="100%" id="buttons">
+		<buttons:SmallButton label="Yes" fontSize="14" click="yes_clickHandler(event)"/>
+		<buttons:SmallButton label="No" click="cancelButtonHandler(event)" fontSize="14"/>
+	</panels:BottomButtons>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.ats.managers.gmsaas.GmsaasManager;
+			
+			import flash.filters.BitmapFilterQuality;
+			
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import spark.filters.DropShadowFilter;
+			
+			public static const OK:String = "okButtonClicked"
+			public static const dropShadow:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.4, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
+					
+			private var quitContent:QuitApplicationConfirm = new QuitApplicationConfirm();
+			
+			private function cancelButtonHandler(event:MouseEvent):void {
+				ModalPopupManager.removePopup(this);
+			}
+			
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				inputPanel.addContent(quitContent);
+			}
+
+			protected function yes_clickHandler(event:MouseEvent):void
+			{
+				buttons.enabled = false;
+				quitContent.closingMessage();
+				dispatchEvent(new Event(OK));
+			}
+			
+		]]>
+	</fx:Script>
+	
+</s:VGroup>

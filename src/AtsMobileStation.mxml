@@ -11,6 +11,7 @@
 			import com.ats.device.Device;
 			import com.ats.device.running.IosDevice;
 			import com.ats.device.running.RunningDevice;
+			import com.ats.gui.alert.QuitApplicationAlert;
 			import com.ats.gui.panel.SettingsForm;
 			import com.ats.gui.renderer.RunningDeviceRenderer;
 			import com.ats.helpers.Settings;
@@ -23,10 +24,12 @@
 			import com.greensock.TweenLite;
 			import com.greensock.TweenMax;
 			
+			import flash.filters.BitmapFilterQuality;
+			
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
 			
-			import flash.filters.BitmapFilterQuality;
 			import spark.components.Alert;
 			import spark.filters.DropShadowFilter;
 			
@@ -55,7 +58,7 @@
 			public var simulators:AvailableSimulatorsManager;
 			
 			public var teamId:String;
-						
+			
 			public function getTeamId():String {
 				return teamId;
 			}
@@ -127,11 +130,11 @@
 				}
 				
 				Settings.cleanLogs();
-								
+				
 				if (!Capabilities.isDebugger) {
 					cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
 				}
-
+				
 				simulators = new AvailableSimulatorsManager();
 				devices = new RunningDevicesManager();
 				
@@ -179,19 +182,22 @@
 			}
 			
 			protected function closeButtonClicked(event:MouseEvent):void {
-				closeButton.enabled = false;
-				
-				infoStatus.text = "Please wait all processes to finish ..."
-				
+				var quit:QuitApplicationAlert = new QuitApplicationAlert();
+				quit.addEventListener(QuitApplicationAlert.OK, quitApplicationHandler, false, 0, true);
+				ModalPopupManager.addPopup(mainGroup, quit);
+			}
+			
+			private function quitApplicationHandler(ev:Event):void{
+				TweenMax.delayedCall(0.1, closeAll);
+			}
+			
+			private function closeAll():void{
 				peerGroup.close();
 				genymotionManager.terminate()
-
 				simulators.terminate();
 				
 				devices.addEventListener(Event.COMPLETE, devicesTerminateComplete);
 				devices.terminate();
-
-				// TweenMax.delayedCall(5.00, closeApp);
 			}
 			
 			private function devicesTerminateComplete(ev:Event):void {
@@ -265,7 +271,7 @@
 				
 				settingsButton.enabled = false;
 				settingsGroup.visible = true;
-				TweenLite.to(settingsGroup, 0.3, {x:14, onComplete:showSettingsComplete});
+				TweenLite.to(settingsGroup, 0.3, {x:4, onComplete:showSettingsComplete});
 			}
 			
 			private function showSettingsComplete():void{
@@ -322,100 +328,33 @@
 			</s:LinearGradient>
 		</s:fill>
 	</s:Rect>
-	<s:Group top="10" right="14" left="14" height="30" filters="{dropShadowFilter}" buttonMode="true"
-			 mouseDown="titleMouseDownHandler(event)">
-		<s:Rect bottom="0" left="0" right="0" top="0" topLeftRadiusX="6" topRightRadiusX="6">
-			<s:fill>
-				<s:LinearGradient rotation="90">
-					<s:GradientEntry color="#485563"/>
-					<s:GradientEntry color="#29323c"/>
-				</s:LinearGradient>
-			</s:fill>
-		</s:Rect>
-		<s:Label id="titleLabel" fontSize="15" left="10" top="9" color="0xadb5bd" filters="{TopTitle.dropShadow}"/>
-		<s:HGroup right="4" top="4">
-			<s:Group id="settingsButton" click="settings_clickHandler(event)">
-				<s:BitmapImage source="assets/icons/24/gear.png"/>
-			</s:Group>
-			<s:Group id="closeButton" click="closeButtonClicked(event)">
-				<s:BitmapImage source="assets/icons/24/close.png"/>
-			</s:Group>
-		</s:HGroup>
-		
-	</s:Group>
-	<s:VGroup bottom="20" left="20" right="20" top="48" gap="2">
-		<s:Group id="connectedGroup" height="100%" width="100%"
-				 clipAndEnableScrolling="true">
-			<s:Group height="26" buttonMode="true" click="clickConnected_clickHandler(event)" width="100%">
-				<s:Rect	left="0" right="0" top="0" bottom="0" alpha="0.7" radiusX="3" radiusY="3">
-					<s:fill>
-						<s:LinearGradient rotation="90">
-							<s:GradientEntry color="0x5a636c"/>
-							<s:GradientEntry color="0x171e28"/>
-						</s:LinearGradient>
-					</s:fill>
-					<s:stroke>
-						<s:LinearGradientStroke rotation="90">
-							<s:GradientEntry color="0x6e7780"/>
-							<s:GradientEntry color="0x0f1217"/>
-						</s:LinearGradientStroke>
-					</s:stroke>
-				</s:Rect>
-				<s:Label verticalCenter="0" paddingLeft="7" fontSize="13" color="0xc8cdd2" text="Connected Devices" fontWeight="bold"/>
-			</s:Group>
-			<s:BitmapImage source="assets/icons/240/network.png" top="100" horizontalCenter="0"/>
-			<s:VGroup top="21" left="0" right="0" bottom="30" gap="3">
-				<s:VGroup filters="{RunningDeviceRenderer.dropShadowFilterMiddle}" gap="3" paddingTop="12" paddingLeft="2" paddingRight="2"
-						  visible="{devices.collection.length==0}" includeInLayout="{devices.collection.length==0}">
-					<s:Label fontWeight="bold" 
-							 text="No devices found"/>
-					<s:Label id="infoStatus" fontStyle="italic" fontSize="11"
-							 text="(Connect devices with usb cable to this station)"/>
-				</s:VGroup>
-				
-				<s:Spacer height="4"/>
-				<s:List width="100%" height="100%"
-						alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
-						contentBackgroundAlpha="0.0" dataProvider="{devices.collection}"
-						itemRenderer="com.ats.gui.renderer.RunningDeviceRenderer" useVirtualLayout="false"/>
-			</s:VGroup>
-		</s:Group>
-		
-		<s:Group id="simulatorsGroup" height="26" width="100%" clipAndEnableScrolling="true">
-			<s:Group id="clickGroup" buttonMode="true" height="26" width="100%"
-					 click="clickGroup_clickHandler(event)">
-				<s:Rect	left="0" right="0" top="0" bottom="0" alpha="0.7" radiusX="3" radiusY="3">
-					<s:fill>
-						<s:LinearGradient rotation="90">
-							<s:GradientEntry color="0x5a636c"/>
-							<s:GradientEntry color="0x171e28"/>
-						</s:LinearGradient>
-					</s:fill>
-					<s:stroke>
-						<s:LinearGradientStroke rotation="90">
-							<s:GradientEntry color="0x6e7780"/>
-							<s:GradientEntry color="0x0f1217"/>
-						</s:LinearGradientStroke>
-					</s:stroke>
-				</s:Rect>
-				<s:Label fontSize="13" verticalCenter="0" left="7" color="0xc8cdd2" text="Available Simulators" fontWeight="bold"
-						 filters="{RunningDeviceRenderer.dropShadowFilterMiddle}"/>
-				
-			</s:Group>
-			<s:Label fontStyle="italic" fontSize="11" top="38"
-					 text="{simulators.collection.length==0?simulators.info:''}" paddingLeft="5"/>
-			<s:BitmapImage source="assets/icons/240/mobiles.png" top="100" horizontalCenter="0"/>
-			<s:List width="100%" top="28" bottom="1"
-					alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
-					contentBackgroundAlpha="0.0" dataProvider="{simulators.collection}"
-					itemRenderer="com.ats.gui.renderer.SimulatorDeviceRenderer" useVirtualLayout="false"/>
-		</s:Group>
-		
-		<s:Group id="genymotionGroup" width="100%" height="26" clipAndEnableScrolling="true" visible="{genymotionManager.visible}" includeInLayout="{genymotionManager.visible}">
+	<s:Group id="mainGroup" top="10" right="10" left="10" bottom="10">
+		<s:Group top="0" right="4" left="4" height="30" filters="{dropShadowFilter}" buttonMode="true"
+				 mouseDown="titleMouseDownHandler(event)">
+			<s:Rect bottom="0" left="0" right="0" top="0" topLeftRadiusX="6" topRightRadiusX="6">
+				<s:fill>
+					<s:LinearGradient rotation="90">
+						<s:GradientEntry color="#485563"/>
+						<s:GradientEntry color="#29323c"/>
+					</s:LinearGradient>
+				</s:fill>
+			</s:Rect>
+			<s:Label id="titleLabel" fontSize="15" left="10" top="9" color="0xadb5bd" filters="{TopTitle.dropShadow}"/>
+			<s:HGroup right="4" top="4">
+				<s:Group id="settingsButton" click="settings_clickHandler(event)">
+					<s:BitmapImage source="assets/icons/24/gear.png"/>
+				</s:Group>
+				<s:Group id="closeButton" click="closeButtonClicked(event)">
+					<s:BitmapImage source="assets/icons/24/close.png"/>
+				</s:Group>
+			</s:HGroup>
 			
-			<s:Group height="26" width="100%">
-				<s:Group buttonMode="true" height="26" width="100%"
-						 click="clickGroup2_clickHandler(event)">
+		</s:Group>
+		
+		<s:VGroup bottom="10" left="10" right="10" top="38" gap="2">
+			<s:Group id="connectedGroup" height="100%" width="100%"
+					 clipAndEnableScrolling="true">
+				<s:Group height="26" buttonMode="true" click="clickConnected_clickHandler(event)" width="100%">
 					<s:Rect	left="0" right="0" top="0" bottom="0" alpha="0.7" radiusX="3" radiusY="3">
 						<s:fill>
 							<s:LinearGradient rotation="90">
@@ -430,32 +369,101 @@
 							</s:LinearGradientStroke>
 						</s:stroke>
 					</s:Rect>
-					<s:HGroup width="100%" paddingLeft="7" color="#c8cdd2" paddingRight="7" verticalCenter="0" verticalAlign="middle" gap="3"
-							  filters="{RunningDeviceRenderer.dropShadowFilterMiddle}">
-						<s:Label fontSize="13" text="Genymotion Cloud" fontWeight="bold"/>
-						<s:Label fontSize="11" width="100%" text="{genymotionManager.instances.length==0?'':'- '+genymotionManager.instances.length+' running instance(s)'}"/>
-						<s:Group id="reloadButtons" alpha="0.4" buttonMode="true" click="reloadButtons_clickHandler(event)"
-								 height="20" width="20" toolTip="Reload Genymotion instances">
-							<s:BitmapImage source="assets/icons/20/reload.png" smooth="true" smoothingQuality="high"/>
-						</s:Group>
-					</s:HGroup>
+					<s:Label verticalCenter="0" paddingLeft="7" fontSize="13" color="0xc8cdd2" text="Connected Devices" fontWeight="bold"/>
 				</s:Group>
+				<s:BitmapImage source="assets/icons/240/network.png" top="100" horizontalCenter="0"/>
+				<s:VGroup top="21" left="0" right="0" bottom="30" gap="3">
+					<s:VGroup filters="{RunningDeviceRenderer.dropShadowFilterMiddle}" gap="3" paddingTop="12" paddingLeft="2" paddingRight="2"
+							  visible="{devices.collection.length==0}" includeInLayout="{devices.collection.length==0}">
+						<s:Label fontWeight="bold" 
+								 text="No devices found"/>
+						<s:Label id="infoStatus" fontStyle="italic" fontSize="11"
+								 text="(Connect devices with usb cable to this station)"/>
+					</s:VGroup>
+					
+					<s:Spacer height="4"/>
+					<s:List width="100%" height="100%"
+							alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
+							contentBackgroundAlpha="0.0" dataProvider="{devices.collection}"
+							itemRenderer="com.ats.gui.renderer.RunningDeviceRenderer" useVirtualLayout="false"/>
+				</s:VGroup>
 			</s:Group>
-			<s:BitmapImage source="assets/icons/240/genymotion.png" top="100" horizontalCenter="0"/>
-			<s:List left="0" right="0" top="28" bottom="1" visible="{!genymotionManager.loading}"
-					borderVisible="false"
-					contentBackgroundAlpha="0.0" dataProvider="{genymotionManager.recipes}"
-					itemRenderer="com.ats.gui.renderer.GenymotionTemplateDeviceRenderer" useVirtualLayout="false"
-					horizontalScrollPolicy="off"/>
-		</s:Group>
-	</s:VGroup>
-	<s:VGroup id="settingsGroup" gap="0" top="10" bottom="10" creationComplete="settingsGroup_creationCompleteHandler(event)">
-		<panels:TitlePanel id="settingsPanel" label="Settings" height="100%" width="100%"/>
-		<panels:BottomButtons width="100%">
-			<buttons:BigButton label="Restart server"/>
-			<buttons:BigButton label="Export devices" enabled="false"/>
-			<buttons:BigButton label="Finish" click="finish_clickHandler(event)"/>
-		</panels:BottomButtons>
-	</s:VGroup>
-	
+			
+			<s:Group id="simulatorsGroup" height="26" width="100%" clipAndEnableScrolling="true">
+				<s:Group id="clickGroup" buttonMode="true" height="26" width="100%"
+						 click="clickGroup_clickHandler(event)">
+					<s:Rect	left="0" right="0" top="0" bottom="0" alpha="0.7" radiusX="3" radiusY="3">
+						<s:fill>
+							<s:LinearGradient rotation="90">
+								<s:GradientEntry color="0x5a636c"/>
+								<s:GradientEntry color="0x171e28"/>
+							</s:LinearGradient>
+						</s:fill>
+						<s:stroke>
+							<s:LinearGradientStroke rotation="90">
+								<s:GradientEntry color="0x6e7780"/>
+								<s:GradientEntry color="0x0f1217"/>
+							</s:LinearGradientStroke>
+						</s:stroke>
+					</s:Rect>
+					<s:Label fontSize="13" verticalCenter="0" left="7" color="0xc8cdd2" text="Available Simulators" fontWeight="bold"
+							 filters="{RunningDeviceRenderer.dropShadowFilterMiddle}"/>
+					
+				</s:Group>
+				<s:Label fontStyle="italic" fontSize="11" top="38"
+						 text="{simulators.collection.length==0?simulators.info:''}" paddingLeft="5"/>
+				<s:BitmapImage source="assets/icons/240/mobiles.png" top="100" horizontalCenter="0"/>
+				<s:List width="100%" top="28" bottom="1"
+						alternatingItemColors="[#efefef, #dedede]" borderVisible="false"
+						contentBackgroundAlpha="0.0" dataProvider="{simulators.collection}"
+						itemRenderer="com.ats.gui.renderer.SimulatorDeviceRenderer" useVirtualLayout="false"/>
+			</s:Group>
+			
+			<s:Group id="genymotionGroup" width="100%" height="26" clipAndEnableScrolling="true" visible="{genymotionManager.visible}" includeInLayout="{genymotionManager.visible}">
+				
+				<s:Group height="26" width="100%">
+					<s:Group buttonMode="true" height="26" width="100%"
+							 click="clickGroup2_clickHandler(event)">
+						<s:Rect	left="0" right="0" top="0" bottom="0" alpha="0.7" radiusX="3" radiusY="3">
+							<s:fill>
+								<s:LinearGradient rotation="90">
+									<s:GradientEntry color="0x5a636c"/>
+									<s:GradientEntry color="0x171e28"/>
+								</s:LinearGradient>
+							</s:fill>
+							<s:stroke>
+								<s:LinearGradientStroke rotation="90">
+									<s:GradientEntry color="0x6e7780"/>
+									<s:GradientEntry color="0x0f1217"/>
+								</s:LinearGradientStroke>
+							</s:stroke>
+						</s:Rect>
+						<s:HGroup width="100%" paddingLeft="7" color="#c8cdd2" paddingRight="7" verticalCenter="0" verticalAlign="middle" gap="3"
+								  filters="{RunningDeviceRenderer.dropShadowFilterMiddle}">
+							<s:Label fontSize="13" text="Genymotion Cloud" fontWeight="bold"/>
+							<s:Label fontSize="11" width="100%" text="{genymotionManager.instances.length==0?'':'- '+genymotionManager.instances.length+' running instance(s)'}"/>
+							<s:Group id="reloadButtons" alpha="0.4" buttonMode="true" click="reloadButtons_clickHandler(event)"
+									 height="20" width="20" toolTip="Reload Genymotion instances">
+								<s:BitmapImage source="assets/icons/20/reload.png" smooth="true" smoothingQuality="high"/>
+							</s:Group>
+						</s:HGroup>
+					</s:Group>
+				</s:Group>
+				<s:BitmapImage source="assets/icons/240/genymotion.png" top="100" horizontalCenter="0"/>
+				<s:List left="0" right="0" top="28" bottom="1" visible="{!genymotionManager.loading}"
+						borderVisible="false"
+						contentBackgroundAlpha="0.0" dataProvider="{genymotionManager.recipes}"
+						itemRenderer="com.ats.gui.renderer.GenymotionTemplateDeviceRenderer" useVirtualLayout="false"
+						horizontalScrollPolicy="off"/>
+			</s:Group>
+		</s:VGroup>
+		<s:VGroup id="settingsGroup" gap="0" top="0" bottom="0" creationComplete="settingsGroup_creationCompleteHandler(event)">
+			<panels:TitlePanel id="settingsPanel" label="Settings" height="100%" width="100%"/>
+			<panels:BottomButtons width="100%">
+				<buttons:BigButton label="Restart server"/>
+				<buttons:BigButton label="Export devices" enabled="false"/>
+				<buttons:BigButton label="Finish" click="finish_clickHandler(event)"/>
+			</panels:BottomButtons>
+		</s:VGroup>
+	</s:Group>
 </s:WindowedApplication>

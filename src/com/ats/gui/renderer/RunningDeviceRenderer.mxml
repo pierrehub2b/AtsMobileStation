@@ -5,27 +5,27 @@
 						 xmlns:renderer="com.ats.gui.renderer.*">
 	<fx:Script>
 		<![CDATA[
-        import com.ats.gui.panel.DeviceSettingsWindow;
-        import com.greensock.TweenLite;
-
-        import com.ats.device.Device;
-        import com.ats.device.running.RunningDevice;
-        import com.ats.device.running.IosDevice;
-
-        import mx.core.DragSource;
-        import mx.managers.DragManager;
-        import mx.managers.PopUpManager;
-
-        import flash.filters.BitmapFilterQuality;
-
-        import spark.filters.DropShadowFilter;
+			import com.ats.device.Device;
+			import com.ats.device.running.IosDevice;
+			import com.ats.device.running.RunningDevice;
+			import com.ats.gui.panel.DeviceSettingsWindow;
+			import com.greensock.TweenLite;
+			
+			import flash.filters.BitmapFilterQuality;
+			
+			import mx.core.DragSource;
+			import mx.core.FlexGlobals;
+			import mx.managers.DragManager;
+			import mx.managers.PopUpManager;
+			
+			import spark.filters.DropShadowFilter;
 
         public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 
         private function showWindow(event:MouseEvent, dev:RunningDevice):void {
             var tw:DeviceSettingsWindow = new DeviceSettingsWindow();
             tw.dev = dev;
-            PopUpManager.addPopUp(tw, parentApplication as DisplayObject, true);
+            PopUpManager.addPopUp(tw, FlexGlobals.topLevelApplication.mainGroup, true);
             PopUpManager.centerPopUp(tw);
         }
 
