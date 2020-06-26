@@ -4,6 +4,7 @@ import com.ats.helpers.Settings;
 
 import flash.desktop.NativeProcess;
 import flash.desktop.NativeProcessStartupInfo;
+import flash.events.EventDispatcher;
 import flash.events.NativeProcessExitEvent;
 import flash.events.ProgressEvent;
 import flash.filesystem.File;
@@ -11,7 +12,14 @@ import flash.filesystem.File;
 import mx.core.FlexGlobals;
 import mx.managers.PopUpManager;
 
-public class GmsaasInstaller {
+public class GmsaasInstaller extends EventDispatcher {
+
+    public static const GMSAAS_INSTALLER_STATE_INSTALLING_PIP:String = "Installing PIP"
+    public static const GMSAAS_INSTALLER_STATE_INSTALLING_GMSAAS:String = "Installing GMSAAS"
+    public static const GMSAAS_INSTALLER_STATE_ASKING_CREDENTIALS:String = "Asking credentials"
+    public static const GMSAAS_INSTALLER_STATE_INSTALL_COMPLETED:String = "GMSAAS confirguration completed"
+    public static const GMSAAS_INSTALLER_STATE_UNINSTALLING:String = "Uninstalling GMSAAS"
+    public static const GMSAAS_INSTALLER_STATE_UNINSTALL_COMPLETED:String = "GMSAAS Uninstall completed"
 
     private static const pythonFolder:File = Settings.getInstance().pythonFolder
 
@@ -30,29 +38,29 @@ public class GmsaasInstaller {
         return pythonFolder.resolvePath("Scripts").resolvePath(gmsaasFileName).exists
     }
 
-    public function GmsaasInstaller() {
+    public function install():void {
         if (Settings.isMacOs) {
-            throw new Error("MacOS not supported yet")
+            dispatchEvent(new GmsaasInstallerErrorEvent("MacOS not supported yet"))
+            return
         }
 
         if (!pythonFolder) {
-            throw new Error('Python folder path not set')
+            dispatchEvent(new GmsaasInstallerErrorEvent("Python folder path not set"))
+            return
         }
 
         pythonFile = pythonFolder.resolvePath(pythonFileName);
         if (!pythonFile.exists) {
-            throw new Error('Python file not found')
+            dispatchEvent(new GmsaasInstallerErrorEvent("Python file not found"))
+            return
         }
-    }
-
-    private var installCompleteCallback:Function
-    public function install(completeCallback:Function):void {
-        installCompleteCallback = completeCallback
 
         upgradePip()
     }
 
     private function upgradePip():void {
+        dispatchEvent(new GmsaasInstallerProgressEvent(GMSAAS_INSTALLER_STATE_INSTALLING_PIP))
+
         var args:Vector.<String> = new Vector.<String>();
         args.push("-m");
         args.push("pip");
@@ -75,9 +83,11 @@ public class GmsaasInstaller {
 
         var pipFile:File = pythonFolder.resolvePath("Scripts").resolvePath(pipFileName);
         if (!pipFile.exists) {
-            installCompleteCallback("PIP file not found")
+            dispatchEvent(new GmsaasInstallerErrorEvent("PIP file not found"))
             return
         }
+
+        dispatchEvent(new GmsaasInstallerProgressEvent(GMSAAS_INSTALLER_STATE_INSTALLING_GMSAAS))
 
         var args:Vector.<String> = new Vector.<String>();
         args.push("install");
@@ -99,9 +109,11 @@ public class GmsaasInstaller {
 
         gmsaasFile = pythonFolder.resolvePath("Scripts").resolvePath(gmsaasFileName);
         if (!gmsaasFile.exists) {
-            installCompleteCallback("gmsaas file not found")
+            dispatchEvent(new GmsaasInstallerErrorEvent("GMSAAS file not found"))
             return
         }
+
+        dispatchEvent(new GmsaasInstallerProgressEvent(GMSAAS_INSTALLER_STATE_ASKING_CREDENTIALS))
 
         defineJSONOutputFormat()
         defineAndroidSdk()
@@ -137,26 +149,25 @@ public class GmsaasInstaller {
     }
 
     public function credentialsCompleteHandler(alert:CredentialsAlert):void {
-        installCompleteCallback()
         PopUpManager.removePopUp(alert)
+
+        dispatchEvent(new GmsaasInstallerProgressEvent(GMSAAS_INSTALLER_STATE_INSTALL_COMPLETED))
     }
 
     public function credentialsCancelHandler(alert:CredentialsAlert):void {
-        installCompleteCallback("Missing credentials")
         PopUpManager.removePopUp(alert)
 
         uninstall()
     }
 
-    private var uninstallCompleteCallback:Function
-    public function uninstall(callback:Function=null):void {
-        uninstallCompleteCallback = callback
-
+    public function uninstall():void {
         var pipFile:File = pythonFolder.resolvePath("Scripts").resolvePath(pipFileName);
         if (!pipFile.exists) {
-            uninstallCompleteCallback("PIP file not found")
+            dispatchEvent(new GmsaasInstallerErrorEvent("PIP file not found"))
             return
         }
+
+        dispatchEvent(new GmsaasInstallerProgressEvent(GMSAAS_INSTALLER_STATE_UNINSTALLING))
 
         var args:Vector.<String> = new Vector.<String>();
         args.push("uninstall");
@@ -176,9 +187,7 @@ public class GmsaasInstaller {
         var process:NativeProcess = event.currentTarget as NativeProcess
         process.removeEventListener(NativeProcessExitEvent.EXIT, uninstallExit)
 
-        if (uninstallCompleteCallback != null) {
-            uninstallCompleteCallback()
-        }
+        dispatchEvent(new GmsaasInstallerProgressEvent(GMSAAS_INSTALLER_STATE_UNINSTALL_COMPLETED))
     }
 
     private function uninstallOutputDataHandler(event:ProgressEvent):void {
