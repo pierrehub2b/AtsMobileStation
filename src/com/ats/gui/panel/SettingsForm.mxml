@@ -69,6 +69,7 @@
 					genymotionInfoLabel.text = null
 					gmsaas = true
 					FlexGlobals.topLevelApplication.genymotionManager.visible = true
+					FlexGlobals.topLevelApplication.genymotionManager.fetchContent()
 					break;
 				case GmsaasInstaller.GMSAAS_INSTALLER_STATE_UNINSTALL_COMPLETED:
 					installer.removeEventListener(GmsaasInstallerErrorEvent.ERROR, installerErrorHandler);
@@ -77,6 +78,7 @@
 					genymotionInfoLabel.text = null
 					gmsaas = false
 					FlexGlobals.topLevelApplication.genymotionManager.visible = false
+
 					break
 			}
 		}
