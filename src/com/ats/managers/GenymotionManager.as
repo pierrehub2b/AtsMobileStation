@@ -1,10 +1,11 @@
 package com.ats.managers
 {
 import com.ats.device.simulator.Simulator;
-import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
 import com.ats.device.simulator.genymotion.GenymotionRecipe;
+import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
 import com.ats.managers.gmsaas.GmsaasInstaller;
 import com.ats.managers.gmsaas.GmsaasManager;
+import com.ats.managers.gmsaas.GmsaasManagerEvent;
 
 import mx.collections.ArrayCollection;
 import mx.collections.Sort;
@@ -46,27 +47,40 @@ public class GenymotionManager {
 		recipes = new ArrayCollection()
 		fetchingRecipes = true
 
-		GmsaasManager.getInstance().fetchRecipes(function (results:Array, error:String):void {
-			fetchingRecipes = false
+		var manager:GmsaasManager = new GmsaasManager()
+		manager.addEventListener(GmsaasManagerEvent.COMPLETED, fetchRecipesListCompletedHandler, false, 0, true)
+		manager.addEventListener(GmsaasManagerEvent.ERROR, fetchRecipesListErrorHandler, false, 0, true)
+		manager.fetchRecipes()
+	}
 
-			if (error) {
-				trace(error);
-				return
-			}
+	private function fetchRecipesListCompletedHandler(event:GmsaasManagerEvent):void {
+		var manager:GmsaasManager = event.currentTarget as GmsaasManager
+		manager.removeEventListener(GmsaasManagerEvent.COMPLETED, fetchRecipesListCompletedHandler)
+		manager.removeEventListener(GmsaasManagerEvent.ERROR, fetchRecipesListErrorHandler)
 
-			recipes = new ArrayCollection(results)
+		fetchingRecipes = false
 
-			var srt:Sort = new Sort();
-			srt.compareFunction = function (a:GenymotionRecipe, b:GenymotionRecipe, array:Array = null):int {
-				return b.version.compare(a.version)
-			}
-			recipes.sort = srt;
-			recipes.refresh();
+		recipes = new ArrayCollection(event.data)
 
-			if (!fetchingInstances) {
-				exec()
-			}
-		})
+		var srt:Sort = new Sort();
+		srt.compareFunction = function (a:GenymotionRecipe, b:GenymotionRecipe, array:Array = null):int {
+			return b.version.compare(a.version)
+		}
+		recipes.sort = srt;
+		recipes.refresh();
+
+		if (!fetchingInstances) {
+			exec()
+		}
+	}
+
+	private function fetchRecipesListErrorHandler(event:GmsaasManagerEvent):void {
+		var manager:GmsaasManager = event.currentTarget as GmsaasManager
+		manager.removeEventListener(GmsaasManagerEvent.COMPLETED, fetchRecipesListCompletedHandler)
+		manager.removeEventListener(GmsaasManagerEvent.ERROR, fetchRecipesListErrorHandler)
+
+		fetchingRecipes = false
+		trace(event.error)
 	}
 
 	private var fetchingInstances:Boolean = false
@@ -74,20 +88,33 @@ public class GenymotionManager {
 		instances = new ArrayCollection()
 		fetchingInstances = true
 
-		GmsaasManager.getInstance().fetchInstances(function (results:Array, error:String):void {
-			fetchingInstances = false
+		var manager:GmsaasManager = new GmsaasManager()
+		manager.addEventListener(GmsaasManagerEvent.COMPLETED, fetchInstancesListCompletedHandler, false, 0, true)
+		manager.addEventListener(GmsaasManagerEvent.ERROR, fetchInstancesListErrorHandler, false, 0, true)
+		manager.fetchInstances()
+	}
 
-			if (error) {
-				trace(error)
-				return
-			}
+	private function fetchInstancesListCompletedHandler(event:GmsaasManagerEvent):void {
+		var manager:GmsaasManager = event.currentTarget as GmsaasManager
+		manager.removeEventListener(GmsaasManagerEvent.COMPLETED, fetchInstancesListCompletedHandler)
+		manager.removeEventListener(GmsaasManagerEvent.ERROR, fetchInstancesListErrorHandler)
 
-			instances = new ArrayCollection(results)
+		fetchingInstances = false
 
-			if (!fetchingRecipes) {
-				exec()
-			}
-		})
+		instances = new ArrayCollection(event.data)
+
+		if (!fetchingRecipes) {
+			exec()
+		}
+	}
+
+	private function fetchInstancesListErrorHandler(event:GmsaasManagerEvent):void {
+		var manager:GmsaasManager = event.currentTarget as GmsaasManager
+		manager.removeEventListener(GmsaasManagerEvent.COMPLETED, fetchInstancesListCompletedHandler)
+		manager.removeEventListener(GmsaasManagerEvent.ERROR, fetchInstancesListErrorHandler)
+
+		fetchingInstances = false
+		trace(event.error)
 	}
 
 	private function exec():void {

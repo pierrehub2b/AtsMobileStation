@@ -35,7 +35,7 @@ public class GenymotionSaasDevice extends AndroidUsbDevice {
         process.start(info)
     }
 
-    var errorData:String = ""
+    private var errorData:String = ""
     private function downloadError(event:ProgressEvent):void {
         var process:NativeProcess = event.currentTarget as NativeProcess
         errorData += process.standardError.readUTFBytes(process.standardError.bytesAvailable)

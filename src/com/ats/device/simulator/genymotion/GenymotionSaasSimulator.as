@@ -1,6 +1,8 @@
 package com.ats.device.simulator.genymotion {
+import com.ats.device.running.GenymotionSaasDevice;
 import com.ats.device.simulator.*;
 import com.ats.managers.gmsaas.GmsaasManager;
+import com.ats.managers.gmsaas.GmsaasManagerEvent;
 
 import flash.events.Event;
 
@@ -76,26 +78,62 @@ public class GenymotionSaasSimulator extends Simulator {
 	public function adbConnect():void {
 		enabled = true
 
-		GmsaasManager.getInstance().adbConnect(uuid, function(result:GenymotionSaasSimulator, error:String):void {
-			if (error) {
-				trace("GM - ADB Connect Error : " + error)
-			}
-		})
+		var manager:GmsaasManager = new GmsaasManager()
+		manager.addEventListener(GmsaasManagerEvent.ERROR, adbConnectErrorHandler, false, 0, true)
+		manager.adbConnect(uuid)
+	}
+
+	private function adbConnectErrorHandler(event:GmsaasManagerEvent):void {
+		var manager:GmsaasManager = event.currentTarget as GmsaasManager
+		manager.removeEventListener(GmsaasManagerEvent.ERROR, adbConnectErrorHandler)
+
+		trace("GM - ADB Connect Error : " + event.error)
 	}
 
 	public function adbDisconnect():void {
 		enabled = false
 		statusOff()
 
-		GmsaasManager.getInstance().adbDisconnect(uuid, function(result:GenymotionSaasSimulator, error:String):void {
-			if (error) {
-				trace("GM - ADB Connect Error : " + error)
-			}
-		})
+		var manager:GmsaasManager = new GmsaasManager()
+		manager.addEventListener(GmsaasManagerEvent.ERROR, adbDisconnectErrorHandler, false, 0, true)
+		manager.adbDisconnect(uuid)
+	}
+
+	private function adbDisconnectErrorHandler(event:GmsaasManagerEvent):void {
+		var manager:GmsaasManager = event.currentTarget as GmsaasManager
+		manager.removeEventListener(GmsaasManagerEvent.ERROR, adbDisconnectErrorHandler)
+
+		trace("GM - ADB Disconnect Error : " + event.error)
 	}
 
 	override public function startSim():void {
+		var manager:GmsaasManager = new GmsaasManager()
+		manager.addEventListener(GmsaasManagerEvent.ERROR, startErrorHandler, false, 0, true);
+		manager.addEventListener(GmsaasManagerEvent.COMPLETED, startCompletedHandler, false, 0, true);
+		manager.startInstance(recipeUuid, name)
+	}
 
+	private function startErrorHandler(event:GmsaasManagerEvent):void {
+		var manager:GmsaasManager = event.currentTarget as GmsaasManager
+		manager.removeEventListener(GmsaasManagerEvent.ERROR, startErrorHandler);
+		manager.removeEventListener(GmsaasManagerEvent.COMPLETED, startCompletedHandler);
+
+		trace(event.error)
+		dispatchEvent(new Event(EVENT_STOPPED))
+	}
+
+	private function startCompletedHandler(event:GmsaasManagerEvent):void {
+		var manager:GmsaasManager = event.currentTarget as GmsaasManager
+		manager.removeEventListener(GmsaasManagerEvent.ERROR, startErrorHandler);
+		manager.removeEventListener(GmsaasManagerEvent.COMPLETED, startCompletedHandler);
+
+		var instance:GenymotionSaasSimulator = event.data[0] as GenymotionSaasSimulator
+		adbSerial = instance.adbSerial
+		state = instance.state
+		adbTunnelState = instance.adbTunnelState
+		uuid = instance.uuid
+		statusOn()
+		adbConnect()
 	}
 
 	override public function startStop():void{
@@ -126,27 +164,44 @@ public class GenymotionSaasSimulator extends Simulator {
 		enabled = false
 		tooltip = "Simulator is terminating ...";
 
-		var gmsaasManager:GmsaasManager = GmsaasManager.getInstance()
+		var manager:GmsaasManager = new GmsaasManager()//.getInstance()
+		manager.addEventListener(GmsaasManagerEvent.COMPLETED, adbDisconnectCompletedHandler, false, 0, true);
+		manager.addEventListener(GmsaasManagerEvent.ERROR, adbDisconnectErrorHandler, false, 0, true)
+		manager.adbDisconnect(uuid)
+	}
 
-		/* gmsaasManager.adbDisconnect(uuid, function(result:GenymotionSaasSimulator, error:String):void {
-			if (error) {
-				trace(error)
-				return
-			} */
 
-			gmsaasManager.stopInstance(uuid, function(result:GenymotionSaasSimulator, error:String):void {
-				if (error) {
-					trace(error)
-					return
-				}
+	private function adbDisconnectCompletedHandler(event:GmsaasManagerEvent):void {
+		var manager: GmsaasManager = event.currentTarget as GmsaasManager
+		manager.removeEventListener(GmsaasManagerEvent.COMPLETED, adbDisconnectCompletedHandler)
+		manager.removeEventListener(GmsaasManagerEvent.ERROR, adbDisconnectErrorHandler)
 
-				if (result.state != STATE_DELETED) {
-					// handle error
-				}
+		manager = new GmsaasManager()
+		manager.addEventListener(GmsaasManagerEvent.COMPLETED, stopInstanceCompletedHandler, false, 0, true);
+		manager.addEventListener(GmsaasManagerEvent.COMPLETED, stopInstanceErrorHandler, false, 0, true);
+		manager.stopInstance(uuid)
+	}
 
-				dispatchEvent(new Event(EVENT_STOPPED))
-			})
-		// })
+	private function stopInstanceCompletedHandler(event:GmsaasManagerEvent):void {
+		var manager: GmsaasManager = event.currentTarget as GmsaasManager
+		manager.removeEventListener(GmsaasManagerEvent.COMPLETED, stopInstanceCompletedHandler)
+		manager.removeEventListener(GmsaasManagerEvent.ERROR, stopInstanceErrorHandler)
+
+		var instance:GenymotionSaasSimulator = event.data[0] as GenymotionSaasSimulator
+		if (instance.state != STATE_DELETED) {
+			// handle error
+			return
+		}
+
+		dispatchEvent(new Event(EVENT_STOPPED))
+	}
+
+	private function stopInstanceErrorHandler(event:GmsaasManagerEvent):void {
+		var manager: GmsaasManager = event.currentTarget as GmsaasManager
+		manager.removeEventListener(GmsaasManagerEvent.COMPLETED, stopInstanceCompletedHandler)
+		manager.removeEventListener(GmsaasManagerEvent.ERROR, stopInstanceErrorHandler)
+
+		trace(event.error)
 	}
 }
 }

@@ -205,7 +205,6 @@ public class AndroidUsbDevice extends AndroidDevice {
     override protected function execute():void {
         writeDebugLogs("Starting driver")
 
-
         var processInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
         processInfo.executable = currentAdbFile
         processInfo.arguments = new <String>[

@@ -1,7 +1,6 @@
 package com.ats.device.simulator.genymotion
 {
 import com.ats.helpers.Version;
-import com.ats.managers.gmsaas.GmsaasManager;
 
 import flash.events.Event;
 
@@ -35,27 +34,39 @@ import mx.core.FlexGlobals;
 			var msIdentifier:String = FlexGlobals.topLevelApplication.peerGroup.identifier
 			return ["GM", uuid, name, msIdentifier, date.time].join("_")
 		}
-		
+
 		public function startInstance():void {
 			var instanceName:String = generateInstanceName()
 			var newInstance:GenymotionSaasSimulator = new GenymotionSaasSimulator({'name':instanceName})
 			addInstance(newInstance)
+			newInstance.startSim()
 
-			GmsaasManager.getInstance().startInstance(uuid, instanceName, function(result:GenymotionSaasSimulator, error:String):void {
-				if (error) {
-					removeInstance(newInstance)
-					trace(error)
-					return
-				}
-
-				newInstance.adbSerial = result.adbSerial
-				newInstance.state = result.state
-				newInstance.adbTunnelState = result.adbTunnelState
-				newInstance.uuid = result.uuid
-				newInstance.statusOn()
-				newInstance.adbConnect()
-			})
+			/* var manager: GmsaasManager = new GmsaasManager()
+			manager.addEventListener(GmsaasManagerEvent.COMPLETED, startInstanceCompletedHandler, false, 0, true);
+			manager.addEventListener(GmsaasManagerEvent.ERROR, startInstanceErrorHandler, false, 0, true);
+			manager.startInstance(uuid, instanceName) */
 		}
+
+		/* private function startInstanceCompletedHandler(event:GmsaasManagerEvent):void {
+			var manager:GmsaasManager = event.currentTarget as GmsaasManager
+			manager.removeEventListener(GmsaasManagerEvent.COMPLETED, startInstanceCompletedHandler)
+			manager.removeEventListener(GmsaasManagerEvent.ERROR, startInstanceErrorHandler)
+
+			var instance:GenymotionSaasSimulator = event.data[0] as GenymotionSaasSimulator
+
+
+			// recuperer new instance ici
+			newInstance.adbSerial = result.adbSerial
+			newInstance.state = result.state
+			newInstance.adbTunnelState = result.adbTunnelState
+			newInstance.uuid = result.uuid
+			newInstance.statusOn()
+			newInstance.adbConnect()
+		}
+
+		private function startInstanceErrorHandler(event:GmsaasManagerEvent):void {
+
+		} */
 
 		public function addInstance(instance:GenymotionSaasSimulator):void {
 			instance.addEventListener(GenymotionSaasSimulator.EVENT_STOPPED, stoppedInstanceHandler, false, 0, true)
