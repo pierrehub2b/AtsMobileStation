@@ -6,7 +6,6 @@ import flash.desktop.NativeProcess;
 import flash.desktop.NativeProcessStartupInfo;
 import flash.events.NativeProcessExitEvent;
 import flash.events.ProgressEvent;
-
 import flash.filesystem.File;
 
 import mx.core.FlexGlobals;
@@ -34,10 +33,6 @@ public class GmsaasInstaller {
     public function GmsaasInstaller() {
         if (Settings.isMacOs) {
             throw new Error("MacOS not supported yet")
-        }
-
-        if (!Settings.getInstance().androidSdkPath) {
-            throw new Error("Android SDK path not set")
         }
 
         if (!pythonFolder) {
@@ -117,7 +112,7 @@ public class GmsaasInstaller {
     private function defineAndroidSdk():void {
         var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
         procInfo.executable = gmsaasFile;
-        procInfo.arguments = new <String>["config", "set", "android-sdk-path", Settings.getInstance().androidSdkPath];
+        procInfo.arguments = new <String>["config", "set", "android-sdk-path", Settings.workAdbFolder.nativePath];
 
         var proc:NativeProcess = new NativeProcess();
         proc.start(procInfo);

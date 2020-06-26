@@ -1,5 +1,8 @@
 package com.ats.device.running
 {
+import com.ats.helpers.DeviceSettings;
+import com.ats.helpers.DeviceSettingsHelper;
+import com.ats.helpers.Settings;
 import com.ats.helpers.Version;
 
 import flash.desktop.NativeProcess;
@@ -11,9 +14,6 @@ import flash.filesystem.FileMode;
 import flash.filesystem.FileStream;
 import flash.globalization.DateTimeFormatter;
 import flash.system.Capabilities;
-
-import com.ats.helpers.DeviceSettings;
-import com.ats.helpers.DeviceSettingsHelper;
 
 import mx.core.FlexGlobals;
 
@@ -78,7 +78,7 @@ public class AndroidDevice extends RunningDevice
 		public override function start():void {
 			dateFormatter.setDateTimePattern("yyyy-MM-dd hh:mm:ss");
 
-			logFile = FlexGlobals.topLevelApplication.logsFolder.resolvePath("android_" + id.replace(/[.:]/g, "") + "_" + new Date().time + ".log");
+			logFile = Settings.logsFolder.resolvePath("android_" + id.replace(/[.:]/g, "") + "_" + new Date().time + ".log");
 			logStream.open(logFile, FileMode.WRITE);
 			logStream.writeUTFBytes("Start Android process");
 			logStream.close();
@@ -145,7 +145,7 @@ public class AndroidDevice extends RunningDevice
 			processOutput = ""
 
 			var processInfo: NativeProcessStartupInfo = new NativeProcessStartupInfo()
-			processInfo.executable = FlexGlobals.topLevelApplication.adbFile
+			processInfo.executable = Settings.adbFile
 			processInfo.arguments = new <String>["-s", id, "shell", "getprop"];
 
 			process = new NativeProcess()

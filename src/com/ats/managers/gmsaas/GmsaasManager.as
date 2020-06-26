@@ -6,11 +6,13 @@ package com.ats.managers.gmsaas {
 	import com.ats.helpers.Version;
 	
 	import flash.desktop.NativeProcessStartupInfo;
+	import flash.events.EventDispatcher;
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
 	
-	public class GmsaasManager {
+	public class GmsaasManager extends EventDispatcher
+	{
 		
 		private static const gmsaasFile:File = Settings.getInstance().pythonFolder.resolvePath("Scripts").resolvePath("gmsaas.exe")
 		private static var _instance:GmsaasManager;
@@ -57,6 +59,8 @@ package com.ats.managers.gmsaas {
 					process.callback(null, error.message)
 				}
 			})
+			
+			
 		}
 		
 		public function fetchInstances(callback: Function):void {
@@ -151,8 +155,7 @@ package com.ats.managers.gmsaas {
 			
 			executeProcess(process, parameters, function (event:NativeProcessExitEvent):void {
 				// removeProcess(event)
-				
-				var json:Object = handleOutput(process.data, process.callback)
+				var json:Object = handleOutput(process.data, process.callback);
 				if (!json) return;
 				
 				try {

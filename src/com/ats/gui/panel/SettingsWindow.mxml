@@ -54,7 +54,7 @@
 		}
 
 		protected function save_clickHandler(event:MouseEvent):void {
-			var file:File = FlexGlobals.topLevelApplication.settingsFile;
+			var file:File = Settings.settingsFile;
 			var fileStream:FileStream = new FileStream();
 			fileStream.open(file, FileMode.WRITE);
 			fileStream.writeUTFBytes("development_team==" + devTeamId.text + "\n");

@@ -7,6 +7,7 @@ package com.ats.managers
 	import com.ats.device.running.RunningDevice;
 	import com.ats.device.simulator.IosSimulator;
 	import com.ats.device.simulator.Simulator;
+	import com.ats.helpers.Settings;
 	import com.greensock.TweenLite;
 	import com.greensock.TweenMax;
 	
@@ -57,9 +58,10 @@ package com.ats.managers
 		
 		private var usbDevicesIdList:Vector.<String>;
 		
-		public function RunningDevicesManager(isMacos:Boolean, adbFolder:File)
+		public function RunningDevicesManager()
 		{
-			if (isMacos) {
+			const adbFolder:File = Settings.workAdbFolder;
+			if (Settings.isMacOs) {
 				
 				adbFile = adbFolder.resolvePath("adb");
 				

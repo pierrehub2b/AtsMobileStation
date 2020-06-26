@@ -16,15 +16,13 @@ public class NetworkUtils extends EventDispatcher {
 
     public function getClientIPAddress():void
     {
-        trace()
-
         process = new NativeProcess();
         process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputData, false, 0, true);
         process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onErrorData, false, 0, true);
         process.addEventListener(IOErrorEvent.STANDARD_OUTPUT_IO_ERROR, onIOError, false, 0, true);
         process.addEventListener(IOErrorEvent.STANDARD_ERROR_IO_ERROR, onIOError, false, 0, true);
 
-        if(AtsMobileStation.isMacOs) {
+        if(Settings.isMacOs) {
             process.addEventListener(NativeProcessExitEvent.EXIT, onMacProcessExit, false, 0, true);
             startMacProcess(networkInterface);
         } else {

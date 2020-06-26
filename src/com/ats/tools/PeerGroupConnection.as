@@ -1,10 +1,11 @@
 package com.ats.tools
 {
 	import com.ats.device.running.RunningDevice;
-import com.ats.managers.AvailableSimulatorsManager;
-import com.ats.managers.RunningDevicesManager;
-import com.ats.managers.gmsaas.GmsaasInstaller;
-import com.greensock.TweenMax;
+	import com.ats.helpers.Settings;
+	import com.ats.managers.AvailableSimulatorsManager;
+	import com.ats.managers.RunningDevicesManager;
+	import com.ats.managers.gmsaas.GmsaasInstaller;
+	import com.greensock.TweenMax;
 	
 	import flash.desktop.NativeApplication;
 	import flash.desktop.NativeProcess;
@@ -24,10 +25,9 @@ import com.greensock.TweenMax;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.utils.Timer;
-
-import mx.core.FlexGlobals;
-
-import mx.events.CollectionEvent;
+	
+	import mx.core.FlexGlobals;
+	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
 	
 	public class PeerGroupConnection
@@ -171,7 +171,7 @@ import mx.events.CollectionEvent;
 		
 		private function installMonaserver():void{
 			
-			if (AtsMobileStation.isMacOs) {
+			if (Settings.isMacOs) {
 				mona.resolvePath("server").resolvePath("MonaServer").copyTo(monaInstallFolder.resolvePath("server").resolvePath("MonaServer"), true);
 				mona.resolvePath("MonaBase").copyTo(monaInstallFolder.resolvePath("MonaBase"), true);
 				mona.resolvePath("MonaCore").copyTo(monaInstallFolder.resolvePath("MonaCore"), true);
@@ -222,7 +222,7 @@ import mx.events.CollectionEvent;
 			
 			monaServerProc = new NativeProcess();
 			
-			if (AtsMobileStation.isMacOs) {
+			if (Settings.isMacOs) {
 				procInfo.arguments.push("--daemon");
 				monaServerProc.addEventListener(NativeProcessExitEvent.EXIT, monaServerDaemonExit, false, 0, true);
 			}else{
