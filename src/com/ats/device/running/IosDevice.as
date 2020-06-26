@@ -1,5 +1,15 @@
 package com.ats.device.running
 {
+	import com.ats.device.Device;
+	import com.ats.device.running.RunningDevice;
+	import com.ats.device.simulator.Simulator;
+	import com.ats.helpers.DevicePortSettings;
+	import com.ats.helpers.DevicePortSettingsHelper;
+	import com.ats.helpers.DeviceSettings;
+	import com.ats.helpers.DeviceSettingsHelper;
+	import com.ats.helpers.PortSwitcher;
+	import com.ats.helpers.Settings;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -8,22 +18,9 @@ package com.ats.device.running
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
-	
-	import com.ats.helpers.DevicePortSettings;
-	import com.ats.helpers.DevicePortSettingsHelper;
+	import flash.globalization.DateTimeFormatter;
 	
 	import mx.core.FlexGlobals;
-	
-	import com.ats.device.Device;
-	import com.ats.device.running.RunningDevice;
-	import com.ats.device.simulator.Simulator;
-	
-	import com.ats.helpers.DeviceSettings;
-	
-	import com.ats.helpers.DeviceSettingsHelper;
-	
-	import com.ats.helpers.PortSwitcher;
-	import flash.globalization.DateTimeFormatter;
 	
 	public class IosDevice extends RunningDevice
 	{
@@ -65,7 +62,7 @@ package com.ats.device.running
 			//---------------------------------------------------------------------------------------
 			
 			dateFormatter.setDateTimePattern("yyyy-MM-dd hh:mm:ss");
-			logFile = FlexGlobals.topLevelApplication.logsFolder.resolvePath("ios_" + id + "_" + new Date().time + ".log");
+			logFile = Settings.logsFolder.resolvePath("ios_" + id + "_" + new Date().time + ".log");
 			
 			logStream.open(logFile, FileMode.WRITE);
 			logStream.writeUTFBytes("Start iOS process");
@@ -75,7 +72,7 @@ package com.ats.device.running
 			//---------------------------------------------------------------------------------------
 			
 			var fileStream:FileStream = new FileStream();
-			var file:File = FlexGlobals.topLevelApplication.devicesSettingsFile;
+			var file:File = Settings.devicesSettingsFile;
 
 			var deviceSettingsHelper:DeviceSettingsHelper = DeviceSettingsHelper.shared;
 			var deviceSettings:DeviceSettings = deviceSettingsHelper.getSettingsForDevice(id);

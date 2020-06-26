@@ -12,32 +12,26 @@
 			import com.ats.device.running.IosDevice;
 			import com.ats.device.running.RunningDevice;
 			import com.ats.gui.panel.SettingsForm;
-			import com.ats.gui.panel.SettingsWindow;
 			import com.ats.gui.renderer.RunningDeviceRenderer;
 			import com.ats.helpers.Settings;
 			import com.ats.helpers.Version;
 			import com.ats.managers.AvailableSimulatorsManager;
 			import com.ats.managers.GenymotionManager;
 			import com.ats.managers.RunningDevicesManager;
-			import com.ats.managers.gmsaas.GmsaasInstaller;
 			import com.ats.tools.PeerGroupConnection;
 			import com.caipture.gui.panels.TopTitle;
 			import com.greensock.TweenLite;
 			import com.greensock.TweenMax;
 			
-			import flash.filters.BitmapFilterQuality;
-			
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
-			import mx.managers.PopUpManager;
 			
+			import flash.filters.BitmapFilterQuality;
 			import spark.components.Alert;
 			import spark.filters.DropShadowFilter;
 			
 			public static const dropShadowFilterApp:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.4, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 90, 0x000000, 0.4, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
-			
-			public static const isMacOs:Boolean = Capabilities.os.indexOf("Mac") > -1;
 			
 			public static const supportedAndroidOsVersion:Version = new Version("5.1")
 			
@@ -45,9 +39,6 @@
 			private var iconMenu:NativeMenu = new NativeMenu();
 			
 			private var settingsForm:SettingsForm;
-			
-			[Bindable]
-			private var settings:Settings = Settings.getInstance()
 			
 			public var peerGroup:PeerGroupConnection;
 			
@@ -64,31 +55,7 @@
 			public var simulators:AvailableSimulatorsManager;
 			
 			public var teamId:String;
-			
-			private static const workFolder:File = File.userDirectory.resolvePath(".atsmobilestation");
-			private var workAdbFolder:File;
-			
-			public function get logsFolder():File {
-				return workFolder.resolvePath("logs");
-			}
-			
-			public function get devicesSettingsFile():File {
-				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/devicesSettings.txt");
-			}
-			
-			public function get devicePortSettingsFile():File {
-				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/portSettings.txt");
-			}
-			
-			public function get settingsFile():File {
-				return File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings/settings.txt");
-			}
-			
-			public function get adbFile():File {
-				var execExtension:String = Capabilities.os.indexOf("Mac") > -1 ? "" : ".exe";
-				return File.applicationDirectory.resolvePath("assets/tools/android/adb" + execExtension);
-			}
-			
+						
 			public function getTeamId():String {
 				return teamId;
 			}
@@ -108,7 +75,7 @@
 			
 			private function restartApp(ev:Event = null):void {
 				var execFilePath:String = "AtsMobileStation.";
-				if (isMacOs) {
+				if (Settings.isMacOs) {
 					execFilePath += "app";
 				} else {
 					execFilePath += "exe";
@@ -159,38 +126,17 @@
 					dock.menu = iconMenu;
 				}
 				
-				try {
-					logsFolder.deleteDirectory(true);
-				} catch (err:IOError) {
-				}
-				
-				/* *** */
-				// files corrupted
-				var date:Date = new Date(2020, 2, 31, 18, 30, 0, 0);
-				if (devicePortSettingsFile.exists && devicePortSettingsFile.modificationDate < date) {
-					devicePortSettingsFile.deleteFile();
-				}
-				
-				if (devicesSettingsFile.exists && devicesSettingsFile.modificationDate < date) {
-					devicesSettingsFile.deleteFile();
-				}
-				/* *** */
-				
-				
+				Settings.cleanLogs();
+								
 				if (!Capabilities.isDebugger) {
 					cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
 				}
-				
-				//workAdbFolder = workFolder.resolvePath("adb");
-				//File.applicationDirectory.resolvePath("assets/tools/android").copyTo(workAdbFolder, true)
-				
-				workAdbFolder = File.applicationDirectory.resolvePath("assets/tools/android");
-				
+
 				simulators = new AvailableSimulatorsManager();
-				devices = new RunningDevicesManager(isMacOs, workAdbFolder);
+				devices = new RunningDevicesManager();
 				
-				if (isMacOs) {
-					var file:File = settingsFile;
+				if (Settings.isMacOs) {
+					var file:File = Settings.settingsFile;
 					if (file.exists) {
 						
 						var fileStream:FileStream = new FileStream();
@@ -213,7 +159,7 @@
 				}
 				
 				genymotionManager = new GenymotionManager();
-				peerGroup = new PeerGroupConnection(workFolder, devices, simulators, httpPort);
+				peerGroup = new PeerGroupConnection(Settings.workFolder, devices, simulators, httpPort);
 			}
 			
 			public function saveValues(desc:String, name:String):void {

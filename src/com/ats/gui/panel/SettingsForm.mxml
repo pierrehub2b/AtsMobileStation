@@ -3,8 +3,8 @@
 		  xmlns:s="library://ns.adobe.com/flex/spark" 
 		  xmlns:mx="library://ns.adobe.com/flex/mx"
 		  xmlns:buttons="com.caipture.gui.buttons.*" 
-		  xmlns:text="com.caipture.gui.text.*" gap="10" xmlns:panels="com.caipture.gui.panels.*"
-			>
+		  xmlns:text="com.caipture.gui.text.*" gap="10" xmlns:panels="com.caipture.gui.panels.*">
+	
 	<fx:Script>
 		<![CDATA[
 		import com.ats.gui.alert.CredentialsAlert;
@@ -20,7 +20,6 @@
 				msName.text = peer.name;
 				msDescription.text = peer.description;
 				
-				androidSdkFolderPath.text = Settings.getInstance().androidSdkPath
 				pythonFolderPath.text = Settings.getInstance().pythonPath
 				
 				gmsaas = GmsaasInstaller.isInstalled()
@@ -90,20 +89,7 @@
 			public function get description():String{
 				return msDescription.text
 			}
-			
-			protected function loadAndroidPath_clickHandler(event:MouseEvent):void
-			{
-				var directory:File = Settings.defaultAppFolder;
-				directory.addEventListener(Event.SELECT, androidFolderSelected);
-				directory.browseForDirectory("Select Android SDK directory");
-			}
-			
-			protected function androidFolderSelected(event:Event):void {
-				event.currentTarget.removeEventListener(Event.SELECT, androidFolderSelected);
-				Settings.getInstance().androidSdkFolder = event.target as File
-				androidSdkFolderPath.text = Settings.getInstance().androidSdkPath
-			}
-			
+						
 			protected function loadPythonPath_clickHandler(event:MouseEvent):void
 			{
 				var directory:File = Settings.defaultAppFolder;
@@ -121,11 +107,6 @@
 	</fx:Script>
 	<text:InputText id="msName" label="Mobile Station name" width="100%"/>
 	<text:InputText id="msDescription" label="Description" width="100%" lines="4"/>
-	
-	<s:HGroup width="100%" verticalAlign="bottom">
-		<text:InputText id="androidSdkFolderPath" label="Android SDK folder" width="100%"/>
-		<buttons:SmallButton click="loadAndroidPath_clickHandler(event)"/>
-	</s:HGroup>
 	
 	<s:HGroup width="100%" verticalAlign="bottom">
 		<text:InputText id="pythonFolderPath" label="Python folder" width="100%"/>

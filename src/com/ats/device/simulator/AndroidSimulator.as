@@ -1,4 +1,6 @@
 package com.ats.device.simulator {
+import com.ats.helpers.Settings;
+
 import flash.desktop.NativeProcess;
 import flash.desktop.NativeProcessStartupInfo;
 import flash.events.NativeProcessExitEvent;
@@ -6,7 +8,7 @@ import flash.events.ProgressEvent;
 import flash.filesystem.File;
 import flash.system.Capabilities;
 
-import com.ats.helpers.Settings;
+import mx.core.FlexGlobals;
 
 public class AndroidSimulator extends Simulator {
 
@@ -38,7 +40,7 @@ public class AndroidSimulator extends Simulator {
     }
 
     override public function startSim():void {
-        var file:File = Settings.getInstance().androidSdkFolder
+        var file:File = Settings.workAdbFolder;
         file = file.resolvePath("emulator").resolvePath("emulator" + execExtension)
 
         if (!file.exists) {

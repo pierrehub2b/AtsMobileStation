@@ -1,4 +1,5 @@
 package com.ats.helpers {
+	import flash.errors.IOError;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.filesystem.File;
@@ -7,23 +8,68 @@ package com.ats.helpers {
 	
 	public class Settings extends EventDispatcher {
 		
+		private static var _instance: Settings = new Settings();
+		
 		private static const APP_FOLDER_WINDOWS:String = "AppData/Local";
 		private static const APP_FOLDER_MACOS:String = "Library";
 		
 		public static const isMacOs:Boolean = Capabilities.os.indexOf("Mac") > -1;
+		public static const workAdbFolder:File = File.applicationDirectory.resolvePath("assets/tools/android");
+		public static const workFolder:File = File.userDirectory.resolvePath(".atsmobilestation");
 		
 		public static function get defaultAppFolder():File{
 			return isMacOs?File.userDirectory.resolvePath(APP_FOLDER_MACOS):File.userDirectory.resolvePath(APP_FOLDER_WINDOWS)
 		}
+
+		public static function get logsFolder():File {
+			return workFolder.resolvePath("logs");
+		}
 		
-		private var sharedObject:SharedObject;
+		private static const settingsFolder:File = File.userDirectory.resolvePath(".actiontestscript/mobilestation/settings");
 		
-		private static var _instance: Settings = new Settings();
+		public static function get devicesSettingsFile():File {
+			return settingsFolder.resolvePath("devicesSettings.txt");
+		}
 		
+		public static function get devicePortSettingsFile():File {
+			return settingsFolder.resolvePath("portSettings.txt");
+		}
+		
+		public static function get settingsFile():File {
+			return settingsFolder.resolvePath("settings.txt");
+		}
+		
+		public static function get adbFile():File {
+			if(isMacOs){
+				return workAdbFolder.resolvePath("adb");
+			}else{
+				return workAdbFolder.resolvePath("adb.exe");
+			}
+		}
+		
+		public static function cleanLogs():void{
+			
+			try {
+				logsFolder.deleteDirectory(true);
+			} catch (err:IOError) {
+			}
+			
+			var date:Date = new Date(2020, 2, 31, 18, 30, 0, 0);
+			if (devicePortSettingsFile.exists && devicePortSettingsFile.modificationDate < date) {
+				devicePortSettingsFile.deleteFile();
+			}
+			
+			if (devicesSettingsFile.exists && devicesSettingsFile.modificationDate < date) {
+				devicesSettingsFile.deleteFile();
+			}
+		}
+				
+			
 		public static function getInstance():Settings {
 			return _instance;
 		}
 		
+		private var sharedObject:SharedObject;
 		private var _androidSdkPath:String;
 		private var _pythonPath:String;
 		
@@ -34,46 +80,10 @@ package com.ats.helpers {
 			
 			sharedObject = SharedObject.getLocal("settings");
 			
-			androidSdkPath = sharedObject.data.androidSdkPath;
-			if(androidSdkPath == null){
-				androidSdkFolder = defaultAppFolder.resolvePath("Android").resolvePath("sdk");
-			}
-			
 			pythonPath = sharedObject.data.pythonPath;
 			if(pythonPath == null){
 				pythonFolder = defaultAppFolder.resolvePath("python");
 			}
-		}
-		
-		[Bindable(event="androidSdkPathChange")]
-		public function get androidSdkPath():String
-		{
-			return _androidSdkPath;
-		}
-		
-		public function set androidSdkPath(value:String):void
-		{
-			if( _androidSdkPath !== value)
-			{
-				_androidSdkPath = value;
-				dispatchEvent(new Event("androidSdkPathChange"));
-			}
-		}
-		
-		public function get androidSdkFolder():File {
-			return new File(androidSdkPath);
-		}
-		
-		public function set androidSdkFolder(value:File):void {
-			
-			if(value.exists){
-				androidSdkPath = value.nativePath;
-			}else{
-				androidSdkPath = null;
-			}
-			
-			sharedObject.data.androidSdkPath = androidSdkPath
-			sharedObject.flush()
 		}
 		
 		[Bindable(event="pythonPathChange")]
