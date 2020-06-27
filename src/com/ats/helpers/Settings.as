@@ -101,11 +101,21 @@ package com.ats.helpers {
 			}
 		}
 		
+		public function get gmsaasExecutable():File {
+			const pyth:File = pythonFolder;
+			if(pyth != null && pyth.exists){
+				const gm:File = pyth.resolvePath("Scripts").resolvePath("gmsaas.exe");
+				if(gm.exists){
+					return gm;
+				}
+			}
+			return null;
+		}
+		
 		public function get pythonFolder():File {
 			if (!pythonPath) {
 				return null
 			}
-
 			return new File(pythonPath);
 		}
 		

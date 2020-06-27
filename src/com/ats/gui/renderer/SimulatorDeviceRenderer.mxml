@@ -5,20 +5,18 @@
 							creationComplete="creationCompleteHandler(event)">
 	<fx:Script>
 		<![CDATA[
-        import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
-        import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
-        import com.greensock.TweenMax;
-
-        import flash.filters.BitmapFilterQuality;
-
-        import mx.events.FlexEvent;
-
-        import spark.filters.ColorMatrixFilter;
-        import spark.filters.DropShadowFilter;
-
         import com.ats.device.Device;
         import com.ats.device.simulator.IosSimulator;
         import com.ats.device.simulator.Simulator;
+        import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
+        import com.greensock.TweenMax;
+        
+        import flash.filters.BitmapFilterQuality;
+        
+        import mx.events.FlexEvent;
+        
+        import spark.filters.ColorMatrixFilter;
+        import spark.filters.DropShadowFilter;
 
         public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
         private static const greyFilter:ColorMatrixFilter = new ColorMatrixFilter([0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0, 0, 0, 1, 0]);
@@ -30,7 +28,7 @@
         protected function button_rollOverHandler(event:MouseEvent):void {
             if (sim.status == Simulator.RUNNING) {
                 showOverButton("turnoff");
-            } else if (sim.status == Simulator.OFF) {
+            } else if (sim.status == Simulator.OFF && !(data is GenymotionSaasSimulator)) {
                 showOverButton("turnon");
             }
         }
@@ -86,7 +84,9 @@
 		</s:HGroup>
 		
 		<s:Spacer width="100%"/>
-		
+		<s:BitmapImage source="assets/icons/24/link.png" smooth="true" smoothingQuality="high"
+					   visible="{data is GenymotionSaasSimulator &amp;&amp; (data as GenymotionSaasSimulator).owned}"
+					   />
 		<s:Group buttonMode="true" click="startStopButton_clickHandler(event)" height="24" width="24"
 				 toolTip="{(data as Simulator).tooltip}" enabled="{(data as Simulator).status!=Device.INSTALL}">
 			<s:BitmapImage id="iconStatus" source="assets/icons/24/{(data as Simulator).status}.png" smooth="true" smoothingQuality="high"/>

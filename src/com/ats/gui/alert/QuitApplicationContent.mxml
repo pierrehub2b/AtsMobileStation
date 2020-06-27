@@ -15,7 +15,8 @@
 		]]>
 	</fx:Script>
 	
-	<s:Label id="mainMessage" text="Quit ATS MobileStation application ?" color="0xadb5bd" fontSize="14" />
+	<s:Label id="mainMessage" text="Quit ATS MobileStation application ?" color="0xadb5bd" fontSize="14"
+			 textAlign="center" width="100%"/>
 	<s:Label id="subMessage" text="(All devices will be disconnected)" color="0xadb5bd" fontStyle="italic"
-			 top="20"/>
+			 top="20" textAlign="center" width="100%"/>
 </s:Group>

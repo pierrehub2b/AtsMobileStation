@@ -1,6 +1,7 @@
 package com.ats.device.simulator
 {
 	import com.ats.device.Device;
+	import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
 
 	public class Simulator extends Device
 	{

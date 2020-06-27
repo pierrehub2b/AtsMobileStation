@@ -11,6 +11,7 @@
 			import com.ats.device.Device;
 			import com.ats.device.running.IosDevice;
 			import com.ats.device.running.RunningDevice;
+			import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
 			import com.ats.gui.alert.QuitApplicationAlert;
 			import com.ats.gui.panel.SettingsForm;
 			import com.ats.gui.renderer.RunningDeviceRenderer;
@@ -23,6 +24,8 @@
 			import com.caipture.gui.panels.TopTitle;
 			import com.greensock.TweenLite;
 			import com.greensock.TweenMax;
+			import com.greensock.plugins.ColorTransformPlugin;
+			import com.greensock.plugins.TweenPlugin;
 			
 			import flash.filters.BitmapFilterQuality;
 			
@@ -41,6 +44,7 @@
 			private var icon:Loader = new Loader();
 			private var iconMenu:NativeMenu = new NativeMenu();
 			
+			[Bindable]
 			private var settingsForm:SettingsForm;
 			
 			public var peerGroup:PeerGroupConnection;
@@ -97,6 +101,8 @@
 			}
 			
 			protected function creationCompleteHandler(event:FlexEvent):void {
+				
+				TweenPlugin.activate([ColorTransformPlugin]);
 				
 				var appXml:XML = NativeApplication.nativeApplication.applicationDescriptor;
 				var ns:Namespace = NativeApplication.nativeApplication.applicationDescriptor.namespace();
@@ -236,11 +242,9 @@
 				}
 			}
 			
-			protected function clickGroup2_clickHandler(event:MouseEvent):void {
+			protected function genymotionGroup_clickHandler(event:MouseEvent):void {
 				if (genymotionGroup.height == 26) {
-					TweenMax.to(genymotionGroup, 0.3, {height: height - 120})
-					TweenMax.to(simulatorsGroup, 0.3, {height: 26})
-					TweenMax.to(connectedGroup, 0.3, {height: 26})
+					showGenymotionGroup();
 				}
 			}
 			
@@ -254,6 +258,12 @@
 					TweenMax.to(connectedGroup, 0.3, newHeight)
 					TweenMax.to(simulatorsGroup, 0.3, {height: 26})
 				}
+			}
+			
+			private function showGenymotionGroup():void{
+				TweenMax.to(genymotionGroup, 0.3, {height: height - 120})
+				TweenMax.to(simulatorsGroup, 0.3, {height: 26})
+				TweenMax.to(connectedGroup, 0.3, {height: 26})
 			}
 			
 			protected function settings_clickHandler(event:MouseEvent):void {
@@ -316,6 +326,18 @@
 			protected function titleMouseDownHandler(event:MouseEvent):void
 			{
 				nativeWindow.startMove();
+			}
+			
+			public function set genymotionActivated(value:Boolean):void{
+				if(value){
+					genymotionManager.visible = true
+					genymotionManager.fetchContent()
+					showGenymotionGroup();
+				}else{
+					genymotionManager.visible = false
+					TweenMax.to(connectedGroup, 0.3, {height: height - 96})
+					TweenMax.to(simulatorsGroup, 0.3, {height: 26})
+				}
 			}
 			
 		]]>
@@ -419,11 +441,12 @@
 						itemRenderer="com.ats.gui.renderer.SimulatorDeviceRenderer" useVirtualLayout="false"/>
 			</s:Group>
 			
-			<s:Group id="genymotionGroup" width="100%" height="26" clipAndEnableScrolling="true" visible="{genymotionManager.visible}" includeInLayout="{genymotionManager.visible}">
+			<s:Group id="genymotionGroup" width="100%" height="26" clipAndEnableScrolling="true" 
+					 visible="{genymotionManager.visible}" includeInLayout="{genymotionManager.visible}">
 				
 				<s:Group height="26" width="100%">
 					<s:Group buttonMode="true" height="26" width="100%"
-							 click="clickGroup2_clickHandler(event)">
+							 click="genymotionGroup_clickHandler(event)">
 						<s:Rect	left="0" right="0" top="0" bottom="0" alpha="0.7" radiusX="3" radiusY="3">
 							<s:fill>
 								<s:LinearGradient rotation="90">
@@ -441,7 +464,7 @@
 						<s:HGroup width="100%" paddingLeft="7" color="#c8cdd2" paddingRight="7" verticalCenter="0" verticalAlign="middle" gap="3"
 								  filters="{RunningDeviceRenderer.dropShadowFilterMiddle}">
 							<s:Label fontSize="13" text="Genymotion Cloud" fontWeight="bold"/>
-							<s:Label fontSize="11" width="100%" text="{genymotionManager.instances.length==0?'':'- '+genymotionManager.instances.length+' running instance(s)'}"/>
+							<s:Label fontSize="11" width="100%" text="{GenymotionSaasSimulator.count==0?'':'- ' + GenymotionSaasSimulator.count + ' running instance(s)'}"/>
 							<s:Group id="reloadButtons" alpha="0.4" buttonMode="true" click="reloadButtons_clickHandler(event)"
 									 height="20" width="20" toolTip="Reload Genymotion instances">
 								<s:BitmapImage source="assets/icons/20/reload.png" smooth="true" smoothingQuality="high"/>
@@ -449,7 +472,7 @@
 						</s:HGroup>
 					</s:Group>
 				</s:Group>
-				<s:BitmapImage source="assets/icons/240/genymotion.png" top="100" horizontalCenter="0"/>
+				<s:BitmapImage source="assets/icons/240/genymotion.png" top="90" horizontalCenter="0"/>
 				<s:List left="0" right="0" top="28" bottom="1" visible="{!genymotionManager.loading}"
 						borderVisible="false"
 						contentBackgroundAlpha="0.0" dataProvider="{genymotionManager.recipes}"
@@ -459,7 +482,7 @@
 		</s:VGroup>
 		<s:VGroup id="settingsGroup" gap="0" top="0" bottom="0" creationComplete="settingsGroup_creationCompleteHandler(event)">
 			<panels:TitlePanel id="settingsPanel" label="Settings" height="100%" width="100%"/>
-			<panels:BottomButtons width="100%">
+			<panels:BottomButtons width="100%" activated="{!settingsForm.edit}">
 				<buttons:BigButton label="Restart server"/>
 				<buttons:BigButton label="Export devices" enabled="false"/>
 				<buttons:BigButton label="Finish" click="finish_clickHandler(event)"/>

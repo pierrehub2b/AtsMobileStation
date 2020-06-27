@@ -6,7 +6,7 @@
 		  gap="0" width="260" height="140"
 		  creationComplete="creationCompleteHandler(event)">
 	
-	<panels:TitlePanel id="inputPanel" label="Ats Mobile Station" height="100%" width="100%"/>
+	<panels:TitlePanel id="inputPanel" label="Ats MobileStation" height="100%" width="100%"/>
 	
 	<panels:BottomButtons width="100%" id="buttons">
 		<buttons:SmallButton label="Yes" fontSize="14" click="yes_clickHandler(event)"/>
@@ -27,7 +27,7 @@
 			public static const OK:String = "okButtonClicked"
 			public static const dropShadow:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.4, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
 					
-			private var quitContent:QuitApplicationConfirm = new QuitApplicationConfirm();
+			private var quitContent:QuitApplicationContent = new QuitApplicationContent();
 			
 			private function cancelButtonHandler(event:MouseEvent):void {
 				ModalPopupManager.removePopup(this);
@@ -40,7 +40,7 @@
 
 			protected function yes_clickHandler(event:MouseEvent):void
 			{
-				buttons.enabled = false;
+				buttons.activated = false;
 				quitContent.closingMessage();
 				dispatchEvent(new Event(OK));
 			}

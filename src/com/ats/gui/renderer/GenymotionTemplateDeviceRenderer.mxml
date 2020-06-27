@@ -97,7 +97,7 @@
 	</s:Rect>
 	
 	<s:HGroup id="mainGroup" width="100%" height="100%" verticalAlign="middle" paddingRight="6" paddingLeft="5" filters="{dropShadowFilterMiddle}">
-		<s:HGroup id="firstGroup" verticalAlign="middle" buttonMode="true" gap="0" width="100%">
+		<s:HGroup id="firstGroup" verticalAlign="middle" gap="0">
 			<s:BitmapImage id="osBitmap" left="6" smooth="true" smoothingQuality="high" source="assets/icons/32/android.png"/>
 			<s:VGroup gap="3" mouseEnabled="false" verticalAlign="bottom" height="100%">
 				<s:HGroup>
@@ -107,19 +107,34 @@
 				<s:Label text="{data.width} x {data.height}  (dpi:{data.dpi})" fontSize="11" fontStyle="italic" color="#e4e7e9"/>
 			</s:VGroup>
 		</s:HGroup>
-
-		<s:Group height="100%">
-			<s:Label text="{(data as GenymotionRecipe).instances.length==0?'':(data as GenymotionRecipe).instances.length+' instance'}{(data as GenymotionRecipe).instances.length&gt;1?'s':''}" 
-					 top="7" fontSize="10" fontStyle="italic" color="#e4e7e9" right="0"/>
-			<buttons:SimpleButton id="startButton" label="start instance" fontSize="11" visible="false" bottom="4" right="0"
-								  click="startButton_clickHandler(event)"/>
-<!--			<s:Group id="plusButton" buttonMode="true" click="startStopButton_clickHandler(event)" height="16" width="16"
-					 toolTip="Start new instance" visible="false">
-				<s:BitmapImage id="iconStatus" source="assets/icons/16/plus.png" smooth="true" smoothingQuality="high"/>
-			</s:Group>-->
-
+		<s:Group id="tagRun" height="100%" toolTip="{(data as GenymotionRecipe).instances.length} running instance(s)"
+				 visible="{(data as GenymotionRecipe).instances.length&gt;0}">
+			<s:Rect	left="0" right="0" top="5" height="16" alpha="0.9" radiusX="3" radiusY="3">
+				<s:fill>
+					<s:LinearGradient rotation="-90">
+						<s:GradientEntry color="0x5a636c"/>
+						<s:GradientEntry color="0x171e28"/>
+					</s:LinearGradient>
+				</s:fill>
+				<s:stroke>
+					<s:LinearGradientStroke rotation="90">
+						<s:GradientEntry color="0x6e7780"/>
+						<s:GradientEntry color="0x0f1217"/>
+					</s:LinearGradientStroke>
+				</s:stroke>
+			</s:Rect>
+			<s:Label id="lbl" left="5" right="5" top="10" color="#adb5bd" fontSize="11" fontWeight="bold"
+					 text="{(data as GenymotionRecipe).instances.length}" textAlign="center"/>
 		</s:Group>
 
+		<s:Spacer width="100%"/>
+
+			<s:Group id="startButton" right="-2" buttonMode="true" click="startButton_clickHandler(event)"
+					 toolTip="Start new instance" visible="false">
+				<s:BitmapImage id="iconStatus" source="assets/icons/24/plus0.png" smooth="true" smoothingQuality="high"/>
+			</s:Group>
+
+		
 	</s:HGroup>
 	<!-- <s:List alternatingItemColors="[#efefef, #dedede]" borderVisible="false" width="100%"
 	includeInLayout="{(data as GenymotionRecipe).instances.length&gt;0}" visible="{(data as GenymotionRecipe).instances.length&gt;0}"
