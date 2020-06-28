@@ -107,9 +107,8 @@
 				<s:Label text="{data.width} x {data.height}  (dpi:{data.dpi})" fontSize="11" fontStyle="italic" color="#e4e7e9"/>
 			</s:VGroup>
 		</s:HGroup>
-		<s:Group id="tagRun" height="100%"
-				 visible="{(data as GenymotionRecipe).instances.length&gt;0}">
-			<s:Rect	left="0" right="0" top="5" height="16" alpha="0.9" radiusX="3" radiusY="3">
+		<s:Group id="tagRun" height="100%" visible="{(data as GenymotionRecipe).instances.length&gt;0}">
+			<s:Rect	left="0" right="0" top="6" height="16" alpha="0.9" radiusX="3" radiusY="3">
 				<s:fill>
 					<s:LinearGradient rotation="-90">
 						<s:GradientEntry color="0x5a636c"/>
@@ -123,7 +122,7 @@
 					</s:LinearGradientStroke>
 				</s:stroke>
 			</s:Rect>
-			<s:Label id="lbl" left="0" right="0" paddingLeft="5" paddingRight="5" top="10" color="#adb5bd" fontSize="10" fontStyle="normal"
+			<s:Label id="lbl" left="0" right="0" paddingLeft="5" paddingRight="5" top="11" color="#adb5bd" fontSize="10" fontStyle="normal"
 					 text="{(data as GenymotionRecipe).instances.length} instance{(data as GenymotionRecipe).instances.length==1?'':'s'}"/>
 		</s:Group>
 
