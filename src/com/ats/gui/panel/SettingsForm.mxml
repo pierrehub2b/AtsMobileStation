@@ -147,16 +147,41 @@
 				Settings.getInstance().pythonFolder = event.target as File
 				pythonFolderPath.text = Settings.getInstance().pythonPath
 			}
+			
+			protected function linkAts_clickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest("https://github.com/pierrehub2b/AtsMobileStation#ios-devices"));
+			}
+			
+			protected function linkGeny_clickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest("https://www.genymotion.com/"));
+			}
+			
+			protected function python_clickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest("https://www.python.org/downloads/"));
+			}
+			
+			protected function amsDownload_clickHandler(event:MouseEvent):void
+			{
+				if(Settings.isMacOs){
+					navigateToURL(new URLRequest("http://www.actiontestscript.com/drivers/mobile/macos/AtsMobileStation.zip"));
+				}else{
+					navigateToURL(new URLRequest("http://www.actiontestscript.com/drivers/mobile/windows/AtsMobileStation.zip"));
+				}
+			}
+			
 		]]>
 	</fx:Script>
 	<text:InputText id="msName" label="Mobile Station name" width="100%"/>
 	<text:InputText id="msDescription" label="Description" width="100%" lines="4"/>
-	<s:Spacer height="16"/>
+	<s:Spacer height="6"/>
 	<s:HGroup width="100%" verticalAlign="bottom">
 		<text:InputText id="pythonFolderPath" label="Python folder" width="100%"/>
 		<buttons:SmallButton click="loadPythonPath_clickHandler(event)"/>
 	</s:HGroup>
-	<s:Spacer height="12"/>
+	<s:Spacer height="6"/>
 	<s:Group width="100%">
 		<panels:InsetPanel id="genyPanel" label="Genymotion Cloud" width="100%" height="100%"/>
 		<s:HGroup width="100%" top="26" paddingLeft="7" paddingRight="5" paddingBottom="5"
@@ -166,10 +191,24 @@
 			<buttons:SmallButton id="gmsaasUninstallButton" label="Uninstall" click="uninstallGmsaas(event)" fontSize="12"/>
 		</s:HGroup>
 	</s:Group>
-	<s:Spacer height="10"/>
-	<text:InputText label="Apple development team ID" width="100%" enabled="false"/>
+	<s:Spacer height="14"/>
+<!--	<text:InputText label="Apple development team ID" width="100%" enabled="false"/>
 	<mx:LinkButton width="100%" label="Apple Developer account" fontStyle="normal" fontSize="14"
-				   textAlign="left" color="0xadb5bd" enabled="false"/>
-	<mx:LinkButton width="100%" label="ATS MobileStation configuration" fontStyle="normal" fontSize="14"
-				   textAlign="left" color="0xadb5bd"/>
+				   textAlign="left" color="0xadb5bd" enabled="false"/>-->
+	
+	<s:VGroup color="#adb5bd" gap="4">
+		<s:Label text="Useful links" fontWeight="bold"/>
+		<s:Spacer height="2"/>
+		<mx:LinkButton width="100%" paddingLeft="5" label="ATS MobileStation configuration" fontStyle="normal" fontSize="14"
+					   textAlign="left" click="linkAts_clickHandler(event)"/>
+		<mx:LinkButton width="100%" paddingLeft="5" label="Genymotion Android simulators" fontStyle="normal" fontSize="14"
+					   textAlign="left" click="linkGeny_clickHandler(event)"/>
+		<mx:LinkButton width="100%" paddingLeft="5" label="Python download page" fontStyle="normal" fontSize="14"
+					   textAlign="left" click="python_clickHandler(event)"/>
+		<mx:LinkButton width="100%" paddingLeft="5" label="Download latest version of MobileStation" fontStyle="normal" fontSize="14"
+					   textAlign="left" click="amsDownload_clickHandler(event)"/>
+	</s:VGroup>
+
+
+
 </s:VGroup>
