@@ -52,6 +52,6 @@ To execute automated tests on physical iPhone devices, you need to create an App
 ## Android devices
 ### Prerequisites
 - the device **must be in WIFI and don't have a pin code** 
-- Enable the **developer mode** and autorize the connexion to the linked computer
+- Enable the **developer mode** and authorize the connection to the linked computer
 
-**You can now go the ATS Framework and begenning use it with your physical device.**
+**You can now go the ATS Framework and begin to use it with your physical device.**
