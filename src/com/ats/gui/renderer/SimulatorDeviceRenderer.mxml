@@ -84,9 +84,8 @@
 		</s:HGroup>
 		
 		<s:Spacer width="100%"/>
-		<s:BitmapImage source="assets/icons/24/link.png" smooth="true" smoothingQuality="high"
-					   visible="{data is GenymotionSaasSimulator &amp;&amp; (data as GenymotionSaasSimulator).owned}"
-					   />
+		<s:BitmapImage source="assets/icons/24/link.png"
+					   visible="{data is GenymotionSaasSimulator &amp;&amp; (data as GenymotionSaasSimulator).owned}"/>
 		<s:Group buttonMode="true" click="startStopButton_clickHandler(event)" height="24" width="24"
 				 toolTip="{(data as Simulator).tooltip}" enabled="{(data as Simulator).status!=Device.INSTALL}">
 			<s:BitmapImage id="iconStatus" source="assets/icons/24/{(data as Simulator).status}.png" smooth="true" smoothingQuality="high"/>
