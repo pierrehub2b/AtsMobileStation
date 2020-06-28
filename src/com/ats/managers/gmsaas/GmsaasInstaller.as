@@ -145,6 +145,7 @@ package com.ats.managers.gmsaas {
 		}
 		
 		public function uninstall():void {
+			
 			var pythonFolder:File = Settings.getInstance().pythonFolder
 			var pipFile:File = pythonFolder.resolvePath("Scripts").resolvePath(pipFileName);
 			if (!pipFile.exists) {

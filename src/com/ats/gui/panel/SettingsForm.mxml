@@ -36,7 +36,7 @@
 			private function set gmsaas(value:Boolean):void {
 				gmsaasUninstallButton.enabled = value
 				gmsaasInstallButton.enabled = !value
-					gmsaasCredentialsButton.enabled = value
+				gmsaasCredentialsButton.enabled = value
 			}
 			
 			protected function installGmsaas(event:Event):void {

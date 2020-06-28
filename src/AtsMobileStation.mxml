@@ -366,7 +366,7 @@
 				</s:fill>
 			</s:Rect>
 			<s:Label id="titleLabel" fontSize="15" left="10" top="9" color="0xadb5bd" filters="{TopTitle.dropShadow}"/>
-			<s:HGroup right="4" top="4">
+			<s:HGroup right="4" top="4" filters="{TopTitle.dropShadow}">
 				<s:Group id="settingsButton" click="settings_clickHandler(event)">
 					<s:BitmapImage source="assets/icons/24/gear.png"/>
 				</s:Group>
@@ -374,7 +374,6 @@
 					<s:BitmapImage source="assets/icons/24/close.png"/>
 				</s:Group>
 			</s:HGroup>
-			
 		</s:Group>
 		
 		<s:VGroup bottom="10" left="10" right="10" top="38" gap="2">
@@ -395,7 +394,8 @@
 							</s:LinearGradientStroke>
 						</s:stroke>
 					</s:Rect>
-					<s:Label verticalCenter="0" paddingLeft="7" fontSize="13" color="0xc8cdd2" text="Connected Devices" fontWeight="bold"/>
+					<s:Label verticalCenter="0" paddingLeft="7" fontSize="13" color="0xc8cdd2" text="Connected Devices" fontWeight="bold"
+							 filters="{TopTitle.dropShadow}"/>
 				</s:Group>
 				<s:BitmapImage source="assets/icons/240/network.png" top="100" horizontalCenter="0"/>
 				<s:VGroup top="21" left="0" right="0" bottom="30" gap="3">
@@ -433,7 +433,7 @@
 						</s:stroke>
 					</s:Rect>
 					<s:Label fontSize="13" verticalCenter="0" left="7" color="0xc8cdd2" text="Available Simulators" fontWeight="bold"
-							 filters="{RunningDeviceRenderer.dropShadowFilterMiddle}"/>
+							 filters="{TopTitle.dropShadow}"/>
 					
 				</s:Group>
 				<s:Label fontStyle="italic" fontSize="11" top="38"
@@ -466,9 +466,9 @@
 							</s:stroke>
 						</s:Rect>
 						<s:HGroup width="100%" paddingLeft="7" color="#c8cdd2" paddingRight="7" verticalCenter="0" verticalAlign="middle" gap="3"
-								  filters="{RunningDeviceRenderer.dropShadowFilterMiddle}">
+								  filters="{TopTitle.dropShadow}">
 							<s:Label fontSize="13" text="Genymotion Cloud" fontWeight="bold"/>
-							<s:Label fontSize="11" width="100%" text="{GenymotionSaasSimulator.count==0?'':'- ' + GenymotionSaasSimulator.count + ' running instance(s)'}"/>
+							<s:Label fontSize="11" width="100%" text="{GenymotionSaasSimulator.count==0?'':'- ' + GenymotionSaasSimulator.count + ' running instance'}{GenymotionSaasSimulator.count&gt;1?'s':''}"/>
 							<s:Group id="reloadButtons" alpha="0.4" buttonMode="true" click="reloadButtons_clickHandler(event)"
 									 height="20" width="20" toolTip="Reload Genymotion instances">
 								<s:BitmapImage source="assets/icons/20/reload.png" smooth="true" smoothingQuality="high"/>
