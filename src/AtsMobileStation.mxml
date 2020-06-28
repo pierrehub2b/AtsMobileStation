@@ -199,9 +199,13 @@
 			
 			private function closeAll():void{
 				peerGroup.close();
-				genymotionManager.terminate()
 				simulators.terminate();
 				
+				genymotionManager.addEventListener(Event.COMPLETE, genymotionTerminated);
+				genymotionManager.terminate()
+			}
+			
+			private function genymotionTerminated(ev:Event):void{
 				devices.addEventListener(Event.COMPLETE, devicesTerminateComplete);
 				devices.terminate();
 			}
@@ -476,7 +480,7 @@
 				<s:List left="0" right="0" top="28" bottom="1" visible="{!genymotionManager.loading}"
 						borderVisible="false"
 						contentBackgroundAlpha="0.0" dataProvider="{genymotionManager.recipes}"
-						itemRenderer="com.ats.gui.renderer.GenymotionTemplateDeviceRenderer" useVirtualLayout="false"
+						itemRenderer="com.ats.gui.renderer.GenymotionRecipeRenderer" useVirtualLayout="false"
 						horizontalScrollPolicy="off"/>
 			</s:Group>
 		</s:VGroup>

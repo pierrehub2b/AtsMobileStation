@@ -23,7 +23,7 @@ package com.ats.managers.gmsaas {
 		
 		private static const pythonFileName:String = "python.exe"
 		private static const pipFileName:String = "pip3.exe"
-		private static const gmsaasFileName:String = "gmsaas.exe"
+		public static const gmsaasFileName:String = "gmsaas.exe"
 		
 		private var pythonFile:File
 		private var gmsaasFile:File

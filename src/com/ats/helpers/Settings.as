@@ -1,4 +1,7 @@
 package com.ats.helpers {
+	import com.ats.managers.gmsaas.GmsaasInstaller;
+	import com.ats.managers.gmsaas.GmsaasManager;
+	
 	import flash.errors.IOError;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -104,7 +107,7 @@ package com.ats.helpers {
 		public function get gmsaasExecutable():File {
 			const pyth:File = pythonFolder;
 			if(pyth != null && pyth.exists){
-				const gm:File = pyth.resolvePath("Scripts").resolvePath("gmsaas.exe");
+				const gm:File = pyth.resolvePath("Scripts").resolvePath(GmsaasInstaller.gmsaasFileName);
 				if(gm.exists){
 					return gm;
 				}
