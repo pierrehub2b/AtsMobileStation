@@ -1,14 +1,12 @@
 package com.ats.managers.gmsaas {
-	
-	import com.ats.device.simulator.genymotion.GenymotionRecipe;
-	import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
-	import com.ats.helpers.Settings;
-	import com.ats.helpers.Version;
-	
-	import flash.events.EventDispatcher;
-	import flash.filesystem.File;
-	
-	public class GmsaasManager extends EventDispatcher {
+
+import com.ats.device.simulator.genymotion.GenymotionRecipe;
+import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
+import com.ats.helpers.Version;
+
+import flash.events.EventDispatcher;
+
+public class GmsaasManager extends EventDispatcher {
 
 		public function fetchRecipes():void {
 			GmsaasProcess.startProcess(["recipes", "list"], fetchRecipesExitHandler);

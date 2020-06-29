@@ -8,342 +8,337 @@
 					   xmlns:buttons="com.caipture.gui.buttons.*">
 	<fx:Script>
 		<![CDATA[
-			import com.ats.device.Device;
-			import com.ats.device.running.IosDevice;
-			import com.ats.device.running.RunningDevice;
-			import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
-			import com.ats.gui.alert.QuitApplicationAlert;
-			import com.ats.gui.panel.SettingsForm;
-			import com.ats.gui.renderer.RunningDeviceRenderer;
-			import com.ats.helpers.Settings;
-			import com.ats.helpers.Version;
-			import com.ats.managers.AvailableSimulatorsManager;
-			import com.ats.managers.GenymotionManager;
-			import com.ats.managers.RunningDevicesManager;
-			import com.ats.tools.PeerGroupConnection;
-			import com.caipture.gui.panels.TopTitle;
-			import com.greensock.TweenLite;
-			import com.greensock.TweenMax;
-			import com.greensock.plugins.ColorTransformPlugin;
-			import com.greensock.plugins.TweenPlugin;
-			
-			import flash.filters.BitmapFilterQuality;
-			
-			import mx.events.CloseEvent;
-			import mx.events.FlexEvent;
-			import mx.managers.PopUpManager;
-			
-			import spark.components.Alert;
-			import spark.filters.DropShadowFilter;
-			
-			public static const dropShadowFilterApp:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.4, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
-			public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 90, 0x000000, 0.4, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
-			
-			public static const supportedAndroidOsVersion:Version = new Version("5.1")
-			
-			private var icon:Loader = new Loader();
-			private var iconMenu:NativeMenu = new NativeMenu();
-			
-			[Bindable]
-			private var settingsForm:SettingsForm;
-			
-			public var peerGroup:PeerGroupConnection;
-			
-			[Bindable]
-			public var genymotionManager:GenymotionManager;
-			
-			[Bindable]
-			private var httpPort:int = 8686;
-			
-			[Bindable]
-			public var devices:RunningDevicesManager;
-			
-			[Bindable]
-			public var simulators:AvailableSimulatorsManager;
-			
-			public var teamId:String;
-			
-			public function getTeamId():String {
-				return teamId;
+		import com.ats.device.Device;
+		import com.ats.device.running.IosDevice;
+		import com.ats.device.running.RunningDevice;
+		import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
+		import com.ats.gui.alert.QuitApplicationAlert;
+		import com.ats.gui.panel.SettingsForm;
+		import com.ats.gui.renderer.RunningDeviceRenderer;
+		import com.ats.helpers.Settings;
+		import com.ats.helpers.Version;
+		import com.ats.managers.AvailableSimulatorsManager;
+		import com.ats.managers.GenymotionManager;
+		import com.ats.managers.RunningDevicesManager;
+		import com.ats.tools.PeerGroupConnection;
+		import com.caipture.gui.panels.TopTitle;
+		import com.greensock.TweenLite;
+		import com.greensock.TweenMax;
+		import com.greensock.plugins.ColorTransformPlugin;
+		import com.greensock.plugins.TweenPlugin;
+
+		import flash.filters.BitmapFilterQuality;
+
+		import mx.events.CloseEvent;
+		import mx.events.FlexEvent;
+
+		import spark.components.Alert;
+		import spark.filters.DropShadowFilter;
+
+		public static const dropShadowFilterApp:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.4, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
+		public static const dropShadowFilter:DropShadowFilter = new DropShadowFilter(2.0, 90, 0x000000, 0.4, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
+
+		public static const supportedAndroidOsVersion:Version = new Version("5.1")
+
+		private var icon:Loader = new Loader();
+		private var iconMenu:NativeMenu = new NativeMenu();
+
+		[Bindable]
+		private var settingsForm:SettingsForm;
+
+		public var peerGroup:PeerGroupConnection;
+
+		[Bindable]
+		public var genymotionManager:GenymotionManager;
+
+		[Bindable]
+		private var httpPort:int = 8686;
+
+		[Bindable]
+		public var devices:RunningDevicesManager;
+
+		[Bindable]
+		public var simulators:AvailableSimulatorsManager;
+
+		public var teamId:String;
+
+		public function getTeamId():String {
+			return teamId;
+		}
+
+		public function setTeamId(value:String):void {
+			teamId = value;
+		}
+
+		private function iconLoadComplete(event:Event):void {
+			NativeApplication.nativeApplication.icon.bitmaps = [event.target.content.bitmapData];
+		}
+
+		private function trayClick(ev:ScreenMouseEvent):void {
+			nativeWindow.restore();
+			NativeApplication.nativeApplication.activate()
+		}
+
+		private function restartApp(ev:Event = null):void {
+			var execFilePath:String = "AtsMobileStation.";
+			if (Settings.isMacOs) {
+				execFilePath += "app";
+			} else {
+				execFilePath += "exe";
 			}
-			
-			public function setTeamId(value:String):void {
-				teamId = value;
-			}
-			
-			private function iconLoadComplete(event:Event):void {
-				NativeApplication.nativeApplication.icon.bitmaps = [event.target.content.bitmapData];
-			}
-			
-			private function trayClick(ev:ScreenMouseEvent):void {
-				nativeWindow.restore();
-				NativeApplication.nativeApplication.activate()
-			}
-			
-			private function restartApp(ev:Event = null):void {
-				var execFilePath:String = "AtsMobileStation.";
-				if (Settings.isMacOs) {
-					execFilePath += "app";
-				} else {
-					execFilePath += "exe";
-				}
-				
-				const execFile:File = File.applicationDirectory.resolvePath(execFilePath);
-				if (execFile.exists) {
-					NativeApplication.nativeApplication.exit();
-					execFile.openWithDefaultApplication();
-				}
-			}
-			
-			private function exitAppHandler(ev:Event):void {
-				NativeApplication.nativeApplication.icon.bitmaps = [];
+
+			const execFile:File = File.applicationDirectory.resolvePath(execFilePath);
+			if (execFile.exists) {
 				NativeApplication.nativeApplication.exit();
+				execFile.openWithDefaultApplication();
 			}
-			
-			protected function creationCompleteHandler(event:FlexEvent):void {
-				
-				TweenPlugin.activate([ColorTransformPlugin]);
-				
-				var appXml:XML = NativeApplication.nativeApplication.applicationDescriptor;
-				var ns:Namespace = NativeApplication.nativeApplication.applicationDescriptor.namespace();
-				const appVersion:String = appXml.ns::versionNumber[0];
-				//appName = appXml.ns::filename[0];
-				System.disposeXML(appXml);
-				
-				titleLabel.text = "Ats MobileStation (" + appVersion + ") - port:" + httpPort
-				
-				var exitCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Exit"));
-				exitCommand.addEventListener(Event.SELECT, exitAppHandler, false, 0, true);
-				
-				var restartCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Restart"));
-				restartCommand.addEventListener(Event.SELECT, restartApp, false, 0, true);
-				
-				if (NativeApplication.supportsSystemTrayIcon) {
-					icon.contentLoaderInfo.addEventListener(Event.COMPLETE, iconLoadComplete);
-					icon.load(new URLRequest("assets/icons/16/ats_logo.png"));
-					
-					var systray:SystemTrayIcon = NativeApplication.nativeApplication.icon as SystemTrayIcon;
-					systray.tooltip = "ATS Mobile Station";
-					systray.menu = iconMenu;
-					systray.addEventListener(ScreenMouseEvent.CLICK, trayClick);
-				}
-				
-				if (NativeApplication.supportsDockIcon) {
-					icon.contentLoaderInfo.addEventListener(Event.COMPLETE, iconLoadComplete);
-					icon.load(new URLRequest("assets/icons/32/ats_logo.png"));
-					var dock:DockIcon = NativeApplication.nativeApplication.icon as DockIcon;
-					dock.menu = iconMenu;
-				}
-				
-				Settings.cleanLogs();
-				
-				if (!Capabilities.isDebugger) {
-					cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
-				}
-				
-				simulators = new AvailableSimulatorsManager();
-				devices = new RunningDevicesManager();
-				
-				if (Settings.isMacOs) {
-					var file:File = Settings.settingsFile;
-					if (file.exists) {
-						
-						var fileStream:FileStream = new FileStream();
-						fileStream.open(file, FileMode.READ);
-						
-						var settingsContent:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
-						var settingsContentArray:Array = settingsContent.split("\n");
-						
-						for each(var setting:String in settingsContentArray) {
-							if (setting != "") {
-								var key:String = setting.split("==")[0];
-								if (key == "development_team") {
-									teamId = setting.split("==")[1];
-									break;
-								}
+		}
+
+		private function exitAppHandler(ev:Event):void {
+			NativeApplication.nativeApplication.icon.bitmaps = [];
+			NativeApplication.nativeApplication.exit();
+		}
+
+		protected function creationCompleteHandler(event:FlexEvent):void {
+
+			TweenPlugin.activate([ColorTransformPlugin]);
+
+			var appXml:XML = NativeApplication.nativeApplication.applicationDescriptor;
+			var ns:Namespace = NativeApplication.nativeApplication.applicationDescriptor.namespace();
+			const appVersion:String = appXml.ns::versionNumber[0];
+			//appName = appXml.ns::filename[0];
+			System.disposeXML(appXml);
+
+			titleLabel.text = "Ats MobileStation (" + appVersion + ") - port:" + httpPort
+
+			var exitCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Exit"));
+			exitCommand.addEventListener(Event.SELECT, exitAppHandler, false, 0, true);
+
+			var restartCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Restart"));
+			restartCommand.addEventListener(Event.SELECT, restartApp, false, 0, true);
+
+			if (NativeApplication.supportsSystemTrayIcon) {
+				icon.contentLoaderInfo.addEventListener(Event.COMPLETE, iconLoadComplete);
+				icon.load(new URLRequest("assets/icons/16/ats_logo.png"));
+
+				var systray:SystemTrayIcon = NativeApplication.nativeApplication.icon as SystemTrayIcon;
+				systray.tooltip = "ATS Mobile Station";
+				systray.menu = iconMenu;
+				systray.addEventListener(ScreenMouseEvent.CLICK, trayClick);
+			}
+
+			if (NativeApplication.supportsDockIcon) {
+				icon.contentLoaderInfo.addEventListener(Event.COMPLETE, iconLoadComplete);
+				icon.load(new URLRequest("assets/icons/32/ats_logo.png"));
+				var dock:DockIcon = NativeApplication.nativeApplication.icon as DockIcon;
+				dock.menu = iconMenu;
+			}
+
+			Settings.cleanLogs();
+
+			if (!Capabilities.isDebugger) {
+				cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
+			}
+
+			simulators = new AvailableSimulatorsManager();
+			devices = new RunningDevicesManager();
+
+			if (Settings.isMacOs) {
+				var file:File = Settings.settingsFile;
+				if (file.exists) {
+
+					var fileStream:FileStream = new FileStream();
+					fileStream.open(file, FileMode.READ);
+
+					var settingsContent:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
+					var settingsContentArray:Array = settingsContent.split("\n");
+
+					for each(var setting:String in settingsContentArray) {
+						if (setting != "") {
+							var key:String = setting.split("==")[0];
+							if (key == "development_team") {
+								teamId = setting.split("==")[1];
+								break;
 							}
 						}
-						fileStream.close();
 					}
-				}
-				
-				genymotionManager = new GenymotionManager();
-				peerGroup = new PeerGroupConnection(Settings.workFolder, devices, simulators, httpPort);
-			}
-			
-			public function saveValues(desc:String, name:String):void {
-				peerGroup.saveValues(desc, name);
-			}
-			
-			public function restartDevice(dev:Device):void {
-				devices.restartDev(dev);
-			}
-			
-			public function restartIosDevices():void {
-				for each(var dv:RunningDevice in devices.collection) {
-					if (!dv.simulator && dv is IosDevice && dv.status != Device.READY) {
-						devices.restartDev(dv);
-					}
+					fileStream.close();
 				}
 			}
-			
-			protected function closeButtonClicked(event:MouseEvent):void {
-				var quit:QuitApplicationAlert = new QuitApplicationAlert();
-				quit.addEventListener(QuitApplicationAlert.OK, quitApplicationHandler, false, 0, true);
-				ModalPopupManager.addPopup(mainGroup, quit);
-			}
-			
-			private function quitApplicationHandler(ev:Event):void{
-				TweenMax.delayedCall(0.1, closeAll);
-			}
-			
-			private function closeAll():void{
-				peerGroup.close();
-				simulators.terminate();
-				
-				genymotionManager.addEventListener(Event.COMPLETE, genymotionTerminated);
-				genymotionManager.terminate()
-			}
-			
-			private function genymotionTerminated(ev:Event):void{
-				devices.addEventListener(Event.COMPLETE, devicesTerminateComplete);
-				devices.terminate();
-			}
-			
-			private function devicesTerminateComplete(ev:Event):void {
-				TweenMax.delayedCall(5.00, closeApp);
-			}
-			
-			private function closeApp():void {
-				NativeApplication.nativeApplication.exit(0);
-			}
-			
-			protected function cleanDirectory(directory:File):void {
-				if (directory.isDirectory) {
-					var dirArray:Array = [];
-					var files:Array = directory.getDirectoryListing();
-					for (var i:int = 0; i < files.length; i++) {
-						if (files[i].isDirectory && files[i].nativePath.indexOf("driver_") > -1) {
-							dirArray.push(files[i]);
-						}
-					}
-					
-					for each(var d:File in dirArray) {
-						d.deleteDirectory(true);
-					}
+
+			genymotionManager = new GenymotionManager();
+			peerGroup = new PeerGroupConnection(Settings.workFolder, devices, simulators, httpPort);
+		}
+
+		public function saveValues(desc:String, name:String):void {
+			peerGroup.saveValues(desc, name);
+		}
+
+		public function restartDevice(dev:Device):void {
+			devices.restartDev(dev);
+		}
+
+		public function restartIosDevices():void {
+			for each(var dv:RunningDevice in devices.collection) {
+				if (!dv.simulator && dv is IosDevice && dv.status != Device.READY) {
+					devices.restartDev(dv);
 				}
 			}
-			
-			protected function clickGroup_clickHandler(event:MouseEvent):void {
-				if (simulatorsGroup.height == 26) {
-					var newHeight:Object = {height: height - 96};
-					if(genymotionManager.visible){
-						newHeight.height -= 26
-						TweenMax.to(genymotionGroup, 0.3, {height: 26})
+		}
+
+		protected function closeButtonClicked(event:MouseEvent):void {
+			var quit:QuitApplicationAlert = new QuitApplicationAlert();
+			quit.addEventListener(QuitApplicationAlert.OK, quitApplicationHandler, false, 0, true);
+			ModalPopupManager.addPopup(mainGroup, quit);
+		}
+
+		private function quitApplicationHandler(ev:Event):void {
+			TweenMax.delayedCall(0.1, closeAll);
+		}
+
+		private function closeAll():void {
+			peerGroup.close();
+			simulators.terminate();
+
+			genymotionManager.addEventListener(Event.COMPLETE, genymotionTerminated);
+			genymotionManager.terminate()
+		}
+
+		private function genymotionTerminated(ev:Event):void {
+			devices.addEventListener(Event.COMPLETE, devicesTerminateComplete);
+			devices.terminate();
+		}
+
+		private function devicesTerminateComplete(ev:Event):void {
+			TweenMax.delayedCall(5.00, closeApp);
+		}
+
+		private function closeApp():void {
+			NativeApplication.nativeApplication.exit(0);
+		}
+
+		protected function cleanDirectory(directory:File):void {
+			if (directory.isDirectory) {
+				var dirArray:Array = [];
+				var files:Array = directory.getDirectoryListing();
+				for (var i:int = 0; i < files.length; i++) {
+					if (files[i].isDirectory && files[i].nativePath.indexOf("driver_") > -1) {
+						dirArray.push(files[i]);
 					}
-					TweenMax.to(simulatorsGroup, 0.3, newHeight)
-					TweenMax.to(connectedGroup, 0.3, {height: 26})
+				}
+
+				for each(var d:File in dirArray) {
+					d.deleteDirectory(true);
 				}
 			}
-			
-			protected function genymotionGroup_clickHandler(event:MouseEvent):void {
-				if (genymotionGroup.height == 26) {
-					showGenymotionGroup();
+		}
+
+		protected function clickGroup_clickHandler(event:MouseEvent):void {
+			if (simulatorsGroup.height == 26) {
+				var newHeight:Object = {height: height - 96};
+				if (genymotionManager.visible) {
+					newHeight.height -= 26
+					TweenMax.to(genymotionGroup, 0.3, {height: 26})
 				}
-			}
-			
-			protected function clickConnected_clickHandler(event:MouseEvent):void {
-				if (connectedGroup.height == 26) {
-					var newHeight:Object = {height: height - 96};
-					if(genymotionManager.visible){
-						newHeight.height -= 26
-						TweenMax.to(genymotionGroup, 0.3, {height: 26})
-					}
-					TweenMax.to(connectedGroup, 0.3, newHeight)
-					TweenMax.to(simulatorsGroup, 0.3, {height: 26})
-				}
-			}
-			
-			private function showGenymotionGroup():void{
-				TweenMax.to(genymotionGroup, 0.3, {height: height - 120})
-				TweenMax.to(simulatorsGroup, 0.3, {height: 26})
+				TweenMax.to(simulatorsGroup, 0.3, newHeight)
 				TweenMax.to(connectedGroup, 0.3, {height: 26})
 			}
-			
-			protected function settings_clickHandler(event:MouseEvent):void {
-				// create and configure the TitleWindow
-				/*const tw:SettingsWindow = new SettingsWindow();
-				for each(var dv:RunningDevice in devices.collection) {
-				if (!dv.simulator && dv is IosDevice) {
-				tw.devices.push(dv);
+		}
+
+		protected function genymotionGroup_clickHandler(event:MouseEvent):void {
+			if (genymotionGroup.height == 26) {
+				showGenymotionGroup();
+			}
+		}
+
+		protected function clickConnected_clickHandler(event:MouseEvent):void {
+			if (connectedGroup.height == 26) {
+				var newHeight:Object = {height: height - 96};
+				if (genymotionManager.visible) {
+					newHeight.height -= 26
+					TweenMax.to(genymotionGroup, 0.3, {height: 26})
 				}
-				}
-				
-				// open the TitleWindow as a modal popup window
-				PopUpManager.addPopUp(tw, this, true);
-				PopUpManager.centerPopUp(tw);*/
-				
-				settingsButton.enabled = false;
-				settingsGroup.visible = true;
-				TweenLite.to(settingsGroup, 0.3, {x:4, onComplete:showSettingsComplete});
+				TweenMax.to(connectedGroup, 0.3, newHeight)
+				TweenMax.to(simulatorsGroup, 0.3, {height: 26})
 			}
-			
-			private function showSettingsComplete():void{
-				settingsButton.enabled = true;
-				settingsForm.reload(peerGroup);
+		}
+
+		private function showGenymotionGroup():void {
+			TweenMax.to(genymotionGroup, 0.3, {height: height - 120})
+			TweenMax.to(simulatorsGroup, 0.3, {height: 26})
+			TweenMax.to(connectedGroup, 0.3, {height: 26})
+		}
+
+		protected function settings_clickHandler(event:MouseEvent):void {
+			// create and configure the TitleWindow
+			/*const tw:SettingsWindow = new SettingsWindow();
+            for each(var dv:RunningDevice in devices.collection) {
+            if (!dv.simulator && dv is IosDevice) {
+            tw.devices.push(dv);
+            }
+            }
+
+            // open the TitleWindow as a modal popup window
+            PopUpManager.addPopUp(tw, this, true);
+            PopUpManager.centerPopUp(tw);*/
+
+			settingsButton.enabled = false;
+			settingsGroup.visible = true;
+			TweenLite.to(settingsGroup, 0.3, {x: 4, onComplete: showSettingsComplete});
+		}
+
+		private function showSettingsComplete():void {
+			settingsButton.enabled = true;
+			settingsForm.reload(peerGroup);
+		}
+
+		public function restartServer():void {
+			Alert.show("Dou you really want to restart the server ?\n(connected clients will be deconnected)", "Restart MobileStation server", Alert.YES | Alert.NO, this, alertClickHandler);
+		}
+
+		private function alertClickHandler(evt:CloseEvent):void {
+			if (evt.detail == Alert.YES) {
+				peerGroup.terminate();
+				restartApp();
 			}
-			
-			public function restartServer():void {
-				Alert.show("Dou you really want to restart the server ?\n(connected clients will be deconnected)", "Restart MobileStation server", Alert.YES | Alert.NO, this, alertClickHandler);
+		}
+
+		protected function reloadButtons_clickHandler(event:MouseEvent):void {
+			genymotionManager.fetchContent();
+		}
+
+		protected function settingsGroup_creationCompleteHandler(event:FlexEvent):void {
+			settingsForm = new SettingsForm()
+			settingsPanel.addContent(settingsForm);
+			settingsGroup.width = width - 28;
+			settingsGroup.x = -width - 10;
+
+		}
+
+		protected function finish_clickHandler(event:MouseEvent):void {
+			saveValues(settingsForm.description, settingsForm.localName);
+			TweenLite.to(settingsGroup, 0.3, {x: -width - 10, onComplete: hideSettingsComplete});
+		}
+
+		private function hideSettingsComplete():void {
+			settingsGroup.visible = false;
+		}
+
+		protected function titleMouseDownHandler(event:MouseEvent):void {
+			nativeWindow.startMove();
+		}
+
+		public function set genymotionActivated(value:Boolean):void {
+			if (value) {
+				genymotionManager.visible = true
+				genymotionManager.fetchContent()
+				showGenymotionGroup();
+			} else {
+				genymotionManager.visible = false
+				TweenMax.to(connectedGroup, 0.3, {height: height - 96})
+				TweenMax.to(simulatorsGroup, 0.3, {height: 26})
 			}
-			
-			private function alertClickHandler(evt:CloseEvent):void {
-				if (evt.detail == Alert.YES) {
-					peerGroup.terminate();
-					restartApp();
-				}
-			}
-			
-			protected function reloadButtons_clickHandler(event:MouseEvent):void {
-				genymotionManager.fetchContent();
-			}
-			
-			protected function settingsGroup_creationCompleteHandler(event:FlexEvent):void
-			{
-				settingsForm = new SettingsForm()
-				settingsPanel.addContent(settingsForm);
-				settingsGroup.width = width -28;
-				settingsGroup.x = -width-10;
-				
-			}
-			
-			protected function finish_clickHandler(event:MouseEvent):void
-			{
-				saveValues(settingsForm.description, settingsForm.localName);
-				TweenLite.to(settingsGroup, 0.3, {x:-width-10, onComplete:hideSettingsComplete});
-			}
-			
-			private function hideSettingsComplete():void{
-				settingsGroup.visible = false;
-			}
-			
-			protected function titleMouseDownHandler(event:MouseEvent):void
-			{
-				nativeWindow.startMove();
-			}
-			
-			public function set genymotionActivated(value:Boolean):void{
-				if(value){
-					genymotionManager.visible = true
-					genymotionManager.fetchContent()
-					showGenymotionGroup();
-				}else{
-					genymotionManager.visible = false
-					TweenMax.to(connectedGroup, 0.3, {height: height - 96})
-					TweenMax.to(simulatorsGroup, 0.3, {height: 26})
-				}
-			}
-			
+		}
 		]]>
 	</fx:Script>
 	<s:Rect bottom="10" left="14" right="14" top="10" filters="{dropShadowFilterApp}" radiusX="6" radiusY="6" alpha="0.98">

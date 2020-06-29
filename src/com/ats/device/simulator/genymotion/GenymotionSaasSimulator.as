@@ -135,7 +135,7 @@ package com.ats.device.simulator.genymotion {
 			event.currentTarget.removeEventListener(GmsaasManagerEvent.ERROR, startErrorHandler);
 			event.currentTarget.removeEventListener(GmsaasManagerEvent.COMPLETED, startCompletedHandler);
 			
-			dispatchEvent(new Event(EVENT_STOPPED))
+			dispatchEvent(new Event(Event.CLOSE))
 		}
 		
 		private function startCompletedHandler(event:GmsaasManagerEvent):void {
@@ -182,17 +182,7 @@ package com.ats.device.simulator.genymotion {
 			status = SHUTDOWN;
 			enabled = false
 			tooltip = "Simulator is terminating ...";
-			
-			var manager:GmsaasManager = new GmsaasManager()//.getInstance()
-			manager.addEventListener(GmsaasManagerEvent.COMPLETED, adbDisconnectCompletedHandler, false, 0, true);
-			manager.addEventListener(GmsaasManagerEvent.ERROR, adbDisconnectErrorHandler, false, 0, true)
-			manager.adbDisconnect(uuid)
-		}
-		
-		private function adbDisconnectCompletedHandler(event:GmsaasManagerEvent):void {
-			event.currentTarget.removeEventListener(GmsaasManagerEvent.COMPLETED, adbDisconnectCompletedHandler)
-			event.currentTarget.removeEventListener(GmsaasManagerEvent.ERROR, adbDisconnectErrorHandler)
-			
+
 			var manager: GmsaasManager = new GmsaasManager()
 			manager.addEventListener(GmsaasManagerEvent.COMPLETED, stopInstanceCompletedHandler, false, 0, true);
 			manager.addEventListener(GmsaasManagerEvent.COMPLETED, stopInstanceErrorHandler, false, 0, true);
@@ -211,7 +201,7 @@ package com.ats.device.simulator.genymotion {
 				return
 			}
 			
-			dispatchEvent(new Event(EVENT_STOPPED))
+			dispatchEvent(new Event(Event.CLOSE))
 		}
 		
 		private function stopInstanceErrorHandler(event:GmsaasManagerEvent):void {

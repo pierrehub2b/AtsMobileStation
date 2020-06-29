@@ -139,16 +139,37 @@ package com.ats.managers
 				}
 			}
 		}
-		
-		public function terminate():void {
-			
-			// not event managed code here !!!
-			for each (var recipe:GenymotionRecipe in recipes) {
-				for each (var instance:GenymotionSaasSimulator in recipe.instances) {
-					instance.adbDisconnect()
+
+		private var ownedInstances:Vector.<GenymotionSaasSimulator>
+		private function stopAllInstances():void {
+			if (!ownedInstances) {
+				ownedInstances = new Vector.<GenymotionSaasSimulator>()
+				for each (var recipe:GenymotionRecipe in recipes) {
+					for each (var instance:GenymotionSaasSimulator in recipe.instances) {
+						if (instance.owned) {
+							ownedInstances.push(instance)
+						}
+					}
 				}
 			}
-			
+
+			var instance:GenymotionSaasSimulator = ownedInstances.pop()
+			instance.addEventListener(Event.CLOSE, instanceStoppedHandler)
+			instance.stopSim()
+		}
+
+		private function instanceStoppedHandler(event:Event):void {
+			var instance:GenymotionSaasSimulator = event.currentTarget as GenymotionSaasSimulator
+			instance.removeEventListener(Event.CLOSE, instanceStoppedHandler)
+
+			if (ownedInstances.length > 0) {
+				stopAllInstances()
+			} else {
+				stopAdbTunnel()
+			}
+		}
+
+		private function stopAdbTunnel():void {
 			const pythonFolder:File = Settings.getInstance().pythonFolder;
 			if(pythonFolder != null && pythonFolder.exists){
 				const gmTunnelDaemon:File = pythonFolder.resolvePath("Lib/site-packages/gmsaas/adbtunnel/gmadbtunneld/gmadbtunneld.exe");
@@ -158,7 +179,7 @@ package com.ats.managers
 					procInfo.executable = gmTunnelDaemon;
 					procInfo.arguments = new <String>["stop"];
 
-					proc.addEventListener(NativeProcessExitEvent.EXIT, stopAdbTunnelExit);
+					proc.addEventListener (NativeProcessExitEvent.EXIT, stopAdbTunnelExit);
 					proc.start(procInfo);
 				}else{
 					dispatchEvent(new Event(Event.COMPLETE))
@@ -168,17 +189,13 @@ package com.ats.managers
 			}
 		}
 		
+		public function terminate():void {
+			stopAllInstances()
+		}
+		
 		private function stopAdbTunnelExit(ev:NativeProcessExitEvent):void{
 			ev.currentTarget.removeEventListener(NativeProcessExitEvent.EXIT, stopAdbTunnelExit);
 			dispatchEvent(new Event(Event.COMPLETE))
-		}
-		
-		public function stopAllInstances():void {
-			
-			// not event managed code here !!!
-			for each (var recipe:GenymotionRecipe in recipes) {
-				recipe.stopAllInstances()
-			}
 		}
 	}
 }

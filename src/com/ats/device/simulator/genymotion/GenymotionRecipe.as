@@ -44,7 +44,7 @@ import mx.core.FlexGlobals;
 		}
 
 		public function addInstance(instance:GenymotionSaasSimulator):void {
-			instance.addEventListener(GenymotionSaasSimulator.EVENT_STOPPED, stoppedInstanceHandler, false, 0, true)
+			instance.addEventListener(Event.CLOSE, stoppedInstanceHandler, false, 0, true)
 			instance.recipeUuid = uuid
 			instance.instanceNumber = attributeInstanceNumber()
 			instance.modelName = name
@@ -55,7 +55,7 @@ import mx.core.FlexGlobals;
 		}
 
 		public function removeInstance(instance:GenymotionSaasSimulator):void {
-			instance.removeEventListener(GenymotionSaasSimulator.EVENT_STOPPED, stoppedInstanceHandler)
+			instance.removeEventListener(Event.CLOSE, stoppedInstanceHandler)
 			instances.removeItem(instance)
 			FlexGlobals.topLevelApplication.simulators.collection.removeItem(instance)
 		}
