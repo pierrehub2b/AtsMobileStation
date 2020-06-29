@@ -142,10 +142,14 @@ package com.ats.managers
 
 		private var ownedInstances:Vector.<GenymotionSaasSimulator>
 		private function stopAllInstances():void {
+			
+			var instance:GenymotionSaasSimulator;
+			
 			if (!ownedInstances) {
 				ownedInstances = new Vector.<GenymotionSaasSimulator>()
-				for each (var recipe:GenymotionRecipe in recipes) {
-					for each (var instance:GenymotionSaasSimulator in recipe.instances) {
+				var recipe:GenymotionRecipe;
+				for each (recipe in recipes) {
+					for each (instance in recipe.instances) {
 						if (instance.owned) {
 							ownedInstances.push(instance)
 						}
@@ -153,7 +157,7 @@ package com.ats.managers
 				}
 			}
 
-			var instance:GenymotionSaasSimulator = ownedInstances.pop()
+			instance = ownedInstances.pop()
 			instance.addEventListener(Event.CLOSE, instanceStoppedHandler)
 			instance.stopSim()
 		}
