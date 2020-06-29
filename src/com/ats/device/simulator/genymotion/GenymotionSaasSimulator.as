@@ -1,45 +1,44 @@
 package com.ats.device.simulator.genymotion {
-	import com.ats.device.running.GenymotionSaasDevice;
-	import com.ats.device.simulator.*;
-	import com.ats.managers.gmsaas.GmsaasManager;
-	import com.ats.managers.gmsaas.GmsaasManagerEvent;
-	
-	import flash.events.Event;
-	
-	import mx.core.FlexGlobals;
-	import mx.events.CloseEvent;
-	
-	import spark.components.Alert;
-	
-	public class GenymotionSaasSimulator extends Simulator {
-		
-		public static const GENYMOTION_ERROR_INCOMPATIBLE_VERSION_NUMBERS:String = "incompatible version numbers"
-		public static const GENYMOTION_ERROR_NO_NETWORK_CONNECTION:String = "no network connection"
-		
-		public static const EVENT_STOPPED:String = "stopped";
-		public static const EVENT_TEMPLATE_NAME_FOUND:String = "info found";
-		public static const EVENT_ADB_CONNECTED:String = "adb connected";
-		public static const EVENT_ADB_DISCONNECTED:String = "adb disconnected";
-		
-		public static const STATE_ONLINE:String = "ONLINE"
-		public static const STATE_BOOTING:String = "BOOTING"
-		public static const STATE_STARTING:String = "STARTING"
-		public static const STATE_CREATING:String = "CREATING"
-		public static const STATE_STOPPING:String = "STOPPING"
-		public static const STATE_DELETED:String = "DELETED"
-		
-		public static const ADB_TUNNEL_STATE_CONNECTED:String = "CONNECTED"
-		public static const ADB_TUNNEL_STATE_PENDING:String = "PENDING"
-		public static const ADB_TUNNEL_STATE_DISCONNECTED:String = "DISCONNECTED";
-		
-		[Bindable]
-		public static var count:int = 0;
-		
-		[Bindable]
-		public var name:String
-		
-		public var uuid:String
-		public var adbSerial:String
+import com.ats.device.simulator.*;
+import com.ats.managers.gmsaas.GmsaasManager;
+import com.ats.managers.gmsaas.GmsaasManagerEvent;
+
+import flash.events.Event;
+
+import mx.core.FlexGlobals;
+import mx.events.CloseEvent;
+
+import spark.components.Alert;
+
+public class GenymotionSaasSimulator extends Simulator {
+
+	public static const GENYMOTION_ERROR_INCOMPATIBLE_VERSION_NUMBERS:String = "incompatible version numbers"
+	public static const GENYMOTION_ERROR_NO_NETWORK_CONNECTION:String = "no network connection"
+
+	public static const EVENT_STOPPED:String = "stopped";
+	public static const EVENT_TEMPLATE_NAME_FOUND:String = "info found";
+	public static const EVENT_ADB_CONNECTED:String = "adb connected";
+	public static const EVENT_ADB_DISCONNECTED:String = "adb disconnected";
+
+	public static const STATE_ONLINE:String = "ONLINE"
+	public static const STATE_BOOTING:String = "BOOTING"
+	public static const STATE_STARTING:String = "STARTING"
+	public static const STATE_CREATING:String = "CREATING"
+	public static const STATE_STOPPING:String = "STOPPING"
+	public static const STATE_DELETED:String = "DELETED"
+
+	public static const ADB_TUNNEL_STATE_CONNECTED:String = "CONNECTED"
+	public static const ADB_TUNNEL_STATE_PENDING:String = "PENDING"
+	public static const ADB_TUNNEL_STATE_DISCONNECTED:String = "DISCONNECTED";
+
+	[Bindable]
+	public static var count:int = 0;
+
+	[Bindable]
+	public var name:String
+
+	public var uuid:String
+	public var adbSerial:String
 		
 		[Bindable]
 		public var state:String
@@ -74,72 +73,72 @@ package com.ats.device.simulator.genymotion {
 			if (properties[0] != 'GM') {
 				throw new Error('Unknow instance')
 			}
-			
+
 			tooltip = "Simulator starting, please wait ..."
-			
+
 			recipeUuid = properties[1]
 			mobileStationIndentifer = properties[3]
-			
-			if(mobileStationIndentifer != FlexGlobals.topLevelApplication.peerGroup.identifier){
+
+			if (mobileStationIndentifer != FlexGlobals.topLevelApplication.peerGroup.identifier) {
 				owned = false;
 			}
 		}
-		
-		public function adbConnect():void {
-			enabled = true
-			
-			var manager:GmsaasManager = new GmsaasManager()
-			manager.addEventListener(GmsaasManagerEvent.ERROR, adbConnectErrorHandler, false, 0, true)
-			manager.addEventListener(GmsaasManagerEvent.COMPLETED, adbConnectCompleteHandler, false, 0, true)
-			manager.adbConnect(uuid)
-		}
-		
-		private function adbConnectErrorHandler(event:GmsaasManagerEvent):void {
-			trace("GM - ADB Connect Error : " + event.error)
-		}
-		
-		private function adbConnectCompleteHandler(event:GmsaasManagerEvent):void {
-			event.currentTarget.removeEventListener(GmsaasManagerEvent.ERROR, adbConnectErrorHandler)
-			event.currentTarget.removeEventListener(GmsaasManagerEvent.COMPLETED, adbConnectCompleteHandler)
-			trace("GM - ADB Connection complete")
-		}
-		
-		public function adbDisconnect():void {
-			enabled = false
-			statusOff()
-			
-			var manager:GmsaasManager = new GmsaasManager()
-			manager.addEventListener(GmsaasManagerEvent.ERROR, adbDisconnectErrorHandler, false, 0, true)
-			manager.addEventListener(GmsaasManagerEvent.COMPLETED, adbDisconnectCompleteHandler, false, 0, true)
-			manager.adbDisconnect(uuid)
-		}
-		
-		private function adbDisconnectErrorHandler(event:GmsaasManagerEvent):void {
-			trace("GM - ADB Disconnect Error : " + event.error)
-		}
-		
-		private function adbDisconnectCompleteHandler(event:GmsaasManagerEvent):void {
-			event.currentTarget.removeEventListener(GmsaasManagerEvent.ERROR, adbDisconnectErrorHandler)
-			event.currentTarget.removeEventListener(GmsaasManagerEvent.COMPLETED, adbDisconnectCompleteHandler)
-			trace("GM - ADB Disconnect complete")
-		}
-		
-		override public function startSim():void {
-			var manager:GmsaasManager = new GmsaasManager()
-			manager.addEventListener(GmsaasManagerEvent.ERROR, startErrorHandler, false, 0, true);
-			manager.addEventListener(GmsaasManagerEvent.COMPLETED, startCompletedHandler, false, 0, true);
-			manager.startInstance(recipeUuid, name)
-		}
-		
-		private function startErrorHandler(event:GmsaasManagerEvent):void {
-			event.currentTarget.removeEventListener(GmsaasManagerEvent.ERROR, startErrorHandler);
-			event.currentTarget.removeEventListener(GmsaasManagerEvent.COMPLETED, startCompletedHandler);
-			
-			dispatchEvent(new Event(Event.CLOSE))
-		}
-		
-		private function startCompletedHandler(event:GmsaasManagerEvent):void {
-			event.currentTarget.removeEventListener(GmsaasManagerEvent.ERROR, startErrorHandler);
+
+	override public function startSim():void {
+		var manager:GmsaasManager = new GmsaasManager()
+		manager.addEventListener(GmsaasManagerEvent.ERROR, startErrorHandler, false, 0, true);
+		manager.addEventListener(GmsaasManagerEvent.COMPLETED, startCompletedHandler, false, 0, true);
+		manager.startInstance(recipeUuid, name)
+	}
+
+	public function adbConnect():void {
+		enabled = true
+
+		var manager:GmsaasManager = new GmsaasManager()
+		manager.addEventListener(GmsaasManagerEvent.ERROR, adbConnectErrorHandler, false, 0, true)
+		manager.addEventListener(GmsaasManagerEvent.COMPLETED, adbConnectCompleteHandler, false, 0, true)
+		manager.adbConnect(uuid)
+	}
+
+	public function adbDisconnect():void {
+		enabled = false
+		statusOff()
+
+		var manager:GmsaasManager = new GmsaasManager()
+		manager.addEventListener(GmsaasManagerEvent.ERROR, adbDisconnectErrorHandler, false, 0, true)
+		manager.addEventListener(GmsaasManagerEvent.COMPLETED, adbDisconnectCompleteHandler, false, 0, true)
+		manager.adbDisconnect(uuid)
+	}
+
+	private static function adbConnectErrorHandler(event:GmsaasManagerEvent):void {
+		trace("GM - ADB Connect Error : " + event.error)
+	}
+
+	private static function adbConnectCompleteHandler(event:GmsaasManagerEvent):void {
+		event.currentTarget.removeEventListener(GmsaasManagerEvent.ERROR, adbConnectErrorHandler)
+		event.currentTarget.removeEventListener(GmsaasManagerEvent.COMPLETED, adbConnectCompleteHandler)
+		trace("GM - ADB Connection complete")
+	}
+
+	private static function adbDisconnectErrorHandler(event:GmsaasManagerEvent):void {
+		trace("GM - ADB Disconnect Error : " + event.error)
+	}
+
+	private static function adbDisconnectCompleteHandler(event:GmsaasManagerEvent):void {
+		event.currentTarget.removeEventListener(GmsaasManagerEvent.ERROR, adbDisconnectErrorHandler)
+		event.currentTarget.removeEventListener(GmsaasManagerEvent.COMPLETED, adbDisconnectCompleteHandler)
+		trace("GM - ADB Disconnect complete")
+	}
+
+	private function startErrorHandler(event:GmsaasManagerEvent):void {
+		event.currentTarget.removeEventListener(GmsaasManagerEvent.ERROR, startErrorHandler);
+		event.currentTarget.removeEventListener(GmsaasManagerEvent.COMPLETED, startCompletedHandler);
+
+		dispatchEvent(new Event(Event.CLOSE))
+	}
+
+	private function startCompletedHandler(event:GmsaasManagerEvent):void {
+		event.currentTarget.removeEventListener(GmsaasManagerEvent.ERROR, startErrorHandler);
 			event.currentTarget.removeEventListener(GmsaasManagerEvent.COMPLETED, startCompletedHandler);
 			
 			count++;

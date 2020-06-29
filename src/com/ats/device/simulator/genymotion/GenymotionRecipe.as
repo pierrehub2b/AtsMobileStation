@@ -73,11 +73,5 @@ import mx.core.FlexGlobals;
 
 			return number
 		}
-
-		public function stopAllInstances():void {
-			for each (var instance:GenymotionSaasSimulator in instances) {
-				instance.stopSim()
-			}
-		}
 	}
 }
