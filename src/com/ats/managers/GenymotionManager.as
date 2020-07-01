@@ -72,7 +72,7 @@ package com.ats.managers
 			srt.compareFunction = function (a:GenymotionRecipe, b:GenymotionRecipe, array:Array = null):int {
 				return b.version.compare(a.version)
 			}
-				
+			
 			recipes.sort = srt;
 			recipes.refresh();
 			
@@ -139,7 +139,7 @@ package com.ats.managers
 				}
 			}
 		}
-
+		
 		private var ownedInstances:Vector.<GenymotionSaasSimulator>
 		private function stopAllInstances():void {
 			
@@ -155,24 +155,27 @@ package com.ats.managers
 						}
 					}
 				}
+				if(ownedInstances.length > 0){
+					instance = ownedInstances.pop()
+					instance.addEventListener(Event.CLOSE, instanceStoppedHandler)
+					instance.stopSim();
+					return;
+				}
 			}
-
-			instance = ownedInstances.pop()
-			instance.addEventListener(Event.CLOSE, instanceStoppedHandler)
-			instance.stopSim()
+			stopAdbTunnel()
 		}
-
+		
 		private function instanceStoppedHandler(event:Event):void {
 			var instance:GenymotionSaasSimulator = event.currentTarget as GenymotionSaasSimulator
 			instance.removeEventListener(Event.CLOSE, instanceStoppedHandler)
-
+			
 			if (ownedInstances.length > 0) {
 				stopAllInstances()
 			} else {
 				stopAdbTunnel()
 			}
 		}
-
+		
 		private function stopAdbTunnel():void {
 			const pythonFolder:File = Settings.getInstance().pythonFolder;
 			if(pythonFolder != null && pythonFolder.exists){
@@ -182,7 +185,7 @@ package com.ats.managers
 					var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 					procInfo.executable = gmTunnelDaemon;
 					procInfo.arguments = new <String>["stop"];
-
+					
 					proc.addEventListener (NativeProcessExitEvent.EXIT, stopAdbTunnelExit);
 					proc.start(procInfo);
 				}else{
