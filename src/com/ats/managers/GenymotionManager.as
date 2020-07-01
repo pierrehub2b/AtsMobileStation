@@ -1,44 +1,43 @@
-package com.ats.managers
-{
-	import com.ats.device.simulator.Simulator;
-	import com.ats.device.simulator.genymotion.GenymotionRecipe;
-	import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
-	import com.ats.helpers.Settings;
-	import com.ats.managers.gmsaas.GmsaasInstaller;
-	import com.ats.managers.gmsaas.GmsaasManager;
-	import com.ats.managers.gmsaas.GmsaasManagerEvent;
-	
-	import flash.desktop.NativeProcess;
-	import flash.desktop.NativeProcessStartupInfo;
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	import flash.events.NativeProcessExitEvent;
-	import flash.filesystem.File;
-	
-	import mx.collections.ArrayCollection;
-	import mx.collections.Sort;
-	import mx.core.FlexGlobals;
-	
-	public class GenymotionManager extends EventDispatcher {
-		
-		[Bindable]
-		public var recipes:ArrayCollection
-		
-		[Bindable]
-		public var instances:ArrayCollection
-		
-		[Bindable]
-		public var loading:Boolean = false;
-		
-		[Bindable]
-		public var visible:Boolean = GmsaasInstaller.isInstalled()
-		
-		public function fetchContent():void {
-			loading = true
-			
-			cleanGenymotionInstances()
-			fetchRecipesList()
-			fetchInstancesList()
+package com.ats.managers {
+import com.ats.device.simulator.Simulator;
+import com.ats.device.simulator.genymotion.GenymotionRecipe;
+import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
+import com.ats.helpers.Settings;
+import com.ats.managers.gmsaas.GmsaasInstaller;
+import com.ats.managers.gmsaas.GmsaasManager;
+import com.ats.managers.gmsaas.GmsaasManagerEvent;
+
+import flash.desktop.NativeProcess;
+import flash.desktop.NativeProcessStartupInfo;
+import flash.events.Event;
+import flash.events.EventDispatcher;
+import flash.events.NativeProcessExitEvent;
+import flash.filesystem.File;
+
+import mx.collections.ArrayCollection;
+import mx.collections.Sort;
+import mx.core.FlexGlobals;
+
+public class GenymotionManager extends EventDispatcher {
+
+	[Bindable]
+	public var recipes:ArrayCollection
+
+	[Bindable]
+	public var instances:ArrayCollection
+
+	[Bindable]
+	public var loading:Boolean = false;
+
+	[Bindable]
+	public var visible:Boolean = GmsaasInstaller.isInstalled()
+
+	public function fetchContent():void {
+		loading = true
+
+		cleanGenymotionInstances()
+		fetchRecipesList()
+		fetchInstancesList()
 		}
 		
 		private function cleanGenymotionInstances():void {
@@ -155,7 +154,8 @@ package com.ats.managers
 						}
 					}
 				}
-				if(ownedInstances.length > 0){
+
+				if (ownedInstances.length > 0) {
 					instance = ownedInstances.pop()
 					instance.addEventListener(Event.CLOSE, instanceStoppedHandler)
 					instance.stopSim();

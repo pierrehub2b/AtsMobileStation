@@ -28,19 +28,22 @@ import mx.core.FlexGlobals;
 			height = info['screen_width']
 			dpi = info['screen_density']
 		}
-		
-		private function generateInstanceName():String {
-			var date:Date = new Date()
-			var msIdentifier:String = FlexGlobals.topLevelApplication.peerGroup.identifier
-			return ["GM", uuid, name, msIdentifier, date.time].join("_")
-		}
 
 		public function startInstance():void {
 			var instanceName:String = generateInstanceName()
-			var newInstance:GenymotionSaasSimulator = new GenymotionSaasSimulator({'name':instanceName})
+			var newInstance:GenymotionSaasSimulator = new GenymotionSaasSimulator({
+				'name': instanceName,
+				'recipe': {'uuid': uuid}
+			})
 			newInstance.recipeUuid = uuid
 			addInstance(newInstance)
 			newInstance.startSim()
+		}
+
+		private function generateInstanceName():String {
+			var date:Date = new Date()
+			var msIdentifier:String = FlexGlobals.topLevelApplication.peerGroup.identifier
+			return ["GM", name, msIdentifier, date.time].join("_")
 		}
 
 		public function addInstance(instance:GenymotionSaasSimulator):void {

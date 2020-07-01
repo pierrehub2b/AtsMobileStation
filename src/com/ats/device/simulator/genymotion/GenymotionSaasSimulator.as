@@ -64,20 +64,20 @@ public class GenymotionSaasSimulator extends Simulator {
 			adbSerial = info['adb_serial']
 			state = info['state']
 			adbTunnelState = info['adbtunnel_state']
-			
+			recipeUuid = info['recipe']['uuid']
+
 			var properties:Array = name.split("_")
-			if (properties.length != 5) {
+			if (properties.length != 4) {
 				throw new Error('Unreadable name')
 			}
-			
+
 			if (properties[0] != 'GM') {
 				throw new Error('Unknow instance')
 			}
 
 			tooltip = "Simulator starting, please wait ..."
 
-			recipeUuid = properties[1]
-			mobileStationIndentifer = properties[3]
+			mobileStationIndentifer = properties[2]
 
 			if (mobileStationIndentifer != FlexGlobals.topLevelApplication.peerGroup.identifier) {
 				owned = false;
@@ -100,16 +100,6 @@ public class GenymotionSaasSimulator extends Simulator {
 		manager.adbConnect(uuid)
 	}
 
-	public function adbDisconnect():void {
-		enabled = false
-		statusOff()
-
-		var manager:GmsaasManager = new GmsaasManager()
-		manager.addEventListener(GmsaasManagerEvent.ERROR, adbDisconnectErrorHandler, false, 0, true)
-		manager.addEventListener(GmsaasManagerEvent.COMPLETED, adbDisconnectCompleteHandler, false, 0, true)
-		manager.adbDisconnect(uuid)
-	}
-
 	private static function adbConnectErrorHandler(event:GmsaasManagerEvent):void {
 		trace("GM - ADB Connect Error : " + event.error)
 	}
@@ -118,16 +108,6 @@ public class GenymotionSaasSimulator extends Simulator {
 		event.currentTarget.removeEventListener(GmsaasManagerEvent.ERROR, adbConnectErrorHandler)
 		event.currentTarget.removeEventListener(GmsaasManagerEvent.COMPLETED, adbConnectCompleteHandler)
 		trace("GM - ADB Connection complete")
-	}
-
-	private static function adbDisconnectErrorHandler(event:GmsaasManagerEvent):void {
-		trace("GM - ADB Disconnect Error : " + event.error)
-	}
-
-	private static function adbDisconnectCompleteHandler(event:GmsaasManagerEvent):void {
-		event.currentTarget.removeEventListener(GmsaasManagerEvent.ERROR, adbDisconnectErrorHandler)
-		event.currentTarget.removeEventListener(GmsaasManagerEvent.COMPLETED, adbDisconnectCompleteHandler)
-		trace("GM - ADB Disconnect complete")
 	}
 
 	private function startErrorHandler(event:GmsaasManagerEvent):void {

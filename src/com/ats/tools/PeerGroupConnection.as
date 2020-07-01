@@ -1,92 +1,84 @@
-package com.ats.tools
-{
-	import com.ats.device.running.RunningDevice;
-	import com.ats.helpers.Settings;
-	import com.ats.managers.AvailableSimulatorsManager;
-	import com.ats.managers.RunningDevicesManager;
-	import com.ats.managers.gmsaas.GmsaasInstaller;
-	import com.greensock.TweenMax;
-	
-	import flash.desktop.NativeApplication;
-	import flash.desktop.NativeProcess;
-	import flash.desktop.NativeProcessStartupInfo;
-	import flash.events.Event;
-	import flash.events.IOErrorEvent;
-	import flash.events.NativeProcessExitEvent;
-	import flash.events.NetStatusEvent;
-	import flash.events.ProgressEvent;
-	import flash.events.TimerEvent;
-	import flash.filesystem.File;
-	import flash.filesystem.FileMode;
-	import flash.filesystem.FileStream;
-	import flash.net.NetConnection;
-	import flash.net.NetGroup;
-	import flash.net.Responder;
-	import flash.net.URLLoader;
-	import flash.net.URLRequest;
-	import flash.utils.Timer;
-	
-	import mx.core.FlexGlobals;
-	import mx.events.CollectionEvent;
-	import mx.events.CollectionEventKind;
-	
-	public class PeerGroupConnection
-	{
-		public static const monaServerFolder:String = "assets/tools/monaserver";
-		
-		private static const rtmpProtocol:String = "RTMP";
-		private static const defaultRtmpPort:int = 1935;
-		private var httpPort:int = 8989;
-		
-		private var rtmpPort:int = defaultRtmpPort;
-		
-		private var netConnection:NetConnection;
-		private var netGroup:NetGroup;
-		
-		private var devicesManager:RunningDevicesManager;
-		
-		private var monaServerBinary:File;
-		private var monaServerProc:NativeProcess;
-		
-		public var description:String = "";
-		public var name:String = "";
-		public var identifier:String = "";
-		
-		private var mona:File;
-		private var monaInstallFolder:File;
-		
-		public function PeerGroupConnection(workFolder:File, devManager:RunningDevicesManager, simManager:AvailableSimulatorsManager, port:int)
-		{
-			devicesManager = devManager;
-			httpPort = port;
-			
-			mona = File.applicationDirectory.resolvePath(monaServerFolder);
+package com.ats.tools {
+import com.ats.device.running.RunningDevice;
+import com.ats.helpers.Settings;
+import com.ats.managers.AvailableSimulatorsManager;
+import com.ats.managers.RunningDevicesManager;
+import com.ats.managers.gmsaas.GmsaasInstaller;
+import com.greensock.TweenMax;
 
-			if(mona.exists){
-				monaInstallFolder = workFolder.resolvePath("monaserver");
-				const iniFile:File = monaInstallFolder.resolvePath("server").resolvePath("MonaServer.ini");
-				
-				updateMonaServerSiteFolder();
-				
-				if(iniFile.exists){
-					const iniFileLoader:URLLoader = new URLLoader();
-					iniFileLoader.addEventListener(Event.COMPLETE, iniFileLoaded, false, 0, true);
-					iniFileLoader.load(new URLRequest(iniFile.url));
-				}else{
-					installMonaserver();
-				}
+import flash.desktop.NativeProcess;
+import flash.desktop.NativeProcessStartupInfo;
+import flash.events.Event;
+import flash.events.IOErrorEvent;
+import flash.events.NativeProcessExitEvent;
+import flash.events.NetStatusEvent;
+import flash.events.ProgressEvent;
+import flash.filesystem.File;
+import flash.filesystem.FileMode;
+import flash.filesystem.FileStream;
+import flash.net.NetConnection;
+import flash.net.NetGroup;
+import flash.net.URLLoader;
+import flash.net.URLRequest;
+
+import mx.core.FlexGlobals;
+import mx.events.CollectionEvent;
+import mx.events.CollectionEventKind;
+
+public class PeerGroupConnection {
+	public static const monaServerFolder:String = "assets/tools/monaserver";
+
+	private static const rtmpProtocol:String = "RTMP";
+	private static const defaultRtmpPort:int = 1935;
+
+	public function PeerGroupConnection(workFolder:File, devManager:RunningDevicesManager, simManager:AvailableSimulatorsManager, port:int) {
+		devicesManager = devManager;
+		httpPort = port;
+
+		mona = File.applicationDirectory.resolvePath(monaServerFolder);
+
+		if (mona.exists) {
+			monaInstallFolder = workFolder.resolvePath("monaserver");
+			const iniFile:File = monaInstallFolder.resolvePath("server").resolvePath("MonaServer.ini");
+
+			updateMonaServerSiteFolder();
+
+			if (iniFile.exists) {
+				const iniFileLoader:URLLoader = new URLLoader();
+				iniFileLoader.addEventListener(Event.COMPLETE, iniFileLoaded, false, 0, true);
+				iniFileLoader.load(new URLRequest(iniFile.url));
+			} else {
+				installMonaserver();
 			}
 		}
-		
-		private function iniFileLoaded(ev:Event):void{
-			var loader:URLLoader = ev.currentTarget as URLLoader;
-			var data:Array = loader.data.split("\n");
-			
-			for(var i:int = 0; i < data.length; ++i){
-				if(data[i] == "[" + rtmpProtocol + "]"){
-					const dataPort:Array = data[i+1].split("=");
-					connectToMonaserver(parseInt(dataPort[1]));
-					break;
+	}
+
+	private var httpPort:int = 8989;
+	private var rtmpPort:int = defaultRtmpPort;
+	private var netGroup:NetGroup;
+
+	private var devicesManager:RunningDevicesManager;
+
+	private var monaServerBinary:File;
+	private var monaServerProc:NativeProcess;
+
+	public var description:String = "";
+	public var name:String = "";
+	public var identifier:String = "";
+
+	private var mona:File;
+	private var monaInstallFolder:File;
+	private var netConnection:NetConnection;
+
+	private function iniFileLoaded(ev:Event):void {
+		var loader:URLLoader = ev.currentTarget as URLLoader;
+		var data:Array = loader.data.split("\n");
+
+		for (var i:int = 0; i < data.length; ++i) {
+			if (data[i] == "[" + rtmpProtocol + "]") {
+				const dataPort:Array = data[i + 1].split("=");
+				connectToMonaserver(parseInt(dataPort[1]));
+				break;
 				}
 			}
 		}
@@ -129,7 +121,6 @@ package com.ats.tools
 		}
 		
 		private function initData(info:Object):void{
-			
 			name = info.name
 			description = info.description
 			identifier = info.identifier

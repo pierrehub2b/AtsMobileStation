@@ -15,8 +15,6 @@ import flash.filesystem.FileStream;
 import flash.globalization.DateTimeFormatter;
 import flash.system.Capabilities;
 
-import mx.core.FlexGlobals;
-
 public class AndroidDevice extends RunningDevice
 	{
 		protected static const ANDROID_DRIVER:String = "com.ats.atsdroid";
@@ -156,17 +154,136 @@ public class AndroidDevice extends RunningDevice
 		}
 
 		private function onDeviceInfoOutput(event:ProgressEvent):void {
-			var process: NativeProcess = event.currentTarget as NativeProcess
+			var process:NativeProcess = event.currentTarget as NativeProcess
 			processOutput += process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable).replace(/\r/g, "");
 		}
 
 		private function onDeviceInfoError(event:ProgressEvent):void {
-			var process: NativeProcess = event.currentTarget as NativeProcess
+			var process:NativeProcess = event.currentTarget as NativeProcess
 			processError += process.standardError.readUTFBytes(process.standardError.bytesAvailable)
 		}
 
+		private static function getPropValue(value:String):String {
+			return /.*:.*\[(.*)]/.exec(value)[1];
+		}
+
+		// to refactor -> regex
+		private static function getDeviceOwner(data:String):String {
+			var array:Array = data.split("\n");
+			for each(var line:String in array) {
+				if (line.indexOf("ATS_DRIVER_LOCKED_BY") > -1) {
+					var firstIndex:int = line.length;
+					var lastIndex:int = line.lastIndexOf("ATS_DRIVER_LOCKED_BY:") + "ATS_DRIVER_LOCKED_BY:".length;
+					return line.substring(lastIndex, firstIndex).slice(0, -1);
+				}
+			}
+
+			return null;
+		}
+
+
+		//---------------------------------------------------------------------------------------------------------
+		//---------------------------------------------------------------------------------------------------------
+
+
+		protected function fetchIpAddress():void {
+			trace("WARNING : fetchIpAddress not implemented")
+		}
+
+
+		//---------------------------------------------------------------------------------------------------------
+		// -------- DRIVER UNINSTALL
+		//---------------------------------------------------------------------------------------------------------
+
+
+		protected function uninstallDriver():void {
+			writeDebugLogs("Uninstall driver")
+
+			var processInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
+			processInfo.executable = currentAdbFile
+			processInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", ANDROID_DRIVER];
+
+			process = new NativeProcess();
+			process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallDriverExit, false, 0, true);
+			process.start(processInfo);
+		}
+
+		protected function onUninstallDriverExit(event:NativeProcessExitEvent):void {
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onUninstallDriverExit);
+		}
+
+		private function onUninstallDriverOutput(event:ProgressEvent):void {
+		}
+
+		private function onUninstallDriverError(event:ProgressEvent):void {
+		}
+
+
+		//---------------------------------------------------------------------------------------------------------
+		// -------- DRIVER INSTALL
+		//---------------------------------------------------------------------------------------------------------
+
+
+		protected function installDriver():void {
+			var processInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
+			processInfo.executable = currentAdbFile
+			processInfo.arguments = new <String>["-s", id, "install", "-r", atsdroidFilePath];
+
+			process = new NativeProcess();
+			process.addEventListener(NativeProcessExitEvent.EXIT, onInstallDriverExit, false, 0, true);
+			process.start(processInfo);
+		}
+
+		private function onInstallDriverOutput():void {
+		}
+
+		private function onInstallDriverError():void {
+		}
+
+		protected function onInstallDriverExit(event:NativeProcessExitEvent):void {
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallDriverExit)
+
+			execute()
+		}
+
+
+		//---------------------------------------------------------------------------------------------------------
+		//-------- DRIVER EXECUTION
+		//---------------------------------------------------------------------------------------------------------
+
+
+		protected function execute():void {
+			trace("WARNING : execute not implemented")
+		}
+
+		protected var executeOutput:String
+
+		protected function onExecuteOutput(event:ProgressEvent):void {
+			executeOutput = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
+			writeErrorLogFile(executeOutput);
+
+			if (executeOutput.indexOf("Process crashed") > -1) {
+				process.standardInput.writeUTFBytes("instrumentCommandLine");
+				return
+			}
+
+			if (executeOutput.indexOf("ATS_DRIVER_RUNNING") > -1) {
+				started()
+			} else if (executeOutput.indexOf("ATS_DRIVER_START") > -1) {
+				trace("driver start -> " + executeOutput);
+			} else if (executeOutput.indexOf("ATS_DRIVER_STOP") > -1) {
+				trace("driver stop");
+			} else if (executeOutput.indexOf("ATS_WIFI_STOP") > -1) {
+				// dispatchEvent(new Event(WIFI_ERROR_EVENT));
+			} else if (executeOutput.indexOf("ATS_DRIVER_LOCKED_BY:") > -1) {
+				locked = getDeviceOwner(executeOutput)
+			} else if (executeOutput.indexOf("ATS_DRIVER_UNLOCKED") > -1) {
+				locked = null;
+			}
+		}
+
 		private function onDeviceInfoExit(event:NativeProcessExitEvent):void {
-			var process: NativeProcess = event.currentTarget as NativeProcess
+			var process:NativeProcess = event.currentTarget as NativeProcess
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onDeviceInfoOutput)
 			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onDeviceInfoError)
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onDeviceInfoExit)
@@ -212,7 +329,7 @@ public class AndroidDevice extends RunningDevice
 				if (simulator) {
 					if (modelId.indexOf("GM") == 0) {
 						var parameters:Array = modelId.split("_")
-						modelName = parameters[2]
+						modelName = parameters[1]
 					} else {
 						if (line.indexOf("[ro.product.cpu.abi]") == 0) {
 							modelName = getPropValue(line)
@@ -233,12 +350,11 @@ public class AndroidDevice extends RunningDevice
 			var myRegexPattern:RegExp = new RegExp(manufacturer + "\\s?", "i")
 			this.modelName = modelName.replace(myRegexPattern, "");
 
-			var deviceOsVersion:Version = new com.ats.helpers.Version(osVersion)
+			var deviceOsVersion:Version = new Version(osVersion)
 			trace("Device version : " + deviceOsVersion.stringValue)
 
 
-
-			if (deviceOsVersion.compare(new Version("5.1")) == com.ats.helpers.Version.INFERIOR) {
+			if (deviceOsVersion.compare(new Version("5.1")) == Version.INFERIOR) {
 				status = ERROR
 				error = "Android version not compatible"
 				errorMessage = "Only supports Android devices running version 5.1 or higher"
@@ -256,118 +372,6 @@ public class AndroidDevice extends RunningDevice
 				booted = false
 				status = BOOT
 			}
-		}
-
-		private function getPropValue(value:String):String {
-			return /.*:.*\[(.*)\]/.exec(value)[1];
-		}
-
-
-		//---------------------------------------------------------------------------------------------------------
-		//---------------------------------------------------------------------------------------------------------
-
-
-		protected function fetchIpAddress():void {
-			trace("WARNING : fetchIpAddress not implemented")
-		}
-
-
-		//---------------------------------------------------------------------------------------------------------
-		// -------- DRIVER UNINSTALL
-		//---------------------------------------------------------------------------------------------------------
-
-
-		protected function uninstallDriver():void {
-			writeDebugLogs("Uninstall driver")
-
-			var processInfo: NativeProcessStartupInfo = new NativeProcessStartupInfo()
-			processInfo.executable = currentAdbFile
-			processInfo.arguments = new <String>["-s", id, "shell", "pm", "uninstall", ANDROID_DRIVER];
-
-			process = new NativeProcess();
-			process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallDriverExit, false, 0, true);
-			process.start(processInfo);
-		}
-
-		protected function onUninstallDriverExit(event:NativeProcessExitEvent):void {
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onUninstallDriverExit);
-		}
-
-		private function onUninstallDriverOutput(event:ProgressEvent):void {}
-		private function onUninstallDriverError(event:ProgressEvent):void {}
-
-
-		//---------------------------------------------------------------------------------------------------------
-		// -------- DRIVER INSTALL
-		//---------------------------------------------------------------------------------------------------------
-
-
-		protected function installDriver():void {
-			var processInfo: NativeProcessStartupInfo = new NativeProcessStartupInfo()
-			processInfo.executable = currentAdbFile
-			processInfo.arguments = new <String>["-s", id, "install", "-r", atsdroidFilePath];
-
-			process = new NativeProcess();
-			process.addEventListener(NativeProcessExitEvent.EXIT, onInstallDriverExit, false, 0, true);
-			process.start(processInfo);
-		}
-
-		private function onInstallDriverOutput():void {}
-		private function onInstallDriverError():void {}
-		protected function onInstallDriverExit(event:NativeProcessExitEvent):void {
-			process.removeEventListener(NativeProcessExitEvent.EXIT, onInstallDriverExit)
-
-			execute()
-		}
-
-
-		//---------------------------------------------------------------------------------------------------------
-		//-------- DRIVER EXECUTION
-		//---------------------------------------------------------------------------------------------------------
-
-
-		protected function execute():void {
-			trace("WARNING : execute not implemented")
-		}
-
-		protected var executeOutput:String
-
-		protected function onExecuteOutput(event:ProgressEvent):void {
-			executeOutput = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
-			writeErrorLogFile(executeOutput);
-
-			if (executeOutput.indexOf("Process crashed") > -1) {
-				process.standardInput.writeUTFBytes("instrumentCommandLine");
-				return
-			}
-
-			if (executeOutput.indexOf("ATS_DRIVER_RUNNING") > -1) {
-				started()
-			} else if (executeOutput.indexOf("ATS_DRIVER_START") > -1) {
-				trace("driver start -> " + executeOutput);
-			} else if(executeOutput.indexOf("ATS_DRIVER_STOP") > -1){
-				trace("driver stop");
-			} else if(executeOutput.indexOf("ATS_WIFI_STOP") > -1) {
-				// dispatchEvent(new Event(WIFI_ERROR_EVENT));
-			} else if(executeOutput.indexOf("ATS_DRIVER_LOCKED_BY:") > -1) {
-				locked = getDeviceOwner(executeOutput)
-			} else if(executeOutput.indexOf("ATS_DRIVER_UNLOCKED") > -1) {
-				locked = null;
-			}
-		}
-
-		// to refactor -> regex
-		private function getDeviceOwner(data:String):String {
-			var array:Array = data.split("\n");
-			for each(var line:String in array) {
-				if (line.indexOf("ATS_DRIVER_LOCKED_BY") > -1) {
-					var firstIndex:int = line.length;
-					var lastIndex:int = line.lastIndexOf("ATS_DRIVER_LOCKED_BY:") + "ATS_DRIVER_LOCKED_BY:".length;
-					return line.substring(lastIndex, firstIndex).slice(0, -1);
-				}
-			}
-
-			return null;
 		}
 
 
