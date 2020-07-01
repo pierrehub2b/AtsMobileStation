@@ -31,6 +31,9 @@
 	</target>
 
 	<target name="prepareBuildWindows" if="isWindows">
+		<delete file="src/assets/tools/python"/>
+		<unzip src="tools/python/windows/python.zip" dest="src/assets/tools/python"/>
+			
 		<delete file="src/assets/tools/monaserver/server/Monaserver.exe"/>
 		<delete file="src/assets/tools/monaserver/server/lua51.dll"/>
 		
