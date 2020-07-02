@@ -74,7 +74,7 @@ package com.ats.helpers {
 		
 		private var sharedObject:SharedObject;
 		private var _androidSdkPath:String;
-		private var _pythonPath:String;
+		//private var _pythonPath:String;
 		
 		public function Settings() {
 			if (_instance) {
@@ -83,28 +83,28 @@ package com.ats.helpers {
 			
 			sharedObject = SharedObject.getLocal("settings");
 			
-			pythonPath = sharedObject.data.pythonPath;
-			if(pythonPath == null){
-				pythonFolder = defaultAppFolder.resolvePath("python");
-			}
+			//pythonPath = sharedObject.data.pythonPath;
+			//if(pythonPath == null){
+			//	pythonFolder = defaultAppFolder.resolvePath("python");
+			//}
 		}
 		
-		[Bindable(event="pythonPathChange")]
-		public function get pythonPath():String
-		{
-			return _pythonPath;
-		}
+		//[Bindable(event="pythonPathChange")]
+		//public function get pythonPath():String
+		//{
+		//	return _pythonPath;
+		//}
 		
-		public function set pythonPath(value:String):void
-		{
-			if( _pythonPath !== value)
-			{
-				_pythonPath = value;
-				dispatchEvent(new Event("pythonPathChange"));
-			}
-		}
+		//public function set pythonPath(value:String):void
+		//{
+		//	if( _pythonPath !== value)
+		//	{
+		//		_pythonPath = value;
+		//		dispatchEvent(new Event("pythonPathChange"));
+		//	}
+		//}
 		
-		public function get gmsaasExecutable():File {
+		/*public function get gmsaasExecutable():File {
 			const pyth:File = pythonFolder;
 			if(pyth != null && pyth.exists){
 				const gm:File = pyth.resolvePath("Scripts").resolvePath(GmsaasInstaller.gmsaasFileName);
@@ -113,9 +113,9 @@ package com.ats.helpers {
 				}
 			}
 			return null;
-		}
+		}*/
 		
-		public function get pythonFolder():File {
+		/*public function get pythonFolder():File {
 			if (!pythonPath) {
 				return null
 			}
@@ -132,6 +132,6 @@ package com.ats.helpers {
 			
 			sharedObject.data.pythonPath = pythonPath
 			sharedObject.flush()
-		}
+		}*/
 	}
 }

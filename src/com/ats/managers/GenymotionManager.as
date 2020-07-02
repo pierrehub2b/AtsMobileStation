@@ -1,43 +1,51 @@
 package com.ats.managers {
-import com.ats.device.simulator.Simulator;
-import com.ats.device.simulator.genymotion.GenymotionRecipe;
-import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
-import com.ats.helpers.Settings;
-import com.ats.managers.gmsaas.GmsaasInstaller;
-import com.ats.managers.gmsaas.GmsaasManager;
-import com.ats.managers.gmsaas.GmsaasManagerEvent;
-
-import flash.desktop.NativeProcess;
-import flash.desktop.NativeProcessStartupInfo;
-import flash.events.Event;
-import flash.events.EventDispatcher;
-import flash.events.NativeProcessExitEvent;
-import flash.filesystem.File;
-
-import mx.collections.ArrayCollection;
-import mx.collections.Sort;
-import mx.core.FlexGlobals;
-
-public class GenymotionManager extends EventDispatcher {
-
-	[Bindable]
-	public var recipes:ArrayCollection
-
-	[Bindable]
-	public var instances:ArrayCollection
-
-	[Bindable]
-	public var loading:Boolean = false;
-
-	[Bindable]
-	public var visible:Boolean = GmsaasInstaller.isInstalled()
-
-	public function fetchContent():void {
-		loading = true
-
-		cleanGenymotionInstances()
-		fetchRecipesList()
-		fetchInstancesList()
+	import com.ats.device.simulator.Simulator;
+	import com.ats.device.simulator.genymotion.GenymotionRecipe;
+	import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
+	import com.ats.managers.gmsaas.GmsaasInstaller;
+	import com.ats.managers.gmsaas.GmsaasManager;
+	import com.ats.managers.gmsaas.GmsaasManagerEvent;
+	import com.ats.managers.gmsaas.GmsaasProcess;
+	import com.ats.tools.Python;
+	
+	import flash.desktop.NativeProcess;
+	import flash.desktop.NativeProcessStartupInfo;
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
+	import flash.events.NativeProcessExitEvent;
+	import flash.filesystem.File;
+	
+	import mx.collections.ArrayCollection;
+	import mx.collections.Sort;
+	import mx.core.FlexGlobals;
+	
+	public class GenymotionManager extends EventDispatcher {
+		
+		[Bindable]
+		public var recipes:ArrayCollection
+		
+		[Bindable]
+		public var instances:ArrayCollection
+		
+		[Bindable]
+		public var loading:Boolean = false;
+		
+		[Bindable]
+		public var visible:Boolean = false
+		
+		public function GenymotionManager(python:Python):void{
+			if(GmsaasProcess.gmsaasExec != null){
+				fetchContent();
+				visible = true;
+			}
+		}
+		
+		public function fetchContent():void {
+			loading = true
+			
+			cleanGenymotionInstances()
+			fetchRecipesList()
+			fetchInstancesList()
 		}
 		
 		private function cleanGenymotionInstances():void {
@@ -154,7 +162,7 @@ public class GenymotionManager extends EventDispatcher {
 						}
 					}
 				}
-
+				
 				if (ownedInstances.length > 0) {
 					instance = ownedInstances.pop()
 					instance.addEventListener(Event.CLOSE, instanceStoppedHandler)
@@ -177,20 +185,15 @@ public class GenymotionManager extends EventDispatcher {
 		}
 		
 		private function stopAdbTunnel():void {
-			const pythonFolder:File = Settings.getInstance().pythonFolder;
-			if(pythonFolder != null && pythonFolder.exists){
-				const gmTunnelDaemon:File = pythonFolder.resolvePath("Lib/site-packages/gmsaas/adbtunnel/gmadbtunneld/gmadbtunneld.exe");
-				if(gmTunnelDaemon.exists){
-					var proc:NativeProcess = new NativeProcess();
-					var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-					procInfo.executable = gmTunnelDaemon;
-					procInfo.arguments = new <String>["stop"];
-					
-					proc.addEventListener (NativeProcessExitEvent.EXIT, stopAdbTunnelExit);
-					proc.start(procInfo);
-				}else{
-					dispatchEvent(new Event(Event.COMPLETE))
-				}
+			const gmTunnelDaemon:File = Python.folder.resolvePath("Lib/site-packages/gmsaas/adbtunnel/gmadbtunneld/gmadbtunneld.exe");
+			if(gmTunnelDaemon.exists){
+				var proc:NativeProcess = new NativeProcess();
+				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+				procInfo.executable = gmTunnelDaemon;
+				procInfo.arguments = new <String>["stop"];
+				
+				proc.addEventListener (NativeProcessExitEvent.EXIT, stopAdbTunnelExit);
+				proc.start(procInfo);
 			}else{
 				dispatchEvent(new Event(Event.COMPLETE))
 			}

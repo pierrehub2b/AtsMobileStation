@@ -1,6 +1,7 @@
 package com.ats.managers.gmsaas {
 	import com.ats.gui.alert.CredentialsAlert;
 	import com.ats.helpers.Settings;
+	import com.ats.tools.Python;
 	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
@@ -19,22 +20,18 @@ package com.ats.managers.gmsaas {
 		public static const GMSAAS_INSTALLER_STATE_INSTALL_COMPLETED:String = "GMSAAS configuration completed"
 		public static const GMSAAS_INSTALLER_STATE_UNINSTALLING:String = "Uninstalling GMSAAS"
 		public static const GMSAAS_INSTALLER_STATE_UNINSTALL_COMPLETED:String = "GMSAAS uninstall completed"
-		
-		
-		private static const pythonFileName:String = "python.exe"
+				
 		private static const pipFileName:String = "pip3.exe"
-		public static const gmsaasFileName:String = "gmsaas.exe"
 		
-		private var pythonFile:File
 		private var gmsaasFile:File
 		
-		static public function isInstalled():Boolean {
+		/*static public function isInstalled():Boolean {
 			var pythonFolder:File = Settings.getInstance().pythonFolder
 			if (pythonFolder != null && Settings.getInstance().gmsaasExecutable != null) {
 				return Settings.getInstance().gmsaasExecutable.exists
 			}
 			return false;
-		}
+		}*/
 		
 		public function install():void {
 			if (Settings.isMacOs) {
@@ -42,7 +39,7 @@ package com.ats.managers.gmsaas {
 				return
 			}
 			
-			var pythonFolder:File = Settings.getInstance().pythonFolder
+			/*var pythonFolder:File = Settings.getInstance().pythonFolder
 			if (!pythonFolder) {
 				dispatchEvent(new GmsaasInstallerErrorEvent("Python folder path not set !"))
 				return
@@ -52,7 +49,7 @@ package com.ats.managers.gmsaas {
 			if (!pythonFile.exists) {
 				dispatchEvent(new GmsaasInstallerErrorEvent("Python file not found !"))
 				return
-			}
+			}*/
 			
 			upgradePip()
 		}
@@ -68,7 +65,7 @@ package com.ats.managers.gmsaas {
 			args.push("pip");
 			
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			procInfo.executable = pythonFile;
+			procInfo.executable = Python.file;
 			procInfo.arguments = args;
 			
 			var proc:NativeProcess = new NativeProcess();
@@ -80,8 +77,7 @@ package com.ats.managers.gmsaas {
 			var proc:NativeProcess = event.currentTarget as NativeProcess
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, upgradePipExit);
 			
-			var pythonFolder:File = Settings.getInstance().pythonFolder
-			var pipFile:File = pythonFolder.resolvePath("Scripts").resolvePath(pipFileName);
+			var pipFile:File = Python.folder.resolvePath("Scripts").resolvePath(pipFileName);
 			if (!pipFile.exists) {
 				dispatchEvent(new GmsaasInstallerErrorEvent("PIP file not found !"))
 				return
@@ -107,8 +103,7 @@ package com.ats.managers.gmsaas {
 			var proc:NativeProcess = event.currentTarget as NativeProcess
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, gmInstallExit);
 			
-			var pythonFolder:File = Settings.getInstance().pythonFolder
-			gmsaasFile = pythonFolder.resolvePath("Scripts").resolvePath(gmsaasFileName);
+			gmsaasFile = Python.folder.resolvePath("Scripts").resolvePath(GmsaasProcess.gmsaasFileName);
 			if (!gmsaasFile.exists) {
 				dispatchEvent(new GmsaasInstallerErrorEvent("GMSAAS file not found !"))
 				return
@@ -146,8 +141,7 @@ package com.ats.managers.gmsaas {
 		
 		public function uninstall():void {
 			
-			var pythonFolder:File = Settings.getInstance().pythonFolder
-			var pipFile:File = pythonFolder.resolvePath("Scripts").resolvePath(pipFileName);
+			var pipFile:File = Python.folder.resolvePath("Scripts").resolvePath(pipFileName);
 			if (!pipFile.exists) {
 				dispatchEvent(new GmsaasInstallerErrorEvent("PIP file not found !"))
 				return
@@ -177,7 +171,7 @@ package com.ats.managers.gmsaas {
 			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, uninstallErrorDataHandler);
 			
 			try{
-				Settings.getInstance().gmsaasExecutable.deleteFile();
+				GmsaasProcess.gmsaasExec.deleteFile();
 			}catch(err:Error){"gmsass file not found"}
 
 			dispatchEvent(new GmsaasInstallerProgressEvent(GMSAAS_INSTALLER_STATE_UNINSTALL_COMPLETED))

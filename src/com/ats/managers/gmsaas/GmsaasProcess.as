@@ -1,5 +1,6 @@
 package com.ats.managers.gmsaas {
 	import com.ats.helpers.Settings;
+	import com.ats.tools.Python;
 	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
@@ -8,9 +9,19 @@ package com.ats.managers.gmsaas {
 	import flash.filesystem.File;
 	
 	public class GmsaasProcess extends NativeProcess {
+		
+		public static const gmsaasFileName:String = "gmsaas.exe"
 			
+		public static function get gmsaasExec():File {
+			const gm:File = Python.file.parent.resolvePath("Scripts").resolvePath(gmsaasFileName);
+			if(gm.exists){
+				return gm;
+			}
+			return null;
+		}
+		
 		public static function startProcess(args:Array, callback:Function):void{
-			const gmFile:File = Settings.getInstance().gmsaasExecutable;
+			const gmFile:File = gmsaasExec
 			if(gmFile != null){
 				var arguments:Vector.<String> = new <String>["--format", "compactjson"]
 				for each (var arg:String in args) {
@@ -21,7 +32,7 @@ package com.ats.managers.gmsaas {
 				callback({error:{message:"GMSAAS executable file not found !"}})
 			}
 		}
-				
+		
 		private var data:String = "";
 		private var callback:Function;
 		private var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
@@ -57,7 +68,7 @@ package com.ats.managers.gmsaas {
 			} catch (error:Error) {
 				callback({error:{message:error.message}});
 			}
-
+			
 			procInfo = null;
 			callback = null;
 		}

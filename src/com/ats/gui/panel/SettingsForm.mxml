@@ -9,10 +9,13 @@
 		<![CDATA[
 			import com.ats.gui.alert.CredentialsAlert;
 			import com.ats.helpers.Settings;
+			import com.ats.managers.GenymotionManager;
 			import com.ats.managers.gmsaas.GmsaasInstaller;
 			import com.ats.managers.gmsaas.GmsaasInstallerErrorEvent;
 			import com.ats.managers.gmsaas.GmsaasInstallerProgressEvent;
+			import com.ats.managers.gmsaas.GmsaasProcess;
 			import com.ats.tools.PeerGroupConnection;
+			import com.ats.tools.Python;
 			
 			import mx.core.FlexGlobals;
 			import mx.events.CloseEvent;
@@ -27,10 +30,10 @@
 				msName.text = peer.name;
 				msDescription.text = peer.description;
 				
-				pythonFolderPath.text = Settings.getInstance().pythonPath
+				pythonFolderPath.text = Python.folder.nativePath
 				genyPanel.clearMessage()
 					
-				gmsaas = GmsaasInstaller.isInstalled()
+				gmsaas = GmsaasProcess.gmsaasExec != null
 			}
 			
 			private function set gmsaas(value:Boolean):void {
@@ -136,17 +139,17 @@
 				return msDescription.text
 			}
 			
-			protected function loadPythonPath_clickHandler(event:MouseEvent):void {
+			/*protected function loadPythonPath_clickHandler(event:MouseEvent):void {
 				var directory:File = Settings.defaultAppFolder;
 				directory.addEventListener(Event.SELECT, pythonFolderSelected);
 				directory.browseForDirectory("Select Python directory");
-			}
+			}*/
 			
-			protected function pythonFolderSelected(event:Event):void {
+			/*protected function pythonFolderSelected(event:Event):void {
 				event.currentTarget.removeEventListener(Event.SELECT, pythonFolderSelected);
 				Settings.getInstance().pythonFolder = event.target as File
 				pythonFolderPath.text = Settings.getInstance().pythonPath
-			}
+			}*/
 			
 			protected function linkAts_clickHandler(event:MouseEvent):void
 			{
@@ -178,8 +181,8 @@
 	<text:InputText id="msDescription" label="Description" width="100%" lines="4"/>
 	<s:Spacer height="6"/>
 	<s:HGroup width="100%" verticalAlign="bottom">
-		<text:InputText id="pythonFolderPath" label="Python folder" width="100%"/>
-		<buttons:SmallButton click="loadPythonPath_clickHandler(event)"/>
+		<text:InputText id="pythonFolderPath" label="Python folder" width="100%" editable="false"/>
+		<!--<buttons:SmallButton click="loadPythonPath_clickHandler(event)"/>-->
 	</s:HGroup>
 	<s:Spacer height="6"/>
 	<s:Group width="100%">

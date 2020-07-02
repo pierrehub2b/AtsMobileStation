@@ -125,10 +125,6 @@ public class PeerGroupConnection {
 			description = info.description
 			identifier = info.identifier
 
-			if (GmsaasInstaller.isInstalled()) {
-				FlexGlobals.topLevelApplication.genymotionManager.fetchContent()
-			}
-
 			devicesManager.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
 		}
 		
