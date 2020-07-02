@@ -2,7 +2,6 @@ package com.ats.managers {
 	import com.ats.device.simulator.Simulator;
 	import com.ats.device.simulator.genymotion.GenymotionRecipe;
 	import com.ats.device.simulator.genymotion.GenymotionSaasSimulator;
-	import com.ats.managers.gmsaas.GmsaasInstaller;
 	import com.ats.managers.gmsaas.GmsaasManager;
 	import com.ats.managers.gmsaas.GmsaasManagerEvent;
 	import com.ats.managers.gmsaas.GmsaasProcess;
@@ -175,8 +174,7 @@ package com.ats.managers {
 		}
 		
 		private function instanceStoppedHandler(event:Event):void {
-			var instance:GenymotionSaasSimulator = event.currentTarget as GenymotionSaasSimulator
-			instance.removeEventListener(Event.CLOSE, instanceStoppedHandler)
+			event.currentTarget.removeEventListener(Event.CLOSE, instanceStoppedHandler)
 			
 			if (ownedInstances.length > 0) {
 				stopAllInstances()
