@@ -154,14 +154,15 @@ public class GenymotionManager extends EventDispatcher {
 						}
 					}
 				}
-
-				if (ownedInstances.length > 0) {
-					instance = ownedInstances.pop()
-					instance.addEventListener(Event.CLOSE, instanceStoppedHandler)
-					instance.stopSim();
-					return;
-				}
 			}
+
+			if (ownedInstances.length > 0) {
+				instance = ownedInstances.pop()
+				instance.addEventListener(Event.CLOSE, instanceStoppedHandler)
+				instance.stopSim();
+				return;
+			}
+
 			stopAdbTunnel()
 		}
 		
