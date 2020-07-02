@@ -162,7 +162,7 @@ package com.ats.managers {
 						}
 					}
 				}
-				
+
 				if (ownedInstances.length > 0) {
 					instance = ownedInstances.pop()
 					instance.addEventListener(Event.CLOSE, instanceStoppedHandler)
@@ -170,6 +170,7 @@ package com.ats.managers {
 					return;
 				}
 			}
+
 			stopAdbTunnel()
 		}
 		
