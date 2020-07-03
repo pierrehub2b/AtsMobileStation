@@ -20,6 +20,7 @@
 		import com.ats.managers.AvailableSimulatorsManager;
 		import com.ats.managers.GenymotionManager;
 		import com.ats.managers.RunningDevicesManager;
+		import com.ats.managers.gmsaas.GmsaasProcess;
 		import com.ats.tools.PeerGroupConnection;
 		import com.ats.tools.Python;
 		import com.caipture.gui.panels.TopTitle;
@@ -169,11 +170,20 @@
 				}
 			}
 
-			peerGroup = new PeerGroupConnection(Settings.workFolder, devices, simulators, httpPort);
+			peerGroup = new PeerGroupConnection(Settings.workFolder, devices, httpPort);
+			peerGroup.addEventListener(Event.INIT, monaServerInitHandler)
+			peerGroup.start()
 
 			python = new Python(Settings.workFolder);
 			python.addEventListener(Event.COMPLETE, pythonCheckComplete);
 			python.install();
+		}
+
+		private function monaServerInitHandler(event:Event):void {
+			(event.currentTarget as PeerGroupConnection).removeEventListener(Event.INIT, monaServerInitHandler)
+			if(GmsaasProcess.gmsaasExec != null){
+				genymotionManager.fetchContent();
+			}
 		}
 
 		private function pythonCheckComplete(ev:Event):void {
