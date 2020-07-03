@@ -167,46 +167,39 @@ public class AndroidUsbDevice extends AndroidDevice {
         usbError("Capture server initialization error");
     }
 
-    private function setupPortForwarding():void {
-        var process:NativeProcess = new NativeProcess();
-        var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+    private static function getWebSocketServerPort(data:String):int {
+        var array:Array = data.split("\n");
+        for each(var line:String in array) {
+            if (line.indexOf("ATS_WEB_SOCKET_SERVER_START") > -1) {
+                var parameters:Array = line.split("=");
+                var subparameters:Array = (parameters[1] as String).split(":");
+                return parseInt(subparameters[1]);
+            }
+        }
 
-        procInfo.executable = currentAdbFile;
-        procInfo.workingDirectory = currentAdbFile.parent;
-        process.addEventListener(NativeProcessExitEvent.EXIT, forwardPortExitHandler, false, 0, true);
-
-        webSocketClientPort = PortSwitcher.getAvailableLocalPort();
-
-        procInfo.arguments = new <String>["-s", id, "forward", "tcp:" + webSocketClientPort, "tcp:" + webSocketServerPort];
-        process.start(procInfo);
+        return -1;
     }
 
     // -- Native Process Exit Events
 
-    private function forwardPortExitHandler(event:Event):void {
-        (event.currentTarget as NativeProcess).removeEventListener(NativeProcessExitEvent.EXIT, forwardPortExitHandler);
-        webServer.setupWebSocket(webSocketClientPort);
-    }
+    private static function getWebSocketServerError(data:String):String {
+        var array:Array = data.split("\n");
+        for each(var line:String in array) {
+            if (line.indexOf("ATS_WEB_SOCKET_SERVER_ERROR") > -1) {
+                var firstIndex:int = line.length;
+                var lastIndex:int = line.lastIndexOf("ATS_WEB_SOCKET_SERVER_ERROR:") + "ATS_WEB_SOCKET_SERVER_ERROR:".length;
+                return line.substring(lastIndex, firstIndex);
+            }
+        }
 
-    override protected function fetchIpAddress():void {
-        writeDebugLogs("Fetching ip address")
-
-        networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_FOUND, localAddressFoundHandler, false, 0, true);
-        networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, localAddressNotFoundHandler, false, 0, true);
-
-        networkUtils.getClientIPAddress();
-    }
-
-    override protected function onUninstallDriverExit(event:NativeProcessExitEvent):void {
-        super.onUninstallDriverExit(event)
-        fetchLocalPort();
+        return "";
     }
 
     override protected function execute():void {
         writeDebugLogs("Starting driver")
 
         var processInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
-        processInfo.executable = currentAdbFile
+        processInfo.executable = adbFile
         processInfo.arguments = new <String>[
             "-s", id, "shell", "am", "instrument", "-w",
             "-e", "ipAddress", ip,
@@ -224,46 +217,51 @@ public class AndroidUsbDevice extends AndroidDevice {
         process.start(processInfo);
     }
 
+    override protected function fetchIpAddress():void {
+        writeDebugLogs("Fetching ip address")
+
+        networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_FOUND, localAddressFoundHandler, false, 0, true);
+        networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, localAddressNotFoundHandler, false, 0, true);
+
+        networkUtils.getClientIPAddress();
+    }
+
+    private function setupPortForwarding():void {
+        var process:NativeProcess = new NativeProcess();
+        var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+
+        procInfo.executable = adbFile;
+        procInfo.workingDirectory = adbFile.parent;
+        process.addEventListener(NativeProcessExitEvent.EXIT, forwardPortExitHandler, false, 0, true);
+
+        webSocketClientPort = PortSwitcher.getAvailableLocalPort();
+
+        procInfo.arguments = new <String>["-s", id, "forward", "tcp:" + webSocketClientPort, "tcp:" + webSocketServerPort];
+        process.start(procInfo);
+    }
+
+    override protected function onUninstallDriverExit(event:NativeProcessExitEvent):void {
+        super.onUninstallDriverExit(event)
+        fetchLocalPort();
+    }
+
     override protected function onExecuteOutput(event:ProgressEvent):void {
         super.onExecuteOutput(event)
 
         if (executeOutput.indexOf("ATS_WEB_SOCKET_SERVER_START:") > -1) {
             webSocketServerPort = getWebSocketServerPort(executeOutput);
             setupPortForwarding();
-        } else if(executeOutput.indexOf("ATS_WEB_SOCKET_SERVER_ERROR") > -1) {
+        } else if (executeOutput.indexOf("ATS_WEB_SOCKET_SERVER_ERROR") > -1) {
             var webSocketServerError:String = getWebSocketServerError(executeOutput);
             trace("WebSocketServer error -> " + getQualifiedClassName(this) + " " + id + " " + webSocketServerError);
-            // usbError("Device server unavailable")
-        } else if(executeOutput.indexOf("ATS_WEB_SOCKET_SERVER_STOP") > -1) {
+        } else if (executeOutput.indexOf("ATS_WEB_SOCKET_SERVER_STOP") > -1) {
             trace("WebSocketServer stopped -> " + getQualifiedClassName(this) + id);
-            // usbError("Device server unavailable")
         }
     }
 
-    private function getWebSocketServerPort(data:String):int {
-        var array:Array = data.split("\n");
-        for each(var line:String in array) {
-            if (line.indexOf("ATS_WEB_SOCKET_SERVER_START") > -1) {
-                var parameters:Array = line.split("=");
-                var subparameters:Array = (parameters[1] as String).split(":");
-                return parseInt(subparameters[1]);
-            }
-        }
-
-        return -1;
-    }
-
-    private function getWebSocketServerError(data:String):String {
-        var array:Array = data.split("\n");
-        for each(var line:String in array) {
-            if (line.indexOf("ATS_WEB_SOCKET_SERVER_ERROR") > -1) {
-                var firstIndex:int = line.length;
-                var lastIndex:int = line.lastIndexOf("ATS_WEB_SOCKET_SERVER_ERROR:") + "ATS_WEB_SOCKET_SERVER_ERROR:".length;
-                return line.substring(lastIndex, firstIndex);
-            }
-        }
-
-        return "";
+    private function forwardPortExitHandler(event:Event):void {
+        (event.currentTarget as NativeProcess).removeEventListener(NativeProcessExitEvent.EXIT, forwardPortExitHandler);
+        webServer.setupWebSocket(webSocketClientPort);
     }
 }
 }

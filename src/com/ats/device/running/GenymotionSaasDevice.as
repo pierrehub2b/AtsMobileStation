@@ -23,7 +23,7 @@ public class GenymotionSaasDevice extends AndroidUsbDevice {
         writeDebugLogs("Downloading APK")
 
         var info:NativeProcessStartupInfo = new NativeProcessStartupInfo()
-        info.executable = currentAdbFile
+        info.executable = adbFile
 
         // -q (quiet): delete output logs interpreted as errors
         // -O (output document): always overwrites file
@@ -54,7 +54,7 @@ public class GenymotionSaasDevice extends AndroidUsbDevice {
         writeDebugLogs("Installing driver")
 
         var info:NativeProcessStartupInfo = new NativeProcessStartupInfo()
-        info.executable = currentAdbFile
+        info.executable = adbFile
         info.arguments = new <String>["-s", id, "shell", "pm", "install", apkOutputPath]
 
         process = new NativeProcess()

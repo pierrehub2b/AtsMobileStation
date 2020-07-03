@@ -28,7 +28,7 @@ public class AndroidWirelessDevice extends AndroidDevice {
 
     override protected function fetchIpAddress():void {
         processInfo = new NativeProcessStartupInfo()
-        processInfo.executable = currentAdbFile
+        processInfo.executable = adbFile
         processInfo.arguments = new <String>["-s", id, "shell", "ip", "route"];
 
         process = new NativeProcess()
@@ -85,7 +85,7 @@ public class AndroidWirelessDevice extends AndroidDevice {
 
     override protected function execute():void {
         var processInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
-        processInfo.executable = currentAdbFile
+        processInfo.executable = adbFile
         processInfo.arguments = new <String>["-s", id, "shell", "am", "instrument", "-w", "-e", "ipAddress", ip, "-e", "atsPort", port, "-e", "usbMode", String(usbMode), "-e", "debug", "false", "-e", "class", ANDROID_DRIVER + ".AtsRunnerWifi", ANDROID_DRIVER + "/android.support.test.runner.AndroidJUnitRunner"];
 
         process = new NativeProcess();

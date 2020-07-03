@@ -19,7 +19,7 @@ public class Python extends EventDispatcher
 			var assetsPythonFile:File = File.applicationDirectory.resolvePath(pythonFolderPath);
 			if (assetsPythonFile.exists) {
 				var workPythonFile:File = workFolder.resolvePath("python");
-				if(!workPythonFile.exists){
+				if (!workPythonFile.exists) {
 					assetsPythonFile.copyTo(workPythonFile);
 				}
 				file = workPythonFile.resolvePath("python.exe");
@@ -27,20 +27,21 @@ public class Python extends EventDispatcher
 				path = folder.nativePath;
 			}
 		}
-		
-		public function install():void{
-			if(file == null){
+
+		public function install():void {
+			if (folder.resolvePath("Scripts").resolvePath("pip3.exe").exists) {
 				dispatchEvent(new Event(Event.COMPLETE));
-			}else{
-				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-				procInfo.executable = file;
-				procInfo.workingDirectory = file.parent;
-				procInfo.arguments = new <String>["get-pip.py", "--no-warn-script-location"]
-				
-				var proc:NativeProcess = new NativeProcess();
-				proc.addEventListener(NativeProcessExitEvent.EXIT, pipInstallExitHandler);
-				proc.start(procInfo);
+				return
 			}
+
+			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			procInfo.executable = file;
+			procInfo.workingDirectory = file.parent;
+			procInfo.arguments = new <String>["get-pip.py", "--no-warn-script-location"]
+
+			var proc:NativeProcess = new NativeProcess();
+			proc.addEventListener(NativeProcessExitEvent.EXIT, pipInstallExitHandler);
+			proc.start(procInfo);
 		}
 		
 		private function pipInstallExitHandler(ev:NativeProcessExitEvent):void{
