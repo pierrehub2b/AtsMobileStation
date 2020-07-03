@@ -34,7 +34,7 @@ package com.ats.managers {
 		
 		public function GenymotionManager():void{
 			if(GmsaasProcess.gmsaasExec != null){
-				fetchContent();
+				// fetchContent();
 				visible = true;
 			}
 		}

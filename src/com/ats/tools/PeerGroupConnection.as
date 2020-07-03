@@ -125,7 +125,8 @@ public class PeerGroupConnection {
 			description = info.description
 			identifier = info.identifier
 
-			devicesManager.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
+			FlexGlobals.topLevelApplication.genymotionManager.fetchContent()
+			// devicesManager.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler);
 		}
 		
 		//--------------------------------------------------------------------------------------------------------
