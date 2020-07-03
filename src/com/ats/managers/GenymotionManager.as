@@ -182,6 +182,8 @@ package com.ats.managers {
 		}
 		
 		private function stopAdbTunnel():void {
+			ownedInstances = null
+
 			const gmTunnelDaemon:File = Python.folder.resolvePath("Lib/site-packages/gmsaas/adbtunnel/gmadbtunneld/gmadbtunneld.exe");
 			if(gmTunnelDaemon.exists){
 				var proc:NativeProcess = new NativeProcess();

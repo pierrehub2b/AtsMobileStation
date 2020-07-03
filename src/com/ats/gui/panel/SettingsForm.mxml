@@ -16,11 +16,10 @@
 			import com.ats.managers.gmsaas.GmsaasProcess;
 			import com.ats.tools.PeerGroupConnection;
 			import com.ats.tools.Python;
-			
+
 			import mx.core.FlexGlobals;
 			import mx.events.CloseEvent;
-			import mx.managers.PopUpManager;
-			
+
 			import spark.components.Alert;
 			
 			[Bindable]
@@ -51,11 +50,19 @@
 				installer.addEventListener(GmsaasInstallerProgressEvent.PROGRESS, installerProgressHandler);
 				installer.install()
 			}
-			
-			protected function uninstallGmsaas(event:Event):void {
+
+			protected function prepareGmsaasUninstall(event:Event):void {
 				genyPanel.infoMessage = "Uninstalling ..."
 				edit = true;
-				
+
+				var genymotionManager:GenymotionManager = FlexGlobals.topLevelApplication.genymotionManager
+				genymotionManager.addEventListener(Event.COMPLETE, genymotionTerminated)
+				genymotionManager.terminate()
+			}
+
+			private function genymotionTerminated(event:Event):void {
+				(event.currentTarget as GenymotionManager).removeEventListener(Event.COMPLETE, genymotionTerminated)
+
 				var installer:GmsaasInstaller = new GmsaasInstaller()
 				installer.addEventListener(GmsaasInstallerErrorEvent.ERROR, installerErrorHandler);
 				installer.addEventListener(GmsaasInstallerProgressEvent.PROGRESS, installerProgressHandler);
@@ -187,11 +194,10 @@
 	<s:Spacer height="6"/>
 	<s:Group width="100%">
 		<panels:InsetPanel id="genyPanel" label="Genymotion Cloud" width="100%" height="100%"/>
-		<s:HGroup width="100%" top="26" paddingLeft="7" paddingRight="5" paddingBottom="5"
-				  horizontalAlign="center">
+		<s:HGroup width="100%" top="26" paddingLeft="7" paddingRight="5" paddingBottom="5" horizontalAlign="center">
 			<buttons:SmallButton id="gmsaasInstallButton" label="Install components" click="installGmsaas(event)" fontSize="12"/>
 			<buttons:SmallButton id="gmsaasCredentialsButton" label="Set credentials" click="editCredentials(event)" fontSize="12"/>
-			<buttons:SmallButton id="gmsaasUninstallButton" label="Uninstall" click="uninstallGmsaas(event)" fontSize="12"/>
+			<buttons:SmallButton id="gmsaasUninstallButton" label="Uninstall" click="prepareGmsaasUninstall(event)" fontSize="12"/>
 		</s:HGroup>
 	</s:Group>
 	<s:Spacer height="14"/>
