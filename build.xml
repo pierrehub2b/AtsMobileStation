@@ -72,7 +72,7 @@
 
 		<echo message="Application type -> '${package.type}'"/>
 
-		<!-- <mxmlc file="src/${APP_NAME}.mxml"
+		<mxmlc file="src/${APP_NAME}.mxml"
             output="temp/${APP_NAME}.swf"
             static-rsls="true"
 			incremental="true"
@@ -96,7 +96,7 @@
         	<include-resource-bundles>short_labels</include-resource-bundles>
         	<include-resource-bundles>tooltips</include-resource-bundles>
 			<define name="APPLICATION::type" value="'${package.type}'"/>
-        </mxmlc> -->
+        </mxmlc>
 		
 		<copy todir="temp/assets">
 			<fileset dir="src/assets"/>
