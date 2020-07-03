@@ -32,7 +32,7 @@ package com.ats.managers {
 		[Bindable]
 		public var visible:Boolean = false
 		
-		public function GenymotionManager(python:Python):void{
+		public function GenymotionManager():void{
 			if(GmsaasProcess.gmsaasExec != null){
 				fetchContent();
 				visible = true;
@@ -148,9 +148,7 @@ package com.ats.managers {
 		
 		private var ownedInstances:Vector.<GenymotionSaasSimulator>
 		private function stopAllInstances():void {
-			
 			var instance:GenymotionSaasSimulator;
-			
 			if (!ownedInstances) {
 				ownedInstances = new Vector.<GenymotionSaasSimulator>()
 				var recipe:GenymotionRecipe;
@@ -161,13 +159,13 @@ package com.ats.managers {
 						}
 					}
 				}
+			}
 
-				if (ownedInstances.length > 0) {
-					instance = ownedInstances.pop()
-					instance.addEventListener(Event.CLOSE, instanceStoppedHandler)
-					instance.stopSim();
-					return;
-				}
+			if (ownedInstances.length > 0) {
+				instance = ownedInstances.pop()
+				instance.addEventListener(Event.CLOSE, instanceStoppedHandler)
+				instance.stopSim();
+				return;
 			}
 
 			stopAdbTunnel()

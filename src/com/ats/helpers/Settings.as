@@ -1,15 +1,11 @@
 package com.ats.helpers {
-	import com.ats.managers.gmsaas.GmsaasInstaller;
-	import com.ats.managers.gmsaas.GmsaasManager;
-	
-	import flash.errors.IOError;
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	import flash.filesystem.File;
-	import flash.net.SharedObject;
-	import flash.system.Capabilities;
-	
-	public class Settings extends EventDispatcher {
+import flash.errors.IOError;
+import flash.events.EventDispatcher;
+import flash.filesystem.File;
+import flash.net.SharedObject;
+import flash.system.Capabilities;
+
+public class Settings extends EventDispatcher {
 		
 		private static var _instance: Settings = new Settings();
 		

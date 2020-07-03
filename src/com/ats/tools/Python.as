@@ -1,24 +1,20 @@
 package com.ats.tools
 {
-	import com.ats.managers.gmsaas.GmsaasInstaller;
-	
-	import flash.desktop.NativeProcess;
-	import flash.desktop.NativeProcessStartupInfo;
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	import flash.events.NativeProcessExitEvent;
-	import flash.filesystem.File;
-	
-	public class Python extends EventDispatcher
+import flash.desktop.NativeProcess;
+import flash.desktop.NativeProcessStartupInfo;
+import flash.events.Event;
+import flash.events.EventDispatcher;
+import flash.events.NativeProcessExitEvent;
+import flash.filesystem.File;
+
+public class Python extends EventDispatcher
 	{
 		public static const pythonFolderPath:String = "assets/tools/python";
 		
 		public static var file:File;
 		public static var folder:File;
 		public static var path:String;
-		
-		public static var gmsaasInstalled:Boolean = false;
-		
+
 		public function Python(workFolder:File):void{
 			var assetsPythonFile:File = File.applicationDirectory.resolvePath(pythonFolderPath);
 			if (assetsPythonFile.exists) {

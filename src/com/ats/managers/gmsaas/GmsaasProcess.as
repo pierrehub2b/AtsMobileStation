@@ -1,14 +1,13 @@
 package com.ats.managers.gmsaas {
-	import com.ats.helpers.Settings;
-	import com.ats.tools.Python;
-	
-	import flash.desktop.NativeProcess;
-	import flash.desktop.NativeProcessStartupInfo;
-	import flash.events.NativeProcessExitEvent;
-	import flash.events.ProgressEvent;
-	import flash.filesystem.File;
-	
-	public class GmsaasProcess extends NativeProcess {
+import com.ats.tools.Python;
+
+import flash.desktop.NativeProcess;
+import flash.desktop.NativeProcessStartupInfo;
+import flash.events.NativeProcessExitEvent;
+import flash.events.ProgressEvent;
+import flash.filesystem.File;
+
+public class GmsaasProcess extends NativeProcess {
 		
 		public static const gmsaasFileName:String = "gmsaas.exe"
 			

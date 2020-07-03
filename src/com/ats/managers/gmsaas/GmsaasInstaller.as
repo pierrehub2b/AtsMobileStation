@@ -1,22 +1,17 @@
 package com.ats.managers.gmsaas {
-	import com.ats.gui.alert.CredentialsAlert;
-	import com.ats.helpers.Settings;
-	import com.ats.tools.Python;
-	
-	import flash.desktop.NativeProcess;
-	import flash.desktop.NativeProcessStartupInfo;
-	import flash.events.EventDispatcher;
-	import flash.events.NativeProcessExitEvent;
-	import flash.events.ProgressEvent;
-	import flash.filesystem.File;
-	
-	import mx.core.FlexGlobals;
-	import mx.managers.PopUpManager;
-	
-	public class GmsaasInstaller extends EventDispatcher {
+import com.ats.helpers.Settings;
+import com.ats.tools.Python;
+
+import flash.desktop.NativeProcess;
+import flash.desktop.NativeProcessStartupInfo;
+import flash.events.EventDispatcher;
+import flash.events.NativeProcessExitEvent;
+import flash.events.ProgressEvent;
+import flash.filesystem.File;
+
+public class GmsaasInstaller extends EventDispatcher {
 		
-		public static const GMSAAS_INSTALLER_STATE_INSTALLING_PIP:String = "Installing PIP"
-		public static const GMSAAS_INSTALLER_STATE_INSTALLING_GMSAAS:String = "Installing GMSAAS"
+		public static const GMSAAS_INSTALLER_STATE_INSTALLING:String = "Installing GMSAAS"
 		public static const GMSAAS_INSTALLER_STATE_INSTALL_COMPLETED:String = "GMSAAS configuration completed"
 		public static const GMSAAS_INSTALLER_STATE_UNINSTALLING:String = "Uninstalling GMSAAS"
 		public static const GMSAAS_INSTALLER_STATE_UNINSTALL_COMPLETED:String = "GMSAAS uninstall completed"
@@ -24,76 +19,24 @@ package com.ats.managers.gmsaas {
 		private static const pipFileName:String = "pip3.exe"
 		
 		private var gmsaasFile:File
-		
-		/*static public function isInstalled():Boolean {
-			var pythonFolder:File = Settings.getInstance().pythonFolder
-			if (pythonFolder != null && Settings.getInstance().gmsaasExecutable != null) {
-				return Settings.getInstance().gmsaasExecutable.exists
-			}
-			return false;
-		}*/
-		
+
 		public function install():void {
 			if (Settings.isMacOs) {
 				dispatchEvent(new GmsaasInstallerErrorEvent("MacOS not supported yet !"))
 				return
 			}
-			
-			/*var pythonFolder:File = Settings.getInstance().pythonFolder
-			if (!pythonFolder) {
-				dispatchEvent(new GmsaasInstallerErrorEvent("Python folder path not set !"))
-				return
-			}
-			
-			pythonFile = pythonFolder.resolvePath(pythonFileName);
-			if (!pythonFile.exists) {
-				dispatchEvent(new GmsaasInstallerErrorEvent("Python file not found !"))
-				return
-			}*/
-			
-			upgradePip()
-		}
-		
-		private function upgradePip():void {
-			dispatchEvent(new GmsaasInstallerProgressEvent(GMSAAS_INSTALLER_STATE_INSTALLING_PIP))
-			
-			var args:Vector.<String> = new Vector.<String>();
-			args.push("-m");
-			args.push("pip");
-			args.push("install");
-			args.push("--upgrade");
-			args.push("pip");
-			
-			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			procInfo.executable = Python.file;
-			procInfo.arguments = args;
-			
-			var proc:NativeProcess = new NativeProcess();
-			proc.addEventListener(NativeProcessExitEvent.EXIT, upgradePipExit);
-			proc.start(procInfo);
-		}
-		
-		private function upgradePipExit(event:NativeProcessExitEvent):void {
-			var proc:NativeProcess = event.currentTarget as NativeProcess
-			proc.removeEventListener(NativeProcessExitEvent.EXIT, upgradePipExit);
-			
-			var pipFile:File = Python.folder.resolvePath("Scripts").resolvePath(pipFileName);
-			if (!pipFile.exists) {
-				dispatchEvent(new GmsaasInstallerErrorEvent("PIP file not found !"))
-				return
-			}
-			
-			dispatchEvent(new GmsaasInstallerProgressEvent(GMSAAS_INSTALLER_STATE_INSTALLING_GMSAAS))
-			
+
+			dispatchEvent(new GmsaasInstallerProgressEvent(GMSAAS_INSTALLER_STATE_INSTALLING))
+
 			var args:Vector.<String> = new Vector.<String>();
 			args.push("install");
 			args.push("--upgrade");
 			args.push("gmsaas");
-			
+
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			procInfo.executable = pipFile;
+			procInfo.executable = Python.folder.resolvePath("Scripts").resolvePath(pipFileName);
 			procInfo.arguments = args;
-			
+
 			var newProc:NativeProcess = new NativeProcess();
 			newProc.addEventListener(NativeProcessExitEvent.EXIT, gmInstallExit);
 			newProc.start(procInfo);
@@ -132,13 +75,7 @@ package com.ats.managers.gmsaas {
 			var proc:NativeProcess = new NativeProcess();
 			proc.start(procInfo);
 		}
-		
-		public function credentialsCancelHandler(alert:CredentialsAlert):void {
-			PopUpManager.removePopUp(alert)
-			
-			uninstall()
-		}
-		
+
 		public function uninstall():void {
 			
 			var pipFile:File = Python.folder.resolvePath("Scripts").resolvePath(pipFileName);
@@ -170,11 +107,13 @@ package com.ats.managers.gmsaas {
 			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, uninstallOutputDataHandler);
 			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, uninstallErrorDataHandler);
 			
-			try{
+			try {
 				GmsaasProcess.gmsaasExec.deleteFile();
-			}catch(err:Error){"gmsass file not found"}
-
-			dispatchEvent(new GmsaasInstallerProgressEvent(GMSAAS_INSTALLER_STATE_UNINSTALL_COMPLETED))
+			} catch (err:Error) {
+				trace("gmsass file not found")
+			} finally {
+				dispatchEvent(new GmsaasInstallerProgressEvent(GMSAAS_INSTALLER_STATE_UNINSTALL_COMPLETED))
+			}
 		}
 		
 		private function uninstallErrorDataHandler(event:ProgressEvent):void {
