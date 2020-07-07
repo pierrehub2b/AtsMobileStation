@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  filters="{dropShadow}" xmlns:panels="com.caipture.gui.panels.*" xmlns:buttons="com.caipture.gui.buttons.*"
+		  gap="0" width="230" height="130"
+		  creationComplete="creationCompleteHandler(event)">
+	
+	<panels:TitlePanel id="inputPanel" label="Ats Mobile Station" height="100%" width="100%"/>
+	
+	<panels:BottomButtons id="buttons" width="100%">
+		<buttons:SmallButton id="okButton" label="Yes, do it" click="okButton_clickHandler(event)" fontSize="14"/>
+		<buttons:SmallButton id="cancelButton" label="Not now" click="cancelButtonHandler(event)" fontSize="14"/>
+	</panels:BottomButtons>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.ats.managers.gmsaas.GmsaasManager;
+			import com.ats.managers.gmsaas.GmsaasManagerEvent;
+			
+			import flash.filters.BitmapFilterQuality;
+			
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			import spark.components.Alert;
+			import spark.filters.DropShadowFilter;
+			
+			public static const dropShadow:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.4, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
+			
+			private var content:NewVersionContent = new NewVersionContent();
+			
+			public var url:String;
+			public var size:int;
+			private var download:Boolean = false;
+			
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				content.addEventListener("enterKey", enterKeyHandler, false, 0, true);
+				inputPanel.addContent(content);
+			}
+			
+			public function set version(value:String):void{
+				content.version = value;
+			}
+			
+			private function cancelButtonHandler(event:MouseEvent):void {
+				if(download){
+					download = false;
+					urlStream.close();
+				}
+				ModalPopupManager.removePopup(this);
+			}
+			
+			private function enterKeyHandler(ev:Event):void{
+				buttons.enabled = false;
+				downloadZipFile();
+			}
+			
+			protected function okButton_clickHandler(event:MouseEvent):void
+			{
+				okButton.enabled = false;
+				cancelButton.label = "Cancel"
+				downloadZipFile();
+			}
+			
+			private var savedFile:File;
+			//private var fileStream:FileStream;
+			private var urlStream:URLStream;
+			//private var currentPos:uint = 0;
+			private var downloadedData:ByteArray;
+			
+			private function downloadZipFile():void{
+				
+				downloadedData = new ByteArray();
+				
+				
+				//fileStream = new FileStream();
+				//fileStream.openAsync(savedFile, FileMode.WRITE);
+				
+				urlStream = new URLStream();
+				urlStream.addEventListener(ProgressEvent.PROGRESS, streamProgress);
+				urlStream.addEventListener(Event.COMPLETE, streamComplete);
+				
+				urlStream.load(new URLRequest(url));
+				
+				download = true;
+			}
+			
+			private function streamProgress(ev:ProgressEvent):void{
+				
+				urlStream.readBytes(downloadedData, downloadedData.length, urlStream.bytesAvailable);
+				
+				//var ba:ByteArray = new ByteArray();
+				//var start:uint = currentPos;
+				//currentPos += urlStream.bytesAvailable;
+				
+				//urlStream.readBytes( ba, start );
+				//fileStream.writeBytes( ba, start );
+				
+				content.load = (ev.bytesLoaded / size)*100
+			}
+			
+			private function streamComplete(ev:Event):void{
+				urlStream.removeEventListener(ProgressEvent.PROGRESS, streamProgress);
+				urlStream.removeEventListener(Event.COMPLETE, streamComplete);
+				
+				urlStream.close();
+				//fileStream.close();
+				
+				if(download){
+					
+					cancelButton.enabled = false;
+					savedFile = File.createTempFile();
+					
+					var fileStream:FileStream = new FileStream();
+					fileStream.addEventListener(Event.CLOSE, writeFileComplete);
+					try {
+						fileStream.openAsync(savedFile, FileMode.WRITE);
+						fileStream.writeBytes(downloadedData);
+					} catch (e:Error) {
+					} finally {
+						fileStream.close();
+					}
+					
+				}else{
+					downloadedData.clear();
+					downloadedData = null;
+				}
+			}
+			
+			private function writeFileComplete(ev:Event):void{
+				var fileStream:FileStream = ev.currentTarget as FileStream;
+				fileStream.removeEventListener(Event.CLOSE, writeFileComplete);
+				
+				content.restart();
+				FlexGlobals.topLevelApplication.closeAndUpdate(savedFile.nativePath);
+			}
+		]]>
+	</fx:Script>
+	
+</s:VGroup>
