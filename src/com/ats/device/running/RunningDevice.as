@@ -86,7 +86,7 @@ public class RunningDevice extends Device
 		trace("USB install error" + getQualifiedClassName(this));
 	}
 
-	protected function writeDebugLogs(message:String):void {
+	protected function printDebugLogs(message:String):void {
 		trace("[INFO][" + new Date().toString() + "]" + "[" + id + " | " + modelName + "]" + "[" + (usbMode ? "USB" : "WIFI") + "]" + " " + message)
 	}
 }

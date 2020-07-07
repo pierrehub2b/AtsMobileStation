@@ -9,11 +9,7 @@ import com.ats.helpers.PortSwitcher;
 import com.ats.servers.tcp.ProxyServer;
 import com.ats.servers.udp.CaptureServer;
 
-import flash.desktop.NativeProcess;
-import flash.desktop.NativeProcessStartupInfo;
 import flash.events.Event;
-import flash.events.NativeProcessExitEvent;
-import flash.events.ProgressEvent;
 
 public class AndroidUsbDevice extends AndroidDevice {
 
@@ -80,7 +76,7 @@ public class AndroidUsbDevice extends AndroidDevice {
     // ----
 
     private function fetchLocalPort():void {
-        writeDebugLogs("Fetching local port")
+        printDebugLogs("Fetching local port")
 
         var portSwitcher:PortSwitcher = new PortSwitcher();
         portSwitcher.addEventListener(PortSwitcher.PORT_NOT_AVAILABLE_EVENT, portSwitcherErrorHandler, false, 0, true);
@@ -156,7 +152,6 @@ public class AndroidUsbDevice extends AndroidDevice {
 
     private function captureServerStartedHandler(event:Event):void {
         captureServer.removeEventListener(CaptureServer.CAPTURE_SERVER_STARTED, webServerInitializedHandler);
-        // end of process
     }
 
     private function captureServerErrorHandler(event:Event):void {
@@ -195,12 +190,10 @@ public class AndroidUsbDevice extends AndroidDevice {
         return "";
     }
 
-    override protected function execute():void {
-        writeDebugLogs("Starting driver")
+    override protected function executeDriver():void {
+        printDebugLogs("Starting driver")
 
-        var processInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
-        processInfo.executable = adbFile
-        processInfo.arguments = new <String>[
+        var arguments:Vector.<String> = new <String>[
             "-s", id, "shell", "am", "instrument", "-w",
             "-e", "ipAddress", ip,
             "-e", "atsPort", port,
@@ -210,44 +203,34 @@ public class AndroidUsbDevice extends AndroidDevice {
             "-e", "class", ANDROID_DRIVER + ".AtsRunnerUsb", ANDROID_DRIVER + "/android.support.test.runner.AndroidJUnitRunner"
         ]
 
-        process = new NativeProcess();
-        process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onExecuteOutput, false, 0, true);
-        process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onExecuteError, false, 0, true);
-        process.addEventListener(NativeProcessExitEvent.EXIT, onExecuteExit, false, 0, true);
-        process.start(processInfo);
+        adbProcess = new AdbProcess();
+        adbProcess.execute(arguments, onExecuteExit, onExecuteOutput, onExecuteError)
     }
 
     override protected function fetchIpAddress():void {
-        writeDebugLogs("Fetching ip address")
+        printDebugLogs("Fetching ip address")
 
         networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_FOUND, localAddressFoundHandler, false, 0, true);
         networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, localAddressNotFoundHandler, false, 0, true);
-
         networkUtils.getClientIPAddress();
     }
 
     private function setupPortForwarding():void {
-        var process:NativeProcess = new NativeProcess();
-        var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-
-        procInfo.executable = adbFile;
-        procInfo.workingDirectory = adbFile.parent;
-        process.addEventListener(NativeProcessExitEvent.EXIT, forwardPortExitHandler, false, 0, true);
-
         webSocketClientPort = PortSwitcher.getAvailableLocalPort();
 
-        procInfo.arguments = new <String>["-s", id, "forward", "tcp:" + webSocketClientPort, "tcp:" + webSocketServerPort];
-        process.start(procInfo);
+        var adbProcess:AdbProcess = new AdbProcess()
+        var arguments:Vector.<String> = new <String>["-s", id, "forward", "tcp:" + webSocketClientPort, "tcp:" + webSocketServerPort];
+        adbProcess.execute(arguments, forwardPortExitHandler)
     }
 
-    override protected function onUninstallDriverExit(event:NativeProcessExitEvent):void {
-        super.onUninstallDriverExit(event)
+    override protected function onUninstallDriverExit():void {
         fetchLocalPort();
     }
 
-    override protected function onExecuteOutput(event:ProgressEvent):void {
-        super.onExecuteOutput(event)
+    override protected function onExecuteOutput():void {
+        super.onExecuteOutput()
 
+        var executeOutput:String = adbProcess.output
         if (executeOutput.indexOf("ATS_WEB_SOCKET_SERVER_START:") > -1) {
             webSocketServerPort = getWebSocketServerPort(executeOutput);
             setupPortForwarding();
@@ -259,8 +242,7 @@ public class AndroidUsbDevice extends AndroidDevice {
         }
     }
 
-    private function forwardPortExitHandler(event:Event):void {
-        (event.currentTarget as NativeProcess).removeEventListener(NativeProcessExitEvent.EXIT, forwardPortExitHandler);
+    private function forwardPortExitHandler():void {
         webServer.setupWebSocket(webSocketClientPort);
     }
 }
