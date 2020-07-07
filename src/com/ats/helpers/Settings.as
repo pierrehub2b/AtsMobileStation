@@ -17,6 +17,13 @@ public class Settings extends EventDispatcher {
 	public static function get defaultAppFolder():File {
 		return isMacOs ? File.userDirectory.resolvePath(APP_FOLDER_MACOS) : File.userDirectory.resolvePath(APP_FOLDER_WINDOWS)
 	}
+	
+	public static function get osName():String{
+		if(isMacOs){
+			return "macos"
+		}
+		return "windows";
+	}
 
 	public static function get logsFolder():File {
 		return workFolder.resolvePath("logs");
