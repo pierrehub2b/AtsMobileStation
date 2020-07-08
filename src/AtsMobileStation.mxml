@@ -121,7 +121,6 @@
 				
 				System.disposeXML(appXml);
 				
-				checkVersion();
 				titleLabel.text = "Ats MobileStation (" + appVersion + ") - port:" + httpPort;
 				
 				var exitCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Exit"));
@@ -197,6 +196,7 @@
 			
 			private function pythonCheckComplete(ev:Event):void {
 				python.removeEventListener(Event.COMPLETE, pythonCheckComplete);
+				checkVersion();
 				genymotionManager = new GenymotionManager();
 			}
 			
