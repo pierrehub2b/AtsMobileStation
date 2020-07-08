@@ -268,7 +268,7 @@ public class AndroidDevice extends RunningDevice {
 	}
 
 	protected function onExecuteOutput():void {
-		var executeOutput:String = adbProcess.output
+		var executeOutput:String = adbProcess.partialOutput
 		writeErrorLogFile(executeOutput);
 
 		if (executeOutput.indexOf("Process crashed") > -1) {

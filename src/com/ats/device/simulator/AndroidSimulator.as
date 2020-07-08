@@ -40,11 +40,11 @@ public class AndroidSimulator extends Simulator {
     }
 
     override public function startSim():void {
-        var file:File = Settings.workAdbFolder;
+        var file:File = File.userDirectory.resolvePath("AppData/Local/Android/Sdk");
         file = file.resolvePath("emulator").resolvePath("emulator" + execExtension)
 
         if (!file.exists) {
-            trace("No Android SDK found")
+            trace("No Emulator.exe found")
             statusOff()
             return
         }

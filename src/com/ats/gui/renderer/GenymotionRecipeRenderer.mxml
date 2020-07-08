@@ -1,83 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <renderer:SimulatorRenderer
-	xmlns:fx="http://ns.adobe.com/mxml/2009"
-	xmlns:s="library://ns.adobe.com/flex/spark"
-	xmlns:renderer="com.ats.gui.renderer.*"
-	width="100%" rollOver="simulatorrenderer1_rollOverHandler(event)"
-	rollOut="simulatorrenderer1_rollOutHandler(event)"
-	click="itemrenderer1_clickHandler(event)" xmlns:buttons="com.caipture.gui.buttons.*">
-	
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:renderer="com.ats.gui.renderer.*"
+		width="100%"
+		creationComplete="creationCompleteHandler(event)"
+		rollOver="simulatorrenderer1_rollOverHandler(event)"
+		rollOut="simulatorrenderer1_rollOutHandler(event)"
+		click="itemrenderer1_clickHandler(event)">
+
 	<fx:Script>
 		<![CDATA[
-			import com.ats.device.simulator.genymotion.GenymotionRecipe;
-			import com.ats.device.simulator.genymotion.GenymotionRecipe;
-			import com.ats.device.simulator.genymotion.GenymotionRecipe;
-			import com.ats.device.simulator.genymotion.GenymotionRecipe;
-			import com.ats.device.simulator.Simulator;
-			import com.greensock.TweenMax;
-			
-			import flash.filters.BitmapFilterQuality;
-			
-			import mx.collections.ArrayCollection;
-			import mx.events.CollectionEvent;
-			import mx.events.FlexEvent;
-			
-			import spark.filters.ColorMatrixFilter;
-			import spark.filters.DropShadowFilter;
-			
-			public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
-			private static const greyFilter:ColorMatrixFilter = new ColorMatrixFilter([0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0, 0, 0, 1, 0])
-			
-			override public function set data(value:Object):void {
-				if (super.data == null || super.data != value) {
-					super.data = value;
-					dispatchEvent(new Event("updateDataEvent"))
-				}
+		import com.ats.device.simulator.Simulator;
+		import com.ats.device.simulator.genymotion.GenymotionRecipe;
+
+		import flash.filters.BitmapFilterQuality;
+
+		import mx.events.FlexEvent;
+
+		import spark.filters.ColorMatrixFilter;
+		import spark.filters.DropShadowFilter;
+
+		public static const dropShadowFilterMiddle:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.2, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
+		private static const greyFilter:ColorMatrixFilter = new ColorMatrixFilter([0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0.3, 0.59, 0.11, 0, 0, 0, 0, 0, 1, 0])
+
+		override public function set data(value:Object):void {
+			if (super.data == null || super.data != value) {
+				super.data = value;
+				dispatchEvent(new Event("updateDataEvent"))
 			}
-			
-			[Bindable(event="updateDataEvent")]
-			public override function get sim():Simulator {
-				return data as Simulator
-			}
-			
-			protected function removedFromStageHandler(event:Event):void {
-				mainGroup.filters = []
-			}
-			
-			/*protected function creationCompleteHandler(event:FlexEvent):void {
-			(data as GenymotionRecipe).instances.addEventListener(CollectionEvent.COLLECTION_CHANGE, collectionChangeHandler);
-			calculateRowHeight()
-			}
-			
-			private function collectionChangeHandler(event:CollectionEvent):void {
-			calculateRowHeight()
-			}
-			
-			private function calculateRowHeight():void {
-			height = (data as GenymotionRecipe).instances.length > 0 ? 50 : 40
-			}*/
-			
-			protected function simulatorrenderer1_rollOverHandler(event:MouseEvent):void {
-				startButton.visible = true;
-				//if (selected) {
-				//	TweenMax.fromTo(plusButton, 0.3, {alpha: 0.5}, {alpha: 1.0})
-				//}
-			}
-			
-			protected function simulatorrenderer1_rollOutHandler(event:MouseEvent):void {
-				startButton.visible = false;
-				//plusButton.alpha = 0.5;
-			}
-			
-			protected function itemrenderer1_clickHandler(event:MouseEvent):void {
-				//TweenMax.fromTo(plusButton, 0.3, {alpha: 0.5}, {alpha: 1.0})
-			}
-			
-			protected function startButton_clickHandler(event:MouseEvent):void
-			{
-				(data as GenymotionRecipe).startInstance()
-			}
-			
+		}
+
+		[Bindable(event="updateDataEvent")]
+		public override function get sim():Simulator {
+			return data as Simulator
+		}
+
+		protected function removedFromStageHandler(event:Event):void {
+			mainGroup.filters = []
+		}
+
+		protected function creationCompleteHandler(event:FlexEvent):void {
+
+		}
+
+		/*private function collectionChangeHandler(event:CollectionEvent):void {
+        calculateRowHeight()
+        }
+
+        private function calculateRowHeight():void {
+        height = (data as GenymotionRecipe).instances.length > 0 ? 50 : 40
+        }*/
+
+		protected function simulatorrenderer1_rollOverHandler(event:MouseEvent):void {
+			startButton.visible = true;
+			//if (selected) {
+			//	TweenMax.fromTo(plusButton, 0.3, {alpha: 0.5}, {alpha: 1.0})
+			//}
+		}
+
+		protected function simulatorrenderer1_rollOutHandler(event:MouseEvent):void {
+			startButton.visible = false;
+			//plusButton.alpha = 0.5;
+		}
+
+		protected function itemrenderer1_clickHandler(event:MouseEvent):void {
+			//TweenMax.fromTo(plusButton, 0.3, {alpha: 0.5}, {alpha: 1.0})
+		}
+
+		protected function startButton_clickHandler(event:MouseEvent):void {
+			(data as GenymotionRecipe).startInstance()
+		}
 		]]>
 	</fx:Script>
 	

@@ -15,6 +15,7 @@ public class AdbProcess extends NativeProcess {
     private var exitCallback:Function
 
     public var output:String
+    public var partialOutput:String
     public var error:String
 
     public function AdbProcess() {
@@ -25,6 +26,7 @@ public class AdbProcess extends NativeProcess {
 
     public function execute(arguments:Vector.<String>, exitCallback:Function, outputCallback:Function = null, errorCallback:Function = null):void {
         output = ""
+        partialOutput = ""
         error = ""
 
         info.arguments = arguments
@@ -46,7 +48,10 @@ public class AdbProcess extends NativeProcess {
     }
 
     private function onOutputHandler(event:ProgressEvent):void {
-        output += standardOutput.readUTFBytes(standardOutput.bytesAvailable)
+        var output:String = standardOutput.readUTFBytes(standardOutput.bytesAvailable)
+
+        this.output += output
+        partialOutput = output
 
         if (outputCallback != null) {
             outputCallback()

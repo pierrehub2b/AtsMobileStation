@@ -230,7 +230,7 @@ public class AndroidUsbDevice extends AndroidDevice {
     override protected function onExecuteOutput():void {
         super.onExecuteOutput()
 
-        var executeOutput:String = adbProcess.output
+        var executeOutput:String = adbProcess.partialOutput
         if (executeOutput.indexOf("ATS_WEB_SOCKET_SERVER_START:") > -1) {
             webSocketServerPort = getWebSocketServerPort(executeOutput);
             setupPortForwarding();
