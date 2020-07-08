@@ -17,6 +17,7 @@ tempFolderPath = appParentFolderPath + "/" + str(uuid.uuid4())
 appFolderPath = appParentFolderPath + "/" + appFolderName
 
 #----------------------------------------------------------------
+# Functions
 #----------------------------------------------------------------
 
 def deleteFolder(folder):
@@ -27,17 +28,27 @@ def deleteFolder(folder):
 		return False
 
 #----------------------------------------------------------------
+# Unzip
 #----------------------------------------------------------------
 
 os.mkdir(tempFolderPath)
-with zipfile.ZipFile(sys.argv[1],"r") as zip_ref:zip_ref.extractall(tempFolderPath)
+with zipfile.ZipFile(zipFilePath,"r") as zip_ref:zip_ref.extractall(tempFolderPath)
+os.remove(zipFilePath)
 
-maxTry = 10
+#----------------------------------------------------------------
+# Replace folder
+#----------------------------------------------------------------
+
+maxTry = 20
 while deleteFolder(appFolderPath) is False and maxTry > 0:
 	maxTry -= 1
-	time.sleep(1)
+	time.sleep(0.5)
 
 os.rename(tempFolderPath, appFolderPath)
+
+#----------------------------------------------------------------
+# Restart app
+#----------------------------------------------------------------
 
 os.chdir(appFolderPath)
 os.system(appExeName)
