@@ -1,7 +1,13 @@
 package com.ats.tools
 {
+	import flash.filesystem.File;
+
 	public class StringHelper
 	{
+		public static function unescapeFilePath(value:File):String{
+			return value.nativePath.replace(/\\/g, "/");
+		}
+		
 		/**
 		 * Convert all JavaScript escape characters into normal characters
 		 *

@@ -59,24 +59,20 @@
 			
 			protected function okButton_clickHandler(event:MouseEvent):void
 			{
-				okButton.enabled = false;
+				okButton.visible = false;
+				okButton.includeInLayout = false;
+				
 				cancelButton.label = "Cancel"
 				downloadZipFile();
 			}
 			
 			private var savedFile:File;
-			//private var fileStream:FileStream;
 			private var urlStream:URLStream;
-			//private var currentPos:uint = 0;
 			private var downloadedData:ByteArray;
 			
 			private function downloadZipFile():void{
 				
 				downloadedData = new ByteArray();
-				
-				
-				//fileStream = new FileStream();
-				//fileStream.openAsync(savedFile, FileMode.WRITE);
 				
 				urlStream = new URLStream();
 				urlStream.addEventListener(ProgressEvent.PROGRESS, streamProgress);
@@ -88,16 +84,7 @@
 			}
 			
 			private function streamProgress(ev:ProgressEvent):void{
-				
 				urlStream.readBytes(downloadedData, downloadedData.length, urlStream.bytesAvailable);
-				
-				//var ba:ByteArray = new ByteArray();
-				//var start:uint = currentPos;
-				//currentPos += urlStream.bytesAvailable;
-				
-				//urlStream.readBytes( ba, start );
-				//fileStream.writeBytes( ba, start );
-				
 				content.load = (ev.bytesLoaded / size)*100
 			}
 			
@@ -106,7 +93,7 @@
 				urlStream.removeEventListener(Event.COMPLETE, streamComplete);
 				
 				urlStream.close();
-				//fileStream.close();
+				urlStream = null;
 				
 				if(download){
 					
@@ -134,7 +121,7 @@
 				fileStream.removeEventListener(Event.CLOSE, writeFileComplete);
 				
 				content.restart();
-				FlexGlobals.topLevelApplication.closeAndUpdate(savedFile.nativePath);
+				FlexGlobals.topLevelApplication.closeAndUpdate(savedFile);
 			}
 		]]>
 	</fx:Script>

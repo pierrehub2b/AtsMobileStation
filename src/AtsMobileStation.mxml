@@ -70,6 +70,8 @@
 			
 			public var teamId:String;
 			private var appVersion:String
+			private var appName:String
+			private var updateScript:String;
 			
 			public function getTeamId():String {
 				return teamId;
@@ -115,10 +117,10 @@
 				var appXml:XML = NativeApplication.nativeApplication.applicationDescriptor;
 				var ns:Namespace = NativeApplication.nativeApplication.applicationDescriptor.namespace();
 				appVersion = appXml.ns::versionNumber[0];
-				//appName = appXml.ns::filename[0];
+				appName = appXml.ns::filename[0];
+				
 				System.disposeXML(appXml);
 				
-				checkVersion();
 				titleLabel.text = "Ats MobileStation (" + appVersion + ") - port:" + httpPort;
 				
 				var exitCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Exit"));
@@ -194,6 +196,7 @@
 			
 			private function pythonCheckComplete(ev:Event):void {
 				python.removeEventListener(Event.COMPLETE, pythonCheckComplete);
+				checkVersion();
 				genymotionManager = new GenymotionManager();
 			}
 			
@@ -223,7 +226,8 @@
 				TweenMax.delayedCall(0.1, closeAll);
 			}
 			
-			public function closeAndUpdate(zipFilePath:String):void {
+			public function closeAndUpdate(zipFile:File):void {
+				python.updateApp(zipFile, appName);
 				closeAll();
 			}
 			
@@ -245,7 +249,8 @@
 			}
 			
 			private function closeApp():void {
-				NativeApplication.nativeApplication.exit(0);
+				python.executeUpdate();
+				NativeApplication.nativeApplication.exit();
 			}
 			
 			protected function cleanDirectory(directory:File):void {
@@ -394,7 +399,7 @@
 			{
 				const data:String = loader.data;
 				loaderFinished();
-
+				
 				var jsonData:Object = {};
 				try{
 					jsonData = JSON.parse(data) as Object;
