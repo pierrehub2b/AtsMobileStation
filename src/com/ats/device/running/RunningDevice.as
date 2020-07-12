@@ -1,8 +1,8 @@
 package com.ats.device.running
 {
-import com.ats.device.*;
-
 import avmplus.getQualifiedClassName;
+
+import com.ats.device.*;
 
 import mx.utils.UIDUtil;
 
@@ -59,6 +59,10 @@ public class RunningDevice extends Device
 			status: status,
 			type: type
 		}
+	}
+	
+	public function installApk(url:String):void{
+		// do nothing by default
 	}
 
 	protected function installing():void{

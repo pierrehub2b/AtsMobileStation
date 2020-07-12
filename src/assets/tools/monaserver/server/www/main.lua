@@ -1,5 +1,6 @@
 local devices = {}
 local sync = nil
+local msApp = nil
 
 function getDeviceIndex(id)
 	for i, v in ipairs (devices) do 
@@ -50,6 +51,8 @@ end
 
 function onConnection(client,type,...)
 	if type == "mobilestation" then
+		
+		msApp = client
 		
 		if data["info"] == nil then 
 			data["info"] = {} 
@@ -123,6 +126,11 @@ function onConnection(client,type,...)
 		return {name=data["info"]["name"], description=data["info"]["description"], identifier=data["info"]["identifier"], configs=mona.configs}
 	else
 		if type == "editor" then
+		
+			function client:installApk(url, deviceId)
+				msApp.writer:writeInvocation("installApk", url, deviceId)
+			end
+			
 			return {devices=devices, name=data["info"]["name"], description=data["info"]["description"], httpPort=mona.configs.HTTP.port}
 		else
 			function client:initData()

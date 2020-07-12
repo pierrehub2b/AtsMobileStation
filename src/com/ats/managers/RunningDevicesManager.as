@@ -87,6 +87,15 @@ public class RunningDevicesManager extends EventDispatcher {
 			iosLoop = TweenLite.delayedCall(5, launchIosProcess);
 		}	
 		
+		public function installApk(url:String, deviceId:String):void{
+			for each(var dv:RunningDevice in collection){
+				if(dv.runningId == deviceId){
+					dv.installApk(url);
+					break;
+				}
+			}
+		}
+		
 		public function terminate():void{
 			adbLoop.pause();
 			TweenLite.killDelayedCallsTo(launchAdbProcess)

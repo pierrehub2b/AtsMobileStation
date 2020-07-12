@@ -136,6 +136,10 @@ public class PeerGroupConnection extends EventDispatcher {
 		// Client methods
 		//--------------------------------------------------------------------------------------------------------
 		
+		public function installApk(url:String, deviceId:String):void{
+			devicesManager.installApk(url, deviceId);
+		}
+		
 		public function saveValues(desc:String, nm:String):void{
 			netConnection.call("updateInfo", null, nm, desc);
 		}
