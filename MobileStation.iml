@@ -9,7 +9,7 @@
               <dependency linkage="Merged" />
             </entry>
           </entries>
-          <sdk name="FlexSDK" />
+          <sdk name="FlexSdk" />
         </dependencies>
         <compiler-options>
           <map>
@@ -37,22 +37,12 @@
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/AdbWinUsbApi.dll" path-in-package="assets/tools/android/AdbWinUsbApi.dll" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/android/libwinpthread-1.dll" path-in-package="assets/tools/android/libwinpthread-1.dll" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/tools/monaserver" path-in-package="assets/tools/monaserver" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/Pods" path-in-package="assets/drivers/ios/Pods" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/atsios/Base.lproj" path-in-package="assets/drivers/ios/atsios/Base.lproj" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/atsios/Info.plist" path-in-package="assets/drivers/ios/atsios/Info.plist" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/atsios/Assets.xcassets" path-in-package="assets/drivers/ios/atsios/Assets.xcassets" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/atsios/AppDelegate.swift" path-in-package="assets/drivers/ios/atsios/AppDelegate.swift" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/atsios/atsios.xcdatamodeld" path-in-package="assets/drivers/ios/atsios/atsios.xcdatamodeld" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/atsios/ViewController.swift" path-in-package="assets/drivers/ios/atsios/ViewController.swift" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/output/Logs/Test" path-in-package="assets/drivers/ios/output/Logs/Test" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/LICENSE" path-in-package="assets/drivers/ios/LICENSE" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/Podfile" path-in-package="assets/drivers/ios/Podfile" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/atsDriver" path-in-package="assets/drivers/ios/atsDriver" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/README.md" path-in-package="assets/drivers/ios/README.md" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/Podfile.lock" path-in-package="assets/drivers/ios/Podfile.lock" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/atsios.xcodeproj" path-in-package="assets/drivers/ios/atsios.xcodeproj" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/atsios.xcworkspace" path-in-package="assets/drivers/ios/atsios.xcworkspace" />
-            <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/ios/testLineCommand.rtf" path-in-package="assets/drivers/ios/testLineCommand.rtf" />
             <FilePathAndPathInPackage file-path="$MODULE_DIR$/src/assets/drivers/atsdroid.apk" path-in-package="assets/drivers/atsdroid.apk" />
           </files-to-package>
           <AirSigningOptions keystore-path="$MODULE_DIR$/cert.p12" use-temp-certificate="false" />
@@ -68,7 +58,7 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="FlexSDK" jdkType="Flex SDK Type (new)" />
+    <orderEntry type="jdk" jdkName="FlexSdk" jdkType="Flex SDK Type (new)" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library" exported="">
       <library type="flex">
