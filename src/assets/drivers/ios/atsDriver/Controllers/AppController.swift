@@ -84,8 +84,6 @@ final class AppController {
         app = XCUIApplication.init(bundleIdentifier: bundleIdentifier)
         app.launch()
         
-        activeChannelsCount += 1
-        
         let label = app.label
         return StartOutput(label: label)
     }
@@ -94,12 +92,6 @@ final class AppController {
         app = XCUIApplication(bundleIdentifier: bundleIdentifier)
         app.terminate()
         app = nil;
-        
-        activeChannelsCount -= 1
-        if activeChannelsCount == 0 {
-            AtsClient.current = nil
-            sendLogs(type: logType.STATUS, message: "** DEVICE UNLOCKED **")
-        }
         
         // sendLogs(type: logType.INFO, message: "Stop app \(parameters[1])")
         return Router.Output(message: "stop app \(bundleIdentifier)")

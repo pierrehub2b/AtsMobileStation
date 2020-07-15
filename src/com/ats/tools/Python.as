@@ -1,5 +1,7 @@
 package com.ats.tools
 {
+import com.ats.helpers.Settings;
+
 import flash.desktop.NativeProcess;
 import flash.desktop.NativeProcessStartupInfo;
 import flash.events.Event;
@@ -7,8 +9,6 @@ import flash.events.EventDispatcher;
 import flash.events.NativeProcessExitEvent;
 import flash.events.ProgressEvent;
 import flash.filesystem.File;
-import flash.filesystem.FileMode;
-import flash.filesystem.FileStream;
 
 public class Python extends EventDispatcher
 	{
@@ -23,16 +23,22 @@ public class Python extends EventDispatcher
 		private var updateProcInfo:NativeProcessStartupInfo;
 		private var updateProc:NativeProcess;
 
-		public function Python(workFolder:File):void{
-			var assetsPythonFile:File = File.applicationDirectory.resolvePath(pythonFolderPath);
-			if (assetsPythonFile.exists) {
-				var workPythonFile:File = workFolder.resolvePath("python");
-				if (!workPythonFile.exists) {
-					assetsPythonFile.copyTo(workPythonFile);
+		public function Python(workFolder:File):void {
+			if (Settings.isMacOs) {
+				//file = File("/usr/local/bin/python3")
+				//folder = file.parent
+				//path = folder.nativePath
+			} else {
+				var assetsPythonFile:File = File.applicationDirectory.resolvePath(pythonFolderPath);
+				if (assetsPythonFile.exists) {
+					var workPythonFile:File = workFolder.resolvePath("python");
+					if (!workPythonFile.exists) {
+						assetsPythonFile.copyTo(workPythonFile);
+					}
+					file = workPythonFile.resolvePath("python.exe");
+					folder = file.parent;
+					path = folder.nativePath;
 				}
-				file = workPythonFile.resolvePath("python.exe");
-				folder = file.parent;
-				path = folder.nativePath;
 			}
 		}
 

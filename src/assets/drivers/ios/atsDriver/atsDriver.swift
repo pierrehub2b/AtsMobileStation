@@ -19,7 +19,7 @@ import Foundation
 import UIKit
 import XCTest
 import Embassy
-import EnvoyAmbassador
+import Ambassador
 import Socket
 
 public var app: XCUIApplication!
@@ -35,13 +35,16 @@ public var continueExecution = true
 public var udpPort: Int = 47633
 public var osVersion = UIDevice.current.systemVersion
 public var userAgent: String?
-public var activeChannelsCount = 0
 public var model = UIDevice.modelName.replacingOccurrences(of: "Simulator ", with: "")
 // public var forceCapture = false
 
 extension UIDevice {
     static var isSimulator: Bool {
-        return ProcessInfo.processInfo.environment["SIMULATOR_DEVICE_NAME"] != nil
+        #if targetEnvironment(simulator)
+        return true
+        #else
+        return false
+        #endif
     }
 }
 
@@ -269,7 +272,7 @@ class atsDriver: XCTestCase {
         let server = DefaultHTTPServer(eventLoop: loop, interface: "0.0.0.0", port: self.port) { environ, startResponse, sendBody in
             
             let queryString = environ["PATH_INFO"]! as! String
-            let token = (environ["HTTP_TOKEN"] as? String)
+            let token = (environ["HTTP_TOKEN"] as? String)// .replacingOccurrences(of:"\"", with: "")
             userAgent = (environ["HTTP_USER_AGENT"] as? String ?? "") + " " + (environ["HTTP_HOST"] as? String ?? "")
             let action = queryString.replacingOccurrences(of: "/", with: "")
             var parameters: [String] = []
@@ -284,18 +287,14 @@ class atsDriver: XCTestCase {
             
             do {
                 let result = try Router.main.route(action, parameters: parameters, token: token)
-                if let content = result as? Content {
-                    // self.resultElement = resultElement.toJSON()
+                if let resultElement = result as? [String: Any] {
+                    self.resultElement = resultElement
                     startResponse("200 OK", [("Content-Type", "application/json")])
-                    let theJSONText = String(data: content.toJSONData()!, encoding: String.Encoding.utf8)!
-                    sendBody(Data(theJSONText.utf8))
-                    sendBody(Data())
-
-                    /* if let theJSONData = try?  JSONSerialization.data(withJSONObject: self.resultElement),
+                    if let theJSONData = try?  JSONSerialization.data(withJSONObject: self.resultElement),
                         let theJSONText = String(data: theJSONData, encoding: String.Encoding.utf8) {
                         sendBody(Data(theJSONText.utf8))
                     }
-                    sendBody(Data()) */
+                    sendBody(Data())
                 } else if let screenshot = result as? Data {
                     startResponse("200 OK", [("Content-Type", "application/octet-stream"),("Content-length", screenshot.count.description)])
                     //sendLogs(type: logType.INFO, message: "Get screenshot informations")

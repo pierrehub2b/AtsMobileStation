@@ -10,7 +10,7 @@ import XCTest
 
 extension ButtonController: Routeable {
     var name: String {
-        return "button"
+        return "sysbutton"
     }
     
     func handleParameters(_ parameters: [String], token: String?) throws -> Any {
@@ -18,31 +18,51 @@ extension ButtonController: Routeable {
             throw Router.RouterError.missingParameters
         }
         
-        switch action {
+        return pressButton(action)
+        
+        
+        /* switch action {
         case .home:
             return pressHomeButton()
         case .orientation:
             return switchOrientation()
         default:
             return Router.Output(message: "unknow button \(action.rawValue)", status: "-42")
-        }
+        } */
     }
 }
 
 final class ButtonController {
     
+    private func transformAction(_ action:ButtonAction) -> XCUIDevice.Button? {
+        switch action {
+        case .home:
+            return XCUIDevice.Button.home
+        default:
+            return nil
+        }
+    }
+    
     private enum ButtonAction: String {
         case home
         case soundup
         case sounddown
-        case silentswitch
+        /* case silentswitch
         case lock
         case enter
         case `return`
-        case orientation
+        case orientation */
     }
     
-    private func pressHomeButton() -> Router.Output {
+    private func pressButton(_ action:ButtonAction) -> Router.Output {
+        if let deviceButton = transformAction(action) {
+            XCUIDevice.shared.press(deviceButton)
+        }
+        
+        return Router.Output(message: "press home button")
+    }
+    
+    /* private func pressHomeButton() -> Router.Output {
         XCUIDevice.shared.press(.home)
         return Router.Output(message: "press home button")
     }
@@ -55,5 +75,5 @@ final class ButtonController {
             XCUIDevice.shared.orientation = .landscapeLeft
             return Router.Output(message: "orientation to landscape mode")
         }
-    }
+    } */
 }

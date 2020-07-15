@@ -1,7 +1,6 @@
 package com.ats.device.running
 {
 	import com.ats.device.Device;
-	import com.ats.device.running.RunningDevice;
 	import com.ats.device.simulator.Simulator;
 	import com.ats.helpers.DevicePortSettings;
 	import com.ats.helpers.DevicePortSettingsHelper;
@@ -9,7 +8,7 @@ package com.ats.device.running
 	import com.ats.helpers.DeviceSettingsHelper;
 	import com.ats.helpers.PortSwitcher;
 	import com.ats.helpers.Settings;
-	
+
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -19,9 +18,9 @@ package com.ats.device.running
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	import flash.globalization.DateTimeFormatter;
-	
+
 	import mx.core.FlexGlobals;
-	
+
 	public class IosDevice extends RunningDevice
 	{
 		private static const ATSDRIVER_DRIVER_HOST:String = "ATSDRIVER_DRIVER_HOST";
@@ -148,7 +147,7 @@ package com.ats.device.running
 			procInfo.executable = xcodeBuildExec;
 			procInfo.workingDirectory = resultDir;
 			
-			var args: Vector.<String> = new <String>["xcodebuild", "-workspace", "atsios.xcworkspace", "-scheme", "atsios", "-destination", "id=" + id];
+			var args: Vector.<String> = new <String>["xcodebuild", "-scheme", "atsios", "-destination", "id=" + id];
 			if(!simulator) {
 				args.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + FlexGlobals.topLevelApplication.getTeamId());
 			}
@@ -160,6 +159,7 @@ package com.ats.device.running
 				args.push("test");
 				writeTypedLogs("build and test on device with id:" + id, "info");
 			}
+			
 			getBundleIds(id);
 			procInfo.arguments = args;
 		}
@@ -176,6 +176,8 @@ package com.ats.device.running
 			}
 			
 			fileStream.close();
+
+			trace(log)
 		}
 		
 		private function writeLogs(data:String):void{

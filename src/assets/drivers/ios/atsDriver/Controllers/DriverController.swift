@@ -35,7 +35,6 @@ extension DriverController: Routeable {
         case .stop:
             let result = stop()
             AtsClient.current = nil
-            activeChannelsCount = 0
             sendLogs(type: logType.STATUS, message: "** DEVICE UNLOCKED **")
             return result
         case .quit:
@@ -102,6 +101,7 @@ final class DriverController {
         }
         
         //sendLogs(type: logType.INFO, message: "Terminate app")
+                
         if !UIDevice.isSimulator {
             XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
         }

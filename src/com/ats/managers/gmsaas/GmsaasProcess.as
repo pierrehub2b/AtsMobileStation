@@ -1,4 +1,5 @@
 package com.ats.managers.gmsaas {
+import com.ats.helpers.Settings;
 import com.ats.tools.Python;
 
 import flash.desktop.NativeProcess;
@@ -12,8 +13,12 @@ public class GmsaasProcess extends NativeProcess {
 		public static const gmsaasFileName:String = "gmsaas.exe"
 			
 		public static function get gmsaasExec():File {
+			if (Settings.isMacOs) {
+				return null
+			}
+
 			const gm:File = Python.file.parent.resolvePath("Scripts").resolvePath(gmsaasFileName);
-			if(gm.exists){
+			if (gm.exists) {
 				return gm;
 			}
 			return null;
@@ -27,7 +32,7 @@ public class GmsaasProcess extends NativeProcess {
 					arguments.push(arg);
 				}
 				new GmsaasProcess(gmFile, arguments, callback).run();
-			}else{
+			} else {
 				callback({error:{message:"GMSAAS executable file not found !"}})
 			}
 		}

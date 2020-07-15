@@ -183,8 +183,10 @@
 				peerGroup.start()
 				
 				python = new Python(Settings.workFolder);
-				python.addEventListener(Event.COMPLETE, pythonCheckComplete);
-				python.install();
+				if (!Settings.isMacOs) {
+					python.addEventListener(Event.COMPLETE, pythonCheckComplete);
+					python.install();
+				}
 			}
 			
 			private function monaServerInitHandler(event:Event):void {
@@ -234,9 +236,14 @@
 			public function closeAll():void {
 				peerGroup.close();
 				simulators.terminate();
-				
-				genymotionManager.addEventListener(Event.COMPLETE, genymotionTerminated);
-				genymotionManager.terminate()
+
+				if  (Settings.isMacOs) {
+					devices.addEventListener(Event.COMPLETE, devicesTerminateComplete);
+					devices.terminate();
+				} else {
+					genymotionManager.addEventListener(Event.COMPLETE, genymotionTerminated);
+					genymotionManager.terminate()
+				}
 			}
 			
 			private function genymotionTerminated(ev:Event):void {

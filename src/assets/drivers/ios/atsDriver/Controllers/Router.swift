@@ -48,6 +48,11 @@ final class Router {
             asChanged = true
         }
         
-        return try controller.handleParameters(parameters, token: token)
+        let result = try controller.handleParameters(parameters, token: token)
+        if let content = result as? Content {
+            return content.toJSON()!
+        } else {
+            return result
+        }
     }
 }
