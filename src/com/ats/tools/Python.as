@@ -25,9 +25,9 @@ public class Python extends EventDispatcher
 
 		public function Python(workFolder:File):void {
 			if (Settings.isMacOs) {
-				//file = File("/usr/local/bin/python3")
-				//folder = file.parent
-				//path = folder.nativePath
+				file = new File().resolvePath("/usr/bin/python")
+				folder = file.parent
+				path = folder.nativePath
 			} else {
 				var assetsPythonFile:File = File.applicationDirectory.resolvePath(pythonFolderPath);
 				if (assetsPythonFile.exists) {
@@ -43,6 +43,8 @@ public class Python extends EventDispatcher
 		}
 
 		public function install():void {
+			
+			
 			if (folder.resolvePath("Scripts").resolvePath("pip3.exe").exists) {
 				dispatchEvent(new Event(Event.COMPLETE));
 				return

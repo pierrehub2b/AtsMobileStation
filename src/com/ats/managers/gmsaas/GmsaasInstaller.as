@@ -22,7 +22,7 @@ public class GmsaasInstaller extends EventDispatcher {
 
 		public function install():void {
 			if (Settings.isMacOs) {
-				dispatchEvent(new GmsaasInstallerErrorEvent("MacOS not supported yet !"))
+				dispatchEvent(new GmsaasInstallerErrorEvent("MacOS is not supported yet !"))
 				return
 			}
 
