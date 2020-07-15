@@ -1,14 +1,10 @@
 package com.ats.device.simulator {
-import com.ats.helpers.Settings;
-
 import flash.desktop.NativeProcess;
 import flash.desktop.NativeProcessStartupInfo;
 import flash.events.NativeProcessExitEvent;
 import flash.events.ProgressEvent;
 import flash.filesystem.File;
 import flash.system.Capabilities;
-
-import mx.core.FlexGlobals;
 
 public class AndroidSimulator extends Simulator {
 
