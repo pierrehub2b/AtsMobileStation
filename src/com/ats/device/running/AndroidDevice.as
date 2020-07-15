@@ -5,16 +5,12 @@ package com.ats.device.running
 	import com.ats.helpers.Settings;
 	import com.ats.helpers.Version;
 	
-	import flash.desktop.NativeProcess;
-	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
-	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	import flash.globalization.DateTimeFormatter;
-	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.net.URLStream;
 	import flash.utils.ByteArray;
@@ -123,24 +119,12 @@ package com.ats.device.running
 			var apkPath:String = apkFile.nativePath.replace(/\\/g, "/");
 			printDebugLogs("Installing apk -> " + apkPath)
 			
-			var info:NativeProcessStartupInfo = new NativeProcessStartupInfo()
-			info.arguments = new <String>["-s", id, "install", apkPath]
-			info.executable = Settings.adbFile
-			
-			var proc:NativeProcess = new NativeProcess();
-			proc.addEventListener(NativeProcessExitEvent.EXIT, onInstallApkExit);
-			proc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onOutputHandler)
-			proc.start(info);
+			var arguments: Vector.<String> = new <String>["-s", id, "install", apkPath]
+			var adbProcess:AdbProcess = new AdbProcess()
+			adbProcess.execute(arguments, onInstallApkExit)
 		}
 		
-		private function onOutputHandler(ev:ProgressEvent):void {
-			trace(ev.currentTarget.standardOutput.readUTFBytes(ev.currentTarget.standardOutput.bytesAvailable))
-			
-			
-		}
-		
-		protected function onInstallApkExit(ev:NativeProcessExitEvent):void {
-			ev.currentTarget.removeEventListener(NativeProcessExitEvent.EXIT, onInstallApkExit)
+		protected function onInstallApkExit():void {
 			status = READY
 			printDebugLogs("Apk installed")
 		}
