@@ -124,6 +124,15 @@ function onConnection(client,type,...)
 		end
 
 		return {name=data["info"]["name"], description=data["info"]["description"], identifier=data["info"]["identifier"], configs=mona.configs}
+
+	elseif type == "gesturecatcher" then
+
+		function client:catchGesture(paths)
+			for id, cli in pairs(mona.clients) do
+				cli.writer:writeInvocation("catchGesture", paths)
+			end
+		end
+
 	else
 		if type == "editor" then
 		
