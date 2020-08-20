@@ -1,6 +1,7 @@
 package com.ats.servers.tcp
 {
-import com.worlize.websocket.WebSocket;
+	import com.ats.tools.PeerGroupConnection;
+	import com.worlize.websocket.WebSocket;
 import com.worlize.websocket.WebSocketConfig;
 import com.worlize.websocket.WebSocketErrorEvent;
 import com.worlize.websocket.WebSocketEvent;
@@ -11,11 +12,14 @@ import flash.events.IOErrorEvent;
 import flash.events.OutputProgressEvent;
 import flash.events.ProgressEvent;
 import flash.events.ServerSocketConnectEvent;
-import flash.net.ServerSocket;
+	import flash.net.NetConnection;
+	import flash.net.ServerSocket;
 import flash.net.Socket;
 import flash.utils.ByteArray;
 
-public class ProxyServer extends EventDispatcher
+	import mx.core.FlexGlobals;
+
+	public class ProxyServer extends EventDispatcher
 	{
 		public static const WEB_SERVER_INITIALIZED:String = "webServerInitialized";
 		public static const WEB_SERVER_STARTED:String = "webServerStarted";
@@ -144,10 +148,16 @@ public class ProxyServer extends EventDispatcher
 
 			var clientData:ByteArray = new ByteArray();
 			var tempData:ByteArray = new ByteArray();
-			clientData.writeInt(proxySocket.id);
-			socket.readBytes(tempData, 0, socket.bytesAvailable);
 
+			// websocket source
+			// clientData.writeInt(0)
+
+			// socket id
+			clientData.writeInt(proxySocket.id);
+
+			socket.readBytes(tempData, 0, socket.bytesAvailable);
 			clientData.writeBytes(tempData, 0, tempData.length);
+
 			proxySocket.data = clientData;
 
 			// forward data
