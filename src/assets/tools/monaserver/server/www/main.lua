@@ -1,6 +1,7 @@
 local devices = {}
 local sync = nil
 local msApp = nil
+local agilitestEditor = nil
 
 function getDeviceIndex(id)
 	for i, v in ipairs (devices) do 
@@ -50,8 +51,18 @@ local function randomString(length)
 end
 
 function onConnection(client,type,...)
+
+	function client:onMessage(data)
+
+		if agilitestEditor then
+			agilitestEditor.writer:writeInvocation("catchGesture", data)
+		end
+
+		return nil
+	end
+
 	if type == "mobilestation" then
-		
+
 		msApp = client
 		
 		if data["info"] == nil then 
@@ -125,16 +136,10 @@ function onConnection(client,type,...)
 
 		return {name=data["info"]["name"], description=data["info"]["description"], identifier=data["info"]["identifier"], configs=mona.configs}
 
-	elseif type == "gesturecatcher" then
-
-		function client:catchGesture(paths)
-			for id, cli in pairs(mona.clients) do
-				cli.writer:writeInvocation("catchGesture", paths)
-			end
-		end
-
 	else
 		if type == "editor" then
+
+			agilitestEditor = client
 		
 			function client:installApk(url, deviceId)
 				msApp.writer:writeInvocation("installApk", url, deviceId)
