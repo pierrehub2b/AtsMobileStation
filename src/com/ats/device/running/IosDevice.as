@@ -108,9 +108,10 @@ package com.ats.device.running
 			writeTypedLogs("Copy files into temp directory", "info");
 			resultDir = File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id);
 			var alreadyCopied:Boolean = false;//resultDir.exists;
-			if(!alreadyCopied) {
+			if (!alreadyCopied) {
 				iosDriverProjectFolder.copyTo(resultDir, true);
 			}
+			
 			writeTypedLogs("Managing plist file", "info");
 			var index:int = 0;
 			file = resultDir.resolvePath("atsDriver/Settings.plist");
@@ -145,7 +146,7 @@ package com.ats.device.running
 			procInfo.executable = xcodeBuildExec;
 			procInfo.workingDirectory = resultDir;
 			
-			var args: Vector.<String> = new <String>["xcodebuild", "-scheme", "atsios", "-destination", "id=" + id, "test"];
+			var args: Vector.<String> = new <String>["xcodebuild", "-scheme", "atsios", "-destination", "id=" + id];
 			if (!simulator) {
 				args.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + FlexGlobals.topLevelApplication.getTeamId());
 			}
@@ -383,7 +384,6 @@ package com.ats.device.running
 				errorMessage = "Go to AppStore for download it";
 				testingProcess.exit();
 				removeReceivers();
-
 			}
 		}
 

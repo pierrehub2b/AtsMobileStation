@@ -127,7 +127,7 @@ class atsDriver: XCTestCase {
         
         
         if !UIDevice.isSimulator {
-            // XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
+            XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
         }
         
         if(customPort != "") {
