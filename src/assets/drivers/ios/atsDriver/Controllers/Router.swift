@@ -33,6 +33,7 @@ final class Router {
         register(InfoController())
         register(ScreenshotController())
         register(ButtonController())
+        register(PropertyController())
     }
     
     private func register(_ controller: Routeable) {

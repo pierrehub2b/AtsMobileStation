@@ -23,7 +23,7 @@ import Ambassador
 import Socket
 
 public var app: XCUIApplication!
-public var appsInstalled: [String] = [];
+public var appsInstalled: [String] = []
 public var applications: [Application] = []
 public var channelWidth = 1.0
 public var channelHeight = 1.0
@@ -127,7 +127,7 @@ class atsDriver: XCTestCase {
         
         
         if !UIDevice.isSimulator {
-            XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
+            // XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
         }
         
         if(customPort != "") {
@@ -149,8 +149,8 @@ class atsDriver: XCTestCase {
         }
         //sendLogs(type: logType.INFO, message: "Start HTTP server : \(customPort)")
         Application.setup()
-        self.setupWebApp()
         self.setupApp()
+        self.setupWebApp()
     }
     
     func getAllAppIds(from dic: [String: Any]) -> [String] {
@@ -281,7 +281,7 @@ class atsDriver: XCTestCase {
             input { data in
                 guard let textData = String(bytes: data, encoding: .utf8) else { return }
                 
-                let tableData = textData.split(separator: "\n")
+                let tableData = textData.replacingOccurrences(of: "\r\n", with: "\n").split(separator: "\n")
                 tableData.forEach { parameters.append(String($0)) }
             }
             
@@ -315,11 +315,39 @@ class atsDriver: XCTestCase {
             } catch Router.RouterError.badRoute {
                 self.resultElement["status"] = "-11"
                 self.resultElement["message"] = "unknow command"
+                startResponse("200 OK", [("Content-Type", "application/json")])
+                if let theJSONData = try?  JSONSerialization.data(withJSONObject: self.resultElement),
+                    let theJSONText = String(data: theJSONData, encoding: String.Encoding.utf8) {
+                    sendBody(Data(theJSONText.utf8))
+                }
+                sendBody(Data())
             } catch CaptureController.CaptureError.noApp {
                 self.resultElement["message"] = "no app has been launched"
                 self.resultElement["status"] = "-99"
+                startResponse("200 OK", [("Content-Type", "application/json")])
+                if let theJSONData = try?  JSONSerialization.data(withJSONObject: self.resultElement),
+                    let theJSONText = String(data: theJSONData, encoding: String.Encoding.utf8) {
+                    sendBody(Data(theJSONText.utf8))
+                }
+                sendBody(Data())
+            } catch Router.RouterError.missingParameters {
+                self.resultElement["message"] = "missing parameter"
+                self.resultElement["status"] = "-99"
+                startResponse("200 OK", [("Content-Type", "application/json")])
+                if let theJSONData = try?  JSONSerialization.data(withJSONObject: self.resultElement),
+                    let theJSONText = String(data: theJSONData, encoding: String.Encoding.utf8) {
+                    sendBody(Data(theJSONText.utf8))
+                }
+                sendBody(Data())
             } catch {
-                
+                self.resultElement["status"] = "-11"
+                self.resultElement["message"] = "unknow error"
+                startResponse("200 OK", [("Content-Type", "application/json")])
+                if let theJSONData = try?  JSONSerialization.data(withJSONObject: self.resultElement),
+                    let theJSONText = String(data: theJSONData, encoding: String.Encoding.utf8) {
+                    sendBody(Data(theJSONText.utf8))
+                }
+                sendBody(Data())
             }
             
             /* if(action == "") {
@@ -735,8 +763,8 @@ class atsDriver: XCTestCase {
     // set up XCUIApplication
     private func setupApp() {
         app = XCUIApplication()
-        app.launchEnvironment["RESET_LOGIN"] = "1"
-        app.launchEnvironment["ENVOY_BASEURL"] = "http://localhost:\(self.port)"
+        app!.launchEnvironment["RESET_LOGIN"] = "1"
+        app!.launchEnvironment["ENVOY_BASEURL"] = "http://localhost:\(self.port)"
     }
     
     /* func driverInfoBase() {

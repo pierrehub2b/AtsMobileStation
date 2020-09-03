@@ -81,7 +81,7 @@ final class AppController {
             return Router.Output(message: "app package not found : \(bundleIdentifier)", status: "-51")
         }
         
-        app = XCUIApplication.init(bundleIdentifier: bundleIdentifier)
+        app = XCUIApplication(bundleIdentifier: bundleIdentifier)
         app.launch()
         
         let label = app.label

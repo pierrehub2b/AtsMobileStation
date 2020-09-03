@@ -43,6 +43,8 @@ extension ElementController: Routeable {
             guard parameters.count > 2 else { throw Router.RouterError.missingParameters }
             let text = parameters[2]
             return input(text)
+        case .press:
+            return press(duration: 1, paths: ["3", "", ""])
         }
     }
 }
@@ -54,6 +56,7 @@ final class ElementController {
         case swipe
         case scripting
         case input
+        case press
     }
     
     struct Output: Content {
@@ -101,17 +104,18 @@ final class ElementController {
     }
     
     private func tap(_ coordinate: CGPoint) -> Content {
+        guard let app = app else {
+            sendLogs(type: logType.ERROR, message: "App is null")
+            return Router.Output(message: "tap on element")
+        }
+        
         let xCoordinate = Double(coordinate.x) * deviceWidth / channelWidth
         let yCoordinate = Double(coordinate.y) * deviceHeight / channelHeight
         
-        if(app != nil) {
-            let normalized = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
-            let coordinate = normalized.withOffset(CGVector(dx: xCoordinate, dy: yCoordinate))
-            coordinate.tap()
-        } else {
-            sendLogs(type: logType.ERROR, message: "App is null")
-        }
-        
+        let normalized = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+        let coordinate = normalized.withOffset(CGVector(dx: xCoordinate, dy: yCoordinate))
+        coordinate.tap()
+
         return Router.Output(message: "tap on element")
     }
     
@@ -121,7 +125,11 @@ final class ElementController {
     }
     
     private func swipe(_ from: CGPoint, to: CGPoint) -> Content {
-        if(app != nil) {
+        guard let app = app else {
+            sendLogs(type: logType.ERROR, message: "App is null")
+            return Router.Output(message: "swipe element")
+        }
+        
             var direction:Direction;
             var adjustment: CGFloat = 0
             if(to.x > 0) {
@@ -154,16 +162,16 @@ final class ElementController {
                 centre.press(forDuration: pressDuration, thenDragTo: xSwipe)
                 break
             }
-        } else {
-            sendLogs(type: logType.ERROR, message: "App is null")
-        }
-                
-        // forceCapture = true
-
+        
         return Router.Output(message: "swipe element")
     }
     
     private func input(_ text: String) -> Content {
+        guard let app = app else {
+            sendLogs(type: logType.ERROR, message: "App is null")
+            return Router.Output(message: "element send keys : \(text)")
+        }
+        
         if text == "&empty;" {
             return Router.Output(message: "no keyboard on screen for tap text")
         } else {
@@ -175,6 +183,55 @@ final class ElementController {
                 return Router.Output(message: "no keyboard on screen for tap text")
             }
         }
+    }
+    
+    private func press(duration: TimeInterval, paths: [String]) -> Content {
+        guard let app2 = app else {
+            sendLogs(type: logType.ERROR, message: "App is null")
+            return Router.Output(message: "not ok")
+        }
+        
+        let app = XCUIApplication(bundleIdentifier: "com.apple.mobilesafari")
+        // app.activate()
+        
+        // for path in paths {
+        let startCoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.3))
+        let endCoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let othercoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.7, dy: 0.7))
+        
+        // let second = Timer.scheduledTimer(timeInterval: 0, target: nil, selector: #selector(test1), userInfo: nil, repeats: false)
+        // let first = Timer.scheduledTimer(timeInterval: 0, target: nil, selector: #selector(test2), userInfo: nil, repeats: false)
+
+        // endCoordinate.press(forDuration: 0, thenDragTo: startCoordinate)
+        // endCoordinate.press(forDuration: 0, thenDragTo: othercoordinate)
+
+        test1()
+        test2()
+        
+        // }
+
+        // startCoordinate.doubleTap()
+                
+        return Router.Output(message: "ok")
+    }
+    
+    @objc func test1() {
+        let app = XCUIApplication(bundleIdentifier: "com.apple.mobilesafari")
+
+        let startCoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.3))
+        let endCoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+
+        endCoordinate.press(forDuration: 0, thenDragTo: startCoordinate)
+    }
+    
+    @objc func test2() {
+        let app = XCUIApplication(bundleIdentifier: "com.apple.mobilesafari")
+
+        
+        let endCoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let othercoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.7, dy: 0.7))
+
+        endCoordinate.press(forDuration: 0, thenDragTo: othercoordinate)
     }
     
     private func fetchCoordinates(_ parameters: [String]) throws -> CGPoint {
@@ -216,3 +273,4 @@ final class ElementController {
         return CGPoint(x: calculateX, y: calculateY)
     }
 }
+

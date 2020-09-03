@@ -67,11 +67,12 @@ final class DriverController {
         let status = "0"
         let screenCapturePort = udpPort
         let systemName = model + " - " + osVersion
+        let systemProperties: [String]
         let deviceWidth: Double
         let deviceHeight: Double
         let channelWidth: Double
         let channelHeight: Double
-        let token: String
+        let token = UUID().uuidString
     }
     
     private func start() -> DriverStartOutput {
@@ -92,7 +93,7 @@ final class DriverController {
         deviceWidth = Double(channelWidth / ratio)
         deviceHeight = Double(channelHeight / ratio)
         
-        return DriverStartOutput(deviceWidth: deviceWidth, deviceHeight: deviceHeight, channelWidth: channelWidth, channelHeight: channelHeight, token: UUID().uuidString)
+        return DriverStartOutput(systemProperties: PropertyController.PropertyActionName.allCases.map { $0.rawValue }, deviceWidth: deviceWidth, deviceHeight: deviceHeight, channelWidth: channelWidth, channelHeight: channelHeight)
     }
     
     private func stop() -> Content {

@@ -33,6 +33,7 @@
 		D816CA1024B71C4D00B914C5 /* Socket in Frameworks */ = {isa = PBXBuildFile; productRef = D816CA0F24B71C4D00B914C5 /* Socket */; };
 		D816CA1324B71C7400B914C5 /* Ambassador in Frameworks */ = {isa = PBXBuildFile; productRef = D816CA1224B71C7400B914C5 /* Ambassador */; };
 		D816CA1624B71C9400B914C5 /* Embassy in Frameworks */ = {isa = PBXBuildFile; productRef = D816CA1524B71C9400B914C5 /* Embassy */; };
+		D8865A8A24C98099003C45D5 /* PropertyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8865A8924C98099003C45D5 /* PropertyController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -84,6 +85,7 @@
 		92C416C22473CB5B00A772AF /* AtsClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtsClient.swift; sourceTree = "<group>"; };
 		92C416C42473D9D300A772AF /* Content.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Content.swift; sourceTree = "<group>"; };
 		9A907BBC234901DF00F3DE15 /* AppIcons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIcons.swift; sourceTree = "<group>"; };
+		D8865A8924C98099003C45D5 /* PropertyController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -164,6 +166,7 @@
 				923AE159245F007600156ECB /* Router.swift */,
 				923AE15B245F008500156ECB /* Routeable.swift */,
 				92C416C42473D9D300A772AF /* Content.swift */,
+				D8865A8924C98099003C45D5 /* PropertyController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -353,6 +356,7 @@
 				923AE15A245F007600156ECB /* Router.swift in Sources */,
 				047BFA8022F178D800BB2E25 /* atsDriver.swift in Sources */,
 				92C416C32473CB5B00A772AF /* AtsClient.swift in Sources */,
+				D8865A8A24C98099003C45D5 /* PropertyController.swift in Sources */,
 				9A907BBD234901DF00F3DE15 /* AppIcons.swift in Sources */,
 				9254C2A02449A8E3006DC4FC /* ScriptingExecutor.swift in Sources */,
 				2DFC38B12435ECC900E445DB /* sendLogs.swift in Sources */,
@@ -518,7 +522,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = X58W5PF95D;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = atsios/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -539,7 +543,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = X58W5PF95D;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = atsios/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -561,7 +565,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = X58W5PF95D;
+				DEVELOPMENT_TEAM = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"COCOAPODS=1",
@@ -589,7 +593,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = X58W5PF95D;
+				DEVELOPMENT_TEAM = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"COCOAPODS=1",
