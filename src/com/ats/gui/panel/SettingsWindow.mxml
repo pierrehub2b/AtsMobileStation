@@ -13,14 +13,10 @@
 		import com.ats.helpers.Settings;
 		import com.ats.managers.gmsaas.GmsaasInstaller;
 
-		import flash.net.navigateToURL;
-
 		import mx.core.FlexGlobals;
 		import mx.events.CloseEvent;
 		import mx.events.FlexEvent;
 		import mx.managers.PopUpManager;
-
-		import spark.components.richTextEditorClasses.BoldTool;
 
 		[Embed(source="/assets/icons/16/apple_site.png")]
 		private const AppleIcon:Class;
@@ -164,7 +160,7 @@
 			try {
 				var installer:GmsaasInstaller = new GmsaasInstaller()
 				genymotionInfoLabel.text = "Installing..."
-				installer.install(function (error:String=null):void {
+				installer.install(function (error:String = null):void {
 					genymotionInfoLabel.text = null
 
 					if (error) {
@@ -184,7 +180,7 @@
 			try {
 				var installer:GmsaasInstaller = new GmsaasInstaller()
 				genymotionInfoLabel.text = "Uninstalling..."
-				installer.uninstall(function (error:String=null):void {
+				installer.uninstall(function (error:String = null):void {
 					genymotionInfoLabel.text = null
 
 					if (error) {
@@ -212,7 +208,7 @@
 		}
 		]]>
 	</fx:Script>
-	
+
 	<s:VGroup left="6" right="6" top="10" bottom="36" gap="2" horizontalAlign="left"
 			  verticalAlign="middle">
 		<s:Label fontWeight="bold" text="Mobile station name"/>
@@ -220,16 +216,16 @@
 		<s:Spacer height="6"/>
 		<s:Label fontWeight="bold" text="Mobile station description"/>
 		<s:TextArea id="desc" width="100%" height="60"/>
-		
+
 		<!--		<s:Label fontWeight="bold" text="Web server"/>
 		<s:HGroup width="100%" gap="3" verticalAlign="middle" verticalCenter="0">
 		<s:TextInput id="webServerPort" width="60" height="100%" maxChars="5" text="{HttpServer.getInstance().port}"/>
 		<s:Button width="100" label="Refresh" fontStyle="normal" fontSize="11" click="setSpecificPort(event)"/>
 		</s:HGroup>
 		<s:Label id="webServerErrorLabel" paddingLeft="5" width="100%" fontStyle="normal" fontSize="11" color="red" visible="false"/>-->
-		
+
 		<mx:HRule height="24" width="100%"/>
-		
+
 		<s:Label fontWeight="bold" text="Android SDK folder"/>
 		<s:HGroup width="100%" gap="3" verticalAlign="middle">
 			<s:TextInput id="androidSDKDirectory" width="100%" height="100%" maxChars="5" enabled="false" text="{Settings.getInstance().androidSdkPath}"/>
@@ -238,25 +234,32 @@
 		</s:HGroup>
 		<s:Spacer height="6"/>
 		<s:Label fontWeight="bold" text="Python folder"/>
-		<s:HGroup width="100%" gap="3" verticalAlign="middle">
+		<s:HGroup width="100%" gap="3" verticalAlign="middle" visible="{!Settings.isMacOs}">
 			<s:TextInput id="pythonDirectory" width="100%" height="100%" maxChars="5" enabled="false" text="{Settings.getInstance().pythonPath}"/>
 			<s:Button width="30" label="..." click="searchPythonDirectory_clickHandler(event)" fontSize="10"
 					  fontStyle="normal"/>
 		</s:HGroup>
 
+		<s:Spacer height="6"/>
+		<s:Label fontWeight="bold" text="Apple Team ID"/>
+		<s:HGroup width="100%" gap="3" verticalAlign="middle" visible="{!Settings.isMacOs}">
+			<s:TextInput id="appleTeamIdInput" width="100%" height="100%" maxChars="5" enabled="false" text="{FlexGlobals.topLevelApplication.teamId}"/>
+		</s:HGroup>
+
+
 		<mx:HRule height="24" width="100%"/>
 		<s:Label fontWeight="bold" text="Genymotion Cloud"/>
-		<s:HGroup id="genymotionGroup" width="100%">
+		<s:HGroup id="genymotionGroup" width="100%"  visible="false">
 			<s:Button id="gmsaasInstallButton" width="100%" label="Setup Genymotion Cloud" click="installGmsaas(event)" fontSize="10"
-				  fontStyle="italic" enabled="true"/>
+					  fontStyle="italic" enabled="true"/>
 			<s:Button id="gmsaasUninstallButton" width="100%" label="Uninstall Genymotion Cloud" click="uninstallGmsaas(event)" fontSize="10"
-				  fontStyle="normal"/>
+					  fontStyle="normal"/>
 			<s:Button id="gmsaasCredentialsButton" width="100%" label="Edit credidentials" click="editCredentials(event)" fontSize="10"
 					  fontStyle="normal"/>
 		</s:HGroup>
 		<s:Label id="genymotionInfoLabel"/>
 		<mx:HRule height="24" width="100%"/>
-		
+
 		<s:HGroup width="100%" gap="3" paddingLeft="5" verticalAlign="middle" verticalCenter="0">
 			<s:Label fontWeight="bold" paddingRight="5" text="Development team ID :"/>
 			<s:TextInput id="devTeamId" width="100%" height="100%" maxChars="10"/>
@@ -267,7 +270,7 @@
 		<mx:LinkButton width="100%" label="Open Apple Developer account" fontStyle="normal" fontSize="11"
 					   textAlign="left" click="linkbutton_clickHandler(event)" icon="{AppleIcon}"/>
 	</s:VGroup>
-	
+
 	<s:Group left="0" right="0" bottom="0" height="30">
 		<s:Rect left="0" right="0" top="0" bottom="0" alpha="0.5">
 			<s:fill>
@@ -277,7 +280,7 @@
 				</s:LinearGradient>
 			</s:fill>
 		</s:Rect>
-		
+
 		<s:HGroup left="5" right="5" gap="2" horizontalAlign="center" verticalCenter="0">
 			<s:Button label="Restart Server" icon="assets/icons/16/restart_services.png" click="restart_clickHandler(event)"/>
 			<s:Button label="Export devices" icon="assets/icons/16/copy.png" click="copyId_clickHandler(event)"/>

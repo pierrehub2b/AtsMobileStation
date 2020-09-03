@@ -82,20 +82,18 @@ package com.ats.device.running
 			
 			automaticPort = deviceSettings.automaticPort;
 			
-			if (simulator == true) {
+			if (simulator) {
 				var portSwitcher:PortSwitcher = new PortSwitcher();
 				settingsPort = portSwitcher.getLocalPort(id, automaticPort).toString();
+				
+				var devicePortSettings:DevicePortSettings = DevicePortSettingsHelper.shared.getPortSetting(id);
+				devicePortSettings.port = parseInt(settingsPort);
+				DevicePortSettingsHelper.shared.addSettings(devicePortSettings);
 			} else {
 				settingsPort = deviceSettings.port.toString();
 			}
 			
-			if (simulator) {
-				var devicePortSettings:DevicePortSettings = DevicePortSettingsHelper.shared.getPortSetting(id);
-				devicePortSettings.port = parseInt(settingsPort);
-				DevicePortSettingsHelper.shared.addSettings(devicePortSettings);
-			}
-			
-			if(FlexGlobals.topLevelApplication.getTeamId() == "" && !simulator) {
+			if(!FlexGlobals.topLevelApplication.getTeamId()  && !simulator) {
 				status = Device.FAIL;
 				errorMessage = " - No development team id set";
 				return;
@@ -147,12 +145,12 @@ package com.ats.device.running
 			procInfo.executable = xcodeBuildExec;
 			procInfo.workingDirectory = resultDir;
 			
-			var args: Vector.<String> = new <String>["xcodebuild", "-scheme", "atsios", "-destination", "id=" + id];
-			if(!simulator) {
+			var args: Vector.<String> = new <String>["xcodebuild", "-scheme", "atsios", "-destination", "id=" + id, "test"];
+			if (!simulator) {
 				args.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + FlexGlobals.topLevelApplication.getTeamId());
 			}
 			
-			if(alreadyCopied) {
+			if (alreadyCopied) {
 				args.push("test-without-building");
 				writeTypedLogs("test without building on device with id:" + id, "info");
 			} else {
@@ -303,6 +301,7 @@ package com.ats.device.running
 		protected function onTestingOutput(event:ProgressEvent):void
 		{
 			const data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
+			trace(data)
 			
 			if (data.indexOf("** WIFI NOT CONNECTED **") > -1) {
 				errorMessage = " - WIFI not connected !";
@@ -343,11 +342,13 @@ package com.ats.device.running
 		protected function onTestingError(event:ProgressEvent):void
 		{
 			const data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
-			addLineToLogs(data);
+			trace(data)
+			
+			// addLineToLogs(data);
 			
 			if (noProvisionningProfileError.test(data)) {
 				error = "No provisioning profiles"
-				errorMessage = "No provisioning profiles\nMore informations in our Github page";
+				errorMessage = "More informations in our Github page";
 				testingProcess.exit();
 				removeReceivers();
 				return;
@@ -355,7 +356,7 @@ package com.ats.device.running
 			
 			if (noCertificatesError.test(data)) {
 				error = "Certificate error"
-				errorMessage = "Certificate error\nMore informations in our Github page";
+				errorMessage = "More informations in our Github page";
 				testingProcess.exit();
 				removeReceivers();
 				return;
@@ -363,7 +364,7 @@ package com.ats.device.running
 			
 			if (startInfoLocked.test(data)) {
 				error = "Locked with passcode"
-				errorMessage = "Locked with passcode. Please disable code\n and auto-lock in device settings";
+				errorMessage = "Please disable code and auto-lock in device settings";
 				testingProcess.exit();
 				removeReceivers();
 				return;
@@ -371,7 +372,7 @@ package com.ats.device.running
 			
 			if (noXcodeInstalled.test(data)) {
 				error = "No XCode founded on this computer"
-				errorMessage = "No XCode founded on this computer\nGo to AppStore for download it";
+				errorMessage = "Go to AppStore for download it";
 				testingProcess.exit();
 				removeReceivers();
 				return;
@@ -379,7 +380,7 @@ package com.ats.device.running
 			
 			if (wrongVersionofxCode.test(data)) {
 				error = "Your device need a more recent version of Xcode"
-				errorMessage = "Your device need a more recent version\n of xCode. Go to AppStore for download it";
+				errorMessage = "Go to AppStore for download it";
 				testingProcess.exit();
 				removeReceivers();
 
