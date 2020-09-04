@@ -25,18 +25,18 @@ package com.ats.managers {
 	import net.tautausan.plist.Plist10;
 	
 	public class RunningDevicesManager extends EventDispatcher {
-		private const mobileDevice:File = File.applicationDirectory.resolvePath("assets/tools/ios/mobiledevice");
-		private const systemProfiler:File = new File("/usr/sbin/system_profiler");
+		// private const mobileDevice:File = File.applicationDirectory.resolvePath("assets/tools/ios/mobiledevice");
+		// private const systemProfiler:File = new File("/usr/sbin/system_profiler");
 		private const envFile:File = new File("/usr/bin/env");
 		
 		private const sysprofilerArgs:Vector.<String> = new <String>["system_profiler", "SPUSBDataType", "-xml"];
-		private const simCtlArgs:Vector.<String> = new <String>["xcrun", "simctl", "list", "devices", "-j"];
+		// private const simCtlArgs:Vector.<String> = new <String>["xcrun", "simctl", "list", "devices", "-j"];
 		private const adbListDevicesArgs:Vector.<String> = new <String>["devices", "-l"];
 		private const adbKillServer:Vector.<String> = new <String>["kill-server"];
 		
 		public static const endOfMessage:String = "<$ATSDROID_endOfMessage$>";
-		private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/;
-		private const jsonPattern:RegExp = /\{[^]*\}/;
+		// private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/;
+		// private const jsonPattern:RegExp = /\{[^]*\}/;
 		public static const responseSplitter:String = "<$atsDroid_ResponseSPLIITER$>";
 		public static var devTeamId:String = "";
 		
@@ -149,7 +149,12 @@ package com.ats.managers {
 					getDevicesIds(itm);
 					const name:String = itm.object._name.toString().toLowerCase();
 					if (name == "iphone") {
-						usbDevicesIdList.push(itm.object.serial_num);
+						var serialNumber:String = itm.object.serial_num
+						if (serialNumber.length == 24) {
+							serialNumber = serialNumber.slice(0, 8) + "-" + serialNumber.slice(8);
+						}
+						
+						usbDevicesIdList.push(serialNumber);
 					}
 				}
 			}
@@ -177,10 +182,6 @@ package com.ats.managers {
 			if(usbDevicesIdList.length > 0){
 				
 				var id:String = usbDevicesIdList.pop();
-				if (id.length == 24) {
-					id = id.slice(0, 8) + "-" + id.slice(8);
-				}
-				
 				const dev:RunningDevice = findDevice(id) as IosDevice;
 				
 				if(dev == null) {
