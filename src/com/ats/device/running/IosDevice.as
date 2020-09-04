@@ -302,9 +302,7 @@ package com.ats.device.running
 		protected function onTestingError(event:ProgressEvent):void
 		{
 			const data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
-			trace(data)
-			
-			// addLineToLogs(data);
+			addLineToLogs(data);
 			
 			if (noProvisionningProfileError.test(data)) {
 				error = "No provisioning profiles"
