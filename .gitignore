@@ -103,15 +103,24 @@ fabric.properties
 bin-debug/
 bin-release/
 release/
-src/assets/tools/android
 temp/
 [Oo]bj/
 [Bb]in/
+
+# Monaserver
+src/assets/tools/monaserver/libluajit-5.1.2.dylib
 src/assets/tools/monaserver/MonaBase/
 src/assets/tools/monaserver/MonaCore/
+src/assets/tools/monaserver/server/MonaServer
+src/assets/tools/monaserver/server/logs/log.0
+src/assets/tools/monaserver/server/data
 src/assets/tools/monaserver/work/logs
+src/assets/tools/monaserver/work/lua51.dll
 src/assets/tools/monaserver/work/MonaServer
 src/assets/tools/monaserver/work/MonaServer.exe
+
+src/assets/tools/android
+src/assets/tools/python
 
 # Other files and folders
 .settings/
@@ -138,10 +147,5 @@ Thumbs.db
 .Spotlight-V100
 .Trashes
 build.properties
-src/assets/tools/monaserver/work/lua51.dll
 *.dll
 *.exe
-src/assets/tools/monaserver/server/MonaServer
-src/assets/tools/monaserver/server/logs/log.0
-src/assets/tools/monaserver/libluajit-5.1.2.dylib
-src/assets/tools/python
