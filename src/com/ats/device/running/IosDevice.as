@@ -8,7 +8,7 @@ package com.ats.device.running
 	import com.ats.helpers.DeviceSettingsHelper;
 	import com.ats.helpers.PortSwitcher;
 	import com.ats.helpers.Settings;
-
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
@@ -18,9 +18,9 @@ package com.ats.device.running
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	import flash.globalization.DateTimeFormatter;
-
+	
 	import mx.core.FlexGlobals;
-
+	
 	public class IosDevice extends RunningDevice
 	{
 		private static const ATSDRIVER_DRIVER_HOST:String = "ATSDRIVER_DRIVER_HOST";
@@ -175,105 +175,64 @@ package com.ats.device.running
 			}
 			
 			fileStream.close();
-
-			trace(log)
 		}
 		
-		private function writeLogs(data:String):void{
-			if(data.length > 0){
-				logStream.open(logFile, FileMode.APPEND);
-				logStream.writeUTFBytes("[" + dateFormatter.format(new Date()) + "]" + data);
-				logStream.close();
-			}
-		}
-		
-		private function writeTypedLogs(data:String, type:String):void{
-			if(data.length > 0){
-				logStream.open(logFile, FileMode.APPEND);
-				logStream.writeUTFBytes("[" + dateFormatter.format(new Date()) + "][" + type.toUpperCase() + "] " + data + "\n");
-				logStream.close();
-			}
-		}
-		
-		protected function onGettingBundlesOutput(ev:ProgressEvent):void{
-			var proc:NativeProcess = ev.currentTarget as NativeProcess;			
-			var apps:Array = proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable).split("\n");			
-			var pListFile:File = resultDir.resolvePath("atsDriver/Settings.plist");
-			if(pListFile.exists) {
-				var fileStreamMobileDevice:FileStream = new FileStream();
-				fileStreamMobileDevice.open(pListFile, FileMode.READ);
-				var pListContent:String = fileStreamMobileDevice.readUTFBytes(fileStreamMobileDevice.bytesAvailable);
-				var arrayStringPList:Array = pListContent.split("\n");				
-				fileStreamMobileDevice.close();
-				
-				var newArray:Array = [];
-				var removeNextIndex:Boolean = false;
-				for each(var str:String in arrayStringPList) {
-					if(str.indexOf("CFAppBundleID") == -1 && !removeNextIndex) {
-						newArray.push(str);
-					}
-					
-					removeNextIndex = false;
-					if(str.indexOf("CFAppBundleID") > -1) {
-						removeNextIndex = true;
-					}
+		private static function getDeviceOwner(data:String):String {
+			var array:Array = data.split("\n");
+			for each(var line:String in array) {
+				if (line.indexOf("** DEVICE LOCKED BY : ") > -1) {
+					var firstIndex:int = line.length;
+					var lastIndex:int = line.lastIndexOf("** DEVICE LOCKED BY : ") + "** DEVICE LOCKED BY : ".length;
+					return line.substring(lastIndex, firstIndex).slice(0, -3);
 				}
-				
-				var indexApp: int = 0;
-				for each (var a:String in apps) 
-				{
-					if(a != "") {
-						newArray.insertAt(4, "\t<key>CFAppBundleID" + indexApp +"</key>\n\t<string>"+a+"</string>");
-						indexApp++;
-					}
-				}
-				
-				pListFile.deleteFile();
-				var file:File = resultDir.resolvePath("atsDriver/Settings.plist");
-				var stream:FileStream = new FileStream();
-				stream.open(file, FileMode.WRITE);
-				for each(var strArray:String in newArray) {
-					stream.writeUTFBytes(strArray + "\n");
-				}
-				stream.close();
-			} else {
-				writeTypedLogs("Erreur à la génération du fichier settings.plist", "error")
-				resultDir.deleteDirectory(true);
-				testingProcess.exit();
 			}
 			
-			proc.exit();
+			return null;
 		}
 		
-		public function getBundleIds(id: String):void 
-		{
-			//Getting App list
-			var mobileDeviceProcess:NativeProcess = new NativeProcess();
-			var mobileDeviceProcessInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			mobileDeviceProcessInfo.executable = new File("/usr/bin/env");
-			mobileDeviceProcessInfo.workingDirectory = iosMobileDeviceTools;
-			var args: Vector.<String> = new <String>["./mobiledevice", "list_apps", "-u", id];
-			mobileDeviceProcessInfo.arguments = args;
-			mobileDeviceProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onGettingBundlesOutput, false, 0, true);
-			mobileDeviceProcess.start(mobileDeviceProcessInfo);
-		}
-		
-		public override function start():void{
-			if(procInfo != null){
+		public override function start():void {
+			if (procInfo != null) {
 				//Getting App list
 				var mobileDeviceProcess:NativeProcess = new NativeProcess();
 				var mobileDeviceProcessInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 				mobileDeviceProcessInfo.executable = new File("/usr/bin/env");
 				mobileDeviceProcessInfo.workingDirectory = iosMobileDeviceTools;
-				var args: Vector.<String> = new <String>["./mobiledevice", "uninstall_app", "-u", id, "com.atsios.xctrunner"];
+				var args:Vector.<String> = new <String>["./mobiledevice", "uninstall_app", "-u", id, "com.atsios.xctrunner"];
 				mobileDeviceProcessInfo.arguments = args;
 				mobileDeviceProcess.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
 				mobileDeviceProcess.start(mobileDeviceProcessInfo);
 			}
 		}
 		
-		override public function dispose():Boolean
-		{
+		public function getBundleIds(id:String):void {
+			//Getting App list
+			var mobileDeviceProcess:NativeProcess = new NativeProcess();
+			var mobileDeviceProcessInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			mobileDeviceProcessInfo.executable = new File("/usr/bin/env");
+			mobileDeviceProcessInfo.workingDirectory = iosMobileDeviceTools;
+			var args:Vector.<String> = new <String>["./mobiledevice", "list_apps", "-u", id];
+			mobileDeviceProcessInfo.arguments = args;
+			mobileDeviceProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onGettingBundlesOutput, false, 0, true);
+			mobileDeviceProcess.start(mobileDeviceProcessInfo);
+		}
+		
+		private function writeLogs(data:String):void {
+			if (data.length > 0) {
+				logStream.open(logFile, FileMode.APPEND);
+				logStream.writeUTFBytes("[" + dateFormatter.format(new Date()) + "]" + data);
+				logStream.close();
+			}
+		}
+		
+		private function writeTypedLogs(data:String, type:String):void {
+			if (data.length > 0) {
+				logStream.open(logFile, FileMode.APPEND);
+				logStream.writeUTFBytes("[" + dateFormatter.format(new Date()) + "][" + type.toUpperCase() + "] " + data + "\n");
+				logStream.close();
+			}
+		}
+		
+		override public function dispose():Boolean {
 			if (testingProcess != null && testingProcess.running) {
 				testingProcess.closeInput();
 				testingProcess.exit();
@@ -386,18 +345,51 @@ package com.ats.device.running
 				removeReceivers();
 			}
 		}
-
-		private function getDeviceOwner(data:String):String {
-			var array:Array = data.split("\n");
-			for each(var line:String in array) {
-				if (line.indexOf("** DEVICE LOCKED BY : ") > -1) {
-					var firstIndex:int = line.length;
-					var lastIndex:int = line.lastIndexOf("** DEVICE LOCKED BY : ") + "** DEVICE LOCKED BY : ".length;
-					return line.substring(lastIndex, firstIndex).slice(0, -3);
+		
+		protected function onGettingBundlesOutput(ev:ProgressEvent):void {
+			var proc:NativeProcess = ev.currentTarget as NativeProcess;
+			var apps:Array = proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable).split("\n");
+			var pListFile:File = resultDir.resolvePath("atsDriver/Settings.plist");
+			if (pListFile.exists) {
+				var fileStreamMobileDevice:FileStream = new FileStream();
+				fileStreamMobileDevice.open(pListFile, FileMode.READ);
+				var pListContent:String = fileStreamMobileDevice.readUTFBytes(fileStreamMobileDevice.bytesAvailable);
+				var arrayStringPList:Array = pListContent.split("\n");
+				fileStreamMobileDevice.close();
+				
+				var newArray:Array = [];
+				var removeNextIndex:Boolean = false;
+				for each(var str:String in arrayStringPList) {
+					if (str.indexOf("CFAppBundleID") == -1 && !removeNextIndex) {
+						newArray.push(str);
+					}
+					
+					removeNextIndex = str.indexOf("CFAppBundleID") > -1;
 				}
+				
+				var indexApp:int = 0;
+				for each (var a:String in apps) {
+					if (a != "") {
+						newArray.insertAt(4, "\t<key>CFAppBundleID" + indexApp + "</key>\n\t<string>" + a + "</string>");
+						indexApp++;
+					}
+				}
+				
+				pListFile.deleteFile();
+				var file:File = resultDir.resolvePath("atsDriver/Settings.plist");
+				var stream:FileStream = new FileStream();
+				stream.open(file, FileMode.WRITE);
+				for each(var strArray:String in newArray) {
+					stream.writeUTFBytes(strArray + "\n");
+				}
+				stream.close();
+			} else {
+				writeTypedLogs("Erreur à la génération du fichier settings.plist", "error")
+				resultDir.deleteDirectory(true);
+				testingProcess.exit();
 			}
-
-			return null;
+			
+			proc.exit();
 		}
 	}
 }
