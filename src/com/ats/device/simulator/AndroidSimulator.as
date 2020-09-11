@@ -1,4 +1,7 @@
 package com.ats.device.simulator {
+import com.adobe.air.filesystem.FileMonitor;
+import com.ats.helpers.Settings;
+
 import flash.desktop.NativeProcess;
 import flash.desktop.NativeProcessStartupInfo;
 import flash.events.NativeProcessExitEvent;
@@ -36,7 +39,13 @@ public class AndroidSimulator extends Simulator {
     }
 
     override public function startSim():void {
-        var file:File = File.userDirectory.resolvePath("AppData/Local/Android/Sdk");
+        var file:File
+        if (Settings.isMacOs) {
+            file = File.userDirectory.resolvePath("Library/Android/sdk")
+        } else {
+            file = File.userDirectory.resolvePath("AppData/Local/Android/Sdk")
+        }
+
         file = file.resolvePath("emulator").resolvePath("emulator" + execExtension)
 
         if (!file.exists) {
