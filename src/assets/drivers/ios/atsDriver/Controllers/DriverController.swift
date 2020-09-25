@@ -67,7 +67,8 @@ final class DriverController {
         let status = "0"
         let screenCapturePort = udpPort
         let systemName = model + " - " + osVersion
-        let systemProperties: [String]
+        let systemProperties = PropertyController.PropertyActionName.allCases.map { $0.rawValue }
+        let systemButtons = ButtonController.ButtonAction.allCases.map { $0.rawValue }
         let deviceWidth: Double
         let deviceHeight: Double
         let channelWidth: Double
@@ -77,7 +78,7 @@ final class DriverController {
     
     private func start() -> DriverStartOutput {
         continueExecution = true
-        
+             
         // Application size
         let screenScale = UIScreen.main.scale
         let screenNativeBounds = XCUIScreen.main.screenshot().image.size
@@ -93,7 +94,7 @@ final class DriverController {
         deviceWidth = Double(channelWidth / ratio)
         deviceHeight = Double(channelHeight / ratio)
         
-        return DriverStartOutput(systemProperties: PropertyController.PropertyActionName.allCases.map { $0.rawValue }, deviceWidth: deviceWidth, deviceHeight: deviceHeight, channelWidth: channelWidth, channelHeight: channelHeight)
+        return DriverStartOutput(deviceWidth: deviceWidth, deviceHeight: deviceHeight, channelWidth: channelWidth, channelHeight: channelHeight)
     }
     
     private func stop() -> Content {

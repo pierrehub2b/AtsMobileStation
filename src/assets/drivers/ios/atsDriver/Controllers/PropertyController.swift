@@ -15,7 +15,15 @@ extension PropertyController: Routeable {
     }
     
     func handleParameters(_ parameters: [String], token: String?) throws -> Any {
-        guard let propertyName = parameters.first, let property = PropertyActionName(rawValue: propertyName), let propertyValue = parameters.last else {
+        guard var propertyName = parameters.first else {
+            throw Router.RouterError.missingParameters
+        }
+        
+        if propertyName.starts(with: "sys-") {
+            propertyName = propertyName.replacingOccurrences(of: "sys-", with: "")
+        }
+        
+        guard let property = PropertyActionName(rawValue: propertyName), let propertyValue = parameters.last else {
             throw Router.RouterError.missingParameters
         }
         

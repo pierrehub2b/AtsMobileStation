@@ -38,42 +38,30 @@ final class ButtonController {
         switch action {
         case .home:
             return XCUIDevice.Button.home
-        default:
+        #if targetEnvironment(simulator)
+        case .soundDown, .soundUp:
             return nil
+        #else
+        case .soundDown:
+            return XCUIDevice.Button.soundDown
+        case .soundUp:
+            return XCUIDevice.Button.soundUp
+        #endif
         }
     }
     
-    private enum ButtonAction: String {
+    enum ButtonAction: String, CaseIterable {
         case home
-        case soundup
-        case sounddown
-        /* case silentswitch
-        case lock
-        case enter
-        case `return`
-        case orientation */
+        case soundUp
+        case soundDown
     }
     
     private func pressButton(_ action:ButtonAction) -> Router.Output {
         if let deviceButton = transformAction(action) {
             XCUIDevice.shared.press(deviceButton)
-        }
-        
-        return Router.Output(message: "press home button")
-    }
-    
-    /* private func pressHomeButton() -> Router.Output {
-        XCUIDevice.shared.press(.home)
-        return Router.Output(message: "press home button")
-    }
-    
-    private func switchOrientation() -> Router.Output {
-        if (XCUIDevice.shared.orientation == .landscapeLeft) {
-            XCUIDevice.shared.orientation = .portrait
-            return Router.Output(message: "orientation to portrait mode")
+            return Router.Output(message: "press \(action.rawValue) button")
         } else {
-            XCUIDevice.shared.orientation = .landscapeLeft
-            return Router.Output(message: "orientation to landscape mode")
+            return Router.Output(message: "press \(action.rawValue) button")
         }
-    } */
+    }
 }
