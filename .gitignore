@@ -107,6 +107,14 @@ temp/
 [Oo]bj/
 [Bb]in/
 
+# Xcode
+xcuserdata/
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
+
 # Monaserver
 src/assets/tools/monaserver/libluajit-5.1.2.dylib
 src/assets/tools/monaserver/MonaBase/
