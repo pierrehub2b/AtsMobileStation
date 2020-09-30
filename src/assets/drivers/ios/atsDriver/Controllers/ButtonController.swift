@@ -19,16 +19,6 @@ extension ButtonController: Routeable {
         }
         
         return pressButton(action)
-        
-        
-        /* switch action {
-        case .home:
-            return pressHomeButton()
-        case .orientation:
-            return switchOrientation()
-        default:
-            return Router.Output(message: "unknow button \(action.rawValue)", status: "-42")
-        } */
     }
 }
 
@@ -38,15 +28,8 @@ final class ButtonController {
         switch action {
         case .home:
             return XCUIDevice.Button.home
-        #if targetEnvironment(simulator)
         case .soundDown, .soundUp:
             return nil
-        #else
-        case .soundDown:
-            return XCUIDevice.Button.soundDown
-        case .soundUp:
-            return XCUIDevice.Button.soundUp
-        #endif
         }
     }
     
