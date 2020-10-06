@@ -36,21 +36,18 @@ package com.ats.device.running
 		private var logStream:FileStream = new FileStream();
 		private var dateFormatter:DateTimeFormatter = new DateTimeFormatter("en-US");
 		
-		private var testingProcess:NativeProcess;
-		private var procInfo:NativeProcessStartupInfo;
+		private var driverProcess:NativeProcess;
 		
 		private static const iosDriverProjectFolder:File = File.applicationDirectory.resolvePath("assets/drivers/ios");
-		private static const xcodeBuildExec:File = new File("/usr/bin/env");
 		private static const iosMobileDeviceTools:File = File.applicationDirectory.resolvePath("assets/tools/ios");
 		
-		private var resultDir: File;
-
+		private var driverDirectory:File;
+		
 		override public function get modelName():String {
 			return simulator ? "Simulator " + _modelName : _modelName;
 		}
-
-		public function IosDevice(id:String, name:String, osVersion:String, simulator:Boolean, ip:String)
-		{
+		
+		public function IosDevice(id:String, name:String, osVersion:String, simulator:Boolean, ip:String) {
 			this.id = id;
 			this.ip = ip;
 			this.osVersion = osVersion
@@ -58,21 +55,20 @@ package com.ats.device.running
 			this.manufacturer = "Apple";
 			this.simulator = simulator;
 			
-			//---------------------------------------------------------------------------------------
-			
-			dateFormatter.setDateTimePattern("yyyy-MM-dd hh:mm:ss");
-			logFile = Settings.logsFolder.resolvePath("ios_" + id + "_" + new Date().time + ".log");
-			
-			logStream.open(logFile, FileMode.WRITE);
-			logStream.writeUTFBytes("Start iOS process");
-			logStream.writeUTFBytes("Getting settings configuration for device:" + id);
-			logStream.close();
+			this.driverDirectory =  File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id)
 			
 			//---------------------------------------------------------------------------------------
 			
-			var fileStream:FileStream = new FileStream();
-			var file:File = Settings.devicesSettingsFile;
-
+			dateFormatter.setDateTimePattern("yyyy-MM-dd hh:mm:ss")
+			logFile = Settings.logsFolder.resolvePath("ios_" + id + "_" + new Date().time + ".log")
+			
+			logStream.open(logFile, FileMode.WRITE)
+			logStream.writeUTFBytes("Start iOS process")
+			logStream.writeUTFBytes("Getting settings configuration for device:" + id)
+			logStream.close()
+			
+			//---------------------------------------------------------------------------------------
+			
 			var deviceSettingsHelper:DeviceSettingsHelper = DeviceSettingsHelper.shared;
 			var deviceSettings:DeviceSettings = deviceSettingsHelper.getSettingsForDevice(id);
 			if (deviceSettings == null) {
@@ -92,89 +88,145 @@ package com.ats.device.running
 			} else {
 				settingsPort = deviceSettings.port.toString();
 			}
-			
+		}
+		
+		override public function dispose():Boolean {
+			if (driverProcess != null && driverProcess.running) {
+				driverProcess.closeInput();
+				driverProcess.exit();
+				return true;
+			}
+			return false;
+		}
+		
+		override public function start():void {
 			if(!FlexGlobals.topLevelApplication.getTeamId()  && !simulator) {
 				status = Device.FAIL;
 				errorMessage = " - No development team id set";
 				return;
 			}
 			
+			iosDriverProjectFolder.copyTo(driverDirectory, true);
+			
 			installing();
-			writeTypedLogs("installing the driver", "info");
-			testingProcess = new NativeProcess();
-			testingProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onTestingOutput, false, 0, true);
-			testingProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError, false, 0, true);
-			testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
-			writeTypedLogs("Copy files into temp directory", "info");
-			resultDir = File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id);
-			var alreadyCopied:Boolean = false;//resultDir.exists;
-			if (!alreadyCopied) {
-				iosDriverProjectFolder.copyTo(resultDir, true);
-			}
-			
-			writeTypedLogs("Managing plist file", "info");
-			var index:int = 0;
-			file = resultDir.resolvePath("atsDriver/Settings.plist");
-			if(file.exists && settingsPort != "") {
-				fileStream = new FileStream();
-				fileStream.open(file, FileMode.READ);
-				var content:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
-				var arrayString:Array = content.split("\n");
-				
-				for each(var lineSettings:String in arrayString) {
-					if(lineSettings.indexOf("CFCustomPort") > -1) {
-						if (automaticPort) {
-							arrayString[index+1] = "\t<string></string>";
-						} else {
-							arrayString[index+1] = "\t<string>" + settingsPort + "</string>";
-						}
-						break;
-					}
-					index++;
-				}				
-				fileStream.close();
-				
-				var writeFileStream:FileStream = new FileStream();
-				writeFileStream.open(file, FileMode.UPDATE);
-				for each(var str:String in arrayString) {
-					writeFileStream.writeUTFBytes(str + "\n");
-				}
-				writeFileStream.close();
-			}
-			
-			procInfo = new NativeProcessStartupInfo();
-			procInfo.executable = xcodeBuildExec;
-			procInfo.workingDirectory = resultDir;
-			
-			var args: Vector.<String> = new <String>["xcodebuild", "-scheme", "atsios", "-destination", "id=" + id];
-			if (!simulator) {
-				args.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + FlexGlobals.topLevelApplication.getTeamId());
-			}
-			
-			if (alreadyCopied) {
-				args.push("test-without-building");
-				writeTypedLogs("test without building on device with id:" + id, "info");
-			} else {
-				args.push("test");
-				writeTypedLogs("build and test on device with id:" + id, "info");
-			}
-			
-			getBundleIds(id);
-			procInfo.arguments = args;
+			uninstallDriver()
 		}
 		
-		protected function addLineToLogs(log: String):void {
-			var file:File = resultDir.resolvePath("logs.txt");
-			var fileStream:FileStream = new FileStream();
-			if(file.exists) {
-				fileStream.open(file, FileMode.APPEND);
-				fileStream.writeUTFBytes(log);
-			} else {
-				fileStream.open(file, FileMode.WRITE);
-				fileStream.writeUTFBytes(log);
+		private function uninstallDriver():void {
+			var processStartupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
+			processStartupInfo.executable = new File("/usr/bin/env")
+			processStartupInfo.workingDirectory = iosMobileDeviceTools
+			processStartupInfo.arguments = new <String>["./mobiledevice", "uninstall_app", "-u", id, "com.atsios.xctrunner"]
+			
+			var process:NativeProcess = new NativeProcess()
+			process.addEventListener(NativeProcessExitEvent.EXIT, onUninstallDriverExit)
+			process.start(processStartupInfo)
+		}
+		
+		private function onUninstallDriverExit(event:NativeProcessExitEvent):void {
+			var process:NativeProcess = event.currentTarget as NativeProcess
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onUninstallDriverExit)
+			
+			fetchBundleIds()
+		}
+		
+		//------------------------------------------------------------------
+		
+		private var bundlesData:String
+		private function fetchBundleIds():void {
+			bundlesData = ""
+			
+			var processStartupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
+			processStartupInfo.executable = new File("/usr/bin/env")
+			processStartupInfo.workingDirectory = iosMobileDeviceTools
+			processStartupInfo.arguments = new <String>["./mobiledevice", "list_apps", "-u", id]
+			
+			var process:NativeProcess = new NativeProcess()
+			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onGettingBundlesOutput, false, 0, true)
+			process.addEventListener(NativeProcessExitEvent.EXIT, onGettingBundlesExit, false, 0, true)
+			process.start(processStartupInfo)
+		}
+		
+		private function onGettingBundlesOutput(event:ProgressEvent):void {
+			var process:NativeProcess = event.currentTarget as NativeProcess
+			bundlesData += process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable)
+		}
+		
+		private function onGettingBundlesExit(event:NativeProcessExitEvent):void {
+			var process:NativeProcess = event.currentTarget as NativeProcess
+			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onGettingBundlesOutput)
+			process.removeEventListener(NativeProcessExitEvent.EXIT, onGettingBundlesExit)
+			
+			var apps:Array = bundlesData.split("\n")
+			apps.pop()
+			
+			var json:Object = {
+				"apps": apps,
+				"customPort": automaticPort ? null : settingsPort
 			}
 			
-			fileStream.close();
+			writeLogs("Managing JSON file", "info");
+			var settingsFile:File = driverDirectory.resolvePath("atsDriver/settings.json");
+			var fileStream:FileStream = new FileStream()
+			fileStream.open(settingsFile, FileMode.WRITE)
+			fileStream.writeUTFBytes(JSON.stringify(json))
+			fileStream.close()
+			
+			startDriver()
+		}
+		
+		// -------------------------
+		
+		private function startDriver():void {
+			writeLogs("build and test on device with id:" + id, "info");
+			writeLogs("installing the driver", "info");
+			
+			var processStartupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			processStartupInfo.executable = new File("/usr/bin/xcodebuild")
+			processStartupInfo.workingDirectory = driverDirectory;
+			
+			var arguments: Vector.<String> = new <String>["test", "-scheme", "atsios", "-destination", "id=" + id];
+			if (!simulator) {
+				arguments.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + FlexGlobals.topLevelApplication.getTeamId());
+			}
+			
+			processStartupInfo.arguments = arguments
+			
+			driverProcess = new NativeProcess()
+			driverProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onDriverOutput, false, 0, true)
+			driverProcess.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onDriverError, false, 0, true)
+			driverProcess.addEventListener(NativeProcessExitEvent.EXIT, onDriverExit, false, 0, true)
+			driverProcess.start(processStartupInfo)
+		}
+		
+		private function onDriverOutput(event:ProgressEvent):void {
+			const data:String = driverProcess.standardOutput.readUTFBytes(driverProcess.standardOutput.bytesAvailable);
+
+			if (data.indexOf("** WIFI NOT CONNECTED **") > -1) {
+				errorMessage = " - WIFI not connected !";
+				dispose()
+			} else if (data.indexOf("** DEVICE LOCKED BY : ") > -1) {
+				this.locked = getDeviceOwner(data);
+			} else if (data.indexOf("** DEVICE UNLOCKED **") > -1) {
+				this.locked = null;
+			} else if (data.indexOf("** Port unavailable **") > -1) {
+				errorMessage = " - Unavailable port !";
+				dispose()
+			} else if(data.indexOf(ATSDRIVER_DRIVER_HOST) > -1) {
+				const find:Array = startInfo.exec(data);
+				ip = find[1];
+				port = find[2];
+				
+				if (simulator) {
+					var devicePortSettings:DevicePortSettings = DevicePortSettingsHelper.shared.getPortSetting(id);
+					devicePortSettings.port = parseInt(port);
+					DevicePortSettingsHelper.shared.addSettings(devicePortSettings);
+				}
+				
+				started();
+			} else {
+				writeLogs(data);
+			}
 		}
 		
 		private static function getDeviceOwner(data:String):String {
@@ -190,204 +242,87 @@ package com.ats.device.running
 			return null;
 		}
 		
-		public override function start():void {
-			if (procInfo != null) {
-				//Getting App list
-				var mobileDeviceProcess:NativeProcess = new NativeProcess();
-				var mobileDeviceProcessInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-				mobileDeviceProcessInfo.executable = new File("/usr/bin/env");
-				mobileDeviceProcessInfo.workingDirectory = iosMobileDeviceTools;
-				var args:Vector.<String> = new <String>["./mobiledevice", "uninstall_app", "-u", id, "com.atsios.xctrunner"];
-				mobileDeviceProcessInfo.arguments = args;
-				mobileDeviceProcess.addEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
-				mobileDeviceProcess.start(mobileDeviceProcessInfo);
-			}
-		}
-		
-		public function getBundleIds(id:String):void {
-			//Getting App list
-			var mobileDeviceProcess:NativeProcess = new NativeProcess();
-			var mobileDeviceProcessInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			mobileDeviceProcessInfo.executable = new File("/usr/bin/env");
-			mobileDeviceProcessInfo.workingDirectory = iosMobileDeviceTools;
-			var args:Vector.<String> = new <String>["./mobiledevice", "list_apps", "-u", id];
-			mobileDeviceProcessInfo.arguments = args;
-			mobileDeviceProcess.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onGettingBundlesOutput, false, 0, true);
-			mobileDeviceProcess.start(mobileDeviceProcessInfo);
-		}
-		
-		private function writeLogs(data:String):void {
-			if (data.length > 0) {
-				logStream.open(logFile, FileMode.APPEND);
-				logStream.writeUTFBytes("[" + dateFormatter.format(new Date()) + "]" + data);
-				logStream.close();
-			}
-		}
-		
-		private function writeTypedLogs(data:String, type:String):void {
-			if (data.length > 0) {
-				logStream.open(logFile, FileMode.APPEND);
-				logStream.writeUTFBytes("[" + dateFormatter.format(new Date()) + "][" + type.toUpperCase() + "] " + data + "\n");
-				logStream.close();
-			}
-		}
-		
-		override public function dispose():Boolean {
-			if (testingProcess != null && testingProcess.running) {
-				testingProcess.closeInput();
-				testingProcess.exit();
-				return true;
-			}
-			return false;
-		}
-		
-		protected function onUninstallExit(ev:NativeProcessExitEvent):void
-		{
-			ev.target.removeEventListener(NativeProcessExitEvent.EXIT, onUninstallExit);
-			testingProcess.start(procInfo);
-		}
-		
-		protected function onTestingExit(ev:NativeProcessExitEvent):void
-		{
-			removeReceivers();
-			writeTypedLogs("test exit", "error");
-			if (errorMessage == "" || status == Simulator.SHUTDOWN) {
-				dispatchEvent(new Event(STOPPED_EVENT));
-			} else {
-				failed();
-			}
-		}
-		
-		protected function onTestingOutput(event:ProgressEvent):void
-		{
-			const data:String = testingProcess.standardOutput.readUTFBytes(testingProcess.standardOutput.bytesAvailable);
-			trace(data)
-			
-			if (data.indexOf("** WIFI NOT CONNECTED **") > -1) {
-				errorMessage = " - WIFI not connected !";
-				removeReceivers();
-				testingProcess.exit();
-			} else if (data.indexOf("** DEVICE LOCKED BY : ") > -1) {
-				this.locked = getDeviceOwner(data);
-			} else if (data.indexOf("** DEVICE UNLOCKED **") > -1) {
-				this.locked = null;
-			} else if (data.indexOf("** Port unavailable **") > -1) {
-				errorMessage = " - Unavailable port !";
-				removeReceivers();
-				testingProcess.exit();
-			} else if(data.indexOf(ATSDRIVER_DRIVER_HOST) > -1) {
-				const find:Array = startInfo.exec(data);
-				ip = find[1];
-				port = find[2];
-				removeReceivers();
-				if (simulator) {
-					var devicePortSettings:DevicePortSettings = DevicePortSettingsHelper.shared.getPortSetting(id);
-					devicePortSettings.port = parseInt(port);
-					DevicePortSettingsHelper.shared.addSettings(devicePortSettings);
-				}
-				
-				removeReceivers();
-				testingProcess.addEventListener(NativeProcessExitEvent.EXIT, onTestingExit, false, 0, true);
-				started();
-			} else {
-				writeLogs(data);
-			}
-		}
-		
-		protected function removeReceivers():void {
-			testingProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onTestingError);
-			testingProcess.removeEventListener(NativeProcessExitEvent.EXIT, onTestingExit);
-		}
-		
-		protected function onTestingError(event:ProgressEvent):void
-		{
-			const data:String = testingProcess.standardError.readUTFBytes(testingProcess.standardError.bytesAvailable);
+		private  function onDriverError(event:ProgressEvent):void {
+			const data:String = driverProcess.standardError.readUTFBytes(driverProcess.standardError.bytesAvailable);
 			addLineToLogs(data);
-			
+
 			if (noProvisionningProfileError.test(data)) {
 				error = "No provisioning profiles"
 				errorMessage = "More informations in our Github page";
-				testingProcess.exit();
-				removeReceivers();
+				dispose()
 				return;
 			}
 			
 			if (noCertificatesError.test(data)) {
 				error = "Certificate error"
 				errorMessage = "More informations in our Github page";
-				testingProcess.exit();
-				removeReceivers();
+				dispose()
 				return;
 			}
 			
 			if (startInfoLocked.test(data)) {
 				error = "Locked with passcode"
 				errorMessage = "Please disable code and auto-lock in device settings";
-				testingProcess.exit();
-				removeReceivers();
+				dispose()
 				return;
 			}
 			
 			if (noXcodeInstalled.test(data)) {
 				error = "No XCode founded on this computer"
 				errorMessage = "Go to AppStore for download it";
-				testingProcess.exit();
-				removeReceivers();
+				dispose()
 				return;
 			}
 			
 			if (wrongVersionofxCode.test(data)) {
 				error = "Your device need a more recent version of Xcode"
 				errorMessage = "Go to AppStore for download it";
-				testingProcess.exit();
-				removeReceivers();
+				dispose()
 			}
 		}
 		
-		protected function onGettingBundlesOutput(ev:ProgressEvent):void {
-			var proc:NativeProcess = ev.currentTarget as NativeProcess;
-			var apps:Array = proc.standardOutput.readUTFBytes(proc.standardOutput.bytesAvailable).split("\n");
-			var pListFile:File = resultDir.resolvePath("atsDriver/Settings.plist");
-			if (pListFile.exists) {
-				var fileStreamMobileDevice:FileStream = new FileStream();
-				fileStreamMobileDevice.open(pListFile, FileMode.READ);
-				var pListContent:String = fileStreamMobileDevice.readUTFBytes(fileStreamMobileDevice.bytesAvailable);
-				var arrayStringPList:Array = pListContent.split("\n");
-				fileStreamMobileDevice.close();
-				
-				var newArray:Array = [];
-				var removeNextIndex:Boolean = false;
-				for each(var str:String in arrayStringPList) {
-					if (str.indexOf("CFAppBundleID") == -1 && !removeNextIndex) {
-						newArray.push(str);
-					}
-					
-					removeNextIndex = str.indexOf("CFAppBundleID") > -1;
-				}
-				
-				var indexApp:int = 0;
-				for each (var a:String in apps) {
-					if (a != "") {
-						newArray.insertAt(4, "\t<key>CFAppBundleID" + indexApp + "</key>\n\t<string>" + a + "</string>");
-						indexApp++;
-					}
-				}
-				
-				pListFile.deleteFile();
-				var file:File = resultDir.resolvePath("atsDriver/Settings.plist");
-				var stream:FileStream = new FileStream();
-				stream.open(file, FileMode.WRITE);
-				for each(var strArray:String in newArray) {
-					stream.writeUTFBytes(strArray + "\n");
-				}
-				stream.close();
+		protected function onDriverExit(ev:NativeProcessExitEvent):void {
+			driverProcess.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, onDriverError);
+			driverProcess.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onDriverError);
+			driverProcess.removeEventListener(NativeProcessExitEvent.EXIT, onDriverExit);
+			
+			writeLogs("test exit", "error");
+			if (status == Simulator.SHUTDOWN) {
+				dispatchEvent(new Event(STOPPED_EVENT));
 			} else {
-				writeTypedLogs("Erreur à la génération du fichier settings.plist", "error")
-				resultDir.deleteDirectory(true);
-				testingProcess.exit();
+				failed();
+			}
+		}
+		
+		
+		// --------------
+		
+		private function writeLogs(data:String, type:String = null):void {
+			if (!data) { return }
+			
+			var logString:String = "[" + dateFormatter.format(new Date()) + "]"
+			if (type) {
+				logString += "[" + type.toUpperCase() + "]"
+			}
+			logString += " " + data
+			
+			logStream.open(logFile, FileMode.APPEND);
+			logStream.writeUTFBytes(logString);
+			logStream.close();
+		}
+		
+		private function addLineToLogs(log: String):void {
+			var file:File = driverDirectory.resolvePath("logs.txt");
+			var fileStream:FileStream = new FileStream();
+			if(file.exists) {
+				fileStream.open(file, FileMode.APPEND);
+				fileStream.writeUTFBytes(log);
+			} else {
+				fileStream.open(file, FileMode.WRITE);
+				fileStream.writeUTFBytes(log);
 			}
 			
-			proc.exit();
+			fileStream.close();
 		}
 	}
 }

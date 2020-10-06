@@ -25,7 +25,6 @@ package com.ats.managers {
 	import net.tautausan.plist.Plist10;
 	
 	public class RunningDevicesManager extends EventDispatcher {
-		// private const mobileDevice:File = File.applicationDirectory.resolvePath("assets/tools/ios/mobiledevice");
 		// private const systemProfiler:File = new File("/usr/sbin/system_profiler");
 		private const envFile:File = new File("/usr/bin/env");
 		
@@ -225,12 +224,10 @@ package com.ats.managers {
 			collection.refresh();
 		}
 		
-		protected function onChmodExit(ev:NativeProcessExitEvent):void
-		{
+		protected function onChmodExit(ev:NativeProcessExitEvent):void {
 			ev.target.removeEventListener(NativeProcessExitEvent.EXIT, onChmodExit);
 			ev.target.closeInput();
 			
-			// two types of devices to find, ios loop need more resources to execute
 			adbLoop = TweenLite.delayedCall(5, launchAdbProcess);
 			iosLoop = TweenLite.delayedCall(5, launchIosProcess);
 		}

@@ -15,23 +15,21 @@ package com.ats.device.simulator
 	import com.ats.device.Device;
 	import com.ats.device.running.IosDevice;
 	
-	public class IosSimulator extends Simulator
-	{
+	public class IosSimulator extends Simulator {
+		
 		private const xcrunExec:File = new File("/usr/bin/xcrun");
 		private var runningDevice:IosDevice;
 		private var process:NativeProcess;
 		private var procInfo: NativeProcessStartupInfo;
 		
-		public function IosSimulator(id:String, name:String, version:String, booted:Boolean)
-		{
+		public function IosSimulator(id:String, name:String, version:String, booted:Boolean) {
 			super(id);
 			this.modelName = StringUtil.trim(name);
 			this.osVersion = version;
 			this.started = booted;
 		}
 		
-		override public function startSim():void
-		{
+		override public function startSim():void {
 			procInfo = new NativeProcessStartupInfo();
 			procInfo.executable = xcrunExec;
 			procInfo.workingDirectory = File.userDirectory;
@@ -45,20 +43,19 @@ package com.ats.device.simulator
 			process.start(procInfo);
 		}
 		
-		protected function onBootData(ev:ProgressEvent):void{
+		protected function onBootData(ev:ProgressEvent):void {
 			process = ev.currentTarget as NativeProcess;
 			var error:String = process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable);
 			trace("boot data -> " + error);
 		}
 		
-		protected function onBootError(ev:ProgressEvent):void{
+		protected function onBootError(ev:ProgressEvent):void {
 			process = ev.currentTarget as NativeProcess;
 			var error:String = process.standardError.readUTFBytes(process.standardError.bytesAvailable);
 			trace("boot error -> " + error);
 		}
 		
-		protected function onBootExit(ev:NativeProcessExitEvent):void{
-			
+		protected function onBootExit(ev:NativeProcessExitEvent):void {
 			process = ev.currentTarget as NativeProcess;
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onBootExit);
 			process.closeInput();

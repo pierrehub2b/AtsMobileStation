@@ -15,12 +15,8 @@ extension PropertyController: Routeable {
     }
     
     func handleParameters(_ parameters: [String], token: String?) throws -> Any {
-        guard var propertyName = parameters.first else {
+        guard let propertyName = parameters.first else {
             throw Router.RouterError.missingParameters
-        }
-        
-        if propertyName.starts(with: "sys-") {
-            propertyName = propertyName.replacingOccurrences(of: "sys-", with: "")
         }
         
         guard let property = PropertyActionName(rawValue: propertyName), let propertyValue = parameters.last else {
@@ -59,7 +55,7 @@ final class PropertyController {
     }
     
     private static func setAirplaneModeEnabled(_ value:String) -> Router.Output {
-        guard let _ = Bool(value) else {
+        guard let _ = booleanFromString(value) else {
             return Router.Output(message: "bad value")
         }
         
@@ -67,7 +63,7 @@ final class PropertyController {
     }
     
     private static func setWifiEnabled(_ value:String) -> Router.Output {
-        guard let _ = Bool(value) else {
+        guard let _ = booleanFromString(value) else {
             return Router.Output(message: "bad value")
         }
         
@@ -87,7 +83,7 @@ final class PropertyController {
     }
     
     private static func setCellularDataEnabled(_ value:String) -> Router.Output {
-        guard let enabled = Bool(value) else {
+        guard let enabled = booleanFromString(value) else {
             return Router.Output(message: "bad value")
         }
         
@@ -111,25 +107,24 @@ final class PropertyController {
     }
     
 
-    
     private static func setBluetoothModeEnabled(_ value:String) -> Router.Output {
-        guard let enabled = Bool(value) else {
+        guard let enabled = booleanFromString(value) else {
             return Router.Output(message: "bad value")
         }
         
         #if targetEnvironment(simulator)
-        
         return Router.Output(message: "property not available")
-        
         #else
         
         settingsApp.launch()
         settingsApp.cells.allElementsBoundByIndex[3].tap()
         
         do {
-            try enableSwitch(enabled, atIndex: 0)
+            try enableSwitch(enabled, atIndex: 1)
+            app.launch()
             return Router.Output(message: "property set")
         } catch {
+            app.launch()
             return Router.Output(message: "property set")
         }
         
@@ -200,19 +195,37 @@ final class PropertyController {
     }
     
     private static func enableSwitch(_ enabled:Bool, atIndex index:Int) throws {
-        let allSwitches = settingsApp.switches.allElementsBoundByIndex
-        guard !allSwitches.isEmpty else {
+        // let allSwitches = settingsApp.switches.count
+        print(settingsApp.description)
+        // print(allSwitches)
+        
+        // for index in 0...allSwitches - 1 {
+            // print("AAAAAAAAAAAAAAAAAH")
+            // print(settingsApp.switches.element(boundBy: index).debugDescription)
+        // }
+        
+                
+        /*guard !allSwitches.isEmpty else {
             throw EnableSwitchError.elementNotFound
-        }
+        }*/
         
-        let element = allSwitches[index]
-        
+        let element = settingsApp.switches.element(boundBy: 0)
+        print(element.debugDescription)
+
         guard let elementValue = element.value as? String, let boolValue = Bool(elementValue) else {
             throw EnableSwitchError.badElementValue
         }
         
         if enabled != boolValue {
             element.tap()
+        }
+    }
+    
+    private static func booleanFromString(_ value: String) -> Bool? {
+        switch value.lowercased() {
+        case "1", "on", "true":     return true
+        case "0", "off", "false":   return false
+        default:                    return nil
         }
     }
     
