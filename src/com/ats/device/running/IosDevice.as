@@ -164,7 +164,7 @@ package com.ats.device.running
 			
 			var json:Object = {
 				"apps": apps,
-				"customPort": automaticPort ? null : settingsPort
+				"customPort": automaticPort ? null : parseInt(settingsPort)
 			}
 			
 			writeLogs("Managing JSON file", "info");
@@ -292,13 +292,12 @@ package com.ats.device.running
 			driverProcess.removeEventListener(NativeProcessExitEvent.EXIT, onDriverExit);
 			
 			writeLogs("test exit", "error");
-			if (status == Simulator.SHUTDOWN) {
+			if (status == Simulator.SHUTDOWN  || errorMessage == "") {
 				dispatchEvent(new Event(STOPPED_EVENT));
 			} else {
 				failed();
 			}
 		}
-		
 		
 		// --------------
 		

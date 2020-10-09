@@ -63,7 +63,6 @@
 		047BFA7422F178D800BB2E25 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		047BFA7622F178D800BB2E25 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		047BFA7B22F178D800BB2E25 /* atsDriver.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = atsDriver.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		047BFA7F22F178D800BB2E25 /* atsDriverOld.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = atsDriverOld.swift; sourceTree = "<group>"; };
 		048E4D3C230E7E3C0004B08E /* libSocket.IO-Client-Swift.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libSocket.IO-Client-Swift.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		048E4D3E230E7E3C0004B08E /* libStarscream.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libStarscream.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		048E4D40230E8D7A0004B08E /* libSocket.swift.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libSocket.swift.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -158,7 +157,6 @@
 				923AE15F245F3D7500156ECB /* Models */,
 				923AE14C24571BB600156ECB /* Controllers */,
 				9254C2A124518FF1006DC4FC /* Scripting */,
-				047BFA7F22F178D800BB2E25 /* atsDriverOld.swift */,
 				D81F7E7A252DE7280091A02C /* HTTPServerManager.swift */,
 				D82C1C0D252DF56C007D0313 /* atsDriver.swift */,
 				D82C1C8E252F4A0E007D0313 /* UDPConnect.swift */,

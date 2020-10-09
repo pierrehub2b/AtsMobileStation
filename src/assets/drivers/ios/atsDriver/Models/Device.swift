@@ -51,7 +51,7 @@ final class Device: Encodable {
     let modelName = UIDevice.modelName.replacingOccurrences(of: "Simulator ", with: "")
         
     private(set) var applications: [Application] = []
-    private(set) var screenCapturePort = 0
+    let screenCapturePort = Int.random(in: 32000..<64000)
 
     let systemProperties = Property.allCases.map { $0.rawValue }
     let systemButtons = Button.allCases.map { $0.rawValue }
@@ -85,9 +85,5 @@ final class Device: Encodable {
     
     func setApplications(_ applications: [String]) {
         self.applications = applications.map { Application(label: "CFBundleName", packageName: String($0), version: "", icon: DefaultAppIcon()) }
-    }
-    
-    func setUDPPort(_ port: Int) {
-        self.screenCapturePort = port
     }
 }

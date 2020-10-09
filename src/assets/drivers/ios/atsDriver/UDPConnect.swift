@@ -14,28 +14,24 @@ class UDPConnect {
 
     static let current = UDPConnect()
     
-    var imgView: Data!
-    private let udpPort = Int.random(in: 32000..<64000)
-
+    private var imgView: Data!
+    
     private let udpThread = DispatchQueue(label: "udpQueue" + UUID().uuidString, qos: .userInitiated)
     
     func start() {
-        Device.current.setUDPPort(udpPort)
-        
         udpThread.async {
-            sendLogs(type: logType.INFO, message: "Starting UDP server on port: \(self.udpPort)")
+            sendLogs(type: logType.INFO, message: "Starting UDP server on port: \(Device.current.screenCapturePort)")
             self.udpStart()
         }
     }
     
-    
-    func udpStart(){
+    func udpStart() {
         do {
             var data = Data()
             let socket = try Socket.create(family: .inet, type: .datagram, proto: .udp)
             
             repeat {
-                let currentConnection = try socket.listen(forMessage: &data, on: udpPort)
+                let currentConnection = try socket.listen(forMessage: &data, on: Device.current.screenCapturePort)
                 self.addNewConnection(socket: socket, currentConnection: currentConnection)
             } while true
         } catch let error {
@@ -110,6 +106,4 @@ class UDPConnect {
         }
         return Array(bytePtr)
     }
-    
-    
 }

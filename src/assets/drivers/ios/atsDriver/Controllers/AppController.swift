@@ -43,13 +43,6 @@ final class AppController {
         case `switch`
     }
     
-    private func fetchAppBundleIdentifier(_ parameters: [String]) throws -> String {
-        guard parameters.count > 1 else { throw Router.RouterError.missingParameters }
-        
-        let bundleIdentifier = parameters[1]
-        return bundleIdentifier
-    }
-    
     private struct StartOutput: Content {
         let status: String = "0"
         let label: String

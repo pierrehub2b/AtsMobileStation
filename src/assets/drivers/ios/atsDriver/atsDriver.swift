@@ -47,6 +47,8 @@ class atsDriver: XCTestCase {
         }
         
         Device.current.setApplications(applications)
+        
+        application = XCUIApplication()
     }
 
     override func tearDownWithError() throws {
@@ -58,9 +60,7 @@ class atsDriver: XCTestCase {
 
     func testRunner() throws {
         udpConnection.start()
-        httpServer.startServer(httpPort)
-        
-        while continueExecution { }
+        httpServer.startServer(httpPort)        
     }
     
     func fetchSimulatorApps() throws -> [String] {

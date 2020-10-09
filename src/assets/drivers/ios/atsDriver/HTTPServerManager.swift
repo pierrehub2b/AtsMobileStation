@@ -16,20 +16,21 @@ class HTTPServerManager {
     private let server = HttpServer()
     private var controllers: [Routeable] = []
 
-    private init() {}
-    
     func startServer(_ port: in_port_t?) {
         do {
             let httpPort = try getAvailablePort(port)
             try server.start(httpPort)
             registerRouteControllers()
             
-            sendLogs(type: logType.STATUS, message: "ATSDRIVER_DRIVER_HOST=\(getWiFiAddress()!):\(try server.port())")
+            if let wifiAddress = getWiFiAddress() {
+                sendLogs(type: logType.STATUS, message: "ATSDRIVER_DRIVER_HOST=\(wifiAddress):\(try! server.port())")
+                RunLoop.main.run()
+            } else {
+                sendLogs(type: logType.STATUS, message: "** WIFI NOT CONNECTED **")
+            }
             
-            RunLoop.main.run()
         } catch {
             print("Server start error: \(error)")
-            sendLogs(type: logType.STATUS, message: "** WIFI NOT CONNECTED **")
         }
     }
     
