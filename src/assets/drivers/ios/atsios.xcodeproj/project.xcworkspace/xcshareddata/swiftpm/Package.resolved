@@ -2,15 +2,6 @@
   "object": {
     "pins": [
       {
-        "package": "Ambassador",
-        "repositoryURL": "https://github.com/envoy/Ambassador.git",
-        "state": {
-          "branch": null,
-          "revision": "447cf56f692999153bd261b1775ea4a58f7f7be9",
-          "version": "4.0.5"
-        }
-      },
-      {
         "package": "Socket",
         "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
         "state": {
@@ -20,12 +11,12 @@
         }
       },
       {
-        "package": "Embassy",
-        "repositoryURL": "https://github.com/envoy/Embassy.git",
+        "package": "Swifter",
+        "repositoryURL": "https://github.com/httpswift/swifter.git",
         "state": {
           "branch": null,
-          "revision": "189436100c00efbf5fb2653fe7972a9371db0a91",
-          "version": "4.1.1"
+          "revision": "9483a5d459b45c3ffd059f7b55f9638e268632fd",
+          "version": "1.5.0"
         }
       }
     ]

@@ -106,7 +106,9 @@ package com.ats.device.running
 				return;
 			}
 			
-			iosDriverProjectFolder.copyTo(driverDirectory, true);
+			// if (driverDirectory.modificationDate < iosDriverProjectFolder) {
+				iosDriverProjectFolder.copyTo(driverDirectory, true);
+			// }
 			
 			installing();
 			uninstallDriver()
@@ -178,6 +180,8 @@ package com.ats.device.running
 		// -------------------------
 		
 		private function startDriver():void {
+			trace(new Date() +" START DRIVER")
+			
 			writeLogs("build and test on device with id:" + id, "info");
 			writeLogs("installing the driver", "info");
 			
@@ -222,6 +226,7 @@ package com.ats.device.running
 					devicePortSettings.port = parseInt(port);
 					DevicePortSettingsHelper.shared.addSettings(devicePortSettings);
 				}
+				trace(new Date() +" DRIVER STARTED")
 				
 				started();
 			} else {

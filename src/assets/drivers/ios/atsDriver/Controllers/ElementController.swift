@@ -8,43 +8,31 @@
 import Foundation
 import XCTest
 import CoreGraphics
+import Swifter
 
 extension ElementController: Routeable {
-    var name: String {
-        return "element"
-    }
     
-    func handleParameters(_ parameters: [String], token: String?) throws -> Any {
-        guard parameters.count > 1 else {
-            throw Router.RouterError.missingParameters
+    var name: String { return "element" }
+    
+    func handleRoutes(_ request: HttpRequest) -> HttpResponse {
+        guard let bodyString = String(bytes: request.body, encoding: .utf8) else {
+            return .internalServerError
         }
         
-        let actionParameter = parameters[1]
-        guard let action = ElementAction(rawValue: actionParameter) else {
-            throw Router.RouterError.missingParameters
+        var bodyParameters: [String] = bodyString.components(separatedBy: "\n")
+        bodyParameters.removeFirst()
+        let actionValue = bodyParameters.removeFirst()
+        
+        guard let action = ElementAction(rawValue: actionValue) else {
+            return .internalServerError
         }
         
         switch action {
-        case .tap:
-            let coordinate = try fetchCoordinates(parameters)
-            return tap(coordinate)
-        case .swipe:
-            let from = try fetchCoordinates(parameters)
-            
-            guard parameters.count > 5 else { throw Router.RouterError.missingParameters }
-            
-            let directionX = Double(parameters[4]) ?? 0.0
-            let directionY = Double(parameters[5]) ?? 0.0
-            
-            return swipe(from, to: CGPoint(x: directionX, y: directionY))
-        case .scripting:
-            return [:]
-        case .input:
-            guard parameters.count > 2 else { throw Router.RouterError.missingParameters }
-            let text = parameters[2]
-            return input(text)
-        case .press:
-            return press(duration: 1, paths: ["3", "", ""])
+        case .tap:      return tapHandler(bodyParameters)
+        case .press:    return .accepted
+        case .input:    return inputHandler(bodyParameters)
+        case .swipe:    return swipeHandler(bodyParameters)
+        case .scripting:return .accepted
         }
     }
 }
@@ -70,9 +58,9 @@ final class ElementController {
         let frame: CGRect
     }
     
-    private func scripting(_ script: String, coordinate: CGPoint) -> Content {
-        let coordinate: XCUICoordinate
-        let script: String
+    private func scripting(_ parameters: [String]) -> HttpResponse {
+        // let coordinate: XCUICoordinate
+        // let script: String
         
         /* let executor = ScriptingExecutor(script);
          
@@ -100,23 +88,25 @@ final class ElementController {
          self.resultElement["error"] = error.localizedDescription
          } */
         
-        return Router.Output(message: "scripting on element")
+        return try! Router.Output(message: "scripting on element").toHttpResponse()
     }
     
-    private func tap(_ coordinate: CGPoint) -> Content {
-        guard let app = app else {
-            sendLogs(type: logType.ERROR, message: "App is null")
-            return Router.Output(message: "tap on element")
+    private func tapHandler(_ parameters: [String]) -> HttpResponse {
+        let device = Device.current
+        
+        do {
+            let coordinate = try fetchCoordinates(parameters)
+            let xCoordinate = Double(coordinate.x) * device.deviceWidth / device.channelWidth
+            let yCoordinate = Double(coordinate.y) * device.deviceHeight / device.channelHeight
+            
+            let normalized = application.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+            let uiCoordinate = normalized.withOffset(CGVector(dx: xCoordinate, dy: yCoordinate))
+            uiCoordinate.tap()
+            
+            return try! Router.Output(message: "tap on element").toHttpResponse()
+        } catch {
+            return .internalServerError
         }
-        
-        let xCoordinate = Double(coordinate.x) * deviceWidth / channelWidth
-        let yCoordinate = Double(coordinate.y) * deviceHeight / channelHeight
-        
-        let normalized = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
-        let coordinate = normalized.withOffset(CGVector(dx: xCoordinate, dy: yCoordinate))
-        coordinate.tap()
-        
-        return Router.Output(message: "tap on element")
     }
     
     enum Direction {
@@ -124,21 +114,24 @@ final class ElementController {
         case vertical
     }
     
-    private func swipe(_ from: CGPoint, to: CGPoint) -> Content {
-        guard let app = app else {
-            sendLogs(type: logType.ERROR, message: "App is null")
-            return Router.Output(message: "swipe element")
+    private func swipeHandler(_ parameters: [String]) -> HttpResponse {
+        guard parameters.count > 5 else {
+            return try! Router.Output(message: "missing parameters").toHttpResponse()
         }
         
-        var direction:Direction;
+        let directionX = Double(parameters[3]) ?? 0.0
+        let directionY = Double(parameters[4]) ?? 0.0
+        let to = CGPoint(x: directionX, y: directionY)
+        
+        var direction:Direction
         var adjustment: CGFloat = 0
-        if(to.x > 0) {
+        if to.x > 0 {
             direction = .horizontal
             adjustment = 1
-        } else if(to.x < 0) {
+        } else if to.x < 0 {
             direction = .horizontal
             adjustment = -1
-        } else if(to.y < 0) {
+        } else if to.y < 0 {
             direction = .vertical
             adjustment = -1
         } else {
@@ -146,51 +139,53 @@ final class ElementController {
             adjustment = 1
         }
         
-        let halfX : CGFloat = CGFloat(Double(from.x) / channelWidth)
-        let halfY : CGFloat = CGFloat(Double(from.y) / channelHeight)
-        let pressDuration : TimeInterval = 0.1
-        
-        let center = app.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY))
-        let ySwipe = app.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY + adjustment))
-        let xSwipe = app.coordinate(withNormalizedOffset: CGVector(dx: halfX + adjustment, dy: halfY))
-        
-        center.press(forDuration: pressDuration, thenDragTo: direction == .vertical ? ySwipe : xSwipe)
-        
-        return Router.Output(message: "swipe element")
+        do {
+            let from = try fetchCoordinates(parameters)
+            
+            let device = Device.current
+            let halfX: CGFloat = CGFloat(Double(from.x) / device.channelWidth)
+            let halfY: CGFloat = CGFloat(Double(from.y) / device.channelHeight)
+            let pressDuration : TimeInterval = 0.1
+            
+            let center = application.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY))
+            let ySwipe = application.coordinate(withNormalizedOffset: CGVector(dx: halfX, dy: halfY + adjustment))
+            let xSwipe = application.coordinate(withNormalizedOffset: CGVector(dx: halfX + adjustment, dy: halfY))
+            
+            center.press(forDuration: pressDuration, thenDragTo: direction == .vertical ? ySwipe : xSwipe)
+            
+            return try! Router.Output(message: "swipe element").toHttpResponse()
+        } catch {
+            return try! Router.Output(message: "problem").toHttpResponse()
+        }
     }
     
-    private func input(_ text: String) -> Content {
-        guard let app = app else {
-            sendLogs(type: logType.ERROR, message: "App is null")
-            return Router.Output(message: "element send keys : \(text)")
+    private func inputHandler(_ parameters: [String]) -> HttpResponse {
+        guard parameters.count > 2 else {
+            return try! Router.Output(message: "missing parameters").toHttpResponse()
         }
         
+        let text = parameters[2]
         if text == "&empty;" {
-            return Router.Output(message: "no keyboard on screen for tap text")
+            return try! Router.Output(message: "no keyboard on screen for tap text").toHttpResponse()
         } else {
-            if(app.keyboards.count > 0) {
-                app.typeText(text)
+            if(application.keyboards.count > 0) {
+                application.typeText(text)
                 //sendLogs(type: logType.INFO, message: "Type text: \(text)")
-                return Router.Output(message: "element send keys : \(text)")
+                return try! Router.Output(message: "element send keys : \(text)").toHttpResponse()
             } else {
-                return Router.Output(message: "no keyboard on screen for tap text")
+                return try! Router.Output(message: "no keyboard on screen for tap text").toHttpResponse()
             }
         }
     }
     
     private func press(duration: TimeInterval, paths: [String]) -> Content {
-        guard let app2 = app else {
-            sendLogs(type: logType.ERROR, message: "App is null")
-            return Router.Output(message: "not ok")
-        }
-        
-        let app = XCUIApplication(bundleIdentifier: "com.apple.mobilesafari")
+        // let app = XCUIApplication(bundleIdentifier: "com.apple.mobilesafari")
         // app.activate()
         
         // for path in paths {
-        let startCoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.3))
-        let endCoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-        let othercoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.7, dy: 0.7))
+        // let startCoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.3))
+        // let endCoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        // let othercoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.7, dy: 0.7))
         
         // let second = Timer.scheduledTimer(timeInterval: 0, target: nil, selector: #selector(test1), userInfo: nil, repeats: false)
         // let first = Timer.scheduledTimer(timeInterval: 0, target: nil, selector: #selector(test2), userInfo: nil, repeats: false)
@@ -198,8 +193,8 @@ final class ElementController {
         // endCoordinate.press(forDuration: 0, thenDragTo: startCoordinate)
         // endCoordinate.press(forDuration: 0, thenDragTo: othercoordinate)
         
-        test1()
-        test2()
+        // test1()
+        // test2()
         
         // }
         
@@ -208,40 +203,15 @@ final class ElementController {
         return Router.Output(message: "ok")
     }
     
-    @objc func test1() {
-        let app = XCUIApplication(bundleIdentifier: "com.apple.mobilesafari")
-        
-        let startCoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.3))
-        let endCoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-        
-        endCoordinate.press(forDuration: 0, thenDragTo: startCoordinate)
-    }
-    
-    @objc func test2() {
-        let app = XCUIApplication(bundleIdentifier: "com.apple.mobilesafari")
-        
-        
-        let endCoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-        let othercoordinate = app.coordinate(withNormalizedOffset: CGVector(dx: 0.7, dy: 0.7))
-        
-        endCoordinate.press(forDuration: 0, thenDragTo: othercoordinate)
-    }
-    
     private func fetchCoordinates(_ parameters: [String]) throws -> CGPoint {
         let coordinates = parameters.last!.split(separator: ";")
+                
+        let xCoordinates = Double(coordinates[0])!
+        let yCoordinates = Double(coordinates[1])!
+        let widthCoordinates = Double(coordinates[2])!
+        let heightCoordinates = Double(coordinates[3])!
         
-        guard parameters.count == 5 else {
-            throw Router.RouterError.missingParameters
-        }
-        
-        guard let x = Double(coordinates[0]),
-            let y = Double(coordinates[1]),
-            let width = Double(coordinates[2]),
-            let height = Double(coordinates[3]) else {
-                throw Router.RouterError.missingParameters
-        }
-        
-        let rect = CGRect(x: x, y: y, width: width, height: height)
+        let rect = CGRect(x: xCoordinates, y: yCoordinates, width: widthCoordinates, height: heightCoordinates)
         
         let elementX = Double(rect.origin.x)
         let elementY = Double(rect.origin.y)
@@ -252,11 +222,11 @@ final class ElementController {
         
         let offsetYShift = 33.0
         
-        if (parameters.count > 3) {
-            offSetX = Double(parameters[2])!
-            offSetY = Double(parameters[3])! + offsetYShift
+        if (parameters.count == 3) {
+            offSetX = Double(parameters[0])!
+            offSetY = Double(parameters[1])! + offsetYShift
             if (offSetY > elementHeight) {
-                offSetY = Double(parameters[3])!
+                offSetY = Double(parameters[1])!
             }
         }
         

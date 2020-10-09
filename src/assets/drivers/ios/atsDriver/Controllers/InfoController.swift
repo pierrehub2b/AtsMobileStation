@@ -8,67 +8,52 @@
 import Foundation
 import XCTest
 import UIKit
+import Swifter
 
 extension InfoController: Routeable {
-    var name: String {
-        return "info"
-    }
     
-    func handleParameters(_ parameters: [String], token: String?) throws -> Any {
-        return fetchInfo()
+    var name: String { return "info" }
+    
+    func handleRoutes(_ request: HttpRequest) -> HttpResponse {
+        do {
+            return try fetchInfo()
+        } catch {
+            return .internalServerError
+        }
     }
 }
 
 final class InfoController {
-        
+    
     struct InfoOutput: Content {
         let os = "ios"
-        let driverVersion: String = "1.1.0"
-        let systemName = UIDevice.modelName.replacingOccurrences(of: "Simulator ", with: "") + " - " + UIDevice.current.systemVersion
+        let driverVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
+        let buildNumber = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
+        let systemName = modelName + " - " + UIDevice.current.systemVersion
+        let systemCountry = NSLocale.current.regionCode
         let deviceWidth: Double
         let deviceHeight: Double
         let channelWidth: Double
         let channelHeight: Double
-        let channelX: Int = 0
-        let channelY: Int = 0
+        let channelX = 0
+        let channelY = 0
+        
         let message = "device capabilities"
         let status = "0"
         let id = UIDevice.current.identifierForVendor!.uuidString
-        let model = UIDevice.modelName.replacingOccurrences(of: "Simulator ", with: "")
+        let model = modelName
         let manufacturer = "Apple"
         let brand = "Apple"
         let version = UIDevice.current.systemVersion
         let bluetoothName = UIDevice.current.name
-        let simulator = UIDevice.modelName.range(of: "Simulator", options: .caseInsensitive) != nil
+        let simulator = Device.current.isSimulator
         let applications: [Application]
     }
-            
-    func fetchInfo() -> InfoOutput {
-        
-        let testBundle = Bundle(for: atsDriver.self)
-        if (!UIDevice.isSimulator) {
-            appsInstalled = []
-            if let url = testBundle.url(forResource: "Settings", withExtension: "plist"), let myDict = NSDictionary(contentsOf: url) as? [String:Any] {
-                appsInstalled = myDict.filter { $0.key.contains("CFAppBundleID") }.map { $0.value } as! [String]
-            }
-
-            Application.setup()
-        }
-        
-        let screenScale = UIScreen.main.scale
-        let screenNativeBounds = XCUIScreen.main.screenshot().image.size
-        let screenShotWidth = screenNativeBounds.width * screenScale
-        let screenShotHeight = screenNativeBounds.height * screenScale
-        
-        channelWidth = Double(screenShotWidth)  //Double(screenSize.width)
-        channelHeight = Double(screenShotHeight) //Double(screenSize.height)
-        
-        var ratio:Double = 1.0
-        ratio = channelHeight / Double(screenNativeBounds.height);
-        
-        deviceWidth = Double(channelWidth / ratio)
-        deviceHeight = Double(channelHeight / ratio)
-        
-        return InfoOutput(deviceWidth: deviceWidth, deviceHeight: deviceHeight, channelWidth: channelWidth, channelHeight: channelHeight, applications: applications)
+    
+    static let modelName = UIDevice.modelName.replacingOccurrences(of: "Simulator ", with: "")
+    
+    func fetchInfo() throws -> HttpResponse {
+        let device = Device.current
+        return try InfoOutput(deviceWidth: device.deviceWidth, deviceHeight: device.deviceHeight, channelWidth: device.channelWidth, channelHeight: device.channelHeight, applications: Device.current.applications).toHttpResponse()
     }
 }

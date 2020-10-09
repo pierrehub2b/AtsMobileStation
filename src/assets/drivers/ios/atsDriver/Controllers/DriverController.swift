@@ -7,40 +7,40 @@
 
 import Foundation
 import XCTest
+import Swifter
 
-extension DriverController: Routeable {    
-    var name: String {
-        return "driver"
-    }
+extension DriverController: Routeable {
     
-    func handleParameters(_ parameters: [String], token: String?) throws -> Any {
-        guard let firstParameter = parameters.first else {
-            throw Router.RouterError.missingParameters
-        }
+    var name: String { return "driver" }
+    
+    func handleRoutes(_ request: HttpRequest) -> HttpResponse {
         
-        guard let action = DriverAction(rawValue: firstParameter) else {
-            return Router.Output(message: "missing app action type \(firstParameter)", status: "-42")
-        }
-        
+        let token = request.headers["token"]
         if let atsClient = AtsClient.current, atsClient.token != token {
-            return Router.Output(message: "Device already in use : \(atsClient.userAgent)", status: "-20")
+            return try! Router.Output(message: "Device already in use : \(atsClient.userAgent)", status: "-20").toHttpResponse()
+        }
+        
+        guard let bodyString = String(bytes: request.body, encoding: .utf8) else {
+            return .accepted
+        }
+            
+        var bodyParameters: [String] = bodyString.components(separatedBy: "\n")
+        let actionValue = bodyParameters.removeFirst()
+            
+        guard let action = DriverAction(rawValue: actionValue) else {
+            return .accepted
         }
         
         switch action {
         case .start:
-            let result = start()
-            AtsClient.current = AtsClient(token: result.token, userAgent: userAgent!, ipAddress: "")
-            sendLogs(type: logType.STATUS, message: "** DEVICE LOCKED BY : \(AtsClient.current!.userAgent) **")
-            return result
-        case .stop:
-            let result = stop()
-            AtsClient.current = nil
-            sendLogs(type: logType.STATUS, message: "** DEVICE UNLOCKED **")
-            return result
-        case .quit:
-            return quit()
-        case .info:
-            return try fetchInfo()
+            guard let userAgent = request.headers["user-agent"] else {
+                return .internalServerError
+            }
+            
+            return startHandler(userAgent: userAgent)
+            case .stop: return stopHandler()
+            case .quit: return quitHandler()
+            case .info: return fetchInfoHandler()
         }
     }
 }
@@ -54,116 +54,107 @@ final class DriverController {
         case info
     }
     
-    struct DriverInfoOutput: Content {
+    private struct DriverInfoOutput: Content {
         let info: String
         let status = "0"
-    }
-    
-    private struct DriverStartOutput: Content {
-        let os = "ios"
-        let driverVersion = "1.1.0"
-        let channelX = 0
-        let channelY = 0
-        let status = "0"
-        let screenCapturePort = udpPort
-        let systemName = model + " - " + osVersion
-        let systemProperties = PropertyController.PropertyActionName.allCases.map { $0.rawValue }
-        let systemButtons = ButtonController.ButtonAction.allCases.map { $0.rawValue }
-        let deviceWidth: Double
-        let deviceHeight: Double
-        let channelWidth: Double
-        let channelHeight: Double
-        let token = UUID().uuidString
-    }
-    
-    private func start() -> DriverStartOutput {
-        continueExecution = true
-             
-        // Application size
-        let screenScale = UIScreen.main.scale
-        let screenNativeBounds = XCUIScreen.main.screenshot().image.size
-        let screenShotWidth = screenNativeBounds.width * screenScale
-        let screenShotHeight = screenNativeBounds.height * screenScale
-        
-        channelWidth = Double(screenShotWidth)  //Double(screenSize.width)
-        channelHeight = Double(screenShotHeight) //Double(screenSize.height)
-        
-        var ratio:Double = 1.0
-        ratio = channelHeight / Double(screenNativeBounds.height);
-        
-        deviceWidth = Double(channelWidth / ratio)
-        deviceHeight = Double(channelHeight / ratio)
-        
-        return DriverStartOutput(deviceWidth: deviceWidth, deviceHeight: deviceHeight, channelWidth: channelWidth, channelHeight: channelHeight)
-    }
-    
-    private func stop() -> Content {
-        if (app != nil) {
-            app.terminate()
-        }
-        
-        //sendLogs(type: logType.INFO, message: "Terminate app")
-                
-        if !UIDevice.isSimulator {
-            XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
-        }
-
-        return Router.Output(message: "stop ats driver")
-    }
-    
-    private func quit() -> Content {
-        if (app != nil) {
-            app.terminate()
-        }
-        
-        //sendLogs(type: logType.INFO, message: "Terminate app")
-        if !UIDevice.isSimulator {
-            XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
-        }
-        continueExecution = false
-
-        return Router.Output(message: "close ats driver")
     }
     
     private struct DriverInfo: Content {
         let packageName: String
         let activity: String
         let system: String
-        let label = app.label
+        let label: String
         let icon = ""
         let version = ""
-        let os = "ios"
+        let os = Device.current.os
     }
     
-    private func fetchInfo() throws -> Content {
-        guard let app = app else {
-            return DriverInfoOutput(info: "")
+    private struct DriverStartOutput: Content {
+        let os = Device.current.os
+        let driverVersion = Device.current.driverVersion
+        let systemName = Device.current.systemName
+
+        let deviceWidth = Device.current.deviceWidth
+        let deviceHeight = Device.current.deviceHeight
+        let channelWidth = Device.current.channelWidth
+        let channelHeight = Device.current.channelHeight
+        let channelX = Device.current.channelX
+        let channelY = Device.current.channelY
+        
+        let systemProperties = Device.Property.allCases.map { $0.rawValue }
+        let systemButtons = Device.Button.allCases.map { $0.rawValue }
+        
+        let token = UUID().uuidString
+        
+        let status = "0"
+        let screenCapturePort = Device.current.screenCapturePort
+    }
+    
+    private func startHandler(userAgent: String) -> HttpResponse {
+        continueExecution = true
+             
+        let output = DriverStartOutput()
+        AtsClient.current = AtsClient(token: output.token, userAgent: userAgent, ipAddress: "")
+        sendLogs(type: logType.STATUS, message: "** DEVICE LOCKED BY : \(AtsClient.current!.userAgent) **")
+        
+        return try! output.toHttpResponse()
+    }
+    
+    private func stopHandler() -> HttpResponse {
+        print(application)
+        sendLogs(type: logType.INFO, message: "Terminate app")
+
+        application?.terminate()
+        continueExecution = false
+        
+        if !Device.current.isSimulator {
+            XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
+        }
+        
+        AtsClient.current = nil
+        sendLogs(type: logType.STATUS, message: "** DEVICE UNLOCKED **")
+
+        return try! Router.Output(message: "stop ats driver").toHttpResponse()
+    }
+    
+    private func quitHandler() -> HttpResponse {
+        sendLogs(type: logType.INFO, message: "Terminate app")
+
+        application?.terminate()
+        continueExecution = false
+        
+        if !Device.current.isSimulator {
+            XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
+        }
+        
+        return try! Router.Output(message: "close ats driver").toHttpResponse()
+    }
+    
+    
+    private func fetchInfoHandler() -> HttpResponse {
+        guard let application = application else {
+            return try! Router.Output(message: "").toHttpResponse()
         }
         
         let pattern = "'(.*?)'"
-        guard let packageName = self.matchingStrings(input: String(app.description), regex: pattern).first?[1] else { throw Router.RouterError.driverError }
+        guard let packageName = self.matchingStrings(input: String(application.description), regex: pattern).first?[1] else {
+            return .internalServerError
+        }
         
-        let activity = getStateStringValue(rawValue: app.state.rawValue)
-
-        let osVersion = UIDevice.current.systemVersion
-        let model = UIDevice.modelName.replacingOccurrences(of: "Simulator ", with: "")
-        let system = model + " " + osVersion
-        
-        let info = DriverInfo(packageName: packageName, activity: activity, system: system)
+        let activity = getStateStringValue(rawValue: application.state.rawValue)
+        let info = DriverInfo(packageName: packageName, activity: activity, system: Device.current.systemName, label: application.label)
         
         do {
             let jsonData = try JSONEncoder().encode(info)
-
             guard let json = String(data: jsonData, encoding: String.Encoding.utf8) else {
-                return DriverInfoOutput(info: "no values")
+                return .internalServerError
             }
             
-            return DriverInfoOutput(info: json)
+            return try! DriverInfoOutput(info: json).toHttpResponse()
         } catch {
             sendLogs(type: logType.ERROR, message: "Array convertIntoJSON - \(error.localizedDescription)")
+            return try! DriverInfoOutput(info: "").toHttpResponse()
         }
-        
-        return DriverInfoOutput(info: "")
     }
 }
 

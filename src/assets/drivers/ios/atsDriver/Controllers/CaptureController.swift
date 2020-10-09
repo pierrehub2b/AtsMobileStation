@@ -6,40 +6,32 @@
 //
 
 import Foundation
+import Swifter
 
-extension CaptureController: Routeable {    
-    var name: String {
-        return "capture"
-    }
+extension CaptureController: Routeable {
     
-    func handleParameters(_ parameters: [String], token: String?) throws -> Any {
-        return try fetchCaptureInfo()
+    var name: String { return "capture" }
+    
+    func handleRoutes(_ request: HttpRequest) -> HttpResponse {
+        return fetchCaptureInfo()
     }
 }
 
 final class CaptureController {
     
-    enum CaptureError: Error {
-        case noApp
-    }
-    
     private struct Output: Content {
-        let status: String = "0"
-        let message: String = "root_description"
-        let deviceWidth: Double
-        let deviceHeight: Double
+        let status = "0"
+        let message = "root_description"
+        let deviceWidth = Device.current.channelWidth
+        let deviceHeight = Device.current.channelHeight
         let root: String
     }
-    
-    private func fetchCaptureInfo() throws -> Output {
-        guard let app = app else { throw CaptureError.noApp }
-
-        if asChanged {
-            appDomDesc = app.debugDescription
-            asChanged = false
-        }
         
-        let root = appDomDesc
-        return Output(deviceWidth: channelWidth, deviceHeight: channelHeight, root: root)
+    private func fetchCaptureInfo() -> HttpResponse {
+        guard let application = application else {
+            return try! Router.Output(message: "no app has been launched", status: "-99").toHttpResponse()
+        }
+
+        return try! Output(root: application.debugDescription).toHttpResponse()
     }
 }

@@ -80,14 +80,14 @@ public class RunningDevice extends Device
 	protected function failed():void{
 		status = FAIL;
 		tooltip = "Driver can not be started";
-		trace("Driver error" + getQualifiedClassName(this));
+		trace("Driver error -> " + getQualifiedClassName(this));
 	}
 
 	protected function usbError(error:String):void {
 		status = USB_ERROR;
 		errorMessage = " - " + error;
 		tooltip = "Problem when installing driver ...";
-		trace("USB install error" + getQualifiedClassName(this));
+		trace("USB install error -> " + getQualifiedClassName(this));
 	}
 
 	protected function printDebugLogs(message:String):void {

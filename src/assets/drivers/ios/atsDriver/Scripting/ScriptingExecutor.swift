@@ -123,7 +123,7 @@ class ScriptingExecutor: NSObject {
             settingsApp.switches.firstMatch.tap();
         }
         
-        app.activate()
+        application.activate()
         
         return nil
     }

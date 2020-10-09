@@ -13,7 +13,6 @@
 		047BFA6D22F178D700BB2E25 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 047BFA6B22F178D700BB2E25 /* Main.storyboard */; };
 		047BFA7222F178D800BB2E25 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 047BFA7122F178D800BB2E25 /* Assets.xcassets */; };
 		047BFA7522F178D800BB2E25 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 047BFA7322F178D800BB2E25 /* LaunchScreen.storyboard */; };
-		047BFA8022F178D800BB2E25 /* atsDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047BFA7F22F178D800BB2E25 /* atsDriver.swift */; };
 		2DFC38B12435ECC900E445DB /* sendLogs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DFC38B02435ECC900E445DB /* sendLogs.swift */; };
 		923AE14E24571C9900156ECB /* ElementController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE14D24571C9900156ECB /* ElementController.swift */; };
 		923AE15024571FFB00156ECB /* DriverController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE14F24571FFB00156ECB /* DriverController.swift */; };
@@ -21,7 +20,6 @@
 		923AE154245874E800156ECB /* CaptureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE153245874E800156ECB /* CaptureController.swift */; };
 		923AE1562458755100156ECB /* InfoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE1552458755100156ECB /* InfoController.swift */; };
 		923AE1582459690400156ECB /* ScreenshotController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE1572459690400156ECB /* ScreenshotController.swift */; };
-		923AE15A245F007600156ECB /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE159245F007600156ECB /* Router.swift */; };
 		923AE15C245F008500156ECB /* Routeable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE15B245F008500156ECB /* Routeable.swift */; };
 		923AE15E245F21DF00156ECB /* ButtonController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE15D245F21DF00156ECB /* ButtonController.swift */; };
 		923AE161245F3D8100156ECB /* Application.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE160245F3D8100156ECB /* Application.swift */; };
@@ -31,9 +29,15 @@
 		9A907BBD234901DF00F3DE15 /* AppIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A907BBC234901DF00F3DE15 /* AppIcons.swift */; };
 		D8020C38252CB28D0077CD01 /* Settings.json in Resources */ = {isa = PBXBuildFile; fileRef = D8020C37252CB28D0077CD01 /* Settings.json */; };
 		D8020C3F252CB3ED0077CD01 /* Settings.json in Resources */ = {isa = PBXBuildFile; fileRef = D8020C37252CB28D0077CD01 /* Settings.json */; };
+		D8020C47252CC7680077CD01 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8020C46252CC7680077CD01 /* Settings.swift */; };
 		D816CA1024B71C4D00B914C5 /* Socket in Frameworks */ = {isa = PBXBuildFile; productRef = D816CA0F24B71C4D00B914C5 /* Socket */; };
-		D816CA1324B71C7400B914C5 /* Ambassador in Frameworks */ = {isa = PBXBuildFile; productRef = D816CA1224B71C7400B914C5 /* Ambassador */; };
-		D816CA1624B71C9400B914C5 /* Embassy in Frameworks */ = {isa = PBXBuildFile; productRef = D816CA1524B71C9400B914C5 /* Embassy */; };
+		D81F7E7B252DE7280091A02C /* HTTPServerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D81F7E7A252DE7280091A02C /* HTTPServerManager.swift */; };
+		D82C1C0E252DF56C007D0313 /* atsDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D82C1C0D252DF56C007D0313 /* atsDriver.swift */; };
+		D82C1C62252E103B007D0313 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = D82C1C61252E103B007D0313 /* Device.swift */; };
+		D82C1C6F252EFA16007D0313 /* Swifter in Frameworks */ = {isa = PBXBuildFile; productRef = D82C1C6E252EFA16007D0313 /* Swifter */; };
+		D82C1C73252EFAC8007D0313 /* Swifter in Frameworks */ = {isa = PBXBuildFile; productRef = D82C1C72252EFAC8007D0313 /* Swifter */; };
+		D82C1C8F252F4A0E007D0313 /* UDPConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = D82C1C8E252F4A0E007D0313 /* UDPConnect.swift */; };
+		D82C1C94252F4BB7007D0313 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE159245F007600156ECB /* Router.swift */; };
 		D8865A8A24C98099003C45D5 /* PropertyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8865A8924C98099003C45D5 /* PropertyController.swift */; };
 /* End PBXBuildFile section */
 
@@ -59,7 +63,7 @@
 		047BFA7422F178D800BB2E25 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		047BFA7622F178D800BB2E25 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		047BFA7B22F178D800BB2E25 /* atsDriver.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = atsDriver.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		047BFA7F22F178D800BB2E25 /* atsDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = atsDriver.swift; sourceTree = "<group>"; };
+		047BFA7F22F178D800BB2E25 /* atsDriverOld.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = atsDriverOld.swift; sourceTree = "<group>"; };
 		048E4D3C230E7E3C0004B08E /* libSocket.IO-Client-Swift.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libSocket.IO-Client-Swift.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		048E4D3E230E7E3C0004B08E /* libStarscream.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libStarscream.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		048E4D40230E8D7A0004B08E /* libSocket.swift.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libSocket.swift.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -86,6 +90,11 @@
 		92C416C42473D9D300A772AF /* Content.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Content.swift; sourceTree = "<group>"; };
 		9A907BBC234901DF00F3DE15 /* AppIcons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIcons.swift; sourceTree = "<group>"; };
 		D8020C37252CB28D0077CD01 /* Settings.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Settings.json; sourceTree = "<group>"; };
+		D8020C46252CC7680077CD01 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+		D81F7E7A252DE7280091A02C /* HTTPServerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPServerManager.swift; sourceTree = "<group>"; };
+		D82C1C0D252DF56C007D0313 /* atsDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = atsDriver.swift; sourceTree = "<group>"; };
+		D82C1C61252E103B007D0313 /* Device.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Device.swift; sourceTree = "<group>"; };
+		D82C1C8E252F4A0E007D0313 /* UDPConnect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPConnect.swift; sourceTree = "<group>"; };
 		D8865A8924C98099003C45D5 /* PropertyController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -94,6 +103,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D82C1C6F252EFA16007D0313 /* Swifter in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -101,9 +111,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D816CA1324B71C7400B914C5 /* Ambassador in Frameworks */,
-				D816CA1624B71C9400B914C5 /* Embassy in Frameworks */,
 				D816CA1024B71C4D00B914C5 /* Socket in Frameworks */,
+				D82C1C73252EFAC8007D0313 /* Swifter in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -149,7 +158,10 @@
 				923AE15F245F3D7500156ECB /* Models */,
 				923AE14C24571BB600156ECB /* Controllers */,
 				9254C2A124518FF1006DC4FC /* Scripting */,
-				047BFA7F22F178D800BB2E25 /* atsDriver.swift */,
+				047BFA7F22F178D800BB2E25 /* atsDriverOld.swift */,
+				D81F7E7A252DE7280091A02C /* HTTPServerManager.swift */,
+				D82C1C0D252DF56C007D0313 /* atsDriver.swift */,
+				D82C1C8E252F4A0E007D0313 /* UDPConnect.swift */,
 			);
 			path = atsDriver;
 			sourceTree = "<group>";
@@ -157,17 +169,17 @@
 		923AE14C24571BB600156ECB /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				923AE14D24571C9900156ECB /* ElementController.swift */,
-				923AE14F24571FFB00156ECB /* DriverController.swift */,
 				923AE1512457200400156ECB /* AppController.swift */,
-				923AE153245874E800156ECB /* CaptureController.swift */,
-				923AE1552458755100156ECB /* InfoController.swift */,
-				923AE1572459690400156ECB /* ScreenshotController.swift */,
 				923AE15D245F21DF00156ECB /* ButtonController.swift */,
+				923AE153245874E800156ECB /* CaptureController.swift */,
+				923AE14F24571FFB00156ECB /* DriverController.swift */,
+				923AE14D24571C9900156ECB /* ElementController.swift */,
+				923AE1552458755100156ECB /* InfoController.swift */,
+				D8865A8924C98099003C45D5 /* PropertyController.swift */,
+				923AE1572459690400156ECB /* ScreenshotController.swift */,
 				923AE159245F007600156ECB /* Router.swift */,
 				923AE15B245F008500156ECB /* Routeable.swift */,
 				92C416C42473D9D300A772AF /* Content.swift */,
-				D8865A8924C98099003C45D5 /* PropertyController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -177,6 +189,8 @@
 			children = (
 				923AE160245F3D8100156ECB /* Application.swift */,
 				92C416C22473CB5B00A772AF /* AtsClient.swift */,
+				D8020C46252CC7680077CD01 /* Settings.swift */,
+				D82C1C61252E103B007D0313 /* Device.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -236,6 +250,7 @@
 			);
 			name = atsios;
 			packageProductDependencies = (
+				D82C1C6E252EFA16007D0313 /* Swifter */,
 			);
 			productName = agilitest_iosDriver;
 			productReference = 047BFA6422F178D700BB2E25 /* atsios.app */;
@@ -257,8 +272,7 @@
 			name = atsDriver;
 			packageProductDependencies = (
 				D816CA0F24B71C4D00B914C5 /* Socket */,
-				D816CA1224B71C7400B914C5 /* Ambassador */,
-				D816CA1524B71C9400B914C5 /* Embassy */,
+				D82C1C72252EFAC8007D0313 /* Swifter */,
 			);
 			productName = agilitest_iosDriverUITests;
 			productReference = 047BFA7B22F178D800BB2E25 /* atsDriver.xctest */;
@@ -296,8 +310,7 @@
 			mainGroup = 047BFA5B22F178D700BB2E25;
 			packageReferences = (
 				D816CA0E24B71C4D00B914C5 /* XCRemoteSwiftPackageReference "BlueSocket" */,
-				D816CA1124B71C7400B914C5 /* XCRemoteSwiftPackageReference "Ambassador" */,
-				D816CA1424B71C9400B914C5 /* XCRemoteSwiftPackageReference "Embassy" */,
+				D82C1C6D252EFA16007D0313 /* XCRemoteSwiftPackageReference "swifter" */,
 			);
 			productRefGroup = 047BFA6522F178D700BB2E25 /* Products */;
 			projectDirPath = "";
@@ -351,17 +364,21 @@
 				923AE1522457200400156ECB /* AppController.swift in Sources */,
 				92C416C52473D9D300A772AF /* Content.swift in Sources */,
 				923AE15C245F008500156ECB /* Routeable.swift in Sources */,
+				D82C1C8F252F4A0E007D0313 /* UDPConnect.swift in Sources */,
+				D81F7E7B252DE7280091A02C /* HTTPServerManager.swift in Sources */,
 				0417A8752315366D0094FC89 /* EnumFunctions.swift in Sources */,
 				923AE1582459690400156ECB /* ScreenshotController.swift in Sources */,
 				923AE15024571FFB00156ECB /* DriverController.swift in Sources */,
 				0400C0A8231D145B004CD4C9 /* UIDeviceName.swift in Sources */,
-				923AE15A245F007600156ECB /* Router.swift in Sources */,
-				047BFA8022F178D800BB2E25 /* atsDriver.swift in Sources */,
 				92C416C32473CB5B00A772AF /* AtsClient.swift in Sources */,
+				D8020C47252CC7680077CD01 /* Settings.swift in Sources */,
 				D8865A8A24C98099003C45D5 /* PropertyController.swift in Sources */,
+				D82C1C94252F4BB7007D0313 /* Router.swift in Sources */,
 				9A907BBD234901DF00F3DE15 /* AppIcons.swift in Sources */,
 				9254C2A02449A8E3006DC4FC /* ScriptingExecutor.swift in Sources */,
+				D82C1C0E252DF56C007D0313 /* atsDriver.swift in Sources */,
 				2DFC38B12435ECC900E445DB /* sendLogs.swift in Sources */,
+				D82C1C62252E103B007D0313 /* Device.swift in Sources */,
 				923AE1562458755100156ECB /* InfoController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -531,6 +548,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ats.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -552,6 +570,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ats.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -657,20 +676,12 @@
 				minimumVersion = 1.0.52;
 			};
 		};
-		D816CA1124B71C7400B914C5 /* XCRemoteSwiftPackageReference "Ambassador" */ = {
+		D82C1C6D252EFA16007D0313 /* XCRemoteSwiftPackageReference "swifter" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/envoy/Ambassador.git";
+			repositoryURL = "https://github.com/httpswift/swifter.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 4.0.5;
-			};
-		};
-		D816CA1424B71C9400B914C5 /* XCRemoteSwiftPackageReference "Embassy" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/envoy/Embassy.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.1.1;
+				minimumVersion = 1.5.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -681,15 +692,15 @@
 			package = D816CA0E24B71C4D00B914C5 /* XCRemoteSwiftPackageReference "BlueSocket" */;
 			productName = Socket;
 		};
-		D816CA1224B71C7400B914C5 /* Ambassador */ = {
+		D82C1C6E252EFA16007D0313 /* Swifter */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = D816CA1124B71C7400B914C5 /* XCRemoteSwiftPackageReference "Ambassador" */;
-			productName = Ambassador;
+			package = D82C1C6D252EFA16007D0313 /* XCRemoteSwiftPackageReference "swifter" */;
+			productName = Swifter;
 		};
-		D816CA1524B71C9400B914C5 /* Embassy */ = {
+		D82C1C72252EFAC8007D0313 /* Swifter */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = D816CA1424B71C9400B914C5 /* XCRemoteSwiftPackageReference "Embassy" */;
-			productName = Embassy;
+			package = D82C1C6D252EFA16007D0313 /* XCRemoteSwiftPackageReference "swifter" */;
+			productName = Swifter;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
