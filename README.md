@@ -1,9 +1,10 @@
 # AtsMobileStation
-PC and Mac OS application to start and install mobile drivers used by ATS test framework
+PC and MacOS application to start and install mobile drivers used by ATS test framework
 
-# Before launching AtsMobileStation on MacOS, please do actions below
+# Before unzipping AtsMobileStation on MacOS, please do actions below
+- Run the command at the location of the application archive folder: xattr -r -d com.apple.quarantine AtsMobileStation.zip
 - If not already install, launch the command: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-- Launch the command: brew install openssl@1.1
+- Run the command: brew install openssl@1.1
 **After the first launch, your system possibly tells you that the library "luajit" is not safe. For authorize it, go to your security settings and click on button "allow acess"**
 
 ## iOS Devices
@@ -13,14 +14,14 @@ To execute automated tests on physical iPhone devices, you need to create an App
 
 ### Prerequisites 
 - Have an Xcode downloaded and **installed**
-- the device **must be in WIFI mode and unlock pin code disabled**
+- The device **must be in WIFI mode and unlock pin code disabled**
 
 ### 1/ Setup provisionning profile into Xcode
 - Open Xcode and go to 'Preferences' (Click on Xcode code in the left top corner)
 - In 'Accounts', add a new account using '+' button in the bottom left corner
 - Select 'Apple ID' in the dropdown list and enter your Apple Developer credentials in the next window
 - When you're logged, click on "Manage Certificates". If there is no certificate associated with your workstation (no one is enlightened), click on "+" button -> "Apple Development" and "Done"
-- Save and quit xCode
+- Save and quit Xcode
 
 ### 2/ Set the Development team ID and retrieve the devices list
 - Open AtsMobileStation and plug an iPhone device
