@@ -153,12 +153,16 @@ extension HTTPServerManager {
                 
                 // Check interface name:
                 let name = String(cString: interface.ifa_name)
-                if name == "en0" || name == "en1" {
+                if name == "en0" {
                     // Convert interface address to a human readable string:
                     var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
-                    getnameinfo(interface.ifa_addr, socklen_t(interface.ifa_addr.pointee.sa_len), &hostname, socklen_t(hostname.count), nil, socklen_t(Device.current.isSimulator ? 1 : 0), NI_NUMERICHOST)
-                    address = String(cString: hostname)
+                    getnameinfo(interface.ifa_addr, socklen_t(interface.ifa_addr.pointee.sa_len), &hostname, socklen_t(hostname.count), nil, socklen_t(0), NI_NUMERICHOST)
+                    return String(cString: hostname)
                     break
+                } else if name == "en1" && Device.current.isSimulator {
+                    var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+                    getnameinfo(interface.ifa_addr, socklen_t(interface.ifa_addr.pointee.sa_len), &hostname, socklen_t(hostname.count), nil, socklen_t(1), NI_NUMERICHOST)
+                    return String(cString: hostname)
                 }
             }
         }
