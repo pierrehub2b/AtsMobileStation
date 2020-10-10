@@ -98,18 +98,21 @@ package com.ats.device.running
 			}
 			return false;
 		}
-		
+
+		private var needsBuilding:Boolean = false
+
 		override public function start():void {
-			if(!FlexGlobals.topLevelApplication.getTeamId()  && !simulator) {
+			if(!FlexGlobals.topLevelApplication.getTeamId() && !simulator) {
 				status = Device.FAIL;
 				errorMessage = " - No development team id set";
 				return;
 			}
-			
-			// if (driverDirectory.modificationDate < iosDriverProjectFolder) {
-				iosDriverProjectFolder.copyTo(driverDirectory, true);
-			// }
-			
+
+			if (!driverDirectory.exists || driverDirectory.resolvePath("atsDriver").modificationDate < iosDriverProjectFolder.resolvePath("atsDriver").modificationDate) {
+				iosDriverProjectFolder.copyTo(driverDirectory, true)
+				needsBuilding = true
+			}
+
 			installing();
 			uninstallDriver()
 		}
@@ -189,11 +192,14 @@ package com.ats.device.running
 			processStartupInfo.executable = new File("/usr/bin/xcodebuild")
 			processStartupInfo.workingDirectory = driverDirectory;
 			
-			var arguments: Vector.<String> = new <String>["test", "-scheme", "atsios", "-destination", "id=" + id];
+			var arguments: Vector.<String> = new <String>["-scheme", "atsios", "-destination", "id=" + id];
 			if (!simulator) {
 				arguments.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + FlexGlobals.topLevelApplication.getTeamId());
 			}
-			
+
+			arguments.push(needsBuilding ? "test" : "test-without-building")
+			trace(arguments)
+
 			processStartupInfo.arguments = arguments
 			
 			driverProcess = new NativeProcess()
