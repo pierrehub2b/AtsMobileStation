@@ -15,17 +15,13 @@ extension InfoController: Routeable {
     var name: String { return "info" }
     
     func handleRoutes(_ request: HttpRequest) -> HttpResponse {
-        do {
-            return try fetchInfo()
-        } catch {
-            return .internalServerError
-        }
+        return fetchInfo()
     }
 }
 
 final class InfoController {
     
-    struct InfoOutput: Content {
+    struct InfoOutput: Encodable {
         let os = "ios"
         let driverVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
         let buildNumber = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
@@ -52,8 +48,14 @@ final class InfoController {
     
     static let modelName = UIDevice.modelName.replacingOccurrences(of: "Simulator ", with: "")
     
-    func fetchInfo() throws -> HttpResponse {
+    func fetchInfo() -> HttpResponse {
         let device = Device.current
-        return try InfoOutput(deviceWidth: device.deviceWidth, deviceHeight: device.deviceHeight, channelWidth: device.channelWidth, channelHeight: device.channelHeight, applications: Device.current.applications).toHttpResponse()
+        return InfoOutput(
+            deviceWidth: device.deviceWidth,
+            deviceHeight: device.deviceHeight,
+            channelWidth: device.channelWidth,
+            channelHeight: device.channelHeight,
+            applications: Device.current.applications)
+            .toHttpResponse()
     }
 }

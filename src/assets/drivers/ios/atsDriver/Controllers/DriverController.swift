@@ -17,7 +17,7 @@ extension DriverController: Routeable {
         
         let token = request.headers["token"]
         if let atsClient = AtsClient.current, atsClient.token != token {
-            return try! Router.Output(message: "Device already in use : \(atsClient.userAgent)", status: "-20").toHttpResponse()
+            return Output(message: "Device already in use : \(atsClient.userAgent)", status: "-20").toHttpResponse()
         }
         
         guard let bodyString = String(bytes: request.body, encoding: .utf8) else {
@@ -54,12 +54,12 @@ final class DriverController {
         case info
     }
     
-    private struct DriverInfoOutput: Content {
+    private struct DriverInfoOutput: Encodable {
         let info: String
         let status = "0"
     }
     
-    private struct DriverInfo: Content {
+    private struct DriverInfo: Encodable {
         let packageName: String
         let activity: String
         let system: String
@@ -69,17 +69,17 @@ final class DriverController {
         let os = Device.current.os
     }
     
-    private struct DriverStartOutput: Content {
-        let os = Device.current.os
-        let driverVersion = Device.current.driverVersion
-        let systemName = Device.current.systemName
+    private struct DriverStartOutput: Encodable {
+        let os: String
+        let driverVersion: String
+        let systemName: String
 
-        let deviceWidth = Device.current.deviceWidth
-        let deviceHeight = Device.current.deviceHeight
-        let channelWidth = Device.current.channelWidth
-        let channelHeight = Device.current.channelHeight
-        let channelX = Device.current.channelX
-        let channelY = Device.current.channelY
+        let deviceWidth: Double
+        let deviceHeight: Double
+        let channelWidth: Double
+        let channelHeight: Double
+        let channelX: Int
+        let channelY: Int
         
         let systemProperties = Device.Property.allCases.map { $0.rawValue }
         let systemButtons = Device.Button.allCases.map { $0.rawValue }
@@ -87,21 +87,33 @@ final class DriverController {
         let token = UUID().uuidString
         
         let status = "0"
-        let screenCapturePort = Device.current.screenCapturePort
+        let screenCapturePort: Int
     }
     
     private func startHandler(userAgent: String) -> HttpResponse {
         continueExecution = true
              
-        let output = DriverStartOutput()
+        let currentDevice = Device.current
+        let output = DriverStartOutput(
+            os: currentDevice.os,
+            driverVersion: currentDevice.driverVersion,
+            systemName: currentDevice.systemName,
+            deviceWidth: currentDevice .deviceWidth,
+            deviceHeight: currentDevice.deviceHeight,
+            channelWidth: currentDevice.channelWidth,
+            channelHeight: currentDevice.channelHeight,
+            channelX: currentDevice.channelX,
+            channelY: currentDevice.channelY,
+            screenCapturePort: currentDevice.screenCapturePort
+        )
+        
         AtsClient.current = AtsClient(token: output.token, userAgent: userAgent, ipAddress: "")
         sendLogs(type: logType.STATUS, message: "** DEVICE LOCKED BY : \(AtsClient.current!.userAgent) **")
         
-        return try! output.toHttpResponse()
+        return output.toHttpResponse()
     }
     
     private func stopHandler() -> HttpResponse {
-        print(application)
         sendLogs(type: logType.INFO, message: "Terminate app")
 
         application?.terminate()
@@ -114,7 +126,7 @@ final class DriverController {
         AtsClient.current = nil
         sendLogs(type: logType.STATUS, message: "** DEVICE UNLOCKED **")
 
-        return try! Router.Output(message: "stop ats driver").toHttpResponse()
+        return Output(message: "stop ats driver").toHttpResponse()
     }
     
     private func quitHandler() -> HttpResponse {
@@ -127,13 +139,13 @@ final class DriverController {
             XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
         }
         
-        return try! Router.Output(message: "close ats driver").toHttpResponse()
+        return Output(message: "close ats driver").toHttpResponse()
     }
     
     
     private func fetchInfoHandler() -> HttpResponse {
         guard let application = application else {
-            return try! Router.Output(message: "").toHttpResponse()
+            return Output(message: "").toHttpResponse()
         }
         
         let pattern = "'(.*?)'"
@@ -150,10 +162,10 @@ final class DriverController {
                 return .internalServerError
             }
             
-            return try! DriverInfoOutput(info: json).toHttpResponse()
+            return DriverInfoOutput(info: json).toHttpResponse()
         } catch {
             sendLogs(type: logType.ERROR, message: "Array convertIntoJSON - \(error.localizedDescription)")
-            return try! DriverInfoOutput(info: "").toHttpResponse()
+            return DriverInfoOutput(info: "").toHttpResponse()
         }
     }
 }

@@ -37,7 +37,7 @@
 		D82C1C6F252EFA16007D0313 /* Swifter in Frameworks */ = {isa = PBXBuildFile; productRef = D82C1C6E252EFA16007D0313 /* Swifter */; };
 		D82C1C73252EFAC8007D0313 /* Swifter in Frameworks */ = {isa = PBXBuildFile; productRef = D82C1C72252EFAC8007D0313 /* Swifter */; };
 		D82C1C8F252F4A0E007D0313 /* UDPConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = D82C1C8E252F4A0E007D0313 /* UDPConnect.swift */; };
-		D82C1C94252F4BB7007D0313 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE159245F007600156ECB /* Router.swift */; };
+		D82C1C94252F4BB7007D0313 /* Output.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE159245F007600156ECB /* Output.swift */; };
 		D8865A8A24C98099003C45D5 /* PropertyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8865A8924C98099003C45D5 /* PropertyController.swift */; };
 /* End PBXBuildFile section */
 
@@ -80,7 +80,7 @@
 		923AE153245874E800156ECB /* CaptureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureController.swift; sourceTree = "<group>"; };
 		923AE1552458755100156ECB /* InfoController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoController.swift; sourceTree = "<group>"; };
 		923AE1572459690400156ECB /* ScreenshotController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotController.swift; sourceTree = "<group>"; };
-		923AE159245F007600156ECB /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
+		923AE159245F007600156ECB /* Output.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Output.swift; sourceTree = "<group>"; };
 		923AE15B245F008500156ECB /* Routeable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Routeable.swift; sourceTree = "<group>"; };
 		923AE15D245F21DF00156ECB /* ButtonController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonController.swift; sourceTree = "<group>"; };
 		923AE160245F3D8100156ECB /* Application.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application.swift; sourceTree = "<group>"; };
@@ -175,7 +175,7 @@
 				923AE1552458755100156ECB /* InfoController.swift */,
 				D8865A8924C98099003C45D5 /* PropertyController.swift */,
 				923AE1572459690400156ECB /* ScreenshotController.swift */,
-				923AE159245F007600156ECB /* Router.swift */,
+				923AE159245F007600156ECB /* Output.swift */,
 				923AE15B245F008500156ECB /* Routeable.swift */,
 				92C416C42473D9D300A772AF /* Content.swift */,
 			);
@@ -371,7 +371,7 @@
 				92C416C32473CB5B00A772AF /* AtsClient.swift in Sources */,
 				D8020C47252CC7680077CD01 /* Settings.swift in Sources */,
 				D8865A8A24C98099003C45D5 /* PropertyController.swift in Sources */,
-				D82C1C94252F4BB7007D0313 /* Router.swift in Sources */,
+				D82C1C94252F4BB7007D0313 /* Output.swift in Sources */,
 				9A907BBD234901DF00F3DE15 /* AppIcons.swift in Sources */,
 				9254C2A02449A8E3006DC4FC /* ScriptingExecutor.swift in Sources */,
 				D82C1C0E252DF56C007D0313 /* atsDriver.swift in Sources */,

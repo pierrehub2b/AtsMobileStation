@@ -53,7 +53,7 @@ class HTTPServerManager {
     
     func routeOnMain(_ routingCall:@escaping ((Swifter.HttpRequest) -> Swifter.HttpResponse)) -> ((Swifter.HttpRequest) -> Swifter.HttpResponse) {
         return { (request: HttpRequest) -> HttpResponse in
-            var response:HttpResponse = HttpResponse.internalServerError
+            var response: HttpResponse = HttpResponse.internalServerError
             DispatchQueue.main.sync {
                 response = routingCall(request)
             }
@@ -136,8 +136,6 @@ extension HTTPServerManager {
     }
     
     private func getWiFiAddress() -> String? {
-        var address : String?
-        
         // Get list of all interfaces on the local machine:
         var ifaddr : UnsafeMutablePointer<ifaddrs>?
         guard getifaddrs(&ifaddr) == 0 else { return nil }
@@ -158,7 +156,6 @@ extension HTTPServerManager {
                     var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
                     getnameinfo(interface.ifa_addr, socklen_t(interface.ifa_addr.pointee.sa_len), &hostname, socklen_t(hostname.count), nil, socklen_t(0), NI_NUMERICHOST)
                     return String(cString: hostname)
-                    break
                 } else if name == "en1" && Device.current.isSimulator {
                     var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
                     getnameinfo(interface.ifa_addr, socklen_t(interface.ifa_addr.pointee.sa_len), &hostname, socklen_t(hostname.count), nil, socklen_t(1), NI_NUMERICHOST)
@@ -166,8 +163,8 @@ extension HTTPServerManager {
                 }
             }
         }
-        freeifaddrs(ifaddr)
         
-        return address
+        freeifaddrs(ifaddr)
+        return nil
     }
 }

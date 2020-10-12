@@ -22,7 +22,7 @@ extension AppController: Routeable {
         let actionValue = bodyParameters.removeFirst()
         
         guard let action = AppAction(rawValue: actionValue) else {
-            return try! Router.Output(message: "missing app action type \(actionValue)", status: "-42").toHttpResponse()
+            return Output(message: "missing app action type \(actionValue)", status: "-42").toHttpResponse()
         }
         
         switch action {
@@ -43,14 +43,14 @@ final class AppController {
         case `switch`
     }
     
-    private struct StartOutput: Content {
+    private struct StartOutput: Encodable {
         let status: String = "0"
         let label: String
         let icon: String = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
         let version: String = "0.0.0"
     }
     
-    private struct InfoOutput: Content {
+    private struct InfoOutput: Encodable {
         struct Info: Encodable {
             let os = "ios"
             let icon = ""
@@ -69,7 +69,7 @@ final class AppController {
         guard Device.current.applications.map({ $0.packageName }).contains(bundleIdentifier) else {
             sendLogs(type: logType.ERROR, message: "Error on app launching: \(bundleIdentifier)")
             application = nil
-            return try! Router.Output(message: "app package not found : \(bundleIdentifier)", status: "-51").toHttpResponse()
+            return Output(message: "app package not found : \(bundleIdentifier)", status: "-51").toHttpResponse()
         }
         
         sendLogs(type: logType.INFO, message: "Launching app \(bundleIdentifier)")
@@ -77,7 +77,7 @@ final class AppController {
         application = XCUIApplication(bundleIdentifier: bundleIdentifier)
         application.launch()
                   
-        return try! StartOutput(label: application.label).toHttpResponse()
+        return StartOutput(label: application.label).toHttpResponse()
     }
     
     private func stopHandler(_ parameters: [String]) -> HttpResponse {
@@ -91,7 +91,7 @@ final class AppController {
         application.terminate()
         application = nil
         
-        return try! Router.Output(message: "stop app \(bundleIdentifier)").toHttpResponse()
+        return Output(message: "stop app \(bundleIdentifier)").toHttpResponse()
     }
     
     private func switchHandler(_ parameters: [String]) -> HttpResponse {
@@ -104,10 +104,10 @@ final class AppController {
         application = XCUIApplication(bundleIdentifier: bundleIdentifier)
         application.activate()
         
-        return try! Router.Output(message: "switch app \(bundleIdentifier)").toHttpResponse()
+        return Output(message: "switch app \(bundleIdentifier)").toHttpResponse()
     }
     
     private func fetchInfoHandler() -> HttpResponse {
-        return try! InfoOutput().toHttpResponse()
+        return InfoOutput().toHttpResponse()
     }
 }

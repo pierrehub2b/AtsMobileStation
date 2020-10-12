@@ -29,19 +29,6 @@
       shouldUseLaunchSchemeArgsEnv = "NO"
       disableMainThreadChecker = "YES"
       systemAttachmentLifetime = "keepNever">
-      <CommandLineArguments>
-         <CommandLineArgument
-            argument = "CUSTOM_PORT"
-            isEnabled = "YES">
-         </CommandLineArgument>
-      </CommandLineArguments>
-      <EnvironmentVariables>
-         <EnvironmentVariable
-            key = "CUSTOM_PORT"
-            value = "lalalala"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-      </EnvironmentVariables>
       <Testables>
          <TestableReference
             skipped = "NO">

@@ -13,13 +13,16 @@ extension CaptureController: Routeable {
     var name: String { return "capture" }
     
     func handleRoutes(_ request: HttpRequest) -> HttpResponse {
-        return fetchCaptureInfo()
+        let response = fetchCaptureInfo()
+        print(response)
+        return response
+        // return fetchCaptureInfo()
     }
 }
 
 final class CaptureController {
     
-    private struct Output: Content {
+    private struct CaptureOutput: Encodable {
         let status = "0"
         let message = "root_description"
         let deviceWidth = Device.current.channelWidth
@@ -27,11 +30,11 @@ final class CaptureController {
         let root: String
     }
         
-    private func fetchCaptureInfo() -> HttpResponse {
+    private func fetchCaptureInfo() -> HttpResponse {        
         guard let application = application else {
-            return try! Router.Output(message: "no app has been launched", status: "-99").toHttpResponse()
+            return Output(message: "no app has been launched", status: "-99").toHttpResponse()
         }
 
-        return try! Output(root: application.debugDescription).toHttpResponse()
+        return CaptureOutput(root: application.debugDescription).toHttpResponse()
     }
 }

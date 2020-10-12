@@ -25,9 +25,9 @@ extension ButtonController: Routeable {
         switch action {
         case .lock:
             XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
-            return try! Router.Output(message: "press \(action.rawValue) button").toHttpResponse()
+            return Output(message: "press \(action.rawValue) button").toHttpResponse()
         default:
-            return try! pressButton(action)
+            return pressButton(action)
         }
     }
 }
@@ -38,12 +38,12 @@ final class ButtonController {
         case unknowButton
     }
     
-    private func pressButton(_ action:Device.Button) throws -> HttpResponse {
+    private func pressButton(_ action:Device.Button) -> HttpResponse {
         if let deviceButton = transformAction(action) {
             XCUIDevice.shared.press(deviceButton)
-            return try Router.Output(message: "press \(action.rawValue) button").toHttpResponse()
+            return Output(message: "press \(action.rawValue) button").toHttpResponse()
         } else {
-            return try Router.Output(message: "press \(action.rawValue) button").toHttpResponse()
+            return Output(message: "press \(action.rawValue) button").toHttpResponse()
         }
     }
     

@@ -31,33 +31,33 @@ extension PropertyController: Routeable {
         }
         
         switch action {
-        case .airplaneModeEnabled:  return try! PropertyController.setAirplaneModeEnabled(propertyValue)
-        case .bluetoothEnabled:     return try! PropertyController.setBluetoothModeEnabled(propertyValue)
-        case .brightness:           return try! PropertyController.setBrightness(propertyValue)
-        case .orientation:          return try! PropertyController.setOrientation(propertyValue)
-        case .volume:               return try! PropertyController.setVolume(propertyValue)
-        case .cellularDataEnabled:  return try! PropertyController.setCellularDataEnabled(propertyValue)
-        case .wifiEnabled:          return try! PropertyController.setWifiEnabled(propertyValue)
+        case .airplaneModeEnabled:  return PropertyController.setAirplaneModeEnabled(propertyValue)
+        case .bluetoothEnabled:     return PropertyController.setBluetoothModeEnabled(propertyValue)
+        case .brightness:           return PropertyController.setBrightness(propertyValue)
+        case .orientation:          return PropertyController.setOrientation(propertyValue)
+        case .volume:               return PropertyController.setVolume(propertyValue)
+        case .cellularDataEnabled:  return PropertyController.setCellularDataEnabled(propertyValue)
+        case .wifiEnabled:          return PropertyController.setWifiEnabled(propertyValue)
         }
     }
 }
 
 final class PropertyController {
     
-    private static func setAirplaneModeEnabled(_ value:String) throws -> HttpResponse {
+    private static func setAirplaneModeEnabled(_ value:String) -> HttpResponse {
         guard let _ = booleanFromString(value) else {
-            return try Router.Output(message: "bad value").toHttpResponse()
+            return Output(message: "bad value").toHttpResponse()
         }
         
-        return try Router.Output(message: "property not available").toHttpResponse()
+        return Output(message: "property not available").toHttpResponse()
     }
     
-    private static func setWifiEnabled(_ value:String) throws -> HttpResponse {
+    private static func setWifiEnabled(_ value:String) -> HttpResponse {
         guard let _ = booleanFromString(value) else {
-            return try Router.Output(message: "bad value").toHttpResponse()
+            return Output(message: "bad value").toHttpResponse()
         }
         
-        return try Router.Output(message: "property not available").toHttpResponse()
+        return Output(message: "property not available").toHttpResponse()
         
         /*
          settingsApp.launch()
@@ -72,14 +72,14 @@ final class PropertyController {
          */
     }
     
-    private static func setCellularDataEnabled(_ value:String) throws -> HttpResponse {
+    private static func setCellularDataEnabled(_ value:String) -> HttpResponse {
         guard let enabled = booleanFromString(value) else {
-            return try Router.Output(message: "bad value").toHttpResponse()
+            return Output(message: "bad value").toHttpResponse()
         }
         
         #if targetEnvironment(simulator)
         
-        return try Router.Output(message: "property not available").toHttpResponse()
+        return try Output.Output(message: "property not available").toHttpResponse()
         
         #else
         
@@ -88,22 +88,22 @@ final class PropertyController {
         
         do {
             try enableSwitch(enabled, atIndex: 0)
-            return try Router.Output(message: "property set").toHttpResponse()
+            return Output(message: "property set").toHttpResponse()
         } catch {
-            return try Router.Output(message: "property set").toHttpResponse()
+            return Output(message: "property set").toHttpResponse()
         }
         
         #endif
     }
     
     
-    private static func setBluetoothModeEnabled(_ value:String) throws -> HttpResponse {
+    private static func setBluetoothModeEnabled(_ value:String) -> HttpResponse {
         guard let enabled = booleanFromString(value) else {
-            return try Router.Output(message: "bad value").toHttpResponse()
+            return Output(message: "bad value").toHttpResponse()
         }
         
         #if targetEnvironment(simulator)
-        return try Router.Output(message: "property not available").toHttpResponse()
+        return try Output.Output(message: "property not available").toHttpResponse()
         #else
         
         settingsApp.launch()
@@ -112,7 +112,7 @@ final class PropertyController {
         do {
             try enableSwitch(enabled, atIndex: 1)
             application.launch()
-            return try Router.Output(message: "property set").toHttpResponse()
+            return Output(message: "property set").toHttpResponse()
         } catch {
             return .internalServerError
         }
@@ -121,24 +121,24 @@ final class PropertyController {
     }
     
     
-    private static func setOrientation(_ value:String) throws -> HttpResponse {
+    private static func setOrientation(_ value:String) -> HttpResponse {
         guard let intValue = Int(value), let deviceOrientation = UIDeviceOrientation(rawValue: intValue) else {
-            return try Router.Output(message: "bad value").toHttpResponse()
+            return Output(message: "bad value").toHttpResponse()
         }
         
         XCUIDevice.shared.orientation = deviceOrientation
         
-        return try Router.Output(message: "property set").toHttpResponse()
+        return Output(message: "property set").toHttpResponse()
     }
     
-    private static func setBrightness(_ value:String) throws -> HttpResponse {
+    private static func setBrightness(_ value:String) -> HttpResponse {
         guard let intValue = Int(value) else {
-            return try Router.Output(message: "bad value").toHttpResponse()
+            return Output(message: "bad value").toHttpResponse()
         }
         
         #if targetEnvironment(simulator)
         
-        return try Router.Output(message: "property not available").toHttpResponse()
+        return try Output(message: "property not available").toHttpResponse()
         
         #else
         
@@ -148,19 +148,19 @@ final class PropertyController {
         settingsApp.cells.allElementsBoundByIndex[12].tap()
         settingsApp.sliders.allElementsBoundByIndex.first!.adjust(toNormalizedSliderPosition: floatValue)
         
-        return try Router.Output(message: "property set").toHttpResponse()
+        return Output(message: "property set").toHttpResponse()
         
         #endif
     }
     
-    private static func setVolume(_ value:String) throws -> HttpResponse {
+    private static func setVolume(_ value:String) -> HttpResponse {
         guard let intValue = Int(value) else {
-            return try Router.Output(message: "bad value").toHttpResponse()
+            return Output(message: "bad value").toHttpResponse()
         }
         
         #if targetEnvironment(simulator)
         
-        return try Router.Output(message: "property not available").toHttpResponse()
+        return try Output(message: "property not available").toHttpResponse()
         
         #else
         
@@ -170,13 +170,12 @@ final class PropertyController {
         settingsApp.cells.allElementsBoundByIndex[7].tap()
         settingsApp.sliders.allElementsBoundByIndex.first!.adjust(toNormalizedSliderPosition: floatValue)
         
-        return try Router.Output(message: "property set").toHttpResponse()
+        return Output(message: "property set").toHttpResponse()
         
         #endif
     }
     
     private static let settingsApp = XCUIApplication(bundleIdentifier: "com.apple.Preferences")
-    
     
     private enum EnableSwitchError: Error {
         case elementNotFound
@@ -199,7 +198,6 @@ final class PropertyController {
          }*/
         
         let element = settingsApp.switches.element(boundBy: 0)
-        print(element.debugDescription)
         
         guard let elementValue = element.value as? String, let boolValue = Bool(elementValue) else {
             throw EnableSwitchError.badElementValue
