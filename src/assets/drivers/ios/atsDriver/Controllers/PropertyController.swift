@@ -1,10 +1,19 @@
+//Licensed to the Apache Software Foundation (ASF) under one
+//or more contributor license agreements.  See the NOTICE file
+//distributed with this work for additional information
+//    regarding copyright ownership.  The ASF licenses this file
+//to you under the Apache License, Version 2.0 (the
+//"License"); you may not use this file except in compliance
+//with the License.  You may obtain a copy of the License at
 //
-//  PropertyController.swift
-//  atsDriver
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Created by Caipture on 23/07/2020.
-//  Copyright © 2020 CAIPTURE. All rights reserved.
-//
+//Unless required by applicable law or agreed to in writing,
+//software distributed under the License is distributed on an
+//"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//KIND, either express or implied.  See the License for the
+//specific language governing permissions and limitations
+//under the License.
 
 import Foundation
 import XCTest
@@ -18,7 +27,7 @@ extension PropertyController: Routeable {
         guard let bodyString = String(bytes: request.body, encoding: .utf8) else {
             return .internalServerError
         }
-        
+
         var bodyParameters: [String] = bodyString.components(separatedBy: "\n")
         let actionValue = bodyParameters.removeFirst()
         
@@ -31,93 +40,98 @@ extension PropertyController: Routeable {
         }
         
         switch action {
-        case .airplaneModeEnabled:  return PropertyController.setAirplaneModeEnabled(propertyValue)
-        case .bluetoothEnabled:     return PropertyController.setBluetoothModeEnabled(propertyValue)
-        case .brightness:           return PropertyController.setBrightness(propertyValue)
+        case .airplaneModeEnabled:  return setAirplaneModeEnabled(propertyValue)
+        case .bluetoothEnabled:     return setBluetoothModeEnabled(propertyValue)
+        case .brightness:           return setBrightness(propertyValue)
         case .orientation:          return PropertyController.setOrientation(propertyValue)
-        case .volume:               return PropertyController.setVolume(propertyValue)
-        case .cellularDataEnabled:  return PropertyController.setCellularDataEnabled(propertyValue)
-        case .wifiEnabled:          return PropertyController.setWifiEnabled(propertyValue)
+        case .volume:               return setVolume(propertyValue)
+        case .cellularDataEnabled:  return setCellularDataEnabled(propertyValue)
+        case .wifiEnabled:          return setWifiEnabled(propertyValue)
         }
     }
 }
 
 final class PropertyController {
     
-    private static func setAirplaneModeEnabled(_ value:String) -> HttpResponse {
-        guard let _ = booleanFromString(value) else {
-            return Output(message: "bad value").toHttpResponse()
-        }
-        
+    private let settingsApp = XCUIApplication(bundleIdentifier: "com.apple.Preferences")
+    
+    var wiFiIndex: Int?
+    var airplaneModeIndex: Int!
+    var bluetoothIndex: Int!
+    var cellularDataIndex: Int!
+    
+    private func setAirplaneModeEnabled(_ value:String) -> HttpResponse {
         return Output(message: "property not available").toHttpResponse()
     }
     
-    private static func setWifiEnabled(_ value:String) -> HttpResponse {
-        guard let _ = booleanFromString(value) else {
-            return Output(message: "bad value").toHttpResponse()
-        }
-        
+    private func setWifiEnabled(_ value:String) -> HttpResponse {
         return Output(message: "property not available").toHttpResponse()
-        
-        /*
-         settingsApp.launch()
-         settingsApp.cells.allElementsBoundByIndex[2].tap()
-         
-         do {
-         try enableSwitch(enabled, atIndex: 0)
-         return Router.Output(message: "property set")
-         } catch {
-         return Router.Output(message: "property set")
-         }
-         */
     }
     
-    private static func setCellularDataEnabled(_ value:String) -> HttpResponse {
-        guard let enabled = booleanFromString(value) else {
-            return Output(message: "bad value").toHttpResponse()
-        }
-        
+    private func setCellularDataEnabled(_ value:String) -> HttpResponse {
         #if targetEnvironment(simulator)
+        return Output(message: "property not available").toHttpResponse()
+        #endif
         
-        return try Output.Output(message: "property not available").toHttpResponse()
-        
-        #else
+        guard let enabled = PropertyController.booleanFromString(value) else {
+            return Output(message: "bad value").toHttpResponse()
+        }
         
         settingsApp.launch()
-        settingsApp.cells.allElementsBoundByIndex[4].tap()
         
         do {
+            try fetchWiFiCellIndex()
+            let cell = settingsApp.cells.allElementsBoundByIndex[cellularDataIndex]
+            if cell.isEnabled {
+                cell.tap()
+                try enableSwitch(enabled, atIndex: 0)
+                application.activate()
+                return Output(message: "property set").toHttpResponse()
+            } else {
+                application.activate()
+                return Output(message: "property not enabled", status: "-11").toHttpResponse()
+            }
+        } catch is EnableSwitchError {
+            application.activate()
+            return Output(message: "property set").toHttpResponse()
+        } catch PropertyControllerError.wiFiIndexNotFound {
+            application.activate()
+            return Output(message: "property set").toHttpResponse()
+        } catch let error {
+            application.activate()
+            return Output(message: error.localizedDescription, status: "-11").toHttpResponse()
+        }
+    }
+    
+    
+    private func setBluetoothModeEnabled(_ value:String) -> HttpResponse {
+        #if targetEnvironment(simulator)
+        return Output(message: "property not available").toHttpResponse()
+        #endif
+        
+        guard let enabled = PropertyController.booleanFromString(value) else {
+            return Output(message: "bad value").toHttpResponse()
+        }
+        
+        settingsApp.launch()
+        
+        do {
+            try fetchWiFiCellIndex()
+            settingsApp.cells.allElementsBoundByIndex[bluetoothIndex].tap()
             try enableSwitch(enabled, atIndex: 0)
+            application.activate()
+            
             return Output(message: "property set").toHttpResponse()
-        } catch {
+        } catch is EnableSwitchError {
+            application.activate()
             return Output(message: "property set").toHttpResponse()
-        }
-        
-        #endif
-    }
-    
-    
-    private static func setBluetoothModeEnabled(_ value:String) -> HttpResponse {
-        guard let enabled = booleanFromString(value) else {
-            return Output(message: "bad value").toHttpResponse()
-        }
-        
-        #if targetEnvironment(simulator)
-        return try Output.Output(message: "property not available").toHttpResponse()
-        #else
-        
-        settingsApp.launch()
-        settingsApp.cells.allElementsBoundByIndex[3].tap()
-        
-        do {
-            try enableSwitch(enabled, atIndex: 1)
-            application.launch()
+        } catch PropertyControllerError.wiFiIndexNotFound {
+            application.activate()
             return Output(message: "property set").toHttpResponse()
-        } catch {
-            return .internalServerError
+        } catch let error {
+            application.activate()
+            return Output(message: error.localizedDescription, status: "-11").toHttpResponse()
         }
-        
-        #endif
     }
     
     
@@ -131,16 +145,14 @@ final class PropertyController {
         return Output(message: "property set").toHttpResponse()
     }
     
-    private static func setBrightness(_ value:String) -> HttpResponse {
+    private func setBrightness(_ value:String) -> HttpResponse {
+        #if targetEnvironment(simulator)
+        return Output(message: "property not available").toHttpResponse()
+        #endif
+        
         guard let intValue = Int(value) else {
             return Output(message: "bad value").toHttpResponse()
         }
-        
-        #if targetEnvironment(simulator)
-        
-        return try Output(message: "property not available").toHttpResponse()
-        
-        #else
         
         let floatValue = CGFloat(intValue) / 100.0
         
@@ -149,61 +161,35 @@ final class PropertyController {
         settingsApp.sliders.allElementsBoundByIndex.first!.adjust(toNormalizedSliderPosition: floatValue)
         
         return Output(message: "property set").toHttpResponse()
-        
-        #endif
     }
     
-    private static func setVolume(_ value:String) -> HttpResponse {
+    private func setVolume(_ value:String) -> HttpResponse {
+        #if targetEnvironment(simulator)
+        return Output(message: "property not available").toHttpResponse()
+        #endif
+        
         guard let intValue = Int(value) else {
             return Output(message: "bad value").toHttpResponse()
         }
         
-        #if targetEnvironment(simulator)
-        
-        return try Output(message: "property not available").toHttpResponse()
-        
-        #else
-        
         let floatValue = CGFloat(intValue) / 100.0
-        
+                
         settingsApp.launch()
         settingsApp.cells.allElementsBoundByIndex[7].tap()
         settingsApp.sliders.allElementsBoundByIndex.first!.adjust(toNormalizedSliderPosition: floatValue)
-        
+             
         return Output(message: "property set").toHttpResponse()
-        
-        #endif
     }
-    
-    private static let settingsApp = XCUIApplication(bundleIdentifier: "com.apple.Preferences")
-    
+        
     private enum EnableSwitchError: Error {
         case elementNotFound
         case badElementValue
     }
     
-    private static func enableSwitch(_ enabled:Bool, atIndex index:Int) throws {
-        // let allSwitches = settingsApp.switches.count
-        print(settingsApp.description)
-        // print(allSwitches)
-        
-        // for index in 0...allSwitches - 1 {
-        // print("AAAAAAAAAAAAAAAAAH")
-        // print(settingsApp.switches.element(boundBy: index).debugDescription)
-        // }
-        
-        
-        /*guard !allSwitches.isEmpty else {
-         throw EnableSwitchError.elementNotFound
-         }*/
-        
-        let element = settingsApp.switches.element(boundBy: 0)
-        
-        guard let elementValue = element.value as? String, let boolValue = Bool(elementValue) else {
-            throw EnableSwitchError.badElementValue
-        }
-        
-        if enabled != boolValue {
+    private func enableSwitch(_ enabled:Bool, atIndex index:Int) throws {
+        let element = settingsApp.switches.allElementsBoundByIndex[index]
+                
+        if let value = element.value as? String, let boolValue = PropertyController.booleanFromString(value), enabled != boolValue {
             element.tap()
         }
     }
@@ -216,16 +202,26 @@ final class PropertyController {
         }
     }
     
-    /*
-     private static func setNightModeEnabled(_ value:String) -> Router.Output {
-     guard let enabled = Bool(value) else {
-     return Router.Output(message: "bad value")
-     }
-     
-     settingsApp.launch()
-     settingsApp.cells.allElementsBoundByIndex[12].tap()
-     
-     return Router.Output(message: "bad value")
-     }
-     */
+    private enum PropertyControllerError: Error {
+        case wiFiIndexNotFound
+    }
+    
+    private func fetchWiFiCellIndex() throws  {
+        guard self.wiFiIndex == nil else { return }
+        
+        settingsApp.cells.allElementsBoundByIndex.enumerated().forEach { (index, element) in
+            if element.label == "Wi-Fi" {
+                self.wiFiIndex = index
+                return
+            }
+        }
+        
+        guard let wiFiIndex = self.wiFiIndex else {
+            throw PropertyControllerError.wiFiIndexNotFound
+        }
+        
+        self.airplaneModeIndex = wiFiIndex - 1
+        self.bluetoothIndex = wiFiIndex + 1
+        self.cellularDataIndex = wiFiIndex + 2
+    }
 }

@@ -55,8 +55,6 @@ package com.ats.device.running
 			this.manufacturer = "Apple";
 			this.simulator = simulator;
 			
-			this.driverDirectory =  File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id)
-			
 			//---------------------------------------------------------------------------------------
 			
 			dateFormatter.setDateTimePattern("yyyy-MM-dd hh:mm:ss")
@@ -107,7 +105,8 @@ package com.ats.device.running
 				errorMessage = " - No development team id set";
 				return;
 			}
-
+			
+			driverDirectory =  File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id)
 			if (!driverDirectory.exists || driverDirectory.resolvePath("atsDriver").modificationDate < iosDriverProjectFolder.resolvePath("atsDriver").modificationDate) {
 				iosDriverProjectFolder.copyTo(driverDirectory, true)
 				needsBuilding = true

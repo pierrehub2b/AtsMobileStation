@@ -1,18 +1,23 @@
+//Licensed to the Apache Software Foundation (ASF) under one
+//or more contributor license agreements.  See the NOTICE file
+//distributed with this work for additional information
+//    regarding copyright ownership.  The ASF licenses this file
+//to you under the Apache License, Version 2.0 (the
+//"License"); you may not use this file except in compliance
+//with the License.  You may obtain a copy of the License at
 //
-//  AtsDriver2.swift
-//  atsDriver
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Created by Caipture on 07/10/2020.
-//  Copyright © 2020 CAIPTURE. All rights reserved.
-//
+//Unless required by applicable law or agreed to in writing,
+//software distributed under the License is distributed on an
+//"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//KIND, either express or implied.  See the License for the
+//specific language governing permissions and limitations
+//under the License.
 
 import XCTest
 import Swifter
 import Socket
-
-enum ATSError: Error {
-    case start
-}
 
 var application: XCUIApplication!
 
@@ -28,7 +33,7 @@ class atsDriver: XCTestCase {
         
     override func setUpWithError() throws {
         guard let settingsFileURL = Bundle(for: atsDriver.self).url(forResource: "Settings", withExtension: "json") else {
-            throw ATSError.start
+            throw DriverError.start("Settings file not found")
         }
         
         let data = try Data(contentsOf: settingsFileURL)
@@ -43,11 +48,11 @@ class atsDriver: XCTestCase {
         }
         
         guard applications.isEmpty == false else {
-            throw ATSError.start
+            throw DriverError.start("Applications is empty")
         }
         
         Device.current.setApplications(applications)
-        
+                
         application = XCUIApplication()
     }
 
@@ -55,18 +60,19 @@ class atsDriver: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
            
         // Close if running
-        httpServer.stopServer()
+        httpServer.stop()
+        udpConnection.stop()
     }
 
-    func testRunner() throws {
+    func testRunner() {
         udpConnection.start()
-        httpServer.startServer(httpPort)        
+        httpServer.startServer(httpPort)
     }
     
-    func fetchSimulatorApps() throws -> [String] {
+    private func fetchSimulatorApps() throws -> [String] {
         guard let url = Bundle.main.url(forResource: "../../../../../Library/SpringBoard/IconState", withExtension: "plist"),
             let myDict = NSDictionary(contentsOf: url) as? [String:Any] else {
-            throw ATSError.start
+            throw DriverError.start("Plist file corrupted")
         }
         
         var appsInstalled = getAllAppIds(from: myDict)
@@ -79,7 +85,7 @@ class atsDriver: XCTestCase {
         return appsInstalled
     }
     
-    func getAllAppIds(from dic: [String: Any]) -> [String] {
+    private func getAllAppIds(from dic: [String: Any]) -> [String] {
         guard let iconLists = dic["iconLists"] as? [[Any]] else {
             return []
         }

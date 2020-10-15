@@ -15,10 +15,7 @@
 //specific language governing permissions and limitations
 //under the License.
 
-struct Application: Encodable {
+enum DriverError: Error {
     
-    let label: String
-    let packageName: String
-    let version: String
-    let icon: String
+    case start(_ reason: String)
 }

@@ -1,10 +1,19 @@
+//Licensed to the Apache Software Foundation (ASF) under one
+//or more contributor license agreements.  See the NOTICE file
+//distributed with this work for additional information
+//    regarding copyright ownership.  The ASF licenses this file
+//to you under the Apache License, Version 2.0 (the
+//"License"); you may not use this file except in compliance
+//with the License.  You may obtain a copy of the License at
 //
-//  Server.swift
-//  atsDriver
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Created by Caipture on 07/10/2020.
-//  Copyright © 2020 CAIPTURE. All rights reserved.
-//
+//Unless required by applicable law or agreed to in writing,
+//software distributed under the License is distributed on an
+//"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//KIND, either express or implied.  See the License for the
+//specific language governing permissions and limitations
+//under the License.
 
 import Foundation
 import Swifter
@@ -23,24 +32,26 @@ class HTTPServerManager {
             registerRouteControllers()
             
             if let wifiAddress = getWiFiAddress() {
-                sendLogs(type: logType.STATUS, message: "ATSDRIVER_DRIVER_HOST=\(wifiAddress):\(try! server.port())")
-                RunLoop.main.run()
+                sendLogs(type: .status, message: "ATSDRIVER_DRIVER_HOST=\(wifiAddress):\(try! server.port())")
             } else {
-                sendLogs(type: logType.STATUS, message: "** WIFI NOT CONNECTED **")
+                sendLogs(type: .status, message: "** WIFI NOT CONNECTED **")
             }
+            
+            print(try server.port())
+            RunLoop.main.run()
             
         } catch {
             print("Server start error: \(error)")
         }
     }
     
-    func stopServer() {
+    func stop() {
         server.stop()
     }
     
     private func registerRouteControllers() {
         controllers.append(AppController())
-        controllers.append(ButtonController())
+        controllers.append(ButtonController()) 
         controllers.append(CaptureController())
         controllers.append(DriverController())
         controllers.append(ElementController())
@@ -51,7 +62,7 @@ class HTTPServerManager {
         controllers.forEach { server.POST["/\($0.name)"] = routeOnMain($0.handleRoutes(_:)) }
     }
     
-    func routeOnMain(_ routingCall:@escaping ((Swifter.HttpRequest) -> Swifter.HttpResponse)) -> ((Swifter.HttpRequest) -> Swifter.HttpResponse) {
+    private func routeOnMain(_ routingCall:@escaping ((Swifter.HttpRequest) -> Swifter.HttpResponse)) -> ((Swifter.HttpRequest) -> Swifter.HttpResponse) {
         return { (request: HttpRequest) -> HttpResponse in
             var response: HttpResponse = HttpResponse.internalServerError
             DispatchQueue.main.sync {

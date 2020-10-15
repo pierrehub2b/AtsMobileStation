@@ -1,10 +1,19 @@
+//Licensed to the Apache Software Foundation (ASF) under one
+//or more contributor license agreements.  See the NOTICE file
+//distributed with this work for additional information
+//    regarding copyright ownership.  The ASF licenses this file
+//to you under the Apache License, Version 2.0 (the
+//"License"); you may not use this file except in compliance
+//with the License.  You may obtain a copy of the License at
 //
-//  UDPConnect.swift
-//  atsDriver
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Created by Caipture on 08/10/2020.
-//  Copyright © 2020 CAIPTURE. All rights reserved.
-//
+//Unless required by applicable law or agreed to in writing,
+//software distributed under the License is distributed on an
+//"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//KIND, either express or implied.  See the License for the
+//specific language governing permissions and limitations
+//under the License.
 
 import Socket
 import UIKit
@@ -15,20 +24,25 @@ class UDPConnect {
     static let current = UDPConnect()
     
     private var imgView: Data!
+    private var socket: Socket!
     
     private let udpThread = DispatchQueue(label: "udpQueue" + UUID().uuidString, qos: .userInitiated)
     
     func start() {
         udpThread.async {
-            sendLogs(type: logType.INFO, message: "Starting UDP server on port: \(Device.current.screenCapturePort)")
+            sendLogs(type: .info, message: "Starting UDP server on port: \(Device.current.screenCapturePort)")
             self.udpStart()
         }
     }
     
-    func udpStart() {
+    func stop() {
+        socket.close()
+    }
+    
+    private func udpStart() {
         do {
             var data = Data()
-            let socket = try Socket.create(family: .inet, type: .datagram, proto: .udp)
+            socket = try Socket.create(family: .inet, type: .datagram, proto: .udp)
             
             repeat {
                 let currentConnection = try socket.listen(forMessage: &data, on: Device.current.screenCapturePort)
@@ -36,14 +50,14 @@ class UDPConnect {
             } while true
         } catch let error {
             guard let socketError = error as? Socket.Error else {
-                sendLogs(type: logType.ERROR, message: "Unexpected error...")
+                sendLogs(type: .error, message: "Unexpected error...")
                 return
             }
-            sendLogs(type: logType.ERROR, message: "Error on socket instance creation: \(socketError.description)")
+            sendLogs(type: .error, message: "Error on socket instance creation: \(socketError.description)")
         }
     }
     
-    func addNewConnection(socket: Socket, currentConnection: (bytesRead: Int, address: Socket.Address?)) {
+    private func addNewConnection(socket: Socket, currentConnection: (bytesRead: Int, address: Socket.Address?)) {
         let bufferSize = 2000
         var offset = 0
         
@@ -56,7 +70,7 @@ class UDPConnect {
             workItem.wait()
             
             let img = self.imgView
-            if(img != nil) {
+            if (img != nil) {
                 repeat {
                     let thisChunkSize = ((img!.count - offset) > bufferSize) ? bufferSize : (img!.count - offset);
                     var chunk = img!.subdata(in: offset..<offset + thisChunkSize)
@@ -64,8 +78,8 @@ class UDPConnect {
                     let uint32Offset = UInt32(offset - thisChunkSize)
                     let uint32RemainingData = UInt32(img!.count - offset)
                     
-                    let offSetTable = self.toByteArrary(value: uint32Offset)
-                    let remainingDataTable = self.toByteArrary(value: uint32RemainingData)
+                    let offSetTable = UDPConnect.toByteArrary(value: uint32Offset)
+                    let remainingDataTable = UDPConnect.toByteArrary(value: uint32RemainingData)
                     
                     chunk.insert(contentsOf: offSetTable + remainingDataTable, at: 0)
                     
@@ -76,17 +90,17 @@ class UDPConnect {
         }
         catch let error {
             guard let socketError = error as? Socket.Error else {
-                sendLogs(type: logType.ERROR, message: "Unexpected error by connection at \(socket.remoteHostname):\(socket.remotePort)...")
+                sendLogs(type: .error, message: "Unexpected error by connection at \(socket.remoteHostname):\(socket.remotePort)...")
                 return
             }
             if continueExecution {
-                sendLogs(type: logType.ERROR, message: "Error reported by connection at \(socket.remoteHostname):\(socket.remotePort):\n \(socketError.description)")
+                sendLogs(type: .error, message: "Error reported by connection at \(socket.remoteHostname):\(socket.remotePort):\n \(socketError.description)")
             }
         }
         
     }
     
-    func refreshView() {
+    private func refreshView() {
         let device = Device.current
         UIGraphicsBeginImageContextWithOptions(CGSize(width: device.channelWidth, height: device.channelHeight), true, 0.60)
         XCUIScreen.main.screenshot().image.draw(in: CGRect(x: 0, y: 0, width: device.channelWidth, height: device.channelHeight))
@@ -96,7 +110,7 @@ class UDPConnect {
         self.imgView = (newImage ?? UIImage()).jpegData(compressionQuality: 0.2)
     }
     
-    func toByteArrary<T>(value: T)  -> [UInt8] where T: UnsignedInteger, T: FixedWidthInteger{
+    private static func toByteArrary<T>(value: T)  -> [UInt8] where T: UnsignedInteger, T: FixedWidthInteger{
         var bigEndian = value.bigEndian
         let count = MemoryLayout<T>.size
         let bytePtr = withUnsafePointer(to: &bigEndian) {

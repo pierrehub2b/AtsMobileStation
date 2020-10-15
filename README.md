@@ -1,5 +1,5 @@
 # AtsMobileStation
-PC and MacOS application to start and install mobile drivers used by ATS test framework
+Windows and MacOS application to start and install mobile drivers used by ATS test framework
 
 # Before unzipping AtsMobileStation on MacOS, please do actions below
 - Run the command at the location of the application archive folder: xattr -r -d com.apple.quarantine AtsMobileStation.zip
@@ -23,23 +23,17 @@ To execute automated tests on physical iPhone devices, you need to create an App
 - When you're logged, click on "Manage Certificates". If there is no certificate associated with your workstation (no one is enlightened), click on "+" button -> "Apple Development" and "Done"
 - Save and quit Xcode
 
-### 2/ Set the Development team ID and retrieve the devices list
+### 2/ Set the Development team ID
 - Open AtsMobileStation and plug an iPhone device
 - In the 'Connected devices' section, click on Apple logo
 - In the textbox, put your Development team ID
-- Click on 'Export device list' and save the output file on your disk
 
-### 3/ Push informations to Apple Developer Website
-- Go and login to your apple dev account (https://developer.apple.com)
-- Go to 'Certificates, ID's and profiles' -> 'Devices' and add new devices by pushing '+' button
-- In 'Register Multiple Devices', upload the file generated previously and save
-
-### 4/ Test if driver working effectively
+### 3/ Test if driver working effectively
 - Go to AtsMobileStation
 - unplug and plug your iPhone device
 - your driver should start (by seeing the green check image, and show you an Ip adress and port)
 
-### 5/ Error handling
+### 4/ Error handling
 - If the Apple keychain access ask credential recurrently: 
   - unplug the device
   - open the keychain access application

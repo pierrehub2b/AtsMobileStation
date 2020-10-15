@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0400C0A8231D145B004CD4C9 /* UIDeviceName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0400C0A7231D145B004CD4C9 /* UIDeviceName.swift */; };
-		0417A8752315366D0094FC89 /* EnumFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0417A8742315366D0094FC89 /* EnumFunctions.swift */; };
 		047BFA6822F178D700BB2E25 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047BFA6722F178D700BB2E25 /* AppDelegate.swift */; };
 		047BFA6D22F178D700BB2E25 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 047BFA6B22F178D700BB2E25 /* Main.storyboard */; };
 		047BFA7222F178D800BB2E25 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 047BFA7122F178D800BB2E25 /* Assets.xcassets */; };
@@ -38,6 +36,7 @@
 		D82C1C73252EFAC8007D0313 /* Swifter in Frameworks */ = {isa = PBXBuildFile; productRef = D82C1C72252EFAC8007D0313 /* Swifter */; };
 		D82C1C8F252F4A0E007D0313 /* UDPConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = D82C1C8E252F4A0E007D0313 /* UDPConnect.swift */; };
 		D82C1C94252F4BB7007D0313 /* Output.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE159245F007600156ECB /* Output.swift */; };
+		D8419176253744DD0094D2EF /* DriverError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8419175253744DD0094D2EF /* DriverError.swift */; };
 		D8865A8A24C98099003C45D5 /* PropertyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8865A8924C98099003C45D5 /* PropertyController.swift */; };
 /* End PBXBuildFile section */
 
@@ -52,8 +51,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0400C0A7231D145B004CD4C9 /* UIDeviceName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDeviceName.swift; sourceTree = "<group>"; };
-		0417A8742315366D0094FC89 /* EnumFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnumFunctions.swift; sourceTree = "<group>"; };
 		043FEF81230C1DFD007051EF /* libBlueSocket.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libBlueSocket.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		046FFFB122F9BDF8008C6466 /* libUITestHelpers.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libUITestHelpers.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		047BFA6422F178D700BB2E25 /* atsios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = atsios.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -94,6 +91,7 @@
 		D82C1C0D252DF56C007D0313 /* atsDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = atsDriver.swift; sourceTree = "<group>"; };
 		D82C1C61252E103B007D0313 /* Device.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Device.swift; sourceTree = "<group>"; };
 		D82C1C8E252F4A0E007D0313 /* UDPConnect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPConnect.swift; sourceTree = "<group>"; };
+		D8419175253744DD0094D2EF /* DriverError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriverError.swift; sourceTree = "<group>"; };
 		D8865A8924C98099003C45D5 /* PropertyController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -160,6 +158,7 @@
 				D81F7E7A252DE7280091A02C /* HTTPServerManager.swift */,
 				D82C1C0D252DF56C007D0313 /* atsDriver.swift */,
 				D82C1C8E252F4A0E007D0313 /* UDPConnect.swift */,
+				D8419175253744DD0094D2EF /* DriverError.swift */,
 			);
 			path = atsDriver;
 			sourceTree = "<group>";
@@ -204,8 +203,6 @@
 		92C416C62473D9FF00A772AF /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				0417A8742315366D0094FC89 /* EnumFunctions.swift */,
-				0400C0A7231D145B004CD4C9 /* UIDeviceName.swift */,
 				9A907BBC234901DF00F3DE15 /* AppIcons.swift */,
 				2DFC38B02435ECC900E445DB /* sendLogs.swift */,
 			);
@@ -364,10 +361,8 @@
 				923AE15C245F008500156ECB /* Routeable.swift in Sources */,
 				D82C1C8F252F4A0E007D0313 /* UDPConnect.swift in Sources */,
 				D81F7E7B252DE7280091A02C /* HTTPServerManager.swift in Sources */,
-				0417A8752315366D0094FC89 /* EnumFunctions.swift in Sources */,
 				923AE1582459690400156ECB /* ScreenshotController.swift in Sources */,
 				923AE15024571FFB00156ECB /* DriverController.swift in Sources */,
-				0400C0A8231D145B004CD4C9 /* UIDeviceName.swift in Sources */,
 				92C416C32473CB5B00A772AF /* AtsClient.swift in Sources */,
 				D8020C47252CC7680077CD01 /* Settings.swift in Sources */,
 				D8865A8A24C98099003C45D5 /* PropertyController.swift in Sources */,
@@ -375,6 +370,7 @@
 				9A907BBD234901DF00F3DE15 /* AppIcons.swift in Sources */,
 				9254C2A02449A8E3006DC4FC /* ScriptingExecutor.swift in Sources */,
 				D82C1C0E252DF56C007D0313 /* atsDriver.swift in Sources */,
+				D8419176253744DD0094D2EF /* DriverError.swift in Sources */,
 				2DFC38B12435ECC900E445DB /* sendLogs.swift in Sources */,
 				D82C1C62252E103B007D0313 /* Device.swift in Sources */,
 				923AE1562458755100156ECB /* InfoController.swift in Sources */,
@@ -463,7 +459,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				NEW_SETTING = "";
@@ -521,7 +517,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				NEW_SETTING = "";
@@ -541,7 +537,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = X58W5PF95D;
 				INFOPLIST_FILE = atsios/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -563,7 +559,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = X58W5PF95D;
 				INFOPLIST_FILE = atsios/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
