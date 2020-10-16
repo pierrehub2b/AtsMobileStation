@@ -1,39 +1,41 @@
 # AtsMobileStation
-Windows and MacOS application to start and install mobile drivers used by ATS test framework
+AtsMobileStation is an application that manages the installation and startup of mobile drivers used by ATS test framework.  
+AtsMobileStation is available on Windows (Android testing) and macOS systems (Android and iOS testing).
 
-# Before unzipping AtsMobileStation on MacOS, please do actions below
-- Run the command at the location of the application archive folder: xattr -r -d com.apple.quarantine AtsMobileStation.zip
-- If not already install, launch the command: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-- Run the command: brew install openssl@1.1
-**After the first launch, your system possibly tells you that the library "luajit" is not safe. For authorize it, go to your security settings and click on button "allow acess"**
+## Android testing
 
-## iOS Devices
-**This procedure is useless if you're using iOS Simulators**
-### Apple Developer settings
-To execute automated tests on physical iPhone devices, you need to create an Apple developer account and subscribe to a developer licence
+### Requirements
+- macOS Catalina or Windows
+- AtsMobileStation
 
-### Prerequisites 
-- Have an Xcode downloaded and **installed**
-- The device **must be in WIFI mode and unlock pin code disabled**
+### Devices configuration
+- Disable device pin code 
+- Enable **developer mode** and authorize the connection to the linked computer
 
-### 1/ Setup provisionning profile into Xcode
+## iOS testing 
+
+### Requirements
+- macOS Catalina 
+- Xcode (download it on App Store)
+- AtsMobileStation for macOS
+- An Apple Developer account, and a developer license to test on physical devices 
+
+### Setup provisionning profile into Xcode
 - Open Xcode and go to 'Preferences' (Click on Xcode code in the left top corner)
 - In 'Accounts', add a new account using '+' button in the bottom left corner
 - Select 'Apple ID' in the dropdown list and enter your Apple Developer credentials in the next window
 - When you're logged, click on "Manage Certificates". If there is no certificate associated with your workstation (no one is enlightened), click on "+" button -> "Apple Development" and "Done"
-- Save and quit Xcode
 
-### 2/ Set the Development team ID
-- Open AtsMobileStation and plug an iPhone device
+### AtsMobileStation configuration
+- Open AtsMobileStation
 - In the 'Connected devices' section, click on Apple logo
 - In the textbox, put your Development team ID
 
-### 3/ Test if driver working effectively
-- Go to AtsMobileStation
-- unplug and plug your iPhone device
-- your driver should start (by seeing the green check image, and show you an Ip adress and port)
+### Devices configuration
+- Disable device pin code 
+- Enable Wi-Fi
 
-### 4/ Error handling
+### Error handling
 - If the Apple keychain access ask credential recurrently: 
   - unplug the device
   - open the keychain access application
@@ -44,9 +46,18 @@ To execute automated tests on physical iPhone devices, you need to create an App
   - enter your Mac credentials
   - plug your device again
 
-## Android devices
-### Prerequisites
-- the device **must be in WIFI and don't have a pin code** 
-- Enable the **developer mode** and authorize the connection to the linked computer
+## Installation on macOS
 
-**You can now go the ATS Framework and begin to use it with your physical device.**
+**Before unzipping and using AtsMobileStation on macOS, complete the following steps:**
+
+1. Install openssl
+- If Brew utility not already installed, open Terminal.app and type:  
+`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"`
+- Then run command:  
+`brew install openssl@1.1`
+
+2. Bypass Apple Gatekeeper
+- Download AtsMobileStation zip file.
+- Before unzipping file, open Terminal.app and type:  
+`xattr -r -d com.apple.quarantine /path/of/your/zip/file` 
+- Unzip the file and open it. If macOS popup asking for permission to open AtsMobileStation appears, delete the unzipped file and repeat the previous step.
