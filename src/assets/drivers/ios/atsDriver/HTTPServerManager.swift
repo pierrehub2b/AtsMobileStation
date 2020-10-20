@@ -37,9 +37,7 @@ class HTTPServerManager {
                 sendLogs(type: .status, message: "** WIFI NOT CONNECTED **")
             }
             
-            print(try server.port())
-            RunLoop.main.run()
-            
+            RunLoop.main.run()            
         } catch {
             print("Server start error: \(error)")
         }

@@ -28,7 +28,6 @@
 		D8020C38252CB28D0077CD01 /* Settings.json in Resources */ = {isa = PBXBuildFile; fileRef = D8020C37252CB28D0077CD01 /* Settings.json */; };
 		D8020C3F252CB3ED0077CD01 /* Settings.json in Resources */ = {isa = PBXBuildFile; fileRef = D8020C37252CB28D0077CD01 /* Settings.json */; };
 		D8020C47252CC7680077CD01 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8020C46252CC7680077CD01 /* Settings.swift */; };
-		D816CA1024B71C4D00B914C5 /* Socket in Frameworks */ = {isa = PBXBuildFile; productRef = D816CA0F24B71C4D00B914C5 /* Socket */; };
 		D81F7E7B252DE7280091A02C /* HTTPServerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D81F7E7A252DE7280091A02C /* HTTPServerManager.swift */; };
 		D82C1C0E252DF56C007D0313 /* atsDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D82C1C0D252DF56C007D0313 /* atsDriver.swift */; };
 		D82C1C62252E103B007D0313 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = D82C1C61252E103B007D0313 /* Device.swift */; };
@@ -108,7 +107,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D816CA1024B71C4D00B914C5 /* Socket in Frameworks */,
 				D82C1C73252EFAC8007D0313 /* Swifter in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -266,7 +264,6 @@
 			);
 			name = atsDriver;
 			packageProductDependencies = (
-				D816CA0F24B71C4D00B914C5 /* Socket */,
 				D82C1C72252EFAC8007D0313 /* Swifter */,
 			);
 			productName = agilitest_iosDriverUITests;
@@ -304,7 +301,6 @@
 			);
 			mainGroup = 047BFA5B22F178D700BB2E25;
 			packageReferences = (
-				D816CA0E24B71C4D00B914C5 /* XCRemoteSwiftPackageReference "BlueSocket" */,
 				D82C1C6D252EFA16007D0313 /* XCRemoteSwiftPackageReference "swifter" */,
 			);
 			productRefGroup = 047BFA6522F178D700BB2E25 /* Products */;
@@ -459,7 +455,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				NEW_SETTING = "";
@@ -517,7 +513,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				NEW_SETTING = "";
@@ -537,7 +533,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = X58W5PF95D;
 				INFOPLIST_FILE = atsios/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -559,7 +555,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = X58W5PF95D;
 				INFOPLIST_FILE = atsios/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -662,14 +658,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		D816CA0E24B71C4D00B914C5 /* XCRemoteSwiftPackageReference "BlueSocket" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/IBM-Swift/BlueSocket.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.52;
-			};
-		};
 		D82C1C6D252EFA16007D0313 /* XCRemoteSwiftPackageReference "swifter" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/httpswift/swifter.git";
@@ -681,11 +669,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		D816CA0F24B71C4D00B914C5 /* Socket */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = D816CA0E24B71C4D00B914C5 /* XCRemoteSwiftPackageReference "BlueSocket" */;
-			productName = Socket;
-		};
 		D82C1C6E252EFA16007D0313 /* Swifter */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = D82C1C6D252EFA16007D0313 /* XCRemoteSwiftPackageReference "swifter" */;
