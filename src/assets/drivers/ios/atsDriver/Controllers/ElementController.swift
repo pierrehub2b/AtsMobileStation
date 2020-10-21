@@ -103,6 +103,10 @@ final class ElementController {
     
     
     private func tapHandler(_ parameters: [String]) -> HttpResponse {
+        guard application.state == .runningForeground else {
+            return Output(message: "tap on element").toHttpResponse()
+        }
+        
         let vector = ElementController.getVector(parameters)
         application.coordinate(withNormalizedOffset: CGVector.zero).withOffset(vector).tap()
         
@@ -110,6 +114,10 @@ final class ElementController {
     }
     
     private func swipeHandler(_ parameters: [String]) -> HttpResponse {
+        guard application.state == .runningForeground else {
+            return Output(message: "tap on element").toHttpResponse()
+        }
+        
         let directionX = Double(parameters[2])!
         let directionY = Double(parameters[3])!
         
@@ -126,6 +134,10 @@ final class ElementController {
     }
     
     private func inputHandler(_ parameters: [String]) -> HttpResponse {
+        guard application.state == .runningForeground else {
+            return Output(message: "tap on element").toHttpResponse()
+        }
+        
         guard parameters.count > 2 else {
             return Output(message: "missing parameters").toHttpResponse()
         }
@@ -134,7 +146,7 @@ final class ElementController {
         if text == "&empty;" {
             return Output(message: "no keyboard on screen for tap text").toHttpResponse()
         } else {
-            if(application.keyboards.count > 0) {
+            if (application.keyboards.count > 0) {
                 application.typeText(text)
                 //sendLogs(type: logType.INFO, message: "Type text: \(text)")
                 return Output(message: "element send keys : \(text)").toHttpResponse()
