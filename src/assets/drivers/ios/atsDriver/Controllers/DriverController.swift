@@ -33,10 +33,10 @@ extension DriverController: Routeable {
         guard let bodyString = String(bytes: request.body, encoding: .utf8) else {
             return .accepted
         }
-            
+        
         var bodyParameters: [String] = bodyString.components(separatedBy: "\n")
         let actionValue = bodyParameters.removeFirst()
-            
+        
         guard let action = DriverAction(rawValue: actionValue) else {
             return .accepted
         }
@@ -48,9 +48,10 @@ extension DriverController: Routeable {
             }
             
             return startHandler(userAgent: userAgent)
-            case .stop: return stopHandler()
-            case .quit: return quitHandler()
-            case .info: return fetchInfoHandler()
+        case .stop: return stopHandler()
+        case .quit: return quitHandler()
+        case .info: return fetchInfoHandler()
+        case .test: return testHandler()
         }
     }
 }
@@ -62,6 +63,7 @@ final class DriverController {
         case stop
         case quit
         case info
+        case test
     }
     
     private struct DriverInfoOutput: Encodable {
@@ -87,7 +89,7 @@ final class DriverController {
         let mobileUser = ""
         let osBuild: String
         let country: String
-
+        
         let deviceWidth: CGFloat
         let deviceHeight: CGFloat
         let channelWidth: CGFloat
@@ -103,8 +105,7 @@ final class DriverController {
     }
     
     private func startHandler(userAgent: String) -> HttpResponse {
-        continueExecution = true
-             
+        
         let currentDevice = Device.current
         let output = DriverStartOutput(
             os:                 currentDevice.os,
@@ -128,9 +129,8 @@ final class DriverController {
     
     private func stopHandler() -> HttpResponse {
         sendLogs(type: LogType.info, message: "Terminate app")
-
+        
         application?.terminate()
-        continueExecution = false
         
         if !Device.current.isSimulator {
             XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
@@ -138,15 +138,14 @@ final class DriverController {
         
         AtsClient.current = nil
         sendLogs(type: LogType.status, message: "** DEVICE UNLOCKED **")
-
+        
         return Output(message: "stop ats driver").toHttpResponse()
     }
     
     private func quitHandler() -> HttpResponse {
         sendLogs(type: LogType.info, message: "Terminate app")
-
+        
         application?.terminate()
-        continueExecution = false
         
         if !Device.current.isSimulator {
             XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
@@ -180,6 +179,12 @@ final class DriverController {
             sendLogs(type: LogType.error, message: "Array convertIntoJSON - \(error.localizedDescription)")
             return DriverInfoOutput(info: "").toHttpResponse()
         }
+    }
+    
+    private func testHandler() -> HttpResponse {
+        print(application.debugDescription)
+        
+        return HttpResponse.accepted
     }
     
     private func getStateStringValue(rawValue: UInt) -> String {

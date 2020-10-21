@@ -71,8 +71,7 @@ final class PropertyController {
     private func setCellularDataEnabled(_ value:String) -> HttpResponse {
         #if targetEnvironment(simulator)
         return Output(message: "property not available").toHttpResponse()
-        #endif
-        
+        #else
         guard let enabled = PropertyController.booleanFromString(value) else {
             return Output(message: "bad value").toHttpResponse()
         }
@@ -101,14 +100,14 @@ final class PropertyController {
             application.activate()
             return Output(message: error.localizedDescription, status: "-11").toHttpResponse()
         }
+        #endif
     }
     
     
     private func setBluetoothModeEnabled(_ value:String) -> HttpResponse {
         #if targetEnvironment(simulator)
         return Output(message: "property not available").toHttpResponse()
-        #endif
-        
+        #else
         guard let enabled = PropertyController.booleanFromString(value) else {
             return Output(message: "bad value").toHttpResponse()
         }
@@ -132,6 +131,7 @@ final class PropertyController {
             application.activate()
             return Output(message: error.localizedDescription, status: "-11").toHttpResponse()
         }
+        #endif
     }
     
     
@@ -148,8 +148,7 @@ final class PropertyController {
     private func setBrightness(_ value:String) -> HttpResponse {
         #if targetEnvironment(simulator)
         return Output(message: "property not available").toHttpResponse()
-        #endif
-        
+        #else
         guard let intValue = Int(value) else {
             return Output(message: "bad value").toHttpResponse()
         }
@@ -161,13 +160,13 @@ final class PropertyController {
         settingsApp.sliders.allElementsBoundByIndex.first!.adjust(toNormalizedSliderPosition: floatValue)
         
         return Output(message: "property set").toHttpResponse()
+        #endif
     }
     
     private func setVolume(_ value:String) -> HttpResponse {
         #if targetEnvironment(simulator)
         return Output(message: "property not available").toHttpResponse()
-        #endif
-        
+        #else
         guard let intValue = Int(value) else {
             return Output(message: "bad value").toHttpResponse()
         }
@@ -179,6 +178,7 @@ final class PropertyController {
         settingsApp.sliders.allElementsBoundByIndex.first!.adjust(toNormalizedSliderPosition: floatValue)
              
         return Output(message: "property set").toHttpResponse()
+        #endif
     }
         
     private enum EnableSwitchError: Error {

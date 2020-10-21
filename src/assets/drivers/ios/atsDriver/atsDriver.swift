@@ -17,12 +17,8 @@
 
 import XCTest
 import Swifter
-import Socket
 
 var application: XCUIApplication!
-
-var continueExecution = true
-var asChanged: Bool = true
 
 class atsDriver: XCTestCase {
 
