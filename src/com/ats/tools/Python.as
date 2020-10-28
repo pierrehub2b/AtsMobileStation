@@ -1,6 +1,7 @@
 package com.ats.tools
 {
 import com.ats.helpers.Settings;
+import com.ats.managers.gmsaas.GmsaasInstaller;
 
 import flash.desktop.NativeProcess;
 import flash.desktop.NativeProcessStartupInfo;
@@ -32,20 +33,24 @@ public class Python extends EventDispatcher
 				var assetsPythonFile:File = File.applicationDirectory.resolvePath(pythonFolderPath);
 				if (assetsPythonFile.exists) {
 					var workPythonFile:File = workFolder.resolvePath("python");
-					if (!workPythonFile.exists) {
-						assetsPythonFile.copyTo(workPythonFile);
-					}
 					file = workPythonFile.resolvePath("python.exe");
+					
+					if (!workPythonFile.exists || !file.exists) {
+						assetsPythonFile.copyTo(workPythonFile);
+					}										
+					
 					folder = file.parent;
 					path = folder.nativePath;
+					
+					var pipInstallScript:File = File.applicationDirectory.resolvePath("assets/scripts/get-pip.py");
+					pipInstallScript.copyTo(workPythonFile.resolvePath("get-pip.py"), true);
 				}
 			}
 		}
 
 		public function install():void {
-			
-			
-			if (folder.resolvePath("Scripts").resolvePath("pip3.exe").exists) {
+
+			if (folder.resolvePath("Scripts").resolvePath(GmsaasInstaller.pipFileName).exists) {
 				dispatchEvent(new Event(Event.COMPLETE));
 				return
 			}

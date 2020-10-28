@@ -16,7 +16,7 @@ public class GmsaasInstaller extends EventDispatcher {
 		public static const GMSAAS_INSTALLER_STATE_UNINSTALLING:String = "Uninstalling GMSAAS"
 		public static const GMSAAS_INSTALLER_STATE_UNINSTALL_COMPLETED:String = "GMSAAS uninstall completed"
 				
-		private static const pipFileName:String = "pip3.exe"
+		public static const pipFileName:String = "pip3.exe"
 		
 		private var gmsaasFile:File
 
@@ -26,20 +26,26 @@ public class GmsaasInstaller extends EventDispatcher {
 				return
 			}
 
-			dispatchEvent(new GmsaasInstallerProgressEvent(GMSAAS_INSTALLER_STATE_INSTALLING))
-
-			var args:Vector.<String> = new Vector.<String>();
-			args.push("install");
-			args.push("--upgrade");
-			args.push("gmsaas");
-
-			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			procInfo.executable = Python.folder.resolvePath("Scripts").resolvePath(pipFileName);
-			procInfo.arguments = args;
-
-			var newProc:NativeProcess = new NativeProcess();
-			newProc.addEventListener(NativeProcessExitEvent.EXIT, gmInstallExit);
-			newProc.start(procInfo);
+			var pipFile:File = Python.folder.resolvePath("Scripts").resolvePath(pipFileName);
+			
+			if(pipFile.exists){
+				dispatchEvent(new GmsaasInstallerProgressEvent(GMSAAS_INSTALLER_STATE_INSTALLING))
+				
+				var args:Vector.<String> = new Vector.<String>();
+				args.push("install");
+				args.push("--upgrade");
+				args.push("gmsaas");
+				
+				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+				procInfo.executable = Python.folder.resolvePath("Scripts").resolvePath(pipFileName);
+				procInfo.arguments = args;
+				
+				var newProc:NativeProcess = new NativeProcess();
+				newProc.addEventListener(NativeProcessExitEvent.EXIT, gmInstallExit);
+				newProc.start(procInfo);
+			}else{
+				dispatchEvent(new GmsaasInstallerErrorEvent(pipFileName + " file not found !"))
+			}
 		}
 		
 		private function gmInstallExit(event:NativeProcessExitEvent):void {
