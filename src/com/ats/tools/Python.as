@@ -14,13 +14,14 @@ import flash.filesystem.File;
 public class Python extends EventDispatcher
 	{
 		public static const pythonFolderPath:String = "assets/tools/python";
-		
+
+		private static const updateScript:String = "update_app.py";
+		private static const getPipScript:String = "get-pip.py";
+
 		public static var file:File;
 		public static var folder:File;
 		public static var path:String;
-		
-		private static const updateScript:String = "update_app.py";
-		
+
 		private var updateProcInfo:NativeProcessStartupInfo;
 		private var updateProc:NativeProcess;
 
@@ -41,9 +42,6 @@ public class Python extends EventDispatcher
 					
 					folder = file.parent;
 					path = folder.nativePath;
-					
-					// var pipInstallScript:File = File.applicationDirectory.resolvePath("assets/scripts/get-pip.py");
-					// pipInstallScript.copyTo(workPythonFile.resolvePath("get-pip.py"), true);
 				}
 			}
 		}
@@ -58,7 +56,7 @@ public class Python extends EventDispatcher
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfo.executable = file;
 			procInfo.workingDirectory = File.applicationDirectory.resolvePath("assets/scripts")
-			procInfo.arguments = new <String>["get-pip.py", "--no-warn-script-location"]
+			procInfo.arguments = new <String>[getPipScript, "--no-warn-script-location"]
 
 			var proc:NativeProcess = new NativeProcess();
 			proc.addEventListener(NativeProcessExitEvent.EXIT, pipInstallExitHandler);
