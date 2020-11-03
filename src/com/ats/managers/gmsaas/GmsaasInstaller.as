@@ -35,9 +35,10 @@ public class GmsaasInstaller extends EventDispatcher {
 				args.push("install");
 				args.push("--upgrade");
 				args.push("gmsaas");
+				args.push("--user")
 				
 				var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-				procInfo.executable = Python.folder.resolvePath("Scripts").resolvePath(pipFileName);
+				procInfo.executable = Python.workFolder.resolvePath("Scripts").resolvePath(pipFileName);
 				procInfo.arguments = args;
 				
 				var newProc:NativeProcess = new NativeProcess();

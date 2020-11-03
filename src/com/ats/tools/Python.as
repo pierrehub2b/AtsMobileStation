@@ -15,6 +15,9 @@ public class Python extends EventDispatcher
 	{
 		public static const pythonFolderPath:String = "assets/tools/python";
 
+		public static const workFolder:File = File.userDirectory.resolvePath("AppData/Roaming/Python/Python38")
+		private static const scriptsFolder:File = File.applicationDirectory.resolvePath("assets/scripts")
+
 		private static const updateScript:String = "update_app.py";
 		private static const getPipScript:String = "get-pip.py";
 
@@ -25,7 +28,7 @@ public class Python extends EventDispatcher
 		private var updateProcInfo:NativeProcessStartupInfo;
 		private var updateProc:NativeProcess;
 
-		public function Python(workFolder:File):void {
+		public function Python() {
 			if (Settings.isMacOs) {
 				file = new File().resolvePath("/usr/bin/python")
 				folder = file.parent
@@ -33,11 +36,10 @@ public class Python extends EventDispatcher
 			} else {
 				var assetsPythonFile:File = File.applicationDirectory.resolvePath(pythonFolderPath);
 				if (assetsPythonFile.exists) {
-					var workPythonFile:File = workFolder.resolvePath("python");
-					file = workPythonFile.resolvePath("python.exe");
+					file = workFolder.resolvePath("python.exe");
 					
-					if (!workPythonFile.exists || !file.exists) {
-						assetsPythonFile.copyTo(workPythonFile);
+					if (!workFolder.exists || !file.exists) {
+						assetsPythonFile.copyTo(workFolder);
 					}										
 					
 					folder = file.parent;
@@ -55,8 +57,8 @@ public class Python extends EventDispatcher
 
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfo.executable = file;
-			procInfo.workingDirectory = File.applicationDirectory.resolvePath("assets/scripts")
-			procInfo.arguments = new <String>[getPipScript, "--no-warn-script-location"]
+			procInfo.workingDirectory = file.parent
+			procInfo.arguments = new <String>[scriptsFolder.resolvePath(getPipScript).nativePath, "--no-warn-script-location"]
 
 			var proc:NativeProcess = new NativeProcess();
 			proc.addEventListener(NativeProcessExitEvent.EXIT, pipInstallExitHandler);
@@ -70,13 +72,12 @@ public class Python extends EventDispatcher
 		public function updateApp(zipFile:File, appName:String):void{
 			
 			appName += ".exe";
-			
-			var script:File = folder.resolvePath(updateScript);
-			File.applicationDirectory.resolvePath("assets/scripts").resolvePath(updateScript).copyTo(script, true);
-			
+
+			var script:File = scriptsFolder.resolvePath(updateScript);
+
 			updateProcInfo = new NativeProcessStartupInfo();
 			updateProcInfo.executable = file;
-			updateProcInfo.workingDirectory = file.parent;
+			updateProcInfo.workingDirectory = file.parent
 			
 			var path:String = File.applicationDirectory.nativePath;
 			var parent:File = new File(path);
