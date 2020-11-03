@@ -19,13 +19,12 @@ import mx.core.FlexGlobals;
 
 		public var instances:ArrayCollection = new ArrayCollection()
 
-		public function GenymotionRecipe(info:Object)
-		{
+		public function GenymotionRecipe(info:Object) {
 			uuid = info['uuid']
 			name = info['name']
 			version = new Version(info['android_version'])
 			width = info['screen_width']
-			height = info['screen_width']
+			height = info['screen_height']
 			dpi = info['screen_density']
 		}
 
