@@ -42,8 +42,8 @@ public class Python extends EventDispatcher
 					folder = file.parent;
 					path = folder.nativePath;
 					
-					var pipInstallScript:File = File.applicationDirectory.resolvePath("assets/scripts/get-pip.py");
-					pipInstallScript.copyTo(workPythonFile.resolvePath("get-pip.py"), true);
+					// var pipInstallScript:File = File.applicationDirectory.resolvePath("assets/scripts/get-pip.py");
+					// pipInstallScript.copyTo(workPythonFile.resolvePath("get-pip.py"), true);
 				}
 			}
 		}
@@ -57,7 +57,7 @@ public class Python extends EventDispatcher
 
 			var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			procInfo.executable = file;
-			procInfo.workingDirectory = file.parent;
+			procInfo.workingDirectory = File.applicationDirectory.resolvePath("assets/scripts")
 			procInfo.arguments = new <String>["get-pip.py", "--no-warn-script-location"]
 
 			var proc:NativeProcess = new NativeProcess();
