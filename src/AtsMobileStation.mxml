@@ -189,7 +189,7 @@
 			peerGroup.addEventListener(Event.INIT, monaServerInitHandler)
 			peerGroup.start()
 
-			python = new Python(Settings.workFolder);
+			python = new Python();
 			if (!Settings.isMacOs) {
 				python.addEventListener(Event.COMPLETE, pythonCheckComplete);
 				python.install();
@@ -198,7 +198,7 @@
 
 		private function monaServerInitHandler(event:Event):void {
 			(event.currentTarget as PeerGroupConnection).removeEventListener(Event.INIT, monaServerInitHandler)
-			if(GmsaasProcess.gmsaasExec != null){
+			if (GmsaasProcess.gmsaasExec != null) {
 				genymotionManager.fetchContent();
 			}
 		}
@@ -244,7 +244,7 @@
 			peerGroup.close();
 			simulators.terminate();
 
-			if  (Settings.isMacOs) {
+			if (Settings.isMacOs) {
 				devices.addEventListener(Event.COMPLETE, devicesTerminateComplete);
 				devices.terminate();
 			} else {
@@ -392,36 +392,36 @@
 		}
 
 		private var loader:URLLoader;
-		private function checkVersion():void{
+
+		private function checkVersion():void {
 			loader = new URLLoader();
 			loader.addEventListener(Event.COMPLETE, onLoaderComponentsComplete);
 			loader.addEventListener(IOErrorEvent.IO_ERROR, ioComponentsErrorHandler);
 			loader.load(new URLRequest(AtsDownloadUrl + "/mobile.php?os=" + Settings.osName + "&" + UIDUtil.createUID()));
 		}
 
-		private function loaderFinished():void{
+		private function loaderFinished():void {
 			loader.removeEventListener(Event.COMPLETE, onLoaderComponentsComplete);
 			loader.removeEventListener(IOErrorEvent.IO_ERROR, ioComponentsErrorHandler);
 			loader = null;
 		}
 
-		private function ioComponentsErrorHandler(event:IOErrorEvent):void
-		{
+		private function ioComponentsErrorHandler(event:IOErrorEvent):void {
 			loaderFinished();
 		}
 
-		private function onLoaderComponentsComplete(e:Event):void
-		{
+		private function onLoaderComponentsComplete(e:Event):void {
 			const data:String = loader.data;
 			loaderFinished();
 
 			var jsonData:Object = {};
-			try{
+			try {
 				jsonData = JSON.parse(data) as Object;
-			}catch(err:Error){}
+			} catch (err:Error) {
+			}
 
-			if(jsonData.hasOwnProperty("release")){
-				if(jsonData.release.version != appVersion){
+			if (jsonData.hasOwnProperty("release")) {
+				if (jsonData.release.version != appVersion) {
 					var alert:NewVersionAlert = new NewVersionAlert();
 					alert.url = AtsDownloadUrl + "/" + jsonData.release.path;
 					alert.size = parseInt(jsonData.release.bundle_size);
@@ -430,7 +430,6 @@
 				}
 			}
 		}
-
 		]]>
 	</fx:Script>
 	<s:Rect bottom="10" left="14" right="14" top="10" filters="{dropShadowFilterApp}" radiusX="6" radiusY="6" alpha="0.98">
