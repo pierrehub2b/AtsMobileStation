@@ -31,7 +31,8 @@ package com.ats.device.running
 		private static const noCertificatesError:RegExp = /signing certificate matching team ID(\s*)/;
 		private static const noXcodeInstalled:RegExp = /requires Xcode(\s*)/;
 		private static const wrongVersionofxCode:RegExp = /which may not be supported by this version of Xcode(\s*)/;
-		
+		private static const sessionExpired:RegExp = /Your session has expired(\s*)/;
+
 		private var logFile:File;
 		private var logStream:FileStream = new FileStream();
 		private var dateFormatter:DateTimeFormatter = new DateTimeFormatter("en-US");
@@ -282,6 +283,12 @@ package com.ats.device.running
 				errorMessage = "Go to AppStore for download it";
 				dispose()
 				return;
+			}
+
+			if (sessionExpired.test(data)) {
+				error = "Your session has expired"
+				errorMessage = "Please log in Xcode";
+				dispose()
 			}
 			
 			if (wrongVersionofxCode.test(data)) {
