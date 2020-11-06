@@ -285,11 +285,11 @@ package com.ats.device.running
 				return;
 			}
 
-			if (sessionExpired.test(data)) {
+			/* if (sessionExpired.test(data)) {
 				error = "Your session has expired"
 				errorMessage = "Please log in Xcode";
 				dispose()
-			}
+			} */
 			
 			if (wrongVersionofxCode.test(data)) {
 				error = "Your device need a more recent version of Xcode"
