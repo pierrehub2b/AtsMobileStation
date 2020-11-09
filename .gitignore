@@ -157,3 +157,4 @@ Thumbs.db
 build.properties
 *.dll
 *.exe
+flexSdkPath.properties
