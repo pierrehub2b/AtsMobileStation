@@ -101,6 +101,9 @@ final class AppController {
         application.terminate()
         application = nil
         
+        AtsClient.current = nil
+        sendLogs(type: LogType.status, message: "** DEVICE UNLOCKED **")
+        
         return Output(message: "stop app \(bundleIdentifier)").toHttpResponse()
     }
     

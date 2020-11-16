@@ -29,13 +29,13 @@ final class Device: Encodable {
     }
     
     enum Property: String, CaseIterable {
-        case airplaneModeEnabled
-        case wifiEnabled
+        // case airplaneModeEnabled
+        // case wifiEnabled
         case cellularDataEnabled
         case bluetoothEnabled
         case orientation
-        case brightness
-        case volume
+        // case brightness
+        // case volume
     }
     
     static let current = Device()

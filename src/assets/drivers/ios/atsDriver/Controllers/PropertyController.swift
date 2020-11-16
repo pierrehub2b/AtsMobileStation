@@ -40,13 +40,13 @@ extension PropertyController: Routeable {
         }
         
         switch action {
-        case .airplaneModeEnabled:  return setAirplaneModeEnabled(propertyValue)
+        // case .airplaneModeEnabled:  return setAirplaneModeEnabled(propertyValue)
         case .bluetoothEnabled:     return setBluetoothModeEnabled(propertyValue)
-        case .brightness:           return setBrightness(propertyValue)
+        // case .brightness:           return setBrightness(propertyValue)
         case .orientation:          return PropertyController.setOrientation(propertyValue)
-        case .volume:               return setVolume(propertyValue)
+        // case .volume:               return setVolume(propertyValue)
         case .cellularDataEnabled:  return setCellularDataEnabled(propertyValue)
-        case .wifiEnabled:          return setWifiEnabled(propertyValue)
+        // case .wifiEnabled:          return setWifiEnabled(propertyValue)
         }
     }
 }
