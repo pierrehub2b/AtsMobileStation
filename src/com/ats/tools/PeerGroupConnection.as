@@ -21,8 +21,12 @@ package com.ats.tools {
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 
+	import mx.collections.ArrayCollection;
+
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
+
+	import org.apache.flex.collections.ArrayList;
 
 	public class PeerGroupConnection extends EventDispatcher {
 
@@ -137,8 +141,9 @@ package com.ats.tools {
 		// Client methods
 		//--------------------------------------------------------------------------------------------------------
 
-		public function installApk(url:String, deviceId:String):void{
-			devicesManager.installApk(url, deviceId);
+		public function install(url:String, deviceIds:Array):void {
+			trace("les devices : " + deviceIds)
+			devicesManager.installApk(url, deviceIds);
 		}
 
 		public function saveValues(desc:String, nm:String):void{

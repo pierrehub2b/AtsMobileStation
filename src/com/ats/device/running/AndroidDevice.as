@@ -72,7 +72,7 @@ package com.ats.device.running
 		
 		public override function installApk(url:String):void{
 			status = INSTALL_APK
-			printDebugLogs("Start apk download")
+			printDebugLogs("Start apk download : " + url)
 			
 			downloadedData = new ByteArray();
 			

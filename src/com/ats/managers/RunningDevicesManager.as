@@ -23,7 +23,9 @@ package com.ats.managers {
 	
 	import net.tautausan.plist.PDict;
 	import net.tautausan.plist.Plist10;
-	
+
+	import org.apache.flex.collections.ArrayList;
+
 	public class RunningDevicesManager extends EventDispatcher {
 		// private const systemProfiler:File = new File("/usr/sbin/system_profiler");
 		private const envFile:File = new File("/usr/bin/env");
@@ -82,12 +84,12 @@ package com.ats.managers {
 		private var iosLoop:TweenLite;
 		private var usbDevicesIdList:Vector.<String>;
 		
-		public function installApk(url:String, deviceId:String):void{
+		public function installApk(url:String, deviceIds:Array):void {
 			for each(var dv:RunningDevice in collection){
-				if(dv.runningId == deviceId){
+				// if(deviceIds.contains(dv.runningId)) {
 					dv.installApk(url);
-					break;
-				}
+					// break;
+				// }
 			}
 		}
 		

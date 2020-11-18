@@ -1,10 +1,11 @@
 <html><head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>ATS Mobile Station</title>
+
     <style type="text/css">
         ul {
             list-style: none;
-            text-align: middle;
+            text-align: center;
         }
 
         ul li::before {
@@ -23,12 +24,12 @@
         function showDevices(devices){
             const list = document.getElementById("listDevices");
             list.innerHTML = "";
-            for (var i = 0; i < devices.length; ++i) {
+            for (let i = 0; i < devices.length; ++i) {
                 const device = devices[i];
                 const item = document.createElement("li");
 
                 const osIcon = document.createElement("img");
-                if(device.manufacturer == "Apple"){
+                if(device.manufacturer === "Apple"){
                     osIcon.src = "apple.png";
                 }else{
                     osIcon.src = "android.png";
@@ -71,7 +72,7 @@
                 const data = JSON.parse(msg.data);
                 switch (data[0]) {
                     case "msStatus":
-                        if(data[1] == "close"){
+                        if(data[1] === "close"){
                             document.getElementById("listDevices").innerHTML = "";
                         }
                         break;
@@ -95,7 +96,7 @@
             xmlhttp.open('GET', "devices", true);
 
             xmlhttp.onreadystatechange = function () {
-                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
                     var data = JSON.parse(xmlhttp.response);
                     showDevices(data[0]);
                 }

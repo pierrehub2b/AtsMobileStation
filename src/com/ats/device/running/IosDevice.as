@@ -216,9 +216,9 @@ package com.ats.device.running
 				errorMessage = " - WIFI not connected !";
 				dispose()
 			} else if (data.indexOf("** DEVICE LOCKED BY : ") > -1) {
-				this.locked = getDeviceOwner(data);
+				locked = getDeviceOwner(data);
 			} else if (data.indexOf("** DEVICE UNLOCKED **") > -1) {
-				this.locked = null;
+				locked = null;
 			} else if (data.indexOf("** Port unavailable **") > -1) {
 				errorMessage = " - Unavailable port !";
 				dispose()
