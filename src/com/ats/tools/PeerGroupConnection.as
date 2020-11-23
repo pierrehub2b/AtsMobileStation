@@ -285,9 +285,13 @@ package com.ats.tools {
 				netConnection.call("deviceRemoved", null, dev.monaDevice);
 			}else if(ev.kind == CollectionEventKind.UPDATE){
 				dev = ev.items[0].source as RunningDevice
-				if(ev.items[0].property == "status" && ev.items[0].newValue == "ready"){
-					netConnection.call("pushDevice", null, dev.monaDevice);
-				}else if (ev.items[0].property == "locked"){
+				if (ev.items[0].property == "status") {
+					if (ev.items[0].newValue == "ready") {
+						netConnection.call("pushDevice", null, dev.monaDevice);
+					}
+
+					netConnection.call("updateDeviceStatus", null, dev.monaDevice);
+				} else if (ev.items[0].property == "locked") {
 					netConnection.call("deviceLocked", null, dev.monaDevice);
 				}
 			}
