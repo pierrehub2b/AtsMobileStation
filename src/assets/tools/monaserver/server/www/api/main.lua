@@ -1,26 +1,28 @@
 function onConnection(client)
 
-	if client.protocol ~= "HTTP" then
-		error("Protocol not supported")
+	function client:devices()
+		return devices
 	end
 
-	function client:devices(data)
-
-		if data ~= nil and data["id"] ~= nil then
-			return mona:toJSON(getDevice(data["id"]))
-		end
-
-		return mona:toJSON(devices)
+	function client:onMessage(data, test)
+		return data + test
 	end
 
-	function client:install(data)
+	function client:device(id)
+		return getDevice(id)
+	end
 
-		if data == nil or data["src"] == nil then
+	function client:install(src, deviceIds)
+
+		if not src then
 			error("Error : src parameter missing")
 		end
 
-		msApp.writer:writeInvocation("install", data["src"], data["deviceIds"])
+		msApp.writer:writeInvocation("install", src, deviceIds)
 
-		return ok
+		return nil
 	end
+end
+
+function onDisconnection(client)
 end

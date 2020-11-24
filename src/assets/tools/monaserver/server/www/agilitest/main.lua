@@ -1,26 +1,7 @@
 function onConnection(client)
 
-	if client.protocol ~= "HTTP" then
-		error("Protocol not supported")
-	end
+	agilitestEditor = client
 
-	function client:devices(data)
+	return { devices = devices, name = data["info"]["name"], description = data["info"]["description"], httpPort = mona.configs.HTTP.port }
 
-		if data ~= nil and data["id"] ~= nil then
-			return mona:toJSON(getDevice(data["id"]))
-		end
-
-		return mona:toJSON(devices)
-	end
-
-	function client:install(data)
-
-		if data == nil or data["src"] == nil then
-			error("Error : src parameter missing")
-		end
-
-		msApp.writer:writeInvocation("install", data["src"], data["deviceIds"])
-
-		return ok
-	end
 end

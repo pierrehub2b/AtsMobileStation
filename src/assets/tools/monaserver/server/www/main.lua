@@ -1,7 +1,7 @@
 devices = {}
 sync = nil
 msApp = nil
-local agilitestEditor = nil
+agilitestEditor = nil
 
 function getDeviceIndex(id)
 	for i, v in ipairs(devices) do
@@ -50,32 +50,16 @@ local function randomString(length)
 	return randomString(length - 1) .. charset[math.random(1, #charset)]
 end
 
-function onConnection(client, type, ...)
+function onConnection(client)
 
-	if type == "editor" then
-
-		agilitestEditor = client
-
-		function client:installApk(url, deviceId)
-			msApp.writer:writeInvocation("installApk", url, deviceId)
-		end
-
-		return { devices = devices, name = data["info"]["name"], description = data["info"]["description"], httpPort = mona.configs.HTTP.port }
-
-	else
-
-		function client:initData()
-			client.writer:writeInvocation("infoUpdated", data["info"]["name"], data["info"]["description"])
-		end
-
-		function client:devices()
-			return devices
-		end
-
-		function client:device(id)
-			return getDevice(id)
-		end
+	function client:initData()
+		client.writer:writeInvocation("infoUpdated", data["info"]["name"], data["info"]["description"])
 	end
+
+	function client:devices()
+		return devices
+	end
+
 end
 
 function onManage()

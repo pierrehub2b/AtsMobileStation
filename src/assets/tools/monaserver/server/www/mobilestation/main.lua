@@ -1,5 +1,7 @@
 function onConnection(client)
 
+	msApp = client
+
 	if data["info"] == nil then
 		data["info"] = {}
 		data["info"]["description"] = "Mobile Station server"
@@ -51,6 +53,10 @@ function onConnection(client)
 		return #devices
 	end
 
+	function client:devices()
+		return devices
+	end
+
 	function client:pushDevice(device)
 		local idx = getDeviceIndex(device["id"])
 		if idx == nil then
@@ -75,6 +81,7 @@ function onConnection(client)
 		close()
 		sync = "exit"
 	end
+
 	return { name = data["info"]["name"], description = data["info"]["description"], identifier = data["info"]["identifier"], configs = mona.configs }
 
 end

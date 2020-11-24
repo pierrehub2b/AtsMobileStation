@@ -279,7 +279,7 @@ package com.ats.device.running
 			}
 			
 			if (noXcodeInstalled.test(data)) {
-				error = "No XCode founded on this computer"
+				error = "No XCode found on this computer"
 				errorMessage = "Go to AppStore for download it";
 				dispose()
 				return;

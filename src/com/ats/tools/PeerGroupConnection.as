@@ -16,17 +16,12 @@ package com.ats.tools {
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	import flash.net.NetConnection;
-	import flash.net.NetGroup;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 
-	import mx.collections.ArrayCollection;
-
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
-
-	import org.apache.flex.collections.ArrayList;
 
 	public class PeerGroupConnection extends EventDispatcher {
 
@@ -37,7 +32,6 @@ package com.ats.tools {
 
 		private var httpPort:int = 8989;
 		private var rtmpPort:int = defaultRtmpPort;
-		private var netGroup:NetGroup;
 
 		private var devicesManager:RunningDevicesManager;
 
@@ -89,7 +83,7 @@ package com.ats.tools {
 		}
 
 		private function connectToMonaserver(port:int):void{
-			if(port > 0){
+			if (port > 0) {
 				netConnection = new NetConnection();
 				netConnection.objectEncoding = 3;
 				netConnection.addEventListener(NetStatusEvent.NET_STATUS, onFirstConnect);
@@ -99,14 +93,11 @@ package com.ats.tools {
 			}
 		}
 
-		private function netIOError(ev:IOErrorEvent):void{
-			trace("io error");
+		private static function netIOError(ev:IOErrorEvent):void{
+			trace("io error : " + ev);
 		}
 
-
-
-		private function onFirstConnect(ev:NetStatusEvent):void{
-
+		private function onFirstConnect(ev:NetStatusEvent):void {
 			netConnection.removeEventListener(NetStatusEvent.NET_STATUS, onFirstConnect);
 			netConnection.removeEventListener(IOErrorEvent.IO_ERROR, netIOError);
 
@@ -114,9 +105,7 @@ package com.ats.tools {
 			{
 				case "NetConnection.Connect.Success":
 					trace("connected to MonaServer!");
-
 					initData(ev.info);
-
 					break;
 				case "NetConnection.Connect.Failed":
 					trace("MonaServer not running, launch install ...");
