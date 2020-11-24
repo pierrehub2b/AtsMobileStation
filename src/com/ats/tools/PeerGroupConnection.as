@@ -16,6 +16,7 @@ package com.ats.tools {
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	import flash.net.NetConnection;
+	import flash.net.Responder;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
@@ -89,7 +90,7 @@ package com.ats.tools {
 				netConnection.addEventListener(NetStatusEvent.NET_STATUS, onFirstConnect);
 				netConnection.addEventListener(IOErrorEvent.IO_ERROR, netIOError);
 				netConnection.client = this;
-				netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + port + "/", "mobilestation");
+				netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + port + "/mobilestation");
 			}
 		}
 
@@ -105,6 +106,7 @@ package com.ats.tools {
 			{
 				case "NetConnection.Connect.Success":
 					trace("connected to MonaServer!");
+					trace(ev.info)
 					initData(ev.info);
 					break;
 				case "NetConnection.Connect.Failed":
@@ -130,9 +132,8 @@ package com.ats.tools {
 		// Client methods
 		//--------------------------------------------------------------------------------------------------------
 
-		public function install(url:String, deviceIds:Array):void {
-			trace("les devices : " + deviceIds)
-			devicesManager.installApk(url, deviceIds);
+		public function installApp(url:String, deviceIds:Array):void {
+			devicesManager.installApp(url, deviceIds);
 		}
 
 		public function saveValues(desc:String, nm:String):void{
@@ -267,26 +268,26 @@ package com.ats.tools {
 			}
 		}
 
-		private function devicesChangeHandler(ev:CollectionEvent):void{
+		private function devicesChangeHandler(ev:CollectionEvent):void {
 			var dev:RunningDevice
-			if(ev.kind == CollectionEventKind.REMOVE){
+			if (ev.kind == CollectionEventKind.REMOVE) {
 				dev = ev.items[0] as RunningDevice
 				netConnection.call("deviceRemoved", null, dev.monaDevice);
-			}else if(ev.kind == CollectionEventKind.UPDATE){
+			} else if(ev.kind == CollectionEventKind.UPDATE) {
 				dev = ev.items[0].source as RunningDevice
 				if (ev.items[0].property == "status") {
+					trace(dev.monaDevice.status)
+					netConnection.call("updateDevice", null, dev.monaDevice);
 					if (ev.items[0].newValue == "ready") {
 						netConnection.call("pushDevice", null, dev.monaDevice);
 					}
-
-					netConnection.call("updateDeviceStatus", null, dev.monaDevice);
 				} else if (ev.items[0].property == "locked") {
 					netConnection.call("deviceLocked", null, dev.monaDevice);
 				}
 			}
 		}
 
-		public function terminate():void{
+		public function terminate():void {
 			netConnection.call("terminate", null);
 		}
 

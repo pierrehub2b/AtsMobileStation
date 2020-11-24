@@ -4,7 +4,7 @@ package com.ats.device.running
 	import com.ats.helpers.DeviceSettingsHelper;
 	import com.ats.helpers.Settings;
 	import com.ats.helpers.Version;
-	
+
 	import flash.events.Event;
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
@@ -14,7 +14,7 @@ package com.ats.device.running
 	import flash.net.URLRequest;
 	import flash.net.URLStream;
 	import flash.utils.ByteArray;
-	
+
 	public class AndroidDevice extends RunningDevice {
 		protected static const ANDROID_DRIVER:String = "com.ats.atsdroid";
 		private static const atsdroidFilePath:String = File.applicationDirectory.resolvePath("assets/drivers/atsdroid.apk").nativePath;
@@ -69,9 +69,33 @@ package com.ats.device.running
 		private var apkFile:File;
 		private var urlStream:URLStream;
 		private var downloadedData:ByteArray;
-		
+
+		public override function installFile(file:File):void {
+			if (file.extension != "apk") {
+				return
+			}
+
+			installing()
+
+			var arguments: Vector.<String> = new <String>["-s", id, "install", file.nativePath]
+			var adbProcess:AdbProcess = new AdbProcess()
+			adbProcess.execute(arguments, onInstallApkExit)
+		}
+
 		public override function installApk(url:String):void{
-			status = INSTALL_APK
+			status = INSTALL_APP
+
+			var apkFilePath = new File(url)
+			if (apkFilePath.exists) {
+				trace("exists")
+				var arguments: Vector.<String> = new <String>["-s", id, "install", apkFilePath.nativePath]
+				var adbProcess:AdbProcess = new AdbProcess()
+				adbProcess.execute(arguments, onInstallApkExit)
+				return
+			} else {
+				trace("not exists")
+			}
+
 			printDebugLogs("Start apk download : " + url)
 			
 			downloadedData = new ByteArray();
@@ -125,8 +149,9 @@ package com.ats.device.running
 		}
 		
 		protected function onInstallApkExit():void {
-			status = READY
 			printDebugLogs("Apk installed")
+
+			started()
 		}
 		
 		//---------------------------------------------------------------------------------------------------------

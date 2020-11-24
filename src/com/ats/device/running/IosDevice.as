@@ -340,5 +340,38 @@ package com.ats.device.running
 			
 			fileStream.close();
 		}
+
+		// ----------------------------------- //
+		// ----------- INSTALL APP ----------- //
+		// ----------------------------------- //
+
+		public override function installFile(file:File):void {
+			if (file.extension != "ipa") {
+				return
+			}
+
+			installing()
+
+			var info:NativeProcessStartupInfo = new NativeProcessStartupInfo()
+			if (simulator) {
+				info.arguments = new <String>["simctl", "install", id, file.nativePath]
+				info.executable = new File("/usr/bin/xcrun")
+				info.workingDirectory = File.userDirectory
+			} else {
+				info.arguments = new <String>["install_app", "-u", id, file.nativePath]
+				info.executable = File.applicationDirectory.resolvePath("assets/tools/ios/mobiledevice");
+				info.workingDirectory = File.userDirectory
+			}
+
+			var process:NativeProcess = new NativeProcess()
+			process.addEventListener(NativeProcessExitEvent.EXIT, onInstallAppExit, false, 0, true);
+			process.start(info)
+		}
+
+		private function onInstallAppExit(event:NativeProcessExitEvent):void {
+			(event.target as NativeProcess).removeEventListener(NativeProcessExitEvent.EXIT, onInstallAppExit)
+
+			started()
+		}
 	}
 }

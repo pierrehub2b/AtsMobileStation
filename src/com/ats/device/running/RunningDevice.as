@@ -4,7 +4,9 @@ import avmplus.getQualifiedClassName;
 
 import com.ats.device.*;
 
-import mx.utils.UIDUtil;
+	import flash.filesystem.File;
+
+	import mx.utils.UIDUtil;
 
 [Bindable]
 [RemoteClass(alias="device.RunningDevice")]
@@ -61,7 +63,11 @@ public class RunningDevice extends Device
 		}
 	}
 	
-	public function installApk(url:String):void{
+	public function installApk(url:String):void {
+		// do nothing by default
+	}
+
+	public function installFile(file:File):void {
 		// do nothing by default
 	}
 

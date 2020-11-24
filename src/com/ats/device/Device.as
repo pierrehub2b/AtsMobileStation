@@ -8,7 +8,7 @@ package com.ats.device
 	{
 		public static const STOPPED_EVENT:String = "deviceStopped";
 		public static const INSTALL:String = "install";
-		public static const INSTALL_APK:String = "installApk";
+		public static const INSTALL_APP:String = "installApp";
 		public static const START:String = "start";
 		public static const READY:String = "ready";
 		public static const BOOT:String = "boot";
