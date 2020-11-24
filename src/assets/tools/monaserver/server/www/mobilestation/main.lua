@@ -53,10 +53,6 @@ function onConnection(client)
 		return #devices
 	end
 
-	function client:devices()
-		return devices
-	end
-
 	function client:pushDevice(device)
 		local idx = getDeviceIndex(device["id"])
 		if idx == nil then

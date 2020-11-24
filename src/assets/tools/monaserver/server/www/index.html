@@ -5,7 +5,7 @@
     <style type="text/css">
         ul {
             list-style: none;
-            text-align: center;
+            text-align: left;
         }
 
         ul li::before {
@@ -97,7 +97,7 @@
 
             xmlhttp.onreadystatechange = function () {
                 if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-                    var data = JSON.parse(xmlhttp.response);
+                    let data = JSON.parse(xmlhttp.response);
                     showDevices(data[0]);
                 }
             }
@@ -112,7 +112,7 @@
 
         // Socket connector
         function createWebSocket() {
-            host = "ws://" + window.location.host + "/api";
+            host = "ws://" + window.location.host + "/                                    ";
 
             if(window.MozWebSocket)
                 window.WebSocket=window.MozWebSocket;
