@@ -16,7 +16,6 @@ package com.ats.tools {
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	import flash.net.NetConnection;
-	import flash.net.Responder;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
@@ -90,7 +89,7 @@ package com.ats.tools {
 				netConnection.addEventListener(NetStatusEvent.NET_STATUS, onFirstConnect);
 				netConnection.addEventListener(IOErrorEvent.IO_ERROR, netIOError);
 				netConnection.client = this;
-				netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + port + "/mobilestation");
+				netConnection.connect(rtmpProtocol.toLowerCase() + "://localhost:" + port + "/", "mobilestation");
 			}
 		}
 
@@ -132,8 +131,8 @@ package com.ats.tools {
 		// Client methods
 		//--------------------------------------------------------------------------------------------------------
 
-		public function installApp(url:String, deviceIds:Array):void {
-			devicesManager.installApp(url, deviceIds);
+		public function installApp(url:String, target:String, deviceIds:Array):void {
+			devicesManager.installApp(url, target, deviceIds);
 		}
 
 		public function saveValues(desc:String, nm:String):void{
@@ -273,11 +272,11 @@ package com.ats.tools {
 			if (ev.kind == CollectionEventKind.REMOVE) {
 				dev = ev.items[0] as RunningDevice
 				netConnection.call("deviceRemoved", null, dev.monaDevice);
-			} else if(ev.kind == CollectionEventKind.UPDATE) {
+			} else if (ev.kind == CollectionEventKind.UPDATE) {
 				dev = ev.items[0].source as RunningDevice
 				if (ev.items[0].property == "status") {
-					trace(dev.monaDevice.status)
 					netConnection.call("updateDevice", null, dev.monaDevice);
+					trace("J'ENVOIE " + dev.monaDevice.id + " " + ev.items[0].newValue)
 					if (ev.items[0].newValue == "ready") {
 						netConnection.call("pushDevice", null, dev.monaDevice);
 					}

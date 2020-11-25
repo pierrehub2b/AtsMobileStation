@@ -63,11 +63,11 @@ public class RunningDevice extends Device
 		}
 	}
 	
-	public function installApk(url:String):void {
+	public function installRemoteFile(url:String):void {
 		// do nothing by default
 	}
 
-	public function installFile(file:File):void {
+	public function installLocalFile(file:File):void {
 		// do nothing by default
 	}
 

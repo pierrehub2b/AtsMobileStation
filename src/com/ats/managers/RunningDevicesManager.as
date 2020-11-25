@@ -29,7 +29,8 @@ package com.ats.managers {
     import mx.collections.ArrayCollection;
     import mx.core.FlexGlobals;
 	import mx.events.CollectionEvent;
-    import mx.utils.URLUtil;
+import mx.utils.UIDUtil;
+import mx.utils.URLUtil;
 
     import net.tautausan.plist.PDict;
     import net.tautausan.plist.Plist10;
@@ -372,21 +373,36 @@ package com.ats.managers {
 		// ----------- INSTALL APP ----------- //
 		// ----------------------------------- //
 
-        private var appName: String
-		public function installApp(url:String, deviceIds:Array):void {
+        private var appName:String
+        private var deviceIds:ArrayCollection
+		public function installApp(url:String, target:String, deviceIds:Array):void {
             if (isInstalling) {
+                trace("Install app error: ")
                 return
             }
 
+            this.deviceIds = new ArrayCollection(deviceIds)
+
             if (URLUtil.isHttpsURL(url) || URLUtil.isHttpURL(url)) {
+                appName = UIDUtil.createUID()
+                if (target == "android") {
+                    appName += ".apk"
+                } else if (target == "ios") {
+                    appName += ".ipa"
+                } else if (target == "app") {
+                    appName += ".app"
+                } else {
+                    trace("Install app error: unknow target")
+                    return
+                }
+
                 isInstalling = true
                 downloadAppFile(url)
             } else {
-                var file:File = new File(url)
-                appName = file.name
-                var fileExtension:String = file.extension
-                if (fileExtension != "ipa" && fileExtension != "apk" && fileExtension != "app") {
-                    trace("Install app error: bad file type")
+                try {
+                    var file:File = new File(url)
+                } catch (error:ArgumentError) {
+                    trace("Install app error: " + error.message)
                     return
                 }
 
@@ -394,8 +410,7 @@ package com.ats.managers {
                     isInstalling = true
                     installAppFile(file)
                 } else {
-                    isInstalling = false
-                    trace("Install app error: file doesn't exists")
+                    trace("Install app error: file doesn't exist")
                 }
             }
 		}
@@ -404,7 +419,9 @@ package com.ats.managers {
             collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, deviceChangeHandler, false, 0, true)
 
             for each(var device:RunningDevice in collection) {
-                device.installFile(file)
+                if (deviceIds.length == 0 || deviceIds.contains(device.id)) {
+                    device.installLocalFile(file)
+                }
             }
         }
 
@@ -422,7 +439,7 @@ package com.ats.managers {
             urlLoader.removeEventListener(Event.COMPLETE, onAppDownloadComplete)
 
             var fileStream:FileStream = new FileStream();
-            temporaryAppFile = File.cacheDirectory.resolvePath("test.apk")
+            temporaryAppFile = File.cacheDirectory.resolvePath(appName)
             fileStream.addEventListener(Event.CLOSE, writeFileComplete);
             try {
                 fileStream.openAsync(temporaryAppFile, FileMode.WRITE);
@@ -455,7 +472,7 @@ package com.ats.managers {
                 collection.removeEventListener(CollectionEvent.COLLECTION_CHANGE, deviceChangeHandler)
 
                 if (temporaryAppFile) {
-                    // temporaryAppFile.deleteFile()
+                    temporaryAppFile.deleteFile()
                     temporaryAppFile = null
                 }
             } else {
@@ -463,6 +480,5 @@ package com.ats.managers {
                 isInstalling = true
             }
         }
-
     }
 }

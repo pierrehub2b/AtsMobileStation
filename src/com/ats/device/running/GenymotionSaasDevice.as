@@ -19,12 +19,12 @@ package com.ats.device.running {
 		override protected function installDriver():void {
 			installingDriver = true
 			
-			installApk(atsdroidRemoteFilePath)
+			installRemoteFile(atsdroidRemoteFilePath)
 		}
 		
 		private var apkName:String
 		
-		public override function installApk(url:String):void {
+		public override function installRemoteFile(url:String):void {
 			apkName = url.split("/").pop()
 			printDebugLogs("Downloading " + apkName)
 			apkOutputPath = "/sdcard/" + apkName

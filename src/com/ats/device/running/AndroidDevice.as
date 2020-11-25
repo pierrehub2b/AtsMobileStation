@@ -70,11 +70,7 @@ package com.ats.device.running
 		private var urlStream:URLStream;
 		private var downloadedData:ByteArray;
 
-		public override function installFile(file:File):void {
-			if (file.extension != "apk") {
-				return
-			}
-
+		public override function installLocalFile(file:File):void {
 			installing()
 
 			var arguments: Vector.<String> = new <String>["-s", id, "install", file.nativePath]
@@ -82,19 +78,8 @@ package com.ats.device.running
 			adbProcess.execute(arguments, onInstallApkExit)
 		}
 
-		public override function installApk(url:String):void{
+		public override function installRemoteFile(url:String):void{
 			status = INSTALL_APP
-
-			var apkFilePath = new File(url)
-			if (apkFilePath.exists) {
-				trace("exists")
-				var arguments: Vector.<String> = new <String>["-s", id, "install", apkFilePath.nativePath]
-				var adbProcess:AdbProcess = new AdbProcess()
-				adbProcess.execute(arguments, onInstallApkExit)
-				return
-			} else {
-				trace("not exists")
-			}
 
 			printDebugLogs("Start apk download : " + url)
 			

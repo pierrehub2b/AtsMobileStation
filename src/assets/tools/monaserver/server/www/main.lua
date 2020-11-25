@@ -51,7 +51,8 @@ end
 
 function onConnection(client, type, ...)
 
-    if type == "mobilestation" then
+    if type == "mobilestation"
+    then
 
         msApp = client
 
@@ -60,19 +61,23 @@ function onConnection(client, type, ...)
             data["info"]["description"] = "Mobile Station server"
 
             local libType = package.cpath:match("%p[\\|/]?%p(%a+)")
-            if libType == "dll" then
+            if libType == "dll"
+            then
                 data["info"]["os"] = "win"
                 data["info"]["name"] = "MS-" .. os.getenv("USERNAME")
-            elseif libType == "dylib" then
+            elseif libType == "dylib"
+            then
                 data["info"]["name"] = "MS-" .. os.getenv("HOME")
                 data["info"]["os"] = "mac"
-            elseif libType == "so" then
+            elseif libType == "so"
+            then
                 data["info"]["os"] = "linux"
                 data["info"]["name"] = "MS-" .. os.getenv("HOME")
             end
         end
 
-        if data["info"]["identifier"] == nil then
+        if data["info"]["identifier"] == nil
+        then
             data["info"]["identifier"] = randomString(6)
         end
 
@@ -92,7 +97,7 @@ function onConnection(client, type, ...)
 
         function client:deviceRemoved(device)
             local idx = getDeviceIndex(device["id"])
-            if idx ~= nil then
+            if idx ~= nil  then
                 table.remove(devices, idx)
                 sync = "removed"
             end
@@ -110,10 +115,13 @@ function onConnection(client, type, ...)
 
         function client:updateDevice(device)
             local idx = getDeviceIndex(device["id"])
-            if idx == nil then
+            if idx ~= nil then
                 devices[idx] = device
-                sync = "updated"
+                for id, cli in pairs(mona.clients) do
+                    cli.writer:writeInvocation("devices", devices, "updated")
+                end
             end
+            return #devices
         end
 
         function client:deviceLocked(device)
@@ -134,12 +142,11 @@ function onConnection(client, type, ...)
 
         return { name = data["info"]["name"], description = data["info"]["description"], identifier = data["info"]["identifier"], configs = mona.configs }
 
-    else if type == "editor" then
+    elseif type == "editor" then
 
         return { devices = devices, name = data["info"]["name"], description = data["info"]["description"], httpPort = mona.configs.HTTP.port }
 
     else
-
         function client:initData()
             client.writer:writeInvocation("infoUpdated", data["info"]["name"], data["info"]["description"])
         end
@@ -154,15 +161,20 @@ function onConnection(client, type, ...)
 
         function client:install(data)
             local src = data["src"]
+            local target = data["target"]
+
             if not src then
                 error("src parameter missing")
             end
 
-            msApp.writer:writeInvocation("installApp", src, data["deviceIds"])
+            if not target then
+                error("target parameter missing")
+            end
+
+            msApp.writer:writeInvocation("installApp", src, target, data["deviceIds"])
 
             return nil
         end
-    end
     end
 end
 

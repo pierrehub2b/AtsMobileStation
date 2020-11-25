@@ -27,10 +27,11 @@ package com.ats.device.running
 		
 		private static const startInfo:RegExp = new RegExp(ATSDRIVER_DRIVER_HOST + "=(.*):(\\d+)");
 		private static const startInfoLocked:RegExp = /isPasscodeLocked:(\s*)YES/;
+		private static const deviceLocked:RegExp = /The device is passcode protected(\s*)/;
 		private static const noProvisionningProfileError:RegExp = /Xcode couldn't find any iOS App Development provisioning profiles matching(\s*)/;
 		private static const noCertificatesError:RegExp = /signing certificate matching team ID(\s*)/;
 		private static const noXcodeInstalled:RegExp = /requires Xcode(\s*)/;
-		private static const wrongVersionofxCode:RegExp = /which may not be supported by this version of Xcode(\s*)/;
+		private static const wrongVersionOfXcode:RegExp = /which may not be supported by this version of Xcode(\s*)/;
 		private static const sessionExpired:RegExp = /Your session has expired(\s*)/;
 
 		private var logFile:File;
@@ -271,7 +272,7 @@ package com.ats.device.running
 				return;
 			}
 			
-			if (startInfoLocked.test(data)) {
+			if (startInfoLocked.test(data) || deviceLocked.test(data)) {
 				error = "Locked with passcode"
 				errorMessage = "Please disable code and auto-lock in device settings";
 				dispose()
@@ -291,7 +292,7 @@ package com.ats.device.running
 				dispose()
 			} */
 			
-			if (wrongVersionofxCode.test(data)) {
+			if (wrongVersionOfXcode.test(data)) {
 				error = "Your device need a more recent version of Xcode"
 				errorMessage = "Go to AppStore for download it";
 				dispose()
@@ -345,7 +346,7 @@ package com.ats.device.running
 		// ----------- INSTALL APP ----------- //
 		// ----------------------------------- //
 
-		public override function installFile(file:File):void {
+		public override function installLocalFile(file:File):void {
 			if (file.extension != "ipa") {
 				return
 			}
