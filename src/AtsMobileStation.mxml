@@ -16,6 +16,8 @@
 		import com.ats.gui.alert.QuitApplicationAlert;
 		import com.ats.gui.panel.SettingsForm;
 		import com.ats.gui.renderer.RunningDeviceRenderer;
+		import com.ats.helpers.NetworkEvent;
+		import com.ats.helpers.NetworkUtils;
 		import com.ats.helpers.Settings;
 		import com.ats.helpers.Version;
 		import com.ats.managers.AvailableSimulatorsManager;
@@ -194,6 +196,26 @@
 				python.addEventListener(Event.COMPLETE, pythonCheckComplete);
 				python.install();
 			}
+
+			var networkUtils:NetworkUtils = new NetworkUtils()
+			networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_FOUND, onIpAddressFound, false, 0, true)
+			networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, onIpAddressNotFound, false, 0, true)
+			networkUtils.getClientIPAddress()
+		}
+
+		private function onIpAddressFound(event:NetworkEvent):void {
+			(event.currentTarget as NetworkUtils).removeEventListener(NetworkEvent.IP_ADDRESS_FOUND, onIpAddressFound)
+			(event.currentTarget as NetworkUtils).removeEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, onIpAddressFound)
+
+			var ipAddress:String = event.ipAddress
+			titleLabel.text = "Ats MobileStation (" + appVersion + ") - " + ipAddress + ":" + httpPort;
+		}
+
+		private function onIpAddressNotFound(event:NetworkEvent):void {
+			(event.currentTarget as NetworkUtils).removeEventListener(NetworkEvent.IP_ADDRESS_FOUND, onIpAddressFound)
+			(event.currentTarget as NetworkUtils).removeEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, onIpAddressFound)
+
+			titleLabel.text = "Ats MobileStation (" + appVersion + ") - port:" + httpPort;
 		}
 
 		private function monaServerInitHandler(event:Event):void {
