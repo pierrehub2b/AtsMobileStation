@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"
+                xmlns:s="library://ns.adobe.com/flex/spark"
+                height="18"
+                autoDrawBackground="false">
+
+    <s:HGroup color="0xfaebd7">
+        <s:Label text="Agilitest" fontWeight="bold"/>
+        <s:Label text="-" fontWeight="bold"/>
+        <s:Label text="{data}"/>
+    </s:HGroup>
+
+</s:ItemRenderer>

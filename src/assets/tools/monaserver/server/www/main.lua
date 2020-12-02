@@ -1,4 +1,6 @@
 local devices = {}
+local agilitestClients = {}
+
 local sync = nil
 local msApp = nil
 
@@ -51,9 +53,7 @@ end
 
 function onConnection(client, type, ...)
 
-    if type == "mobilestation"
-    then
-
+    if type == "mobilestation" then
         msApp = client
 
         if data["info"] == nil then
@@ -140,15 +140,24 @@ function onConnection(client, type, ...)
             sync = "exit"
         end
 
-        return { name = data["info"]["name"], description = data["info"]["description"], identifier = data["info"]["identifier"], configs = mona.configs }
+        return { name = data["info"]["name"], description = data["info"]["description"], identifier = data["info"]["identifier"], configs = mona.configs, clients = agilitestClients  }
 
     elseif type == "editor" then
+
+        local clientAddress = client["parameters"]["publicAddress"]
+        agilitestClients[#agilitestClients + 1] = clientAddress
+
+        msApp.writer:writeInvocation("onClientConnection", clientAddress)
 
         return { devices = devices, name = data["info"]["name"], description = data["info"]["description"], httpPort = mona.configs.HTTP.port }
 
     else
         function client:initData()
             client.writer:writeInvocation("infoUpdated", data["info"]["name"], data["info"]["description"])
+        end
+
+        function client:clients()
+            return agilitestClients
         end
 
         function client:devices()
@@ -181,7 +190,7 @@ end
 function onManage()
     if sync ~= nil then
         if sync == "exit" then
-            os.exit()
+            -- os.exit()
         else
             for id, cli in pairs(mona.clients) do
                 cli.writer:writeInvocation("devices", devices, sync)
@@ -192,4 +201,25 @@ function onManage()
 end
 
 function onDisconnection(client)
+
+    local clientAddress = client["parameters"]["publicAddress"]
+    local clientIndex = getClientIndex(clientAddress)
+
+    if clientIndex ~= nil then
+        table.remove(agilitestClients, clientIndex)
+
+        for id, cli in pairs(mona.clients) do
+            msApp.writer:writeInvocation("onClientDisconnection", clientAddress)
+        end
+    end
+
+end
+
+function getClientIndex(clientAddress)
+    for i, cli in ipairs(agilitestClients) do
+        if cli == clientAddress then
+            return i
+        end
+    end
+    return nil
 end

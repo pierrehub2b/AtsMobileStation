@@ -73,7 +73,6 @@
 		public var teamId:String;
 		private var appVersion:String
 		private var appName:String
-		private var updateScript:String;
 
 		public function getTeamId():String {
 			return teamId;
@@ -209,7 +208,7 @@
 			networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_FOUND, onIpAddressFound)
 			networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, onIpAddressNotFound)
 			networkUtils = null
-			
+
 			var ipAddress:String = event.ipAddress
 			titleLabel.text = "Ats MobileStation (" + appVersion + ") - " + ipAddress + ":" + httpPort;
 		}
@@ -227,6 +226,8 @@
 			if (GmsaasProcess.gmsaasExec != null) {
 				genymotionManager.fetchContent();
 			}
+
+			restartServerButton.enabled = true
 		}
 
 		private function pythonCheckComplete(ev:Event):void {
@@ -392,7 +393,7 @@
 		}
 
 		protected function finish_clickHandler(event:MouseEvent):void {
-			saveValues(settingsForm.description, settingsForm.localName);
+			saveValues(null, settingsForm.localName);
 			setTeamId(settingsForm.developmentTeamId)
 			TweenLite.to(settingsGroup, 0.3, {x: -width - 10, onComplete: hideSettingsComplete});
 		}
@@ -456,6 +457,14 @@
 				}
 			}
 		}
+
+		private function restartServer_clickHandler(event:MouseEvent):void {
+			restartServerButton.enabled = false
+			peerGroup.close()
+			peerGroup.addEventListener(Event.INIT, monaServerInitHandler)
+			peerGroup.start()
+		}
+
 		]]>
 	</fx:Script>
 	<s:Rect bottom="10" left="14" right="14" top="10" filters="{dropShadowFilterApp}" radiusX="6" radiusY="6" alpha="0.98">
@@ -599,8 +608,7 @@
 		<s:VGroup id="settingsGroup" gap="0" top="0" bottom="0" creationComplete="settingsGroup_creationCompleteHandler(event)">
 			<panels:TitlePanel id="settingsPanel" label="Settings" height="100%" width="100%"/>
 			<panels:BottomButtons width="100%" activated="{!settingsForm.edit}">
-				<buttons:BigButton label="Restart server"/>
-				<buttons:BigButton label="Export devices" enabled="false"/>
+				<buttons:BigButton id="restartServerButton" label="Restart server" click="restartServer_clickHandler(event)"/>
 				<buttons:BigButton label="Finish" click="finish_clickHandler(event)"/>
 			</panels:BottomButtons>
 		</s:VGroup>

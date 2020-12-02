@@ -52,7 +52,7 @@
 					
 					portAutomatic.selected = deviceSettings.automaticPort;
 					androidUsb.selected = deviceSettings.usbMode;
-					portSelection.text = portAutomatic.selected == true ? "" : deviceSettings.port.toString();
+					portSelection.text = portAutomatic.selected ? "" : deviceSettings.port.toString();
 					portSelection.enabled = !portAutomatic.selected;
 				}
 			}
