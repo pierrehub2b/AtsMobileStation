@@ -308,6 +308,7 @@ package com.ats.device.running
 			if (status == Simulator.SHUTDOWN  || errorMessage == "") {
 				dispatchEvent(new Event(STOPPED_EVENT));
 			} else {
+				driverDirectory.deleteDirectory(true)
 				failed();
 			}
 		}
