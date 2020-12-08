@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
 					   xmlns:s="library://ns.adobe.com/flex/spark"
-					   xmlns:panels="com.caipture.gui.panels.*" xmlns:buttons="com.caipture.gui.buttons.*"
+					   xmlns:panels="com.caipture.gui.panels.*" xmlns:buttons="com.caipture.gui.buttons.*" xmlns:ms="com.ats.gui.*"
 					   showStatusBar="false"
 					   frameRate="60"
 					   creationComplete="creationCompleteHandler(event)"
-					   backgroundAlpha="0.0">
+					   backgroundAlpha="0.0"
+					   currentState="loading">
 	<fx:Script>
 		<![CDATA[
 		import com.ats.device.Device;
@@ -119,6 +120,8 @@
 
 		protected function creationCompleteHandler(event:FlexEvent):void {
 
+			// addLoadingScreen()
+
 			TweenPlugin.activate([ColorTransformPlugin]);
 
 			var appXml:XML = NativeApplication.nativeApplication.applicationDescriptor;
@@ -128,7 +131,7 @@
 
 			System.disposeXML(appXml);
 
-			titleLabel.text = "Ats MobileStation (" + appVersion + ") - port:" + httpPort;
+			// titleLabel.text = "Ats MobileStation (" + appVersion + ") - port:" + httpPort;
 
 			var exitCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Exit"));
 			exitCommand.addEventListener(Event.SELECT, exitAppHandler, false, 0, true);
@@ -210,7 +213,7 @@
 			networkUtils = null
 
 			var ipAddress:String = event.ipAddress
-			titleLabel.text = "Ats MobileStation (" + appVersion + ") - " + ipAddress + ":" + httpPort;
+			// titleLabel.text = "Ats MobileStation (" + appVersion + ") - " + ipAddress + ":" + httpPort;
 		}
 
 		private function onIpAddressNotFound(event:NetworkEvent):void {
@@ -227,12 +230,13 @@
 				genymotionManager.fetchContent();
 			}
 
+			currentState = "normal"
 			restartServerButton.enabled = true
+			checkVersion()
 		}
 
 		private function pythonCheckComplete(ev:Event):void {
 			python.removeEventListener(Event.COMPLETE, pythonCheckComplete);
-			checkVersion();
 			genymotionManager = new GenymotionManager();
 		}
 
@@ -450,6 +454,7 @@
 			if (jsonData.hasOwnProperty("release")) {
 				if (jsonData.release.version != appVersion) {
 					var alert:NewVersionAlert = new NewVersionAlert();
+					alert.addEventListener("startDownload", onDownloadStart, false, 0, true);
 					alert.url = AtsDownloadUrl + "/" + jsonData.release.path;
 					alert.size = parseInt(jsonData.release.bundle_size);
 					alert.version = jsonData.release.version;
@@ -465,8 +470,66 @@
 			peerGroup.start()
 		}
 
+		/* private var loadingWindow:NativeWindow
+		private var loadingScreen:LoadingScreen
+		private function addLoadingScreen():void {
+			var splashWindowinitOptions:NativeWindowInitOptions = new NativeWindowInitOptions()
+			splashWindowinitOptions.transparent = true
+			splashWindowinitOptions.systemChrome = NativeWindowSystemChrome.NONE
+			splashWindowinitOptions.type = NativeWindowType.UTILITY
+
+			loadingWindow = new NativeWindow(splashWindowinitOptions)
+			loadingWindow.title = "Splash Example"
+			loadingWindow.alwaysInFront = true
+			loadingScreen = new LoadingScreen()
+			// hiddenGroup.addElement(loadingScreen)
+			// hiddenGroup.removeElement(loadingScreen)
+			loadingWindow.stage.scaleMode = 'noScale'
+			loadingWindow.stage.align = 'topLeft'
+			loadingWindow.stage.addChild(loadingScreen);
+			loadingWindow.x = Screen.mainScreen.visibleBounds.width/2 - 300
+			loadingWindow.y = Screen.mainScreen.visibleBounds.height/2 - 200
+			loadingWindow.width = 600
+			loadingWindow.height = 400
+			loadingWindow.activate();
+
+			nativeWindow.visible = false
+		}
+
+		private function removeLoadingScreen():void {
+			nativeWindow.x = Screen.mainScreen.visibleBounds.width/2 - nativeWindow.width/2
+			nativeWindow.y = Screen.mainScreen.visibleBounds.height/2 - nativeWindow.height/2
+
+			nativeWindow.visible = true
+			nativeWindow.activate()
+
+			loadingWindow.stage.removeChild(loadingScreen)
+			loadingWindow.close()
+			loadingWindow = null
+
+			currentState = "LoadedState"
+		} */
+
+		private function onDownloadStart(event:Event):void {
+			(event.currentTarget as NewVersionAlert).removeEventListener("startDownload", onDownloadStart)
+			currentState = "loading"
+		}
 		]]>
 	</fx:Script>
+
+	<s:transitions>
+		<s:Transition>
+			<s:Sequence>
+
+			</s:Sequence>
+		</s:Transition>
+	</s:transitions>
+
+	<s:states>
+		<s:State name="loading" />
+		<s:State name="normal" />
+	</s:states>
+
 	<s:Rect bottom="10" left="14" right="14" top="10" filters="{dropShadowFilterApp}" radiusX="6" radiusY="6" alpha="0.98">
 		<s:fill>
 			<s:LinearGradient rotation="90">
@@ -475,9 +538,9 @@
 			</s:LinearGradient>
 		</s:fill>
 	</s:Rect>
-	<s:Group id="mainGroup" top="10" right="10" left="10" bottom="10">
-		<s:Group top="0" right="4" left="4" height="30" filters="{dropShadowFilter}" buttonMode="true"
-				 mouseDown="titleMouseDownHandler(event)">
+
+	<s:Group id="mainGroup" includeIn="normal" top="10" right="10" left="10" bottom="10">
+		<s:Group top="0" right="4" left="4" height="30" filters="{dropShadowFilter}" buttonMode="true" mouseDown="titleMouseDownHandler(event)">
 			<s:Rect bottom="0" left="0" right="0" top="0" topLeftRadiusX="6" topRightRadiusX="6">
 				<s:fill>
 					<s:LinearGradient rotation="90">
@@ -496,7 +559,6 @@
 				</s:Group>
 			</s:HGroup>
 		</s:Group>
-
 		<s:VGroup bottom="10" left="10" right="10" top="38" gap="2">
 			<s:Group id="connectedGroup" height="100%" width="100%"
 					 clipAndEnableScrolling="true">
@@ -613,4 +675,7 @@
 			</panels:BottomButtons>
 		</s:VGroup>
 	</s:Group>
+
+	<ms:LoadingScreen id="loadingGroup" includeIn="loading"/>
+
 </s:WindowedApplication>

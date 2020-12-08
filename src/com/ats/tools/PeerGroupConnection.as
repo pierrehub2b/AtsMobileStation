@@ -237,6 +237,8 @@ public class PeerGroupConnection extends EventDispatcher {
         monaServerProc = new NativeProcess();
 
         if (Settings.isMacOs) {
+            var test:Vector.<String> = new Vector.<String>()
+            test.push("")
             procInfo.arguments.push("--daemon");
             monaServerProc.addEventListener(NativeProcessExitEvent.EXIT, monaServerDaemonExit, false, 0, true);
         } else {
@@ -317,10 +319,6 @@ public class PeerGroupConnection extends EventDispatcher {
         stream.open(monServerIni, FileMode.WRITE);
         stream.writeUTFBytes("[RTMFP]\nport = " + rtmpPort + "\n[RTMP]\nport = " + rtmpPort + "\n[HTTP]\nport = " + httpPort + "\nindex = index.html\n[RTSP]\nport = 0\n[WebSocket]\ntimeout = 120");
         stream.close();
-    }
-
-    private function restart():void {
-
     }
 }
 }

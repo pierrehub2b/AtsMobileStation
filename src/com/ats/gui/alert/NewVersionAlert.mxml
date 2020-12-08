@@ -59,6 +59,8 @@
 			
 			protected function okButton_clickHandler(event:MouseEvent):void
 			{
+				dispatchEvent(new Event("startDownload"))
+
 				okButton.visible = false;
 				okButton.includeInLayout = false;
 				
