@@ -111,7 +111,6 @@ public class PeerGroupConnection extends EventDispatcher {
         switch (ev.info.code) {
             case "NetConnection.Connect.Success":
                 trace("connected to MonaServer!");
-                trace(ev.info)
                 initData(ev.info);
                 break;
             case "NetConnection.Connect.Failed":
@@ -300,7 +299,6 @@ public class PeerGroupConnection extends EventDispatcher {
             dev = ev.items[0].source as RunningDevice
             if (ev.items[0].property == "status") {
                 netConnection.call("updateDevice", null, dev.monaDevice);
-                trace("J'ENVOIE " + dev.monaDevice.id + " " + ev.items[0].newValue)
                 if (ev.items[0].newValue == "ready") {
                     netConnection.call("pushDevice", null, dev.monaDevice);
                 }

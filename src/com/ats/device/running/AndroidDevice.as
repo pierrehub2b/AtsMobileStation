@@ -363,7 +363,6 @@ package com.ats.device.running
 			
 			if (executeOutput.indexOf("ATS_DRIVER_RUNNING") > -1) {
 				started()
-				trace(executeOutput)
 			} else if (executeOutput.indexOf("ATS_DRIVER_START") > -1) {
 				trace("driver start -> " + executeOutput);
 			} else if (executeOutput.indexOf("ATS_DRIVER_STOP") > -1) {

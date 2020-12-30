@@ -233,6 +233,8 @@
 			currentState = "normal"
 			restartServerButton.enabled = true
 			checkVersion()
+
+			titleLabel.text = "Ats MobileStation (" + appVersion + ") - port:" + httpPort
 		}
 
 		private function pythonCheckComplete(ev:Event):void {

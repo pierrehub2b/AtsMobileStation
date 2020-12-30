@@ -80,7 +80,8 @@ public class RunningDevice extends Device
 	protected function started():void{
 		status = READY;
 		tooltip = "Driver started and ready";
-		trace("Driver started -> " + getQualifiedClassName(this));
+		// trace("Driver started -> " + getQualifiedClassName(this));
+		printDebugLogs("Driver started and ready")
 	}
 
 	protected function failed():void{

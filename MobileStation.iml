@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="Flex" version="4">
+  <component name="FacetManager">
+    <facet type="Lua" name="Lua">
+      <configuration SdkName="Kahlua" />
+    </facet>
+    <facet type="Python" name="Python">
+      <configuration sdkName="" />
+    </facet>
+  </component>
   <component name="FlexBuildConfigurationManager" active="AtsMobileStation">
     <configurations>
       <configuration name="AtsMobileStation" target-platform="Desktop" main-class="AtsMobileStation" output-file="AtsMobileStation.swf" output-folder="$MODULE_DIR$/bin">
