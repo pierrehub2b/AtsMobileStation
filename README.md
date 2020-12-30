@@ -12,6 +12,13 @@ AtsMobileStation is available on Windows (Android testing) and macOS systems (An
 - Disable device pin code 
 - Enable **developer mode** and authorize the connection to the linked computer
 
+**For Mi or Xiaomi Device :**
+
+- Go to Settings
+- Additional Settings
+- Developer options
+- Install via USB: Toggle On
+
 ## iOS testing 
 
 ### Requirements
