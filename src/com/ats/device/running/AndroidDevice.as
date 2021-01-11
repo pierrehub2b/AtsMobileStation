@@ -32,6 +32,7 @@ package com.ats.device.running
 		
 		//---------------------------------------------------------------------------------------------------------
 		//---------------------------------------------------------------------------------------------------------
+
 		private var logStream:FileStream = new FileStream();
 		private var dateFormatter:DateTimeFormatter = new DateTimeFormatter("en-US");
 		
@@ -42,11 +43,11 @@ package com.ats.device.running
 		public static function setup(id:String, isEmulator:Boolean):AndroidDevice {
 			var deviceSettingsHelper:DeviceSettingsHelper = DeviceSettingsHelper.shared;
 			var deviceSettings:DeviceSettings = deviceSettingsHelper.getSettingsForDevice(id);
-			
 			if (deviceSettings == null) {
 				deviceSettings = new DeviceSettings(id, true, isEmulator);
 				deviceSettingsHelper.save(deviceSettings);
 			}
+
 			var automaticPort:Boolean = deviceSettings.automaticPort;
 			var usbMode:Boolean = deviceSettings.usbMode;
 			
@@ -338,6 +339,10 @@ package com.ats.device.running
 		protected function installDriver():void {
 			var arguments: Vector.<String> = new <String>["-s", id, "install", "-r", atsdroidFilePath];
 			adbProcess.execute(arguments, onInstallDriverExit)
+		}
+
+		protected function onInstallDriverError():void {
+			// adbProcess.removeEventListener()
 		}
 		
 		protected function onInstallDriverExit():void {

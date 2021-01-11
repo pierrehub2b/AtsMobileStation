@@ -5,9 +5,9 @@ public class DeviceSettings {
     public var deviceId:String;
     public var automaticPort:Boolean;
     public var usbMode:Boolean;
-    public var port:int; // -1 == null
+    public var port:int;
 
-    public function DeviceSettings(deviceId:String, automaticPort:Boolean = true, usbMode:Boolean = false, port:int = 8080) {
+    public function DeviceSettings(deviceId:String, automaticPort:Boolean = true, usbMode:Boolean = true, port:int = 8080) {
         this.deviceId = deviceId.toLowerCase();
         this.automaticPort = automaticPort;
         this.usbMode = usbMode;
