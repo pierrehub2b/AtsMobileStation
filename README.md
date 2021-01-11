@@ -2,6 +2,27 @@
 AtsMobileStation is an application that manages the installation and startup of mobile drivers used by ATS test framework.  
 AtsMobileStation is available on Windows (Android testing) and macOS systems (Android and iOS testing).
 
+## Installation on Windows
+
+### Requirements
+- C++ Redistributable Packages for Visual Studio 2013 32 bits (https://www.microsoft.com/fr-FR/download/details.aspx?id=40784)
+
+## Installation on macOS
+
+**Before unzipping and using AtsMobileStation on macOS, complete the following steps:**
+
+1. Install openssl
+- If Brew utility not already installed, open Terminal.app and type:  
+  `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"`
+- Then run command:  
+  `brew install openssl@1.1`
+
+2. Bypass Apple Gatekeeper
+- Download AtsMobileStation zip file.
+- Before unzipping file, open Terminal.app and type:  
+  `xattr -r -d com.apple.quarantine /path/of/your/zip/file`
+- Unzip the file and open it. If macOS popup asking for permission to open AtsMobileStation appears, delete the unzipped file and repeat the previous step.
+
 ## Android testing
 
 ### Requirements
@@ -52,19 +73,3 @@ AtsMobileStation is available on Windows (Android testing) and macOS systems (An
   - "**unlock** the keychain 'session'"
   - enter your Mac credentials
   - plug your device again
-
-## Installation on macOS
-
-**Before unzipping and using AtsMobileStation on macOS, complete the following steps:**
-
-1. Install openssl
-- If Brew utility not already installed, open Terminal.app and type:  
-`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"`
-- Then run command:  
-`brew install openssl@1.1`
-
-2. Bypass Apple Gatekeeper
-- Download AtsMobileStation zip file.
-- Before unzipping file, open Terminal.app and type:  
-`xattr -r -d com.apple.quarantine /path/of/your/zip/file` 
-- Unzip the file and open it. If macOS popup asking for permission to open AtsMobileStation appears, delete the unzipped file and repeat the previous step.
