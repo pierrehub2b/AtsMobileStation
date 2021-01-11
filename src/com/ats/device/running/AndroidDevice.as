@@ -41,11 +41,11 @@ package com.ats.device.running
 		}
 		
 		public static function setup(id:String, isEmulator:Boolean):AndroidDevice {
-			var deviceSettingsHelper:DeviceSettingsHelper = DeviceSettingsHelper.shared;
-			var deviceSettings:DeviceSettings = deviceSettingsHelper.getSettingsForDevice(id);
+			var deviceSettingsHelper:DeviceSettingsHelper = DeviceSettingsHelper.shared
+			var deviceSettings:DeviceSettings = deviceSettingsHelper.getSettingsForDevice(id)
 			if (deviceSettings == null) {
-				deviceSettings = new DeviceSettings(id, true, isEmulator);
-				deviceSettingsHelper.save(deviceSettings);
+				deviceSettings = new DeviceSettings(id)
+				deviceSettingsHelper.save(deviceSettings)
 			}
 
 			var automaticPort:Boolean = deviceSettings.automaticPort;
