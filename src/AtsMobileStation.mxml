@@ -165,30 +165,6 @@
 			simulators = new AvailableSimulatorsManager();
 			devices = new RunningDevicesManager();
 
-			if (Settings.isMacOs) {
-				var file:File = Settings.settingsFile;
-				if (file.exists) {
-
-					var fileStream:FileStream = new FileStream();
-					fileStream.open(file, FileMode.READ);
-
-					var settingsContent:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
-					var settingsContentArray:Array = settingsContent.split("\n");
-
-					for each(var setting:String in settingsContentArray) {
-						if (setting != "") {
-							var key:String = setting.split("==")[0];
-							if (key == "development_team") {
-								teamId = setting.split("==")[1];
-								settingsForm.teamIdInputText.text = teamId
-								break;
-							}
-						}
-					}
-					fileStream.close();
-				}
-			}
-
 			peerGroup = new PeerGroupConnection(Settings.workFolder, devices, httpPort);
 			peerGroup.addEventListener(Event.INIT, monaServerInitHandler)
 			peerGroup.start()
@@ -235,6 +211,30 @@
 			checkVersion()
 
 			titleLabel.text = "Ats MobileStation (" + appVersion + ") - port:" + httpPort
+
+			if (Settings.isMacOs) {
+				var file:File = Settings.settingsFile;
+				if (file.exists) {
+
+					var fileStream:FileStream = new FileStream();
+					fileStream.open(file, FileMode.READ);
+
+					var settingsContent:String = fileStream.readUTFBytes(fileStream.bytesAvailable);
+					var settingsContentArray:Array = settingsContent.split("\n");
+
+					for each(var setting:String in settingsContentArray) {
+						if (setting != "") {
+							var key:String = setting.split("==")[0];
+							if (key == "development_team") {
+								teamId = setting.split("==")[1];
+								settingsForm.teamIdInputText.text = teamId
+								break;
+							}
+						}
+					}
+					fileStream.close();
+				}
+			}
 		}
 
 		private function pythonCheckComplete(ev:Event):void {
