@@ -17,6 +17,7 @@
 
 import XCTest
 import Swifter
+import atsios
 
 var application: XCUIApplication!
 

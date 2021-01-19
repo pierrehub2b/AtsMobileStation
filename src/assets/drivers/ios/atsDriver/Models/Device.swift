@@ -55,10 +55,11 @@ final class Device: Encodable {
     
     let description: String
     
-    let deviceWidth: CGFloat
-    let deviceHeight: CGFloat
-    let channelWidth: CGFloat
-    let channelHeight: CGFloat
+    var deviceWidth: CGFloat = 0
+    var deviceHeight: CGFloat = 0
+    var channelWidth: CGFloat = 0
+    var channelHeight: CGFloat = 0
+    let deviceScale = AppDelegate.deviceScale()
     
     let isSimulator: Bool
     
@@ -83,15 +84,7 @@ final class Device: Encodable {
         let bundleInfo = Bundle.main.infoDictionary
         self.driverBuildNumber = bundleInfo?["CFBundleVersion"] as? String ?? ""
         self.driverVersion = bundleInfo?["CFBundleShortVersionString"] as? String ?? ""
-        
-        let image = XCUIScreen.main.screenshot().image
-        let deviceSize = image.size
-        self.deviceWidth = deviceSize.width
-        self.deviceHeight = deviceSize.height
-        let deviceScale = image.scale
-        self.channelWidth = deviceSize.width * deviceScale
-        self.channelHeight = deviceSize.height * deviceScale
-        
+                
         #if targetEnvironment(simulator)
         self.isSimulator = true
         #else
@@ -114,6 +107,13 @@ final class Device: Encodable {
         systemVersionString.removeLast()
 
         return systemVersionString
+    }
+    
+    func setDeviceSize(size: CGRect) {
+        self.deviceWidth = size.width
+        self.deviceHeight = size.height
+        self.channelWidth = size.width * deviceScale
+        self.channelHeight = size.height * deviceScale
     }
 }
 

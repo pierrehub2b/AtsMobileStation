@@ -18,29 +18,25 @@ package com.ats.managers {
     import flash.filesystem.File;
     import flash.filesystem.FileMode;
     import flash.filesystem.FileStream;
-    import flash.net.FileReference;
     import flash.net.URLLoader;
     import flash.net.URLLoaderDataFormat;
     import flash.net.URLRequest;
-    import flash.net.URLStream;
     import flash.system.System;
     import flash.utils.ByteArray;
 
     import mx.collections.ArrayCollection;
     import mx.core.FlexGlobals;
-	import mx.events.CollectionEvent;
-import mx.utils.UIDUtil;
-import mx.utils.URLUtil;
+    import mx.events.CollectionEvent;
+    import mx.utils.UIDUtil;
+    import mx.utils.URLUtil;
 
     import net.tautausan.plist.PDict;
     import net.tautausan.plist.Plist10;
 
     public class RunningDevicesManager extends EventDispatcher {
-        // private const systemProfiler:File = new File("/usr/sbin/system_profiler");
-        private const envFile:File = new File("/usr/bin/env");
 
+        private const envFile:File = new File("/usr/bin/env");
         private const sysprofilerArgs:Vector.<String> = new <String>["system_profiler", "SPUSBDataType", "-xml"];
-        // private const simCtlArgs:Vector.<String> = new <String>["xcrun", "simctl", "list", "devices", "-j"];
         private const adbListDevicesArgs:Vector.<String> = new <String>["devices", "-l"];
         private const adbKillServer:Vector.<String> = new <String>["kill-server"];
 
@@ -48,6 +44,7 @@ import mx.utils.URLUtil;
         // private const iosDevicePattern:RegExp = /(.*)\(([^\)]*)\).*\[(.*)\](.*)/;
         // private const jsonPattern:RegExp = /\{[^]*\}/;
         public static const responseSplitter:String = "<$atsDroid_ResponseSPLIITER$>";
+
         public static var devTeamId:String = "";
 
         private static function isSimulator(info:Array):Boolean {

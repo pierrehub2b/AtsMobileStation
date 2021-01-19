@@ -99,20 +99,15 @@ package com.ats.device.running
 			return false;
 		}
 
-		private var needsBuilding:Boolean = false
-
 		override public function start():void {
-			if(!FlexGlobals.topLevelApplication.getTeamId() && !simulator) {
+			if (!FlexGlobals.topLevelApplication.getTeamId() && !simulator) {
 				status = Device.FAIL;
 				errorMessage = " - No development team id set";
 				return;
 			}
 			
 			driverDirectory =  File.userDirectory.resolvePath("Library/mobileStationTemp/driver_"+ id)
-			if (!driverDirectory.exists || driverDirectory.resolvePath("atsDriver").modificationDate < iosDriverProjectFolder.resolvePath("atsDriver").modificationDate) {
-				iosDriverProjectFolder.copyTo(driverDirectory, true)
-				needsBuilding = true
-			}
+			iosDriverProjectFolder.copyTo(driverDirectory, true)
 
 			installing();
 			uninstallDriver()
@@ -198,7 +193,8 @@ package com.ats.device.running
 				arguments.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + FlexGlobals.topLevelApplication.getTeamId());
 			}
 
-			arguments.push(needsBuilding ? "test" : "test-without-building")
+			arguments.push("test")
+
 			trace(arguments)
 
 			processStartupInfo.arguments = arguments
@@ -233,6 +229,7 @@ package com.ats.device.running
 					devicePortSettings.port = parseInt(port);
 					DevicePortSettingsHelper.shared.addSettings(devicePortSettings);
 				}
+
 				trace(new Date() +" DRIVER STARTED")
 				
 				started();

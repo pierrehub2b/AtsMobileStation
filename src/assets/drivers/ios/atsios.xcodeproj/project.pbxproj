@@ -22,6 +22,7 @@
 		923AE15E245F21DF00156ECB /* ButtonController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE15D245F21DF00156ECB /* ButtonController.swift */; };
 		923AE161245F3D8100156ECB /* Application.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE160245F3D8100156ECB /* Application.swift */; };
 		9254C2A02449A8E3006DC4FC /* ScriptingExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9254C29F2449A8E3006DC4FC /* ScriptingExecutor.swift */; };
+		927F8B4B25B6EC1500877C04 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047BFA6722F178D700BB2E25 /* AppDelegate.swift */; };
 		92C416C32473CB5B00A772AF /* AtsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92C416C22473CB5B00A772AF /* AtsClient.swift */; };
 		92C416C52473D9D300A772AF /* Content.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92C416C42473D9D300A772AF /* Content.swift */; };
 		9A907BBD234901DF00F3DE15 /* AppIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A907BBC234901DF00F3DE15 /* AppIcons.swift */; };
@@ -348,6 +349,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				927F8B4B25B6EC1500877C04 /* AppDelegate.swift in Sources */,
 				923AE161245F3D8100156ECB /* Application.swift in Sources */,
 				923AE15E245F21DF00156ECB /* ButtonController.swift in Sources */,
 				923AE14E24571C9900156ECB /* ElementController.swift in Sources */,
