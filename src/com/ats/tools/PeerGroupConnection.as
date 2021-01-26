@@ -236,13 +236,12 @@ public class PeerGroupConnection extends EventDispatcher {
         monaServerProc = new NativeProcess();
 
         if (Settings.isMacOs) {
-            var test:Vector.<String> = new Vector.<String>()
-            test.push("")
             procInfo.arguments.push("--daemon");
             monaServerProc.addEventListener(NativeProcessExitEvent.EXIT, monaServerDaemonExit, false, 0, true);
         } else {
             monaServerProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onMonaServerRun, false, 0, true);
         }
+
         monaServerProc.start(procInfo);
     }
 
