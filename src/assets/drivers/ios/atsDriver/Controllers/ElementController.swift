@@ -138,11 +138,11 @@ final class ElementController {
             return Output(message: "tap on element").toHttpResponse()
         }
         
-        guard parameters.count > 2 else {
+        guard parameters.count > 0 else {
             return Output(message: "missing parameters").toHttpResponse()
         }
         
-        let text = parameters[2]
+        let text = parameters[0]
         if text == "&empty;" {
             return Output(message: "no keyboard on screen for tap text").toHttpResponse()
         } else {
