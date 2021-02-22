@@ -22,7 +22,6 @@ package com.ats.managers {
     import flash.net.URLLoaderDataFormat;
     import flash.net.URLRequest;
     import flash.system.System;
-    import flash.utils.ByteArray;
 
     import mx.collections.ArrayCollection;
     import mx.core.FlexGlobals;
@@ -30,13 +29,10 @@ package com.ats.managers {
     import mx.utils.UIDUtil;
     import mx.utils.URLUtil;
 
-    import net.tautausan.plist.PDict;
-    import net.tautausan.plist.Plist10;
-
     public class RunningDevicesManager extends EventDispatcher {
 
         private const envFile:File = new File("/usr/bin/env");
-        private const sysprofilerArgs:Vector.<String> = new <String>["system_profiler", "SPUSBDataType", "-xml"];
+        private const sysprofilerArgs:Vector.<String> = new <String>["system_profiler", "SPUSBDataType", "-json"];
         private const adbListDevicesArgs:Vector.<String> = new <String>["devices", "-l"];
         private const adbKillServer:Vector.<String> = new <String>["kill-server"];
 
@@ -89,7 +85,6 @@ package com.ats.managers {
         private var adbLoop:TweenLite;
         private var iosLoop:TweenLite;
         private var usbDevicesIdList:Vector.<String>;
-        private var downloadedData:ByteArray = new ByteArray();
         private var urlLoader:URLLoader;
 		private var isInstalling:Boolean = false
 
@@ -143,20 +138,16 @@ package com.ats.managers {
             proc.start(procInfo);
         }
 
-        private function getDevicesIds(itmList:PDict):void {
-            if (itmList.object._items != null) {
-                const itemsListArray:Array = itmList.object._items.object as Array;
-                for each(var itm:PDict in itemsListArray) {
-                    getDevicesIds(itm);
-                    const name:String = itm.object._name.toString().toLowerCase();
-                    if (name == "iphone") {
-                        var serialNumber:String = itm.object.serial_num
-                        if (serialNumber.length == 24) {
-                            serialNumber = serialNumber.slice(0, 8) + "-" + serialNumber.slice(8);
-                        }
-
-                        usbDevicesIdList.push(serialNumber);
+        private function getDevicesIds(itmList:Object):void {
+            for each (var object:Object in itmList) {
+                const name:String = object._name.toString().toLowerCase();
+                if (name == "iphone") {
+                    var serialNumber:String = object.serial_num
+                    if (serialNumber.length == 24) {
+                        serialNumber = serialNumber.slice(0, 8) + "-" + serialNumber.slice(8);
                     }
+
+                    usbDevicesIdList.push(serialNumber);
                 }
             }
         }
@@ -309,43 +300,25 @@ package com.ats.managers {
         }
 
         private function onUsbDeviceExit(ev:NativeProcessExitEvent):void {
-
             ev.target.removeEventListener(NativeProcessExitEvent.EXIT, onUsbDeviceExit);
             ev.target.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onReadIosDevicesData);
             ev.target.closeInput();
 
             //------------------------------------------------------------------------------------------
 
-            var newlineTabPattern:RegExp = /[\n\t]/g;
-            var output:String = String(iosOutput.replace(newlineTabPattern, ""));
-            const plistNodeIndex:int = output.indexOf("<plist version=\"1.0\">");
+            usbDevicesIdList = new <String>[]
 
-            if (plistNodeIndex > -1) {
-                output = output.substr(plistNodeIndex + 21, output.length - plistNodeIndex - 29);
+            const json:Object = JSON.parse(iosOutput)
+            const usbPorts:Array = json["SPUSBDataType"][0]["_items"]
+            getDevicesIds(usbPorts)
 
-                usbDevicesIdList = new Vector.<String>();
-
-                var plist:Plist10 = new Plist10(output);
-                const usbPorts:Array = plist.root._items.object as Array;
-
-                for each (var port:PDict in usbPorts) {
-                    getDevicesIds(port);
+            for each(var iosDev:RunningDevice in collection) {
+                if (iosDev is IosDevice && !iosDev.simulator && usbDevicesIdList.indexOf(iosDev.id) == -1) {
+                    iosDev.close()
                 }
-
-                plist.dispose();
-                plist = null;
-
-                for each(var iosDev:RunningDevice in collection) {
-                    if (iosDev is IosDevice && !iosDev.simulator && usbDevicesIdList.indexOf(iosDev.id) < 0) {
-                        iosDev.close()
-                    }
-                }
-
-                loadDevicesId();
-
-            } else {
-                iosLoop.restart(true);
             }
+
+            loadDevicesId();
 
             System.gc();
         }
