@@ -23,25 +23,13 @@
 	<target name="prepareBuildMacos" if="isMac">
 		<delete dir="src/assets/tools/python"/>
 		<unzip src="tools/python/windows/python.zip" dest="src/assets/tools/python"/>
-
-		<delete dir="src/assets/tools/monaserver/MonaBase"/>
-		<delete dir="src/assets/tools/monaserver/MonaCore"/>
-		<delete file="src/assets/tools/monaserver/server/MonaServer"/>
-		<delete file="src/assets/tools/monaserver/libluajit-5.1.2.dylib"/>
-			
 		<unzip src="tools/android/macos/adb.zip" dest="src/assets/tools/android"/>
-		<unzip src="tools/monaserver/macos/monaserver.zip" dest="src/assets/tools/monaserver"/>
 	</target>
 
 	<target name="prepareBuildWindows" if="isWindows">
 		<delete dir="src/assets/tools/python"/>
 		<unzip src="tools/python/windows/python.zip" dest="src/assets/tools/python"/>
-			
-		<delete file="src/assets/tools/monaserver/server/Monaserver.exe"/>
-		<delete file="src/assets/tools/monaserver/server/lua51.dll"/>
-		
 		<unzip src="tools/android/windows/adb.zip" dest="src/assets/tools/android"/>
-		<unzip src="tools/monaserver/windows/monaserver.zip" dest="src/assets/tools/monaserver/server"/>
 	</target>
 
 	<target name="configure" depends="initMacOsProperties,initWindowsProperties">

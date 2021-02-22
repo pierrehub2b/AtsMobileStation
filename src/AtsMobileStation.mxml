@@ -25,7 +25,6 @@
 		import com.ats.managers.GenymotionManager;
 		import com.ats.managers.RunningDevicesManager;
 		import com.ats.managers.gmsaas.GmsaasProcess;
-		import com.ats.tools.PeerGroupConnection;
 		import com.ats.tools.Python;
 		import com.caipture.gui.panels.TopTitle;
 		import com.greensock.TweenLite;
@@ -54,8 +53,6 @@
 
 		[Bindable]
 		private var settingsForm:SettingsForm;
-
-		public var peerGroup:PeerGroupConnection;
 
 		public var python:Python;
 
@@ -119,9 +116,6 @@
 		}
 
 		protected function creationCompleteHandler(event:FlexEvent):void {
-
-			// addLoadingScreen()
-
 			TweenPlugin.activate([ColorTransformPlugin]);
 
 			var appXml:XML = NativeApplication.nativeApplication.applicationDescriptor;
@@ -130,8 +124,6 @@
 			appName = appXml.ns::filename[0];
 
 			System.disposeXML(appXml);
-
-			// titleLabel.text = "Ats MobileStation (" + appVersion + ") - port:" + httpPort;
 
 			var exitCommand:NativeMenuItem = iconMenu.addItem(new NativeMenuItem("Exit"));
 			exitCommand.addEventListener(Event.SELECT, exitAppHandler, false, 0, true);
@@ -165,10 +157,6 @@
 			simulators = new AvailableSimulatorsManager();
 			devices = new RunningDevicesManager();
 
-			peerGroup = new PeerGroupConnection(Settings.workFolder, devices, httpPort);
-			peerGroup.addEventListener(Event.INIT, monaServerInitHandler)
-			peerGroup.start()
-
 			python = new Python();
 			if (!Settings.isMacOs) {
 				python.addEventListener(Event.COMPLETE, pythonCheckComplete);
@@ -176,41 +164,32 @@
 			}
 
 			networkUtils = new NetworkUtils()
-			networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_FOUND, onIpAddressFound, false, 0, true)
-			networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, onIpAddressNotFound, false, 0, true)
+			networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_FOUND, onIpAddressComplete, false, 0, true)
+			networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, onIpAddressComplete, false, 0, true)
 			networkUtils.getClientIPAddress()
 		}
 
-		var networkUtils:NetworkUtils
-
-		private function onIpAddressFound(event:NetworkEvent):void {
-			networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_FOUND, onIpAddressFound)
-			networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, onIpAddressNotFound)
+		private var networkUtils:NetworkUtils
+		private function onIpAddressComplete(event:NetworkEvent):void {
+			networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_FOUND, onIpAddressComplete)
+			networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, onIpAddressComplete)
 			networkUtils = null
 
-			var ipAddress:String = event.ipAddress
-			// titleLabel.text = "Ats MobileStation (" + appVersion + ") - " + ipAddress + ":" + httpPort;
-		}
+			currentState = "normal"
 
-		private function onIpAddressNotFound(event:NetworkEvent):void {
-			networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_FOUND, onIpAddressFound)
-			networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, onIpAddressNotFound)
-			networkUtils = null
+			const ipAddress:String = event.ipAddress
+			if (ipAddress) {
+				titleLabel.text = "Ats MobileStation (" + appVersion + ") - " + ipAddress + ":" + httpPort;
+			} else {
+				titleLabel.text = "Ats MobileStation (" + appVersion + ") - port:" + httpPort
+			}
 
-			titleLabel.text = "Ats MobileStation (" + appVersion + ") - port:" + httpPort;
-		}
-
-		private function monaServerInitHandler(event:Event):void {
-			(event.currentTarget as PeerGroupConnection).removeEventListener(Event.INIT, monaServerInitHandler)
 			if (GmsaasProcess.gmsaasExec != null) {
 				genymotionManager.fetchContent();
 			}
 
-			currentState = "normal"
-			restartServerButton.enabled = true
-			checkVersion()
 
-			titleLabel.text = "Ats MobileStation (" + appVersion + ") - port:" + httpPort
+			checkVersion()
 
 			if (Settings.isMacOs) {
 				var file:File = Settings.settingsFile;
@@ -242,10 +221,6 @@
 			genymotionManager = new GenymotionManager();
 		}
 
-		public function saveValues(desc:String, name:String):void {
-			peerGroup.saveValues(desc, name);
-		}
-
 		public function restartDevice(dev:Device):void {
 			devices.restartDev(dev);
 		}
@@ -274,7 +249,6 @@
 		}
 
 		public function closeAll():void {
-			peerGroup.close();
 			simulators.terminate();
 
 			if (Settings.isMacOs) {
@@ -353,18 +327,6 @@
 		}
 
 		protected function settings_clickHandler(event:MouseEvent):void {
-			// create and configure the TitleWindow
-			/*const tw:SettingsWindow = new SettingsWindow();
-            for each(var dv:RunningDevice in devices.collection) {
-            if (!dv.simulator && dv is IosDevice) {
-            tw.devices.push(dv);
-            }
-            }
-
-            // open the TitleWindow as a modal popup window
-            PopUpManager.addPopUp(tw, this, true);
-            PopUpManager.centerPopUp(tw);*/
-
 			settingsButton.enabled = false;
 			settingsGroup.visible = true;
 			TweenLite.to(settingsGroup, 0.3, {x: 4, onComplete: showSettingsComplete});
@@ -372,7 +334,6 @@
 
 		private function showSettingsComplete():void {
 			settingsButton.enabled = true;
-			settingsForm.reload(peerGroup);
 		}
 
 		public function restartServer():void {
@@ -381,7 +342,6 @@
 
 		private function alertClickHandler(evt:CloseEvent):void {
 			if (evt.detail == Alert.YES) {
-				peerGroup.terminate();
 				restartApp();
 			}
 		}
@@ -399,7 +359,6 @@
 		}
 
 		protected function finish_clickHandler(event:MouseEvent):void {
-			saveValues(null, settingsForm.localName);
 			setTeamId(settingsForm.developmentTeamId)
 			TweenLite.to(settingsGroup, 0.3, {x: -width - 10, onComplete: hideSettingsComplete});
 		}
@@ -465,57 +424,11 @@
 			}
 		}
 
-		private function restartServer_clickHandler(event:MouseEvent):void {
-			restartServerButton.enabled = false
-			peerGroup.close()
-			peerGroup.addEventListener(Event.INIT, monaServerInitHandler)
-			peerGroup.start()
-		}
-
-		/* private var loadingWindow:NativeWindow
-		private var loadingScreen:LoadingScreen
-		private function addLoadingScreen():void {
-			var splashWindowinitOptions:NativeWindowInitOptions = new NativeWindowInitOptions()
-			splashWindowinitOptions.transparent = true
-			splashWindowinitOptions.systemChrome = NativeWindowSystemChrome.NONE
-			splashWindowinitOptions.type = NativeWindowType.UTILITY
-
-			loadingWindow = new NativeWindow(splashWindowinitOptions)
-			loadingWindow.title = "Splash Example"
-			loadingWindow.alwaysInFront = true
-			loadingScreen = new LoadingScreen()
-			// hiddenGroup.addElement(loadingScreen)
-			// hiddenGroup.removeElement(loadingScreen)
-			loadingWindow.stage.scaleMode = 'noScale'
-			loadingWindow.stage.align = 'topLeft'
-			loadingWindow.stage.addChild(loadingScreen);
-			loadingWindow.x = Screen.mainScreen.visibleBounds.width/2 - 300
-			loadingWindow.y = Screen.mainScreen.visibleBounds.height/2 - 200
-			loadingWindow.width = 600
-			loadingWindow.height = 400
-			loadingWindow.activate();
-
-			nativeWindow.visible = false
-		}
-
-		private function removeLoadingScreen():void {
-			nativeWindow.x = Screen.mainScreen.visibleBounds.width/2 - nativeWindow.width/2
-			nativeWindow.y = Screen.mainScreen.visibleBounds.height/2 - nativeWindow.height/2
-
-			nativeWindow.visible = true
-			nativeWindow.activate()
-
-			loadingWindow.stage.removeChild(loadingScreen)
-			loadingWindow.close()
-			loadingWindow = null
-
-			currentState = "LoadedState"
-		} */
-
 		private function onDownloadStart(event:Event):void {
 			(event.currentTarget as NewVersionAlert).removeEventListener("startDownload", onDownloadStart)
 			currentState = "loading"
 		}
+
 		]]>
 	</fx:Script>
 
@@ -672,7 +585,6 @@
 		<s:VGroup id="settingsGroup" gap="0" top="0" bottom="0" creationComplete="settingsGroup_creationCompleteHandler(event)">
 			<panels:TitlePanel id="settingsPanel" label="Settings" height="100%" width="100%"/>
 			<panels:BottomButtons width="100%" activated="{!settingsForm.edit}">
-				<buttons:BigButton id="restartServerButton" label="Restart server" click="restartServer_clickHandler(event)"/>
 				<buttons:BigButton label="Finish" click="finish_clickHandler(event)"/>
 			</panels:BottomButtons>
 		</s:VGroup>

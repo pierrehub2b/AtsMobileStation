@@ -14,7 +14,6 @@
 		import com.ats.managers.gmsaas.GmsaasInstallerErrorEvent;
 		import com.ats.managers.gmsaas.GmsaasInstallerProgressEvent;
 		import com.ats.managers.gmsaas.GmsaasProcess;
-		import com.ats.tools.PeerGroupConnection;
 		import com.ats.tools.Python;
 
 		import mx.core.FlexGlobals;
@@ -25,18 +24,9 @@
 		[Bindable]
 		public var edit:Boolean = false;
 
-		[Bindable]
-		private var peerConnection:PeerGroupConnection
-
-		public function reload(peer:PeerGroupConnection):void {
-			this.peerConnection = peer
-
-			msName.text = peer.name;
-
+		public function reload():void {
 			pythonFolderPath.text = Python.folder.nativePath
 			genyPanel.clearMessage()
-
-			connectedClientsList.dataProvider = peerConnection.clients
 
 			gmsaas = GmsaasProcess.gmsaasExec != null
 		}
@@ -178,12 +168,6 @@
 		]]>
 	</fx:Script>
 	<text:InputText id="msName" label="Mobile Station name" width="100%"/>
-	<s:Group width="100%" height="100%" includeInLayout="{!Settings.isMacOs}">
-		<panels:InsetPanel id="connectedClientsPanel" label="{'Connected clients (' + peerConnection.clients.length + ')'}" width="100%" height="100%" includeInLayout="true"/>
-		<s:Spacer height="10" />
-		<s:List right="7" left="7" top="26" id="connectedClientsList" width="100%" height="100%" itemRenderer="com.ats.gui.renderer.EditorRenderer"
-				useVirtualLayout="false" contentBackgroundAlpha="0" borderAlpha="0" dataProvider="{peerConnection.clients}"/>
-	</s:Group>
 	<s:Spacer height="6"/>
 	<s:HGroup width="100%" verticalAlign="bottom" includeInLayout="{!Settings.isMacOs}">
 		<text:InputText id="pythonFolderPath" label="Python folder" width="100%" editable="false"/>
