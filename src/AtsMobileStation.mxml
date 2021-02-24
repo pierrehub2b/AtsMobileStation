@@ -59,8 +59,8 @@
 		[Bindable]
 		public var genymotionManager:GenymotionManager;
 
-		[Bindable]
-		private var httpPort:int = 8686;
+		// [Bindable]
+		// private var httpPort:int = 8686;
 
 		[Bindable]
 		public var devices:RunningDevicesManager;
@@ -158,9 +158,12 @@
 			devices = new RunningDevicesManager();
 
 			python = new Python();
-			if (!Settings.isMacOs) {
-				python.addEventListener(Event.COMPLETE, pythonCheckComplete);
-				python.install();
+			if (Settings.isMacOs) {
+				python.addEventListener(Event.COMPLETE, pythonSetupComplete)
+				python.setupMacOsPath()
+			} else {
+				python.addEventListener(Event.COMPLETE, pythonCheckComplete)
+				python.install()
 			}
 
 			networkUtils = new NetworkUtils()
@@ -170,6 +173,7 @@
 		}
 
 		private var networkUtils:NetworkUtils
+
 		private function onIpAddressComplete(event:NetworkEvent):void {
 			networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_FOUND, onIpAddressComplete)
 			networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, onIpAddressComplete)
@@ -179,22 +183,18 @@
 
 			const ipAddress:String = event.ipAddress
 			if (ipAddress) {
-				titleLabel.text = "Ats MobileStation (" + appVersion + ") - " + ipAddress + ":" + httpPort;
+				titleLabel.text = "Ats MobileStation (" + appVersion + ") - " + ipAddress // + ":" + httpPort;
 			} else {
-				titleLabel.text = "Ats MobileStation (" + appVersion + ") - port:" + httpPort
+				titleLabel.text = "Ats MobileStation (" + appVersion + ")" // - port:" + httpPort
 			}
 
 			if (GmsaasProcess.gmsaasExec != null) {
 				genymotionManager.fetchContent();
 			}
 
-
-			checkVersion()
-
 			if (Settings.isMacOs) {
 				var file:File = Settings.settingsFile;
 				if (file.exists) {
-
 					var fileStream:FileStream = new FileStream();
 					fileStream.open(file, FileMode.READ);
 
@@ -213,12 +213,25 @@
 					}
 					fileStream.close();
 				}
+			} else {
+				checkVersion()
 			}
 		}
 
 		private function pythonCheckComplete(ev:Event):void {
 			python.removeEventListener(Event.COMPLETE, pythonCheckComplete);
-			genymotionManager = new GenymotionManager();
+			genymotionManager = new GenymotionManager()
+		}
+
+		private function pythonSetupComplete(ev:Event):void {
+			python.removeEventListener(Event.COMPLETE, pythonSetupComplete)
+
+			if (Python.file) {
+				python.addEventListener(Event.COMPLETE, pythonCheckComplete)
+				python.install()
+
+				checkVersion()
+			}
 		}
 
 		public function restartDevice(dev:Device):void {
@@ -336,16 +349,6 @@
 			settingsButton.enabled = true;
 		}
 
-		public function restartServer():void {
-			Alert.show("Dou you really want to restart the server ?\n(connected clients will be deconnected)", "Restart MobileStation server", Alert.YES | Alert.NO, this, alertClickHandler);
-		}
-
-		private function alertClickHandler(evt:CloseEvent):void {
-			if (evt.detail == Alert.YES) {
-				restartApp();
-			}
-		}
-
 		protected function reloadButtons_clickHandler(event:MouseEvent):void {
 			genymotionManager.fetchContent();
 		}
@@ -413,14 +416,14 @@
 			}
 
 			if (jsonData.hasOwnProperty("release")) {
-				if (jsonData.release.version != appVersion) {
+				// if (jsonData.release.version != appVersion) {
 					var alert:NewVersionAlert = new NewVersionAlert();
 					alert.addEventListener("startDownload", onDownloadStart, false, 0, true);
 					alert.url = AtsDownloadUrl + "/" + jsonData.release.path;
 					alert.size = parseInt(jsonData.release.bundle_size);
 					alert.version = jsonData.release.version;
 					ModalPopupManager.addPopup(mainGroup, alert);
-				}
+				// }
 			}
 		}
 
@@ -428,7 +431,6 @@
 			(event.currentTarget as NewVersionAlert).removeEventListener("startDownload", onDownloadStart)
 			currentState = "loading"
 		}
-
 		]]>
 	</fx:Script>
 

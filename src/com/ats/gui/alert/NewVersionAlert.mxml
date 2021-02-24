@@ -14,16 +14,11 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import com.ats.managers.gmsaas.GmsaasManager;
-			import com.ats.managers.gmsaas.GmsaasManagerEvent;
-			
 			import flash.filters.BitmapFilterQuality;
 			
 			import mx.core.FlexGlobals;
-			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			
-			import spark.components.Alert;
 			import spark.filters.DropShadowFilter;
 			
 			public static const dropShadow:DropShadowFilter = new DropShadowFilter(4.0, 45, 0x000000, 0.4, 8.0, 8.0, 0.9, BitmapFilterQuality.HIGH, false, false, false);
@@ -72,14 +67,12 @@
 			private var urlStream:URLStream;
 			private var downloadedData:ByteArray;
 			
-			private function downloadZipFile():void{
-				
+			private function downloadZipFile():void {
 				downloadedData = new ByteArray();
 				
 				urlStream = new URLStream();
 				urlStream.addEventListener(ProgressEvent.PROGRESS, streamProgress);
 				urlStream.addEventListener(Event.COMPLETE, streamComplete);
-				
 				urlStream.load(new URLRequest(url));
 				
 				download = true;
@@ -87,17 +80,17 @@
 			
 			private function streamProgress(ev:ProgressEvent):void{
 				urlStream.readBytes(downloadedData, downloadedData.length, urlStream.bytesAvailable);
-				content.load = (ev.bytesLoaded / size)*100
+				content.load = (ev.bytesLoaded / size) * 100
 			}
 			
-			private function streamComplete(ev:Event):void{
+			private function streamComplete(ev:Event):void {
 				urlStream.removeEventListener(ProgressEvent.PROGRESS, streamProgress);
 				urlStream.removeEventListener(Event.COMPLETE, streamComplete);
 				
 				urlStream.close();
 				urlStream = null;
 				
-				if(download){
+				if (download) {
 					
 					cancelButton.enabled = false;
 					savedFile = File.createTempFile();

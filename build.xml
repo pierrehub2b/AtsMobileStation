@@ -22,7 +22,6 @@
 
 	<target name="prepareBuildMacos" if="isMac">
 		<delete dir="src/assets/tools/python"/>
-		<unzip src="tools/python/windows/python.zip" dest="src/assets/tools/python"/>
 		<unzip src="tools/android/macos/adb.zip" dest="src/assets/tools/android"/>
 	</target>
 
@@ -157,8 +156,7 @@
 	</target>
 
 	<target name="zipWindows" if="isWindows">
-		<zip destfile="release/${APP_NAME}.zip"
-				     basedir="release/${APP_NAME}"/>
+		<zip destfile="release/${APP_NAME}.zip" basedir="release/${APP_NAME}"/>
 	</target>
 
 	<target name="zipMacos" if="isMac">

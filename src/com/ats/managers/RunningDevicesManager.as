@@ -61,10 +61,10 @@ package com.ats.managers {
 
                 adbFile = adbFolder.resolvePath("adb");
 
-                var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-                procInfo.executable = new File("/bin/chmod");
-                procInfo.workingDirectory = File.applicationDirectory.resolvePath("assets/tools");
-                procInfo.arguments = new <String>["+x", "android/adb", "ios/mobiledevice"];
+                var procInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
+                procInfo.executable = new File("/bin/chmod")
+                procInfo.workingDirectory = File.applicationDirectory.resolvePath("assets/tools")
+                procInfo.arguments = new <String>["+x", "android/adb", "ios/mobiledevice"]
 
                 var proc:NativeProcess = new NativeProcess();
                 proc.addEventListener(NativeProcessExitEvent.EXIT, onChmodExit, false, 0, true);

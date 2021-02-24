@@ -21,14 +21,14 @@ public class GmsaasInstaller extends EventDispatcher {
 		private var gmsaasFile:File
 
 		public function install():void {
+			var pipFile:File
 			if (Settings.isMacOs) {
-				dispatchEvent(new GmsaasInstallerErrorEvent("MacOS is not supported yet !"))
-				return
+				pipFile = Python.folder.resolvePath("pip3");
+			} else {
+				pipFile = Python.folder.resolvePath("Scripts").resolvePath(pipFileName)
 			}
 
-			var pipFile:File = Python.folder.resolvePath("Scripts").resolvePath(pipFileName);
-			
-			if(pipFile.exists){
+			if (pipFile.exists) {
 				dispatchEvent(new GmsaasInstallerProgressEvent(GMSAAS_INSTALLER_STATE_INSTALLING))
 				
 				var args:Vector.<String> = new Vector.<String>();
@@ -54,7 +54,12 @@ public class GmsaasInstaller extends EventDispatcher {
 			var proc:NativeProcess = event.currentTarget as NativeProcess
 			proc.removeEventListener(NativeProcessExitEvent.EXIT, gmInstallExit);
 			
-			gmsaasFile = Python.folder.resolvePath("Scripts").resolvePath(GmsaasProcess.gmsaasFileName);
+			if (Settings.isMacOs) {
+				gmsaasFile = Python.folder.resolvePath("gmsaas");
+			} else {
+				gmsaasFile = Python.folder.resolvePath("Scripts").resolvePath(GmsaasProcess.gmsaasFileName);
+			}
+
 			if (!gmsaasFile.exists) {
 				dispatchEvent(new GmsaasInstallerErrorEvent("GMSAAS file not found !"))
 				return
@@ -85,8 +90,13 @@ public class GmsaasInstaller extends EventDispatcher {
 		}
 
 		public function uninstall():void {
-			
-			var pipFile:File = Python.folder.resolvePath("Scripts").resolvePath(pipFileName);
+			var pipFile:File
+			if (Settings.isMacOs) {
+				pipFile = Python.folder.resolvePath("pip3");
+			} else {
+				pipFile = Python.folder.resolvePath("Scripts").resolvePath(pipFileName)
+			}
+
 			if (!pipFile.exists) {
 				dispatchEvent(new GmsaasInstallerErrorEvent("PIP file not found !"))
 				return

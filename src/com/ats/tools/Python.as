@@ -19,21 +19,21 @@ public class Python extends EventDispatcher
 		private static const scriptsFolder:File = File.applicationDirectory.resolvePath("assets/scripts")
 
 		private static const updateScript:String = "update_app.py";
+		private static const updateScriptMac:String = "update-macos-app.py";
 		private static const getPipScript:String = "get-pip.py";
 
 		public static var file:File;
+
+		[Bindable]
 		public static var folder:File;
+
 		public static var path:String;
 
 		private var updateProcInfo:NativeProcessStartupInfo;
 		private var updateProc:NativeProcess;
 
 		public function Python() {
-			if (Settings.isMacOs) {
-				file = new File().resolvePath("/usr/bin/python")
-				folder = file.parent
-				path = folder.nativePath
-			} else {
+			if (!Settings.isMacOs) {
 				var assetsPythonFile:File = File.applicationDirectory.resolvePath(pythonFolderPath);
 				if (assetsPythonFile.exists) {
 					file = workFolder.resolvePath("python.exe");
@@ -70,20 +70,25 @@ public class Python extends EventDispatcher
 		}
 		
 		public function updateApp(zipFile:File, appName:String):void{
-			
-			appName += ".exe";
-
-			var script:File = scriptsFolder.resolvePath(updateScript);
-
 			updateProcInfo = new NativeProcessStartupInfo();
 			updateProcInfo.executable = file;
 			updateProcInfo.workingDirectory = file.parent
-			
+
 			var path:String = File.applicationDirectory.nativePath;
 			var parent:File = new File(path);
 			parent = parent.parent;
-			
-			updateProcInfo.arguments = new <String>[StringHelper.unescapeFilePath(script), StringHelper.unescapeFilePath(zipFile), StringHelper.unescapeFilePath(parent), File.applicationDirectory.name, appName, "&"]
+
+			var script:File
+			if (Settings.isMacOs) {
+				script = scriptsFolder.resolvePath(updateScriptMac)
+				appName += ".app"
+				updateProcInfo.arguments = new <String>[StringHelper.unescapeFilePath(script), StringHelper.unescapeFilePath(zipFile), StringHelper.unescapeFilePath(parent), appName]
+			} else {
+				script = scriptsFolder.resolvePath(updateScript)
+				appName += ".exe"
+				updateProcInfo.arguments = new <String>[StringHelper.unescapeFilePath(script), StringHelper.unescapeFilePath(zipFile), StringHelper.unescapeFilePath(parent), File.applicationDirectory.name, appName, "&"]
+			}
+
 			updateProc = new NativeProcess();
 			updateProc.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onUpdateProcessStarted, false, 0, true);
 			updateProc.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, onOutputErrorShell, false, 0, true);
@@ -91,24 +96,76 @@ public class Python extends EventDispatcher
 		}
 		
 		private function onUpdateProcessStarted(event:ProgressEvent):void{
-			//var phase:String = updateProc.standardOutput.readUTFBytes(updateProc.standardOutput.bytesAvailable);
-			//trace(phase)
+			var phase:String = updateProc.standardOutput.readUTFBytes(updateProc.standardOutput.bytesAvailable);
+			trace(phase)
 		}
 		
 		public function onOutputErrorShell(event:ProgressEvent):void
 		{
-			//trace(updateProc.standardError.readUTFBytes(updateProc.standardError.bytesAvailable));
+			trace(updateProc.standardError.readUTFBytes(updateProc.standardError.bytesAvailable));
 		}
 		
 		public function processJavaExit(event:NativeProcessExitEvent):void
 		{
-			//trace("exit");
+			trace("exit");
 		}
 		
 		public function executeUpdate():void{
 			if(updateProc != null){
 				updateProc.start(updateProcInfo);
 			}
+		}
+
+		// ---------
+
+		private var outputData:String
+		private var errorData:String
+
+		public function setupMacOsPath():void {
+			var startupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo()
+			startupInfo.executable = new File("/usr/bin/env")
+			startupInfo.arguments = new <String>["which", "python3"]
+
+			outputData = ""
+			errorData = ""
+
+			var process:NativeProcess = new NativeProcess()
+			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, process_standardOutputDataHandler)
+			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, process_standardErrorDataHandler)
+			process.addEventListener(NativeProcessExitEvent.EXIT, process_exitHandler)
+			process.start(startupInfo)
+		}
+
+		private function process_standardOutputDataHandler(event:ProgressEvent):void {
+			var process:NativeProcess = event.currentTarget as NativeProcess
+			outputData += process.standardOutput.readUTFBytes(process.standardOutput.bytesAvailable)
+		}
+
+		private function process_standardErrorDataHandler(event:ProgressEvent):void {
+			var process:NativeProcess = event.currentTarget as NativeProcess
+			errorData += process.standardError.readUTFBytes(process.standardError.bytesAvailable)
+		}
+
+		private function process_exitHandler(event:NativeProcessExitEvent):void {
+			var process:NativeProcess = event.currentTarget as NativeProcess
+			process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, process_standardOutputDataHandler)
+			process.removeEventListener(ProgressEvent.STANDARD_ERROR_DATA, process_standardErrorDataHandler)
+			process.removeEventListener(NativeProcessExitEvent.EXIT, process_exitHandler)
+
+			if (errorData) {
+				trace(errorData)
+			}
+
+			if (outputData) {
+				file = new File(outputData.replace("\n", ""))
+				folder = file.parent
+				path = folder.nativePath
+			}
+
+			outputData = null
+			errorData = null
+
+			dispatchEvent(new Event(Event.COMPLETE))
 		}
 	}
 }

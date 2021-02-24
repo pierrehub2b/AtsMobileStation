@@ -5,7 +5,7 @@
       <configuration SdkName="Kahlua" />
     </facet>
     <facet type="Python" name="Python">
-      <configuration sdkName="" />
+      <configuration sdkName="Python 3.8" />
     </facet>
   </component>
   <component name="FlexBuildConfigurationManager" active="AtsMobileStation">
@@ -79,5 +79,6 @@
         <jarDirectory url="file://$MODULE_DIR$/libs" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="Python 3.8 interpreter library" level="application" />
   </component>
 </module>

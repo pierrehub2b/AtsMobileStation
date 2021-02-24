@@ -141,11 +141,6 @@
 			Settings.getInstance().androidSdkFolder = event.target as File
 		}
 
-		protected function restart_clickHandler(event:MouseEvent):void {
-			PopUpManager.removePopUp(this);
-			FlexGlobals.topLevelApplication.restartServer();
-		}
-
 		protected function searchPythonDirectory_clickHandler(event:MouseEvent):void {
 			var directory:File = Settings.defaultAppFolder;
 			directory.addEventListener(Event.SELECT, pythonFolderSelected);
