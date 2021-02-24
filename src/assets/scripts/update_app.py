@@ -32,8 +32,6 @@ def deleteFolder(folder):
 #----------------------------------------------------------------
 
 os.mkdir(tempFolderPath)
-os.system("unzip -q -o %s -d %s" % (target_build, target))
-
 with zipfile.ZipFile(zipFilePath,"r") as zip_ref:zip_ref.extractall(tempFolderPath)
 os.remove(zipFilePath)
 
@@ -53,4 +51,4 @@ os.rename(tempFolderPath, appFolderPath)
 #----------------------------------------------------------------
 
 os.chdir(appFolderPath)
-os.system("open " + appExeName)
+os.system(appExeName)
