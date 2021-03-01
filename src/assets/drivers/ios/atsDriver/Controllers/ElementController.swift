@@ -38,6 +38,7 @@ extension ElementController: Routeable {
         }
         
         switch action {
+        case .alertTap: return alertTapHandler(bodyParameters)
         case .tap:      return tapHandler(bodyParameters)
         case .press:    return .accepted
         case .input:    return inputHandler(bodyParameters)
@@ -50,6 +51,7 @@ extension ElementController: Routeable {
 final class ElementController {
     
     enum ElementAction: String {
+        case alertTap = "alert-tap"
         case tap
         case swipe
         case scripting
@@ -99,6 +101,28 @@ final class ElementController {
          } */
         
         return Output(message: "scripting on element").toHttpResponse()
+    }
+    
+    private func alertTapHandler(_ parameters: [String]) -> HttpResponse {
+        guard application.state == .runningForeground else {
+            return Output(message: "tap on element").toHttpResponse()
+        }
+        
+        let vector = ElementController.getVector(parameters)
+
+        if (application.alerts.allElementsBoundByIndex.count > 0) {
+            let alert = application.alerts.firstMatch
+            let point = CGPoint(x: vector.dx, y: vector.dy)
+            let alertButtons = alert.buttons.allElementsBoundByIndex
+            alertButtons.forEach { button in
+                if (button.frame.contains(point)) {
+                    button.tap()
+                    return
+                }
+            }
+        }
+        
+        return Output(message: "tap on element").toHttpResponse()
     }
     
     
