@@ -188,12 +188,9 @@ final class ElementController {
         let x = Double(values[0])!
         let y = Double(values[1])!
         
-        let width = Double(values[2])!
-        let height = Double(values[3])!
-
         let screenScale = Double(UIScreen.main.scale)
-        let vectorX = ((x + offsetX) + (width / 2)) / screenScale
-        let vectorY = ((y + offsetY) + (height / 2)) / screenScale
+        let vectorX = (x + offsetX) / screenScale
+        let vectorY = (y + offsetY) / screenScale
         
         return CGVector(dx: vectorX, dy: vectorY)
     }
