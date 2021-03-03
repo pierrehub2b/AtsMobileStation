@@ -65,6 +65,8 @@ class UDPConnect {
     
     private func receive(on connection: NWConnection) {
         connection.receiveMessage { (_, _, _, _) in
+            
+            print("receive udp")
 
             guard let nextFrame = self.nextFrame() else {
                 self.receive(on: connection)
@@ -99,6 +101,8 @@ class UDPConnect {
         connection.batch {
             datagramArray.forEach { connection.send(content: $0, completion: NWConnection.SendCompletion.contentProcessed { _ in }) }
         }
+        
+        print("send udp")
         
         receive(on: connection)
     }

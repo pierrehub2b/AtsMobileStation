@@ -38,7 +38,6 @@ extension ElementController: Routeable {
         }
         
         switch action {
-        case .alertTap: return alertTapHandler(bodyParameters)
         case .tap:      return tapHandler(bodyParameters)
         case .press:    return .accepted
         case .input:    return inputHandler(bodyParameters)
@@ -51,7 +50,6 @@ extension ElementController: Routeable {
 final class ElementController {
     
     enum ElementAction: String {
-        case alertTap = "alert-tap"
         case tap
         case swipe
         case scripting
@@ -102,29 +100,6 @@ final class ElementController {
         
         return Output(message: "scripting on element").toHttpResponse()
     }
-    
-    private func alertTapHandler(_ parameters: [String]) -> HttpResponse {
-        guard application.state == .runningForeground else {
-            return Output(message: "tap on element").toHttpResponse()
-        }
-        
-        let vector = ElementController.getVector(parameters)
-
-        if (application.alerts.allElementsBoundByIndex.count > 0) {
-            let alert = application.alerts.firstMatch
-            let point = CGPoint(x: vector.dx, y: vector.dy)
-            let alertButtons = alert.buttons.allElementsBoundByIndex
-            alertButtons.forEach { button in
-                if (button.frame.contains(point)) {
-                    button.tap()
-                    return
-                }
-            }
-        }
-        
-        return Output(message: "tap on element").toHttpResponse()
-    }
-    
     
     private func tapHandler(_ parameters: [String]) -> HttpResponse {
         guard application.state == .runningForeground else {
@@ -213,9 +188,12 @@ final class ElementController {
         let x = Double(values[0])!
         let y = Double(values[1])!
         
+        let width = Double(values[2])!
+        let height = Double(values[3])!
+
         let screenScale = Double(UIScreen.main.scale)
-        let vectorX = (x + offsetX) / screenScale
-        let vectorY = (y + offsetY) / screenScale
+        let vectorX = ((x + offsetX) + (width / 2)) / screenScale
+        let vectorY = ((y + offsetY) + (height / 2)) / screenScale
         
         return CGVector(dx: vectorX, dy: vectorY)
     }

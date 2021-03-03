@@ -22,6 +22,7 @@
 		923AE15E245F21DF00156ECB /* ButtonController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE15D245F21DF00156ECB /* ButtonController.swift */; };
 		923AE161245F3D8100156ECB /* Application.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923AE160245F3D8100156ECB /* Application.swift */; };
 		9254C2A02449A8E3006DC4FC /* ScriptingExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9254C29F2449A8E3006DC4FC /* ScriptingExecutor.swift */; };
+		92575CE825EF7ECD00E2D0DD /* AlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92575CE725EF7ECD00E2D0DD /* AlertController.swift */; };
 		927F8B4B25B6EC1500877C04 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047BFA6722F178D700BB2E25 /* AppDelegate.swift */; };
 		92C416C32473CB5B00A772AF /* AtsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92C416C22473CB5B00A772AF /* AtsClient.swift */; };
 		92C416C52473D9D300A772AF /* Content.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92C416C42473D9D300A772AF /* Content.swift */; };
@@ -82,6 +83,7 @@
 		923AE15D245F21DF00156ECB /* ButtonController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonController.swift; sourceTree = "<group>"; };
 		923AE160245F3D8100156ECB /* Application.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application.swift; sourceTree = "<group>"; };
 		9254C29F2449A8E3006DC4FC /* ScriptingExecutor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScriptingExecutor.swift; sourceTree = "<group>"; };
+		92575CE725EF7ECD00E2D0DD /* AlertController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertController.swift; sourceTree = "<group>"; };
 		92C416C22473CB5B00A772AF /* AtsClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtsClient.swift; sourceTree = "<group>"; };
 		92C416C42473D9D300A772AF /* Content.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Content.swift; sourceTree = "<group>"; };
 		9A907BBC234901DF00F3DE15 /* AppIcons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIcons.swift; sourceTree = "<group>"; };
@@ -169,6 +171,7 @@
 				923AE15D245F21DF00156ECB /* ButtonController.swift */,
 				923AE153245874E800156ECB /* CaptureController.swift */,
 				923AE14F24571FFB00156ECB /* DriverController.swift */,
+				92575CE725EF7ECD00E2D0DD /* AlertController.swift */,
 				923AE14D24571C9900156ECB /* ElementController.swift */,
 				923AE1552458755100156ECB /* InfoController.swift */,
 				D8865A8924C98099003C45D5 /* PropertyController.swift */,
@@ -353,6 +356,7 @@
 				923AE161245F3D8100156ECB /* Application.swift in Sources */,
 				923AE15E245F21DF00156ECB /* ButtonController.swift in Sources */,
 				923AE14E24571C9900156ECB /* ElementController.swift in Sources */,
+				92575CE825EF7ECD00E2D0DD /* AlertController.swift in Sources */,
 				923AE154245874E800156ECB /* CaptureController.swift in Sources */,
 				923AE1522457200400156ECB /* AppController.swift in Sources */,
 				92C416C52473D9D300A772AF /* Content.swift in Sources */,

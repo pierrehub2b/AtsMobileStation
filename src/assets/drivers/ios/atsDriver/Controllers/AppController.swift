@@ -80,11 +80,11 @@ final class AppController {
             return .internalServerError
         }
         
-        guard Device.current.applications.map({ $0.packageName }).contains(bundleIdentifier) else {
+        /* guard Device.current.applications.map({ $0.packageName }).contains(bundleIdentifier) else {
             sendLogs(type: .error, message: "Error on app launching: \(bundleIdentifier)")
             application = nil
             return Output(message: "app package not found : \(bundleIdentifier)", status: "-51").toHttpResponse()
-        }
+        } */
         
         sendLogs(type: .info, message: "Launching app \(bundleIdentifier)")
         

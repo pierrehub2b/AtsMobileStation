@@ -56,6 +56,7 @@ class HTTPServerManager {
         controllers.append(InfoController())
         controllers.append(ScreenshotController())
         controllers.append(PropertyController())
+        controllers.append(AlertController())
         
         controllers.forEach { server.POST["/\($0.name)"] = routeOnMain($0.handleRoutes(_:)) }
     }
