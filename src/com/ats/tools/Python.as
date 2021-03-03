@@ -13,7 +13,7 @@ import flash.filesystem.File;
 
 public class Python extends EventDispatcher
 	{
-		public static const pythonFolderPath:String = "assets/tools/python";
+		public static const pythonFolderPath:String = Settings.isMacOs ? "/usr/bin" : "assets/tools/python";
 
 		public static const workFolder:File = File.userDirectory.resolvePath("AppData/Roaming/Python/Python38")
 		private static const scriptsFolder:File = File.applicationDirectory.resolvePath("assets/scripts")
@@ -49,7 +49,6 @@ public class Python extends EventDispatcher
 		}
 
 		public function install():void {
-
 			if (folder.resolvePath("Scripts").resolvePath(GmsaasInstaller.pipFileName).exists) {
 				dispatchEvent(new Event(Event.COMPLETE));
 				return
@@ -100,13 +99,11 @@ public class Python extends EventDispatcher
 			trace(phase)
 		}
 		
-		public function onOutputErrorShell(event:ProgressEvent):void
-		{
+		public function onOutputErrorShell(event:ProgressEvent):void {
 			trace(updateProc.standardError.readUTFBytes(updateProc.standardError.bytesAvailable));
 		}
 		
-		public function processJavaExit(event:NativeProcessExitEvent):void
-		{
+		public function processJavaExit(event:NativeProcessExitEvent):void {
 			trace("exit");
 		}
 		
@@ -166,6 +163,10 @@ public class Python extends EventDispatcher
 			errorData = null
 
 			dispatchEvent(new Event(Event.COMPLETE))
+		}
+
+		public function startHttpServer():void {
+
 		}
 	}
 }
