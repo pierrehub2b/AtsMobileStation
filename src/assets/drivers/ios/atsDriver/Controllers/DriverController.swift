@@ -146,6 +146,7 @@ final class DriverController {
         sendLogs(type: LogType.info, message: "Terminate app")
         
         application?.terminate()
+        UDPConnect.current.stop()
         
         if !Device.current.isSimulator {
             XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))

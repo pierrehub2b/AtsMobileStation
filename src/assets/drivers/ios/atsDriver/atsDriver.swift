@@ -29,6 +29,8 @@ class atsDriver: XCTestCase {
     private var httpPort: in_port_t!
         
     override func setUpWithError() throws {
+        try super.tearDownWithError()
+        
         guard let settingsFileURL = Bundle(for: atsDriver.self).url(forResource: "Settings", withExtension: "json") else {
             throw DriverError.start("Settings file not found")
         }
@@ -47,16 +49,23 @@ class atsDriver: XCTestCase {
         guard applications.isEmpty == false else {
             throw DriverError.start("Applications is empty")
         }
-        
+                
         Device.current.setApplications(applications)
                 
         application = XCUIApplication()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(terminate(notification:)), name: NSNotification.Name(rawValue: "XCTestWDSessionShutDown"), object: nil)
     }
 
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        try super.tearDownWithError()
            
         // Close if running
+        httpServer.stop()
+        udpConnection.stop()
+    }
+    
+    @objc func terminate(notification: NSNotification) {
         httpServer.stop()
         udpConnection.stop()
     }

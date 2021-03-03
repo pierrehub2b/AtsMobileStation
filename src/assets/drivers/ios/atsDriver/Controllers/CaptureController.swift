@@ -41,7 +41,7 @@ final class CaptureController {
         guard let application = application else {
             return Output(message: "no app has been launched", status: "-99").toHttpResponse()
         }
-
+        
         return CaptureOutput(root: application.debugDescription).toHttpResponse()
     }
 }
