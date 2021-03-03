@@ -166,7 +166,18 @@ public class Python extends EventDispatcher
 		}
 
 		public function startHttpServer():void {
+			var process:NativeProcess = new NativeProcess()
+			var info:NativeProcessStartupInfo = new NativeProcessStartupInfo()
+			info.executable = file
+			info.workingDirectory = File.userDirectory.resolvePath(".atsmobilestation").resolvePath("http")
 
+			if (Settings.isMacOs) {
+				info.arguments = new <String>["-m", "80"]
+			} else {
+				info.arguments = new <String>["-m", "http.server", "80"]
+			}
+
+			process.start(info)
 		}
 	}
 }
