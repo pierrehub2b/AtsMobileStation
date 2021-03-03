@@ -35,6 +35,7 @@
 		import flash.filters.BitmapFilterQuality;
 
 		import mx.events.CloseEvent;
+		import mx.events.CollectionEvent;
 		import mx.events.FlexEvent;
 		import mx.utils.UIDUtil;
 
@@ -154,8 +155,11 @@
 				cleanDirectory(File.userDirectory.resolvePath("Library/mobileStationTemp"));
 			}
 
+			File.userDirectory.resolvePath(".atsmobilestation").resolvePath("http").createDirectory()
+
 			simulators = new AvailableSimulatorsManager();
 			devices = new RunningDevicesManager();
+			devices.collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, devicesChangeHandler)
 
 			python = new Python();
 			if (Settings.isMacOs) {
@@ -221,6 +225,7 @@
 		private function pythonCheckComplete(ev:Event):void {
 			python.removeEventListener(Event.COMPLETE, pythonCheckComplete);
 			genymotionManager = new GenymotionManager()
+			python.startHttpServer()
 		}
 
 		private function pythonSetupComplete(ev:Event):void {
@@ -417,12 +422,12 @@
 
 			if (jsonData.hasOwnProperty("release")) {
 				// if (jsonData.release.version != appVersion) {
-					var alert:NewVersionAlert = new NewVersionAlert();
-					alert.addEventListener("startDownload", onDownloadStart, false, 0, true);
-					alert.url = AtsDownloadUrl + "/" + jsonData.release.path;
-					alert.size = parseInt(jsonData.release.bundle_size);
-					alert.version = jsonData.release.version;
-					ModalPopupManager.addPopup(mainGroup, alert);
+				var alert:NewVersionAlert = new NewVersionAlert();
+				alert.addEventListener("startDownload", onDownloadStart, false, 0, true);
+				alert.url = AtsDownloadUrl + "/" + jsonData.release.path;
+				alert.size = parseInt(jsonData.release.bundle_size);
+				alert.version = jsonData.release.version;
+				ModalPopupManager.addPopup(mainGroup, alert);
 				// }
 			}
 		}
@@ -431,6 +436,16 @@
 			(event.currentTarget as NewVersionAlert).removeEventListener("startDownload", onDownloadStart)
 			currentState = "loading"
 		}
+
+		private function devicesChangeHandler(event:CollectionEvent):void {
+			const json:String = JSON.stringify(devices.collection)
+			var jsonFile:File = File.userDirectory.resolvePath(".atsmobilestation").resolvePath("http").resolvePath("devices.json")
+			var stream:FileStream = new FileStream()
+			stream.open(jsonFile, FileMode.WRITE)
+			stream.writeUTFBytes(json)
+			stream.close()
+		}
+
 		]]>
 	</fx:Script>
 
