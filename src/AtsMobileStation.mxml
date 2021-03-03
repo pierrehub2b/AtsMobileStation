@@ -421,14 +421,14 @@
 			}
 
 			if (jsonData.hasOwnProperty("release")) {
-				// if (jsonData.release.version != appVersion) {
-				var alert:NewVersionAlert = new NewVersionAlert();
-				alert.addEventListener("startDownload", onDownloadStart, false, 0, true);
-				alert.url = AtsDownloadUrl + "/" + jsonData.release.path;
-				alert.size = parseInt(jsonData.release.bundle_size);
-				alert.version = jsonData.release.version;
-				ModalPopupManager.addPopup(mainGroup, alert);
-				// }
+				if (jsonData.release.version != appVersion) {
+					var alert:NewVersionAlert = new NewVersionAlert();
+					alert.addEventListener("startDownload", onDownloadStart, false, 0, true);
+					alert.url = AtsDownloadUrl + "/" + jsonData.release.path;
+					alert.size = parseInt(jsonData.release.bundle_size);
+					alert.version = jsonData.release.version;
+					ModalPopupManager.addPopup(mainGroup, alert);
+				}
 			}
 		}
 
