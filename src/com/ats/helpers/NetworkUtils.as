@@ -12,22 +12,19 @@ package com.ats.helpers {
 			var interfaceObj:NetworkInterface;
 			var address:InterfaceAddress;
 			
-			try{
-				for (var i:int = 0; i < interfaces.length; i++){
-					interfaceObj = interfaces[i];
-					for (var j:int = 0; j < interfaceObj.addresses.length; j++)
-					{
-						address = interfaceObj.addresses[j];
-						if(address.ipVersion == "IPv4"){
-							var addressArray:Array = address.address.split(".");
-							var broadcastArray:Array = address.broadcast.split(".");
-							if(addressArray[0] == broadcastArray[0] && addressArray[1] == broadcastArray[1] && addressArray[2] == broadcastArray[2]){
-								return address.address;
-							}
+			for (var i:int = 0; i < interfaces.length; i++){
+				interfaceObj = interfaces[i];
+				for (var j:int = 0; j < interfaceObj.addresses.length; j++){
+					address = interfaceObj.addresses[j];
+					if(address.ipVersion == "IPv4" && address.address != null && address.broadcast != null){
+						var addressArray:Array = address.address.split(".");
+						var broadcastArray:Array = address.broadcast.split(".");
+						if(addressArray.length == 4 && broadcastArray.length == 4 && addressArray[0] == broadcastArray[0] && addressArray[1] == broadcastArray[1] && addressArray[2] == broadcastArray[2]){
+							return address.address;
 						}
 					}
 				}
-			}catch(err:Error){}
+			}
 			
 			return null;
 		}
