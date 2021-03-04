@@ -31,14 +31,14 @@
 		import com.greensock.TweenMax;
 		import com.greensock.plugins.ColorTransformPlugin;
 		import com.greensock.plugins.TweenPlugin;
-
+		
 		import flash.filters.BitmapFilterQuality;
-
+		
 		import mx.events.CloseEvent;
 		import mx.events.CollectionEvent;
 		import mx.events.FlexEvent;
 		import mx.utils.UIDUtil;
-
+		
 		import spark.components.Alert;
 		import spark.filters.DropShadowFilter;
 
@@ -169,23 +169,14 @@
 				python.addEventListener(Event.COMPLETE, pythonCheckComplete)
 				python.install()
 			}
-
-			networkUtils = new NetworkUtils()
-			networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_FOUND, onIpAddressComplete, false, 0, true)
-			networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, onIpAddressComplete, false, 0, true)
-			networkUtils.getClientIPAddress()
+			
+			onIpAddressComplete(NetworkUtils.getClientLocalIpAddress());
 		}
 
-		private var networkUtils:NetworkUtils
-
-		private function onIpAddressComplete(event:NetworkEvent):void {
-			networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_FOUND, onIpAddressComplete)
-			networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, onIpAddressComplete)
-			networkUtils = null
+		private function onIpAddressComplete(ipAddress:String):void {
 
 			currentState = "normal"
 
-			const ipAddress:String = event.ipAddress
 			if (ipAddress) {
 				titleLabel.text = "Ats MobileStation (" + appVersion + ") - " + ipAddress // + ":" + httpPort;
 			} else {

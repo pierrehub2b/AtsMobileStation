@@ -3,7 +3,6 @@ package com.ats.device.running {
 import avmplus.getQualifiedClassName;
 
 import com.ats.helpers.DeviceSettings;
-import com.ats.helpers.NetworkEvent;
 import com.ats.helpers.NetworkUtils;
 import com.ats.helpers.PortSwitcher;
 import com.ats.servers.tcp.ProxyServer;
@@ -51,26 +50,6 @@ public class AndroidUsbDevice extends AndroidDevice {
         }
 
         super.close();
-    }
-
-    // -- Network Utils Events
-
-    private function localAddressFoundHandler(event:NetworkEvent):void {
-        networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_FOUND, localAddressFoundHandler);
-        networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, localAddressNotFoundHandler);
-        networkUtils = null;
-
-        this.ip = event.ipAddress;
-
-        uninstallDriver()
-    }
-
-    private function localAddressNotFoundHandler(event:NetworkEvent):void {
-        networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_FOUND, localAddressFoundHandler);
-        networkUtils.removeEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, localAddressNotFoundHandler);
-        networkUtils = null;
-
-        usbError("Retrieve local address error");
     }
 
     // ----
@@ -209,10 +188,13 @@ public class AndroidUsbDevice extends AndroidDevice {
 
     override protected function fetchIpAddress():void {
         printDebugLogs("Fetching ip address")
-
-        networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_FOUND, localAddressFoundHandler, false, 0, true);
-        networkUtils.addEventListener(NetworkEvent.IP_ADDRESS_NOT_FOUND, localAddressNotFoundHandler, false, 0, true);
-        networkUtils.getClientIPAddress();
+		
+		ip = NetworkUtils.getClientLocalIpAddress();
+		if(ip != null){
+			uninstallDriver();
+		}else{
+			usbError("Retrieve local address error");
+		}
     }
 
     private function setupPortForwarding():void {
