@@ -216,7 +216,7 @@
 		private function pythonCheckComplete(ev:Event):void {
 			python.removeEventListener(Event.COMPLETE, pythonCheckComplete);
 			genymotionManager = new GenymotionManager()
-			python.startHttpServer()
+			python.prepareHttpServer()
 		}
 
 		private function pythonSetupComplete(ev:Event):void {
