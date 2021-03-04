@@ -222,7 +222,7 @@ public class Python extends EventDispatcher
 			}
 		}
 
-		private function startHttpServer():void {
+		private static function startHttpServer():void {
 			var info:NativeProcessStartupInfo = new NativeProcessStartupInfo()
 			info.executable = file
 			info.workingDirectory = File.userDirectory.resolvePath(".atsmobilestation").resolvePath("http")
@@ -234,7 +234,7 @@ public class Python extends EventDispatcher
 
 		// private var stopHttpServersOutputData:String
 		// private var stopHttpServersErrorData:String
-		private function stopHttpServers(pids: Array):void {
+		static private function stopHttpServers(pids: Array):void {
 			var arguments:Vector.<String> = new <String>["/F"]
 			for each (var pid:String in pids) {
 				arguments.push("/PID")
