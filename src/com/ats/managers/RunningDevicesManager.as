@@ -140,14 +140,18 @@ package com.ats.managers {
 
         private function getDevicesIds(itmList:Object):void {
             for each (var object:Object in itmList) {
-                const name:String = object._name.toString().toLowerCase();
-                if (name == "iphone") {
-                    var serialNumber:String = object.serial_num
-                    if (serialNumber.length == 24) {
-                        serialNumber = serialNumber.slice(0, 8) + "-" + serialNumber.slice(8);
-                    }
+                if (object.hasOwnProperty("_items")) {
+                    getDevicesIds(object._items)
+                } else {
+                    const name:String = object._name.toString().toLowerCase();
+                    if (name == "iphone") {
+                        var serialNumber:String = object.serial_num
+                        if (serialNumber.length == 24) {
+                            serialNumber = serialNumber.slice(0, 8) + "-" + serialNumber.slice(8);
+                        }
 
-                    usbDevicesIdList.push(serialNumber);
+                        usbDevicesIdList.push(serialNumber);
+                    }
                 }
             }
         }
@@ -309,8 +313,7 @@ package com.ats.managers {
             usbDevicesIdList = new <String>[]
 
             const json:Object = JSON.parse(iosOutput)
-            const usbPorts:Array = json["SPUSBDataType"][0]["_items"]
-            getDevicesIds(usbPorts)
+            getDevicesIds(json["SPUSBDataType"])
 
             for each(var iosDev:RunningDevice in collection) {
                 if (iosDev is IosDevice && !iosDev.simulator && usbDevicesIdList.indexOf(iosDev.id) == -1) {
