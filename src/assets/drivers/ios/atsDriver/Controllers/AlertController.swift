@@ -76,18 +76,21 @@ final class AlertController {
         guard application.state == .runningForeground else {
             return Output(message: "tap on element").toHttpResponse()
         }
-        
-        let vector = AlertController.getVector(parameters)
-
+                
+        let text: String = parameters[1]
+        let coordinates = parameters[0].components(separatedBy: ";")
+                
         if (application.alerts.allElementsBoundByIndex.count > 0) {
             let alert = application.alerts.firstMatch
-            let point = CGPoint(x: vector.dx, y: vector.dy)
+            let point = CGPoint(x: Double(coordinates[0])! / Double(Device.current.deviceScale), y: Double(coordinates[1])! / Double(Device.current.deviceScale))
             if let inputField = alert.textFields.allElementsBoundByIndex.first(where: { $0.frame.contains(point) }) {
-                inputField.typeText("")
+                inputField.tap()
+                inputField.typeText(text)
+                return Output(message: "text on element").toHttpResponse()
             }
         }
         
-        return Output(message: "tap on element").toHttpResponse()
+        return Output(message: "textField does not exist").toHttpResponse()
     }
     
     private static func getVector(_ parameters: [String]) -> CGVector {
