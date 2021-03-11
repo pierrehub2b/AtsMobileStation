@@ -173,14 +173,17 @@ import flash.filesystem.File;
 		////////
 
 		public function prepareHttpServer():void {
-			var htmlFolder:File = File.applicationDirectory.resolvePath("assets/http")
-			htmlFolder.copyTo(File.userDirectory.resolvePath(".atsmobilestation/http"), true)
-
 			if (Settings.isMacOs) {
+				copyHtmlFolder()
 				startHttpServer()
 			} else {
 				checkRunningHttpServer()
 			}
+		}
+
+		private static function copyHtmlFolder():void {
+			var htmlFolder:File = File.applicationDirectory.resolvePath("assets/http")
+			htmlFolder.copyTo(File.userDirectory.resolvePath(".atsmobilestation/http"), true)
 		}
 
 		private function checkRunningHttpServer():void {
@@ -218,12 +221,12 @@ import flash.filesystem.File;
 					}
 				}
 
-				if (pids.length == 0) {
-					startHttpServer()
-				} else if (pids.length > 1) {
-					pids.shift()
+				if (pids.length > 0) {
 					stopHttpServers(pids)
 				}
+
+				copyHtmlFolder()
+				startHttpServer()
 			}
 		}
 
