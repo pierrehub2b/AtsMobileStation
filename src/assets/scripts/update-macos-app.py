@@ -17,6 +17,8 @@ os.system("xattr -r -d com.apple.quarantine " + zipFilePath)
 #----------------------------------------------------------------
 
 os.system("unzip -o " + zipFilePath + " -d " + appFolderPath)
+os.system("rm -R " + appFolderPath + "/__MACOSX")
+
 
 #----------------------------------------------------------------
 # Restart app

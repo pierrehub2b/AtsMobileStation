@@ -10,8 +10,10 @@ import flash.events.EventDispatcher;
 import flash.events.NativeProcessExitEvent;
 import flash.events.ProgressEvent;
 import flash.filesystem.File;
+	import flash.filesystem.FileMode;
+	import flash.filesystem.FileStream;
 
-public class Python extends EventDispatcher
+	public class Python extends EventDispatcher
 	{
 		public static const pythonFolderPath:String = Settings.isMacOs ? "/usr/bin" : "assets/tools/python";
 
@@ -81,7 +83,7 @@ public class Python extends EventDispatcher
 			if (Settings.isMacOs) {
 				script = scriptsFolder.resolvePath(updateScriptMac)
 				appName += ".app"
-				updateProcInfo.arguments = new <String>[StringHelper.unescapeFilePath(script), StringHelper.unescapeFilePath(zipFile), StringHelper.unescapeFilePath(parent), appName]
+				updateProcInfo.arguments = new <String>[StringHelper.unescapeFilePath(script), StringHelper.unescapeFilePath(zipFile), StringHelper.unescapeFilePath(parent.parent.parent), appName]
 			} else {
 				script = scriptsFolder.resolvePath(updateScript)
 				appName += ".exe"
