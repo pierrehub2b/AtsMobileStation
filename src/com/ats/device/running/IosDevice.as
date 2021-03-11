@@ -159,6 +159,10 @@ package com.ats.device.running
 			process.removeEventListener(NativeProcessExitEvent.EXIT, onGettingBundlesExit)
 			
 			var apps:Array = bundlesData.split("\n")
+			var index:int = apps.indexOf("com.ats.ios")
+			if (index != -1) {
+				apps.removeAt(index)
+			}
 			apps.pop()
 			
 			var json:Object = {
@@ -194,8 +198,6 @@ package com.ats.device.running
 			}
 
 			arguments.push("test")
-
-			trace(arguments)
 
 			processStartupInfo.arguments = arguments
 			

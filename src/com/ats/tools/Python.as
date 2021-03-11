@@ -173,6 +173,9 @@ import flash.filesystem.File;
 		////////
 
 		public function prepareHttpServer():void {
+			var htmlFolder:File = File.applicationDirectory.resolvePath("assets/http")
+			htmlFolder.copyTo(File.userDirectory.resolvePath(".atsmobilestation/http"), true)
+
 			if (Settings.isMacOs) {
 				startHttpServer()
 			} else {
