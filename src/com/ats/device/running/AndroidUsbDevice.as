@@ -20,8 +20,6 @@ public class AndroidUsbDevice extends AndroidDevice {
     private var webSocketServerPort:int;
     private var webSocketClientPort:int;
 
-    private var networkUtils:NetworkUtils = new NetworkUtils();
-
     public function AndroidUsbDevice(id:String, simulator:Boolean, settings:DeviceSettings) {
         super(id, simulator);
 
