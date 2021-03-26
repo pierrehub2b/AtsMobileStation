@@ -100,7 +100,7 @@ package com.ats.device.running
 		}
 
 		override public function start():void {
-			if (!FlexGlobals.topLevelApplication.getTeamId() && !simulator) {
+			if (!FlexGlobals.topLevelApplication.appleDeveloperTeamId && !simulator) {
 				status = Device.FAIL;
 				errorMessage = " - No development team id set";
 				return;
@@ -194,7 +194,7 @@ package com.ats.device.running
 			
 			var arguments: Vector.<String> = new <String>["-scheme", "atsios", "-destination", "id=" + id];
 			if (!simulator) {
-				arguments.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + FlexGlobals.topLevelApplication.getTeamId());
+				arguments.push("-allowProvisioningUpdates", "-allowProvisioningDeviceRegistration", "DEVELOPMENT_TEAM=" + FlexGlobals.topLevelApplication.appleDeveloperTeamId);
 			}
 
 			arguments.push("test")
