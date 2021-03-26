@@ -238,7 +238,7 @@
 		<s:Spacer height="6"/>
 		<s:Label fontWeight="bold" text="Apple Team ID"/>
 		<s:HGroup width="100%" gap="3" verticalAlign="middle" visible="{!Settings.isMacOs}">
-			<s:TextInput id="appleTeamIdInput" width="100%" height="100%" maxChars="5" enabled="false" text="{FlexGlobals.topLevelApplication.teamId}"/>
+			<s:TextInput id="appleTeamIdInput" width="100%" height="100%" maxChars="5" enabled="false" text="{FlexGlobals.topLevelApplication.appleDeveloperTeamId}"/>
 		</s:HGroup>
 
 

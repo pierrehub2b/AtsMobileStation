@@ -33,9 +33,8 @@ package com.ats.managers {
 		public var visible:Boolean = false
 		
 		public function GenymotionManager():void{
-			if(GmsaasProcess.gmsaasExec != null){
-				// fetchContent();
-				visible = true;
+			if (GmsaasProcess.gmsaasExec != null) {
+				visible = true
 			}
 		}
 		

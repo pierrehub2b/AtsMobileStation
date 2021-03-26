@@ -182,7 +182,7 @@
 		</s:HGroup>
 	</s:Group>
 	<s:Spacer height="14"/>
-	<text:InputText label="Apple development team ID" width="100%"  id="teamIdInputText" text="{FlexGlobals.topLevelApplication.teamId}" includeInLayout="{Settings.isMacOs}"/>
+	<text:InputText label="Apple development team ID" width="100%"  id="teamIdInputText" text="{FlexGlobals.topLevelApplication.appleDeveloperTeamId}" includeInLayout="{Settings.isMacOs}"/>
 	<s:Spacer height="8" includeInLayout="{Settings.isMacOs}"/>
 
 	<s:VGroup color="#adb5bd" gap="4">
